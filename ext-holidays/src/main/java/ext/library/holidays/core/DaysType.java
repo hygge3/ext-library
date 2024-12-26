@@ -1,0 +1,47 @@
+package ext.library.holidays.core;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Contract;
+
+/**
+ * 日期类型，工作日对应结果为 0, 休息日对应结果为 1, 节假日对应的结果为 2；
+ */
+@Getter
+@RequiredArgsConstructor
+public enum DaysType {
+
+    /**
+     * 工作日
+     */
+    WEEKDAYS((byte) 0),
+    /**
+     * 休息日
+     */
+    REST_DAYS((byte) 1),
+    /**
+     * 节假日
+     */
+    HOLIDAYS((byte) 2);
+
+    @JsonValue
+    private final byte type;
+
+    /**
+     * 将 type 转换成枚举
+     *
+     * @param type type
+     * @return DaysType
+     */
+    @Contract(pure = true)
+    public static DaysType from(byte type) {
+        return switch (type) {
+            case 0 -> WEEKDAYS;
+            case 1 -> REST_DAYS;
+            case 2 -> HOLIDAYS;
+            default -> throw new IllegalArgumentException("Unbeknown DaysType:" + type);
+        };
+    }
+
+}

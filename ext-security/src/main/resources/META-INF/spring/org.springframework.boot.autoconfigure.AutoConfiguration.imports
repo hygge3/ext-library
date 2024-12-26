@@ -1,0 +1,2 @@
+ext.library.security.config.SecurityAutoConfig
+ext.library.security.handler.SecurityExceptionHandler

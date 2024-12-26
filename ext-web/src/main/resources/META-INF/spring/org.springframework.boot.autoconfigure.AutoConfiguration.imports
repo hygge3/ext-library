@@ -1,0 +1,6 @@
+ext.library.web.config.UndertowAutoConfiguration
+ext.library.web.config.WebMvcAutoConfiguration
+ext.library.web.handler.GlobalExceptionHandler
+ext.library.web.handler.GlobalResponseHandler
+ext.library.web.launch.StartedEventListener
+ext.library.web.validation.ValidationAutoConfiguration

@@ -1,0 +1,4 @@
+ext.library.redis.config.CacheAutoConfig
+ext.library.redis.config.RedisAutoConfig
+ext.library.redis.config.properties.RedisPropertiesHolder
+ext.library.redis.lock.aspect.DistributedLockAspect

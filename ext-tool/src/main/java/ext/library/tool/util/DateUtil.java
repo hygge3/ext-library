@@ -1,0 +1,315 @@
+package ext.library.tool.util;
+
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjusters;
+
+import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * 时间工具类
+ */
+@UtilityClass
+public final class DateUtil {
+
+    // region Common
+    /** 默认时区 */
+    public final ZoneOffset DEFAULT_ZONE_OFFSET = ZoneOffset.of("+8");
+
+    /** 默认时区 */
+    public final ZoneId DEFAULT_ZONE_ID = DEFAULT_ZONE_OFFSET.normalized();
+
+    /** 日期时间格式化字符串 YMD HMS */
+    public final String STRING_FORMATTER_YMD_HMS = "yyyy-MM-dd HH:mm:ss";
+
+    /** 日期时间格式化 YMD HMS */
+    public final DateTimeFormatter FORMATTER_YMD_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD_HMS);
+
+    /** 日期格式化字符串 YMD */
+    public final String STRING_FORMATTER_YMD = "yyyy-MM-dd";
+
+    /** 日期格式化 YMD */
+    public final DateTimeFormatter FORMATTER_YMD = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD);
+
+    /** 时间格式化字符串 HMS */
+    public final String STRING_FORMATTER_HMS = "HH:mm:ss";
+
+    /** 时间格式化 HMS */
+    public final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
+
+    @NotNull
+    public String format(@NotNull Temporal temporal, @NotNull DateTimeFormatter formatter) {
+        return formatter.format(temporal);
+    }
+
+    // endregion Common
+
+    // region LocalDateTime
+
+    /**
+     * 字符串转时间
+     *
+     * @param str yyyy-MM-dd HH:mm:ss 格式字符串
+     * @return java.time.LocalDateTime 时间
+     */
+    @NotNull
+    @Contract(pure = true)
+    public LocalDateTime parse(String str) {
+        return LocalDateTime.parse(str, FORMATTER_YMD_HMS);
+    }
+
+    /**
+     * 时间戳转时间，使用 GMT+8 时区
+     *
+     * @param timestamp 时间戳 - 毫秒
+     * @return java.time.LocalDateTime
+     */
+    @NotNull
+    @Contract(pure = true)
+    public LocalDateTime parse(Long timestamp) {
+        return parse(timestamp, DEFAULT_ZONE_ID);
+    }
+
+    /**
+     * 时间戳转时间
+     *
+     * @param timestamp 时间戳 - 毫秒
+     * @param zoneId    时区
+     * @return java.time.LocalDateTime
+     */
+    @NotNull
+    @Contract("_,_->new")
+    public LocalDateTime parse(Long timestamp, ZoneId zoneId) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId);
+    }
+
+    /**
+     * 时间转时间戳 (毫秒)
+     *
+     * @param dateTime 日期时间
+     * @return {@code Long }
+     */
+    @NotNull
+    public Long toTimestamp(LocalDateTime dateTime) {
+        return toTimestamp(dateTime, DEFAULT_ZONE_OFFSET);
+    }
+
+    /**
+     * 时间转时间戳 (毫秒)
+     *
+     * @param dateTime 日期时间
+     * @param offset   时区
+     * @return {@code Long }
+     */
+    @NotNull
+    public Long toTimestamp(@NotNull LocalDateTime dateTime, ZoneOffset offset) {
+        return dateTime.toInstant(offset).toEpochMilli();
+    }
+
+    /**
+     * 日期时间格式化
+     *
+     * @param dateTime 日期时间
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalDateTime dateTime) {
+        return format(dateTime, FORMATTER_YMD_HMS);
+    }
+
+    /**
+     * 日期时间格式化
+     *
+     * @param dateTime  日期时间
+     * @param formatter 格式化模板
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalDateTime dateTime, String formatter) {
+        return format(dateTime, DateTimeFormatter.ofPattern(formatter));
+    }
+
+    // endregion LocalDateTime
+
+    // region LocalDate
+
+    /**
+     * 字符串转日期
+     *
+     * @param str yyyy-MM-dd 格式字符串
+     * @return java.time.LocalDate 日期
+     */
+    @NotNull
+    @Contract(pure = true)
+    public LocalDate parseDate(String str) {
+        return LocalDate.parse(str, FORMATTER_YMD);
+    }
+
+    /**
+     * 日期格式化
+     *
+     * @param date 日期
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalDate date) {
+        return format(date, FORMATTER_YMD);
+    }
+
+    /**
+     * 日期格式化
+     *
+     * @param date      日期
+     * @param formatter 格式化模板
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalDate date, String formatter) {
+        return format(date, DateTimeFormatter.ofPattern(formatter));
+    }
+
+    // endregion LocalDate
+
+    // region LocalTime
+
+    /**
+     * 字符串转时间
+     *
+     * @param str HH:mm:ss 格式字符串
+     * @return java.time.LocalTime 日期
+     */
+    @NotNull
+    @Contract(pure = true)
+    public LocalTime parseTime(String str) {
+        return LocalTime.parse(str, FORMATTER_HMS);
+    }
+
+    /**
+     * 时间格式化
+     *
+     * @param time 时间
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalTime time) {
+        return format(time, FORMATTER_HMS);
+    }
+
+    /**
+     * 时间格式化
+     *
+     * @param time      时间
+     * @param formatter 格式化模板
+     * @return {@code String }
+     */
+    @NotNull
+    public String format(LocalTime time, String formatter) {
+        return format(time, DateTimeFormatter.ofPattern(formatter));
+    }
+
+    // endregion LocalTime
+
+    // region Helper
+
+    /**
+     * 计算相差天数
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return 天数
+     */
+    public long differentDays(LocalDateTime start, LocalDateTime end) {
+        return Duration.between(start, end).toDays();
+    }
+
+    /**
+     * 判断某个时间是否在某个时间段
+     *
+     * @param startTime 起始时间
+     * @param dateTime  比较时间
+     * @param endTime   结束时间
+     * @return 是否在…之间
+     */
+    public boolean isBetween(LocalDateTime startTime, @NotNull LocalDateTime dateTime, LocalDateTime endTime) {
+        return dateTime.isBefore(endTime) && dateTime.isAfter(startTime);
+    }
+
+    /**
+     * 获取当天的开始时间
+     *
+     * @param time 时间
+     * @return 当天的开始时间
+     */
+    @NotNull
+    public LocalDateTime getDayStart(@NotNull LocalDateTime time) {
+        return time.with(LocalTime.MIN);
+    }
+
+    /**
+     * 获取当天的结束时间
+     *
+     * @param time 时间
+     * @return 当天的结束时间
+     */
+    @NotNull
+    public LocalDateTime getDayEnd(@NotNull LocalDateTime time) {
+        return time.with(LocalTime.MAX);
+    }
+
+    /**
+     * 获取当周的开始时间
+     *
+     * @param time 时间
+     * @return 当周的开始时间
+     */
+    @NotNull
+    public LocalDateTime getWeekStart(@NotNull LocalDateTime time) {
+        return time.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
+    }
+
+    /**
+     * 获取当周的结束时间
+     *
+     * @param time 时间
+     * @return 当周的结束时间
+     */
+    @NotNull
+    public LocalDateTime getWeekEnd(@NotNull LocalDateTime time) {
+        return time.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX);
+    }
+
+    /**
+     * 获取当月的开始时间
+     *
+     * @param time 时间
+     * @return 当月的开始时间
+     */
+    @NotNull
+    public LocalDateTime getMonthStart(@NotNull LocalDateTime time) {
+        return time.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
+    }
+
+    /**
+     * 获取当月的结束时间
+     *
+     * @param time 时间
+     * @return 当月的结束时间
+     */
+    @NotNull
+    public LocalDateTime getMonthEnd(@NotNull LocalDateTime time) {
+        return time.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+    }
+
+    // endregion Helper
+
+}
