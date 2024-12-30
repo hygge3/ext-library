@@ -28,7 +28,7 @@ public class SaTokenExceptionHandler {
      * @param e       e
      */
     private static void printLog(@NotNull HttpServletRequest request, @NotNull @Nls String message, @NotNull Exception e) {
-        log.error("URI:{},{}", request.getRequestURI(), message, e);
+        log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
     /**

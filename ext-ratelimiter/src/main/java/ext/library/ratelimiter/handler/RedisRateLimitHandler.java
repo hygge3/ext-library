@@ -42,17 +42,14 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
 
         Long currentCount = redisTemplate.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key),
                 String.valueOf(rateLimiter.count()), String.valueOf(interval));
-        if (null != currentCount) {
-            long count = currentCount;
-            if (count > 0 && count <= rateLimiter.count()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("限制期内的第 {} 次访问", count);
-                }
-                return true;
+        if (currentCount > 0 && currentCount <= rateLimiter.count()) {
+            if (log.isDebugEnabled()) {
+                log.debug("[🚥] 限制期内的第 {} 次访问", currentCount);
             }
+            return true;
         }
         if (log.isDebugEnabled()) {
-            log.debug("触发限流");
+            log.debug("[🚥] 触发限流");
         }
         return false;
     }

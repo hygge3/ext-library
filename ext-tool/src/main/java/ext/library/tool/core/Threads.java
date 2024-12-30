@@ -42,7 +42,7 @@ public class Threads {
                 if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
                     pool.shutdownNow();
                     if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
-                        log.info("Pool did not terminate");
+                        log.info("[🛠️] Pool did not terminate");
                     }
                 }
             } catch (InterruptedException ie) {

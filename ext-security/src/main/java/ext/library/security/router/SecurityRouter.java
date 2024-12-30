@@ -60,7 +60,7 @@ public class SecurityRouter implements RouterFunction<Method> {
         String path = ServletUtil.getRequest().getRequestURI();
         // 判断路由是否匹配
         boolean pathMatchResult = routePathMatch(pattern, path);
-        log.debug("路由匹配 pattern:{},path:{},result：{}", pattern, path, pathMatchResult);
+        log.debug("[🛡️] 路由匹配 pattern:{},path:{},result：{}", pattern, path, pathMatchResult);
         if (pathMatchResult && !supplier.getAsBoolean()) {
             throw new ForbiddenException("路由方法权限验证不通过");
         }

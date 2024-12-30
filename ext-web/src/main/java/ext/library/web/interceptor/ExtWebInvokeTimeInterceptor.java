@@ -38,14 +38,14 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
             if ($.isNotEmpty(body)) {
                 jsonParam = new String(body);
             }
-            log.info("[🌐] => {}:{},[body],[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
+            log.info("[🌐] {}:{},[body],[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
         } else {
             Map<String, String[]> parameterMap = request.getParameterMap();
             if ($.isNotEmpty(parameterMap)) {
                 String parameters = JsonUtil.toJson(parameterMap);
-                log.info("[🌐] => {}:{},[query],[{}]", request.getMethod(), request.getRequestURI(), parameters);
+                log.info("[🌐] {}:{},[query],[{}]", request.getMethod(), request.getRequestURI(), parameters);
             } else {
-                log.info("[🌐] => {}:{}", request.getMethod(), request.getRequestURI());
+                log.info("[🌐] {}:{}", request.getMethod(), request.getRequestURI());
             }
         }
 
@@ -60,7 +60,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
                                 @NotNull Object handler, Exception ex) throws Exception {
         StopWatch stopWatch = KEY_CACHE.get();
         stopWatch.stop();
-        log.info("[🌐] => {}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
+        log.info("[🌐] {}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
         KEY_CACHE.remove();
     }
 

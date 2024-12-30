@@ -66,7 +66,7 @@ public class WebSocketUtil {
             WebSocketMessage broadcastMessage = new WebSocketMessage();
             broadcastMessage.setMessage(webSocketMessage.getMessage());
             broadcastMessage.setSessionKeys(unsentSessionKeys);
-            log.info("WebSocket 发送主题订阅消息，topic:{},session keys:{},message:{}", WEB_SOCKET_TOPIC, unsentSessionKeys,
+            log.info("[⛓️] WebSocket 发送主题订阅消息，topic:{},session keys:{},message:{}", WEB_SOCKET_TOPIC, unsentSessionKeys,
                     webSocketMessage.getMessage());
             RedisUtil.publish(WEB_SOCKET_TOPIC, JsonUtil.toJson(broadcastMessage));
         }
@@ -80,7 +80,7 @@ public class WebSocketUtil {
     public void publishAll(String message) {
         WebSocketMessage broadcastMessage = new WebSocketMessage();
         broadcastMessage.setMessage(message);
-        log.info("WebSocket 发送主题订阅消息，topic:{},message:{}", WEB_SOCKET_TOPIC, message);
+        log.info("[⛓️] WebSocket 发送主题订阅消息，topic:{},message:{}", WEB_SOCKET_TOPIC, message);
         RedisUtil.publish(WEB_SOCKET_TOPIC, JsonUtil.toJson(broadcastMessage));
     }
 
@@ -112,12 +112,12 @@ public class WebSocketUtil {
     private synchronized void sendMessage(WebSocketSession session,
                                           org.springframework.web.socket.WebSocketMessage<?> message) {
         if (session == null || !session.isOpen()) {
-            log.warn("[send] session 会话已经关闭");
+            log.warn("[⛓️][send] session 会话已经关闭");
         } else {
             try {
                 session.sendMessage(message);
             } catch (IOException e) {
-                log.error("[send] session({}) 发送消息异常，message:{}", session, message, e);
+                log.error("[⛓️][send] session({}) 发送消息异常，message:{}", session, message, e);
             }
         }
     }

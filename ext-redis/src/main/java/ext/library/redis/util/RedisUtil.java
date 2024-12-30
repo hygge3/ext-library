@@ -20,6 +20,7 @@ import ext.library.json.util.JsonUtil;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.convert.DurationStyle;
@@ -131,7 +132,7 @@ public class RedisUtil {
                 else redis.call("INCRBY", key, "1") redis.call("expire", key, interval) return current + 1 end
                 """, Long.class);
         if (log.isDebugEnabled()) {
-            log.debug("rate.limit.key:{}", key);
+            log.debug("[🚥] rate.limit.key:{}", key);
         }
 
         Long currentCount = execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key), String.valueOf(count),
@@ -140,13 +141,13 @@ public class RedisUtil {
         if (null != currentCount) {
             if (currentCount > 0 && currentCount <= count) {
                 if (log.isDebugEnabled()) {
-                    log.debug("限制期内的第 {} 次访问", currentCount);
+                    log.debug("[🚥] 限制期内的第 {} 次访问", currentCount);
                 }
                 return true;
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("限流规则已触发");
+            log.debug("[🚥] 限流规则已触发");
         }
         return false;
     }
@@ -351,6 +352,7 @@ public class RedisUtil {
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
     public <T> T get(String key, Class<T> clazz) {
+        @Language("json")
         String value = get(key);
         if (Objects.isNull(value)) {
             return null;

@@ -127,7 +127,7 @@ public class ThreadPools {
             try {
                 runnable.run();
             } catch (Throwable throwable) {
-                log.error("The thread inside the thread pool is abnormal!", throwable);
+                log.error("[🛠️] The thread inside the thread pool is abnormal!", throwable);
             } finally {
                 thread.setName(oldName);
                 MDC.clear();

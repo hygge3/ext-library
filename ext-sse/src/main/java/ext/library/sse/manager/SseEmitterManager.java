@@ -96,7 +96,7 @@ public class SseEmitterManager {
      * @param userId  要发送消息的用户 id
      * @param message 要发送的消息内容
      */
-    public void sendMessage(@NotNull String userId,@NotNull  String message) {
+    public void sendMessage(@NotNull String userId, @NotNull String message) {
         Map<String, SseEmitter> emitters = USER_TOKEN_EMITTERS.get(userId);
         if (emitters != null) {
             for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
@@ -140,7 +140,7 @@ public class SseEmitterManager {
             SseMessage broadcastMessage = new SseMessage();
             broadcastMessage.setMessage(sseMessage.getMessage());
             broadcastMessage.setUserIds(unsentUserIds);
-            log.info("SSE 发送主题订阅消息，topic:{},session keys:{},message:{}", SSE_TOPIC, unsentUserIds, sseMessage.getMessage());
+            log.info("[📨] SSE 发送主题订阅消息，topic:{},session keys:{},message:{}", SSE_TOPIC, unsentUserIds, sseMessage.getMessage());
             RedisUtil.publish(SSE_TOPIC, JsonUtil.toJson(broadcastMessage));
         }
     }
@@ -153,7 +153,7 @@ public class SseEmitterManager {
     public void publishAll(@NotNull String message) {
         SseMessage broadcastMessage = new SseMessage();
         broadcastMessage.setMessage(message);
-        log.info("SSE 发送主题订阅消息，topic:{},message:{}", SSE_TOPIC, message);
+        log.info("[📨] SSE 发送主题订阅消息，topic:{},message:{}", SSE_TOPIC, message);
         RedisUtil.publish(SSE_TOPIC, JsonUtil.toJson(broadcastMessage));
     }
 

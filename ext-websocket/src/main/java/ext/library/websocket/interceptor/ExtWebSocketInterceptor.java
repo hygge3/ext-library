@@ -37,7 +37,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
             attributes.put(LOGIN_USER_KEY, SecurityUtil.getCurrentSecuritySession());
             return true;
         } catch (UnauthorizedException e) {
-            log.error("WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
+            log.error("[⛓️] WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
             return false;
         }
     }
@@ -54,7 +54,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
     public void afterHandshake(@NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response, @NotNull WebSocketHandler wsHandler,
                                Exception exception) {
         // 在这个方法中可以执行一些握手成功后的后续处理逻辑，比如记录日志或者其他操作
-        log.info("WebSocket 连接成功 '{}'", SecurityUtil.getCurrentLoginId());
+        log.info("[⛓️] WebSocket 连接成功 '{}'", SecurityUtil.getCurrentLoginId());
     }
 
 }

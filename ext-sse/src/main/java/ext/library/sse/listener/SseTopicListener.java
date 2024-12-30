@@ -28,17 +28,15 @@ public class SseTopicListener implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         sseEmitterManager.subscribeMessage((message) -> {
-            log.info("SSE 主题订阅收到消息，session keys:{},message:{}", message.getUserIds(), message.getMessage());
+            log.info("[📨] SSE 主题订阅收到消息，session keys:{},message:{}", message.getUserIds(), message.getMessage());
             // 如果 key 不为空就按照 key 发消息 如果为空就群发
             if ($.isNotEmpty(message.getUserIds())) {
-                message.getUserIds().forEach(key -> {
-                    sseEmitterManager.sendMessage(key, message.getMessage());
-                });
+                message.getUserIds().forEach(key -> sseEmitterManager.sendMessage(key, message.getMessage()));
             } else {
                 sseEmitterManager.sendMessage(message.getMessage());
             }
         });
-        log.info("初始化 SSE 主题订阅监听器成功");
+        log.info("[📨] 初始化 SSE 主题订阅监听器成功");
     }
 
 }

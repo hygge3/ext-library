@@ -24,7 +24,7 @@ public class WebSocketTopicListener implements ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		// 订阅 WebSocket 消息
 		WebSocketUtil.subscribeMessage((message) -> {
-			log.info("WebSocket 主题订阅收到消息，session keys:{},message:{}", message.getSessionKeys(), message.getMessage());
+			log.info("[⛓️] WebSocket 主题订阅收到消息，session keys:{},message:{}", message.getSessionKeys(), message.getMessage());
 			// 如果 key 不为空就按照 key 发消息 如果为空就群发
 			if ($.isNotEmpty(message.getSessionKeys())) {
 				message.getSessionKeys().forEach(key -> {
@@ -34,12 +34,10 @@ public class WebSocketTopicListener implements ApplicationRunner {
 				});
 			}
 			else {
-				WebSocketSessionHolder.getSessionsAll().forEach(key -> {
-					WebSocketUtil.sendMessage(key, message.getMessage());
-				});
+				WebSocketSessionHolder.getSessionsAll().forEach(key -> WebSocketUtil.sendMessage(key, message.getMessage()));
 			}
 		});
-		log.info("初始化 WebSocket 主题订阅监听器成功");
+		log.info("[⛓️] 初始化 WebSocket 主题订阅监听器成功");
 	}
 
 }

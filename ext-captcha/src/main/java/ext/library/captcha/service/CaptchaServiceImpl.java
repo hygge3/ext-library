@@ -30,7 +30,7 @@ public class CaptchaServiceImpl implements ICaptchaService {
 
 	@Override
 	public boolean validate(String uuid, String userInputCaptcha) {
-		log.debug("validate captcha uuid is {}, userInputCaptcha is {}", uuid, userInputCaptcha);
+		log.debug("[🔢] validate captcha uuid is {}, userInputCaptcha is {}", uuid, userInputCaptcha);
 		String code = captchaCache.getAndRemove(properties.getCacheName(), uuid);
 		if ($.isEmpty(code)) {
 			return false;

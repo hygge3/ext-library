@@ -25,7 +25,7 @@ public interface SecurityListener {
      * @param loginModel 登录参数
      */
     default void doLogin(String loginId, String token, SecurityLoginParams loginModel) {
-        log.info("[ℹ️] 登录成功，account:{},token:{},deviceType:{}", loginId, token,
+        log.info("[🛡️] 登录成功，account:{},token:{},deviceType:{}", loginId, token,
                 Objects.nonNull(loginModel) ? loginModel.getDeviceType() : SecurityConstant.UNKNOWN);
     }
 
@@ -37,7 +37,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doKickOut(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 被踢下线，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 被踢下线，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -48,7 +48,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doReplaceOut(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 被顶下线，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 被顶下线，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -59,7 +59,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doBanned(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 封禁，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 封禁，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -70,7 +70,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doUnseal(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 解封，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 解封，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -92,7 +92,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doRemove(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 删除，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 删除，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -103,7 +103,7 @@ public interface SecurityListener {
      * @param deviceType 设备类型
      */
     default void doLoginOut(String loginId, String token, String deviceType) {
-        log.info("[ℹ️] 退出，account:{},token:{},deviceType:{}", loginId, token, deviceType);
+        log.info("[🛡️] 退出，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 
     /**
@@ -112,7 +112,7 @@ public interface SecurityListener {
      * @param securitySessionId session id
      */
     default void doCreatedSecuritySession(String securitySessionId) {
-        log.info("[ℹ️] 创建 Session，securitySessionId:{}", securitySessionId);
+        log.info("[🛡️] 创建 Session，securitySessionId:{}", securitySessionId);
     }
 
     /**
@@ -121,7 +121,7 @@ public interface SecurityListener {
      * @param securitySessionId session id
      */
     default void doDestroySecuritySession(String securitySessionId) {
-        log.info("[ℹ️] 销毁 Session，securitySessionId:{}", securitySessionId);
+        log.info("[🛡️] 销毁 Session，securitySessionId:{}", securitySessionId);
     }
 
 }

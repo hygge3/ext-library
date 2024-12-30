@@ -35,7 +35,7 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
         Map<String, Byte> dataMap = YEAR_DATA_MAP.get(year);
         // 对于没有数据的，我们按正常的周六日来判断，
         if (dataMap == null) {
-            log.error("没有相应年份的数据：[{}]，请自行升级或维护数据！", year);
+            log.error("[📅] 没有相应年份的数据：[{}]，请自行升级或维护数据！", year);
             return isWeekDay(localDate);
         }
         // 日期信息

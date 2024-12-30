@@ -98,7 +98,7 @@ public final class WxPayUtil {
         try {
             writer.close();
         } catch (Exception ex) {
-            log.error("字符写入流关闭异常");
+            log.error("[💳] 字符写入流关闭异常");
         }
         return output;
     }

@@ -33,11 +33,11 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if ($.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
-            log.info("[connect] 无效的 token. sessionId: {}", session.getId());
+            log.info("[⛓️][connect] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.addSession(loginUser.getLoginId(), session);
-        log.info("[connect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        log.info("[⛓️][connect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**
@@ -92,7 +92,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     public void handleTransportError(@NotNull WebSocketSession session, @NotNull Throwable exception) throws Exception {
-        log.error("[transport error] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
+        log.error("[⛓️][transport error] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
     }
 
     /**
@@ -105,11 +105,11 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionClosed(@NotNull WebSocketSession session, @NotNull CloseStatus status) {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if ($.isNull(loginUser)) {
-            log.info("[disconnect] 无效的 token. sessionId: {}", session.getId());
+            log.info("[⛓️][disconnect] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.removeSession(loginUser.getLoginId());
-        log.info("[disconnect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        log.info("[⛓️][disconnect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**

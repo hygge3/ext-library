@@ -63,7 +63,7 @@ public class CacheStringAspect {
         Method method = signature.getMethod();
 
         if (log.isTraceEnabled()) {
-            log.trace("执行字符串缓存操作！method : {}", method.getName());
+            log.trace("[💾] 执行字符串缓存操作！method : {}", method.getName());
         }
 
         // 根据方法的参数 以及当前类对象获得 keyGenerator

@@ -87,7 +87,7 @@ public class DistributedLockAspect {
         try {
             DistributedLockUtil.unLock(lockKey);
         } catch (Exception e) {
-            log.error("分布式锁解锁异常", e);
+            log.error("[🔒] 分布式锁解锁异常", e);
         }
     }
 
@@ -100,11 +100,13 @@ public class DistributedLockAspect {
      */
     private String getLockKey(ProceedingJoinPoint pjp,
                               @NotNull ext.library.redis.lock.annotation.DistributedLock distributedLock) {
+        @Language("spel")
         String lockKey = distributedLock.key();
         String keyPrefix = distributedLock.keyPrefix();
         if ($.isBlank(lockKey)) {
             throw Exceptions.throwOut("Lok key cannot be empty");
         }
+
         if (lockKey.contains("#")) {
             this.checkSpEL(lockKey);
             MethodSignature methodSignature = (MethodSignature) pjp.getSignature();

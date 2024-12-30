@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * OkHttp logger, Slf4j and console log.
- *
  */
 @Slf4j
 public enum HttpLogger implements HttpLoggingInterceptor.Logger {
@@ -18,7 +17,7 @@ public enum HttpLogger implements HttpLoggingInterceptor.Logger {
     Slf4j() {
         @Override
         public void log(@NotNull @Nls String message) {
-            log.info(message);
+            log.info("[🔗] " + message);
         }
     },
 
@@ -29,8 +28,8 @@ public enum HttpLogger implements HttpLoggingInterceptor.Logger {
         @Override
         public void log(@NotNull @Nls String message) {
             // 统一添加前缀，方便在茫茫日志中查看
-            System.out.println("HttpLog: " + message);
+            System.out.println("[🔗] " + message);
         }
-    };
+    }
 
 }

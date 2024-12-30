@@ -39,7 +39,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if ($.isBlank(prefix)) {
-            LOGGER.warn("前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);
@@ -63,7 +63,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if ($.isBlank(prefix)) {
-            LOGGER.warn("前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);

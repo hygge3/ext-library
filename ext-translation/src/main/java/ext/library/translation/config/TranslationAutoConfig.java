@@ -36,7 +36,7 @@ public class TranslationAutoConfig {
 				map.put(annotation.type(), trans);
 			}
 			else {
-				log.warn("{} 翻译实现类未标注 TranslationType 注解！", trans.getClass().getName());
+				log.warn("[📚] {} 翻译实现类未标注 TranslationType 注解！", trans.getClass().getName());
 			}
 		}
 		TranslationHandler.TRANSLATION_MAPPER.putAll(map);

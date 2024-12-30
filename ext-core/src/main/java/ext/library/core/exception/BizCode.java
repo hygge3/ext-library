@@ -87,8 +87,11 @@ public enum BizCode implements ResponseCode {
 
     // region 6xx Custom Error
 
-    /** 自定义错误消息 */ WARN(600, "unknown"),
-    /** 非法参数 */ ILLEGAL_ARGUMENT(601, "Illegal Argument"),
+    /** 自定义错误消息 */
+    WARN(600, "Unknown"),
+
+    /** 非法参数 */
+    ILLEGAL_ARGUMENT(601, "Illegal Argument"),
 
     /**
      * 数据库执行异常

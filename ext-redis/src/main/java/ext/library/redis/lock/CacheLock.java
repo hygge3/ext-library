@@ -65,7 +65,7 @@ public class CacheLock {
      */
     public Boolean lock(String lockKey, String requestId, long timeout, TimeUnit timeUnit) {
         if (log.isTraceEnabled()) {
-            log.trace("lock: {key:{}, clientId:{}}", lockKey, requestId);
+            log.trace("[🔒] lock: {key:{}, clientId:{}}", lockKey, requestId);
         }
         return RedisUtil.setNxEx(lockKey, requestId, timeout, timeUnit);
     }
@@ -79,7 +79,7 @@ public class CacheLock {
      */
     public boolean releaseLock(String key, String requestId) {
         if (log.isTraceEnabled()) {
-            log.trace("release lock: {key:{}, clientId:{}}", key, requestId);
+            log.trace("[🔒] release lock: {key:{}, clientId:{}}", key, requestId);
         }
         Long result = RedisUtil.execute(RELEASE_LOCK_LUA_SCRIPT, Collections.singletonList(key), requestId);
         return Objects.equals(result, RELEASE_LOCK_SUCCESS_RESULT);

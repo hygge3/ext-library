@@ -54,7 +54,7 @@ public class MailSenderImpl implements MailSender {
         } catch (Exception e) {
             mailSendInfo.setSuccess(false);
             mailSendInfo.setErrorMsg(e.getMessage());
-            log.error("Sending email failed:[{}]", mailDetails, e);
+            log.error("[📧] Sending email failed:[{}]", mailDetails, e);
         } finally {
             // 发布邮件发送事件
             eventPublisher.publishEvent(new MailSendEvent(mailSendInfo));
@@ -92,7 +92,7 @@ public class MailSenderImpl implements MailSender {
         }
 
         mailSender.send(messageHelper.getMimeMessage());
-        log.info("邮件发送成功:[{}]", mailDetails);
+        log.info("[📧] 邮件发送成功:[{}]", mailDetails);
     }
 
 }

@@ -28,7 +28,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
         try {
             gen.writeString(strategy.desensitize().apply(value));
         } catch (Exception e) {
-            log.error("脱敏失败 => {}", e.getMessage());
+            log.error("[😶] 脱敏失败 => {}", e.getMessage());
             gen.writeString(value);
         }
     }

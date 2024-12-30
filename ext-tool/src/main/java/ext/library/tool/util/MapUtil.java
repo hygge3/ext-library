@@ -310,7 +310,7 @@ public class MapUtil {
                 valueKey = getValue(item, key);
             } catch (Exception e) {
                 // 未找到方法值时不处理，采用默认的 null
-                log.warn("No value found", e);
+                log.warn("[🛠️] No value found", e);
             }
             // 获取需要返回的 map 中是否已有该值的集合
             // 如果没有该值的集合，创建一个新集合插入 map 中
@@ -363,7 +363,7 @@ public class MapUtil {
                 mapKey = getValue(item, key);
             } catch (Exception e) {
                 // 未找到方法值时不处理，采用默认的 null
-                log.warn("No value found", e);
+                log.warn("[🛠️] [🛠️] No value found", e);
             }
             // 将取到的值作为 key，当前对象作为值，插入 map 中，如果有相同的 key 会覆盖之前的值
             map.put(mapKey == null ? null : mapKey.toString(), item);
@@ -384,7 +384,7 @@ public class MapUtil {
         try {
             beanInfo = Introspector.getBeanInfo(obj.getClass());
         } catch (IntrospectionException e) {
-            log.warn("Getting entity is incorrect", e);
+            log.warn("[🛠️] Getting entity is incorrect", e);
             return null;
         }
         // 获取所有属性
@@ -400,7 +400,7 @@ public class MapUtil {
                 // 执行 get 方法拿到值
                 return readMethod.invoke(obj);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                log.warn("An error occurred to get the value", e);
+                log.warn("[🛠️] An error occurred to get the value", e);
                 return null;
             }
         }

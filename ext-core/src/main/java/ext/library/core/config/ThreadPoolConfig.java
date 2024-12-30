@@ -68,7 +68,7 @@ public class ThreadPoolConfig {
     @PreDestroy
     public void destroy() {
         try {
-            log.info("Close the background task thread pool");
+            log.info("[📎] Close the background task thread pool");
             Threads.shutdownAndAwaitTermination(scheduledExecutorService);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
