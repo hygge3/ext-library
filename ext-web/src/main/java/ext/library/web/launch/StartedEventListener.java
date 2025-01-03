@@ -27,28 +27,23 @@ public class StartedEventListener {
     public void afterStart(@NotNull WebServerInitializedEvent event) {
         WebServerApplicationContext context = event.getApplicationContext();
         Environment environment = context.getEnvironment();
-        String appName = environment.getProperty("spring.application.name");
-        String profile = environment.getProperty("spring.profiles.active");
+        String appName = $.defaultIfEmpty(environment.getProperty("spring.application.name"), "APP");
+        String env = $.defaultIfEmpty(environment.getProperty("spring.profiles.active"), "default");
         int localPort = event.getWebServer().getPort();
-        System.err.printf("=== [%s] Startup, port:[%d], env:[%s] ===%n", $.defaultIfEmpty(appName, "APP"), localPort,
-                $.defaultIfEmpty(profile, "default"));
-
         ApplicationHome home = new ApplicationHome();
-        System.out.printf("dir: %s, source: %s%n", home.getDir(), home.getSource());
-
+        String content = """
+                === [%s] Startup, port:[%d], env:[%s] ===
+                dir: %s, source: %s
+                swagger: %b, path: %s
+                """;
+        boolean hasOpenApi = hasOpenApi();
         // 如果有 swagger，打印开发阶段的 swagger ui 地址
-        if (hasOpenApi()) {
-            String property = environment.getProperty("springdoc.swagger-ui.path");
-            String swaggerPath = $.defaultIfEmpty(property, "/swagger-ui.html");
-            System.out.printf("http://localhost:%s%s%n", localPort, swaggerPath);
-        } else {
-            System.out.printf("http://localhost:%s%n", localPort);
-        }
+        String swaggerPath = $.defaultIfEmpty(environment.getProperty("springdoc.swagger-ui.path"), hasOpenApi ? "/swagger-ui.html" : null);
+        System.err.printf(content, appName, localPort, env, home.getDir(), home.getSource(), hasOpenApi(), swaggerPath);
     }
 
     private static boolean hasOpenApi() {
-        return Stream.of("springfox.documentation.spring.web.plugins.Docket", "io.swagger.v3.oas.models.OpenAPI")
-                .anyMatch(clazz -> ClassUtils.isPresent(clazz, null));
+        return Stream.of("springfox.documentation.spring.web.plugins.Docket", "io.swagger.v3.oas.models.OpenAPI").anyMatch(clazz -> ClassUtils.isPresent(clazz, null));
     }
 
 }

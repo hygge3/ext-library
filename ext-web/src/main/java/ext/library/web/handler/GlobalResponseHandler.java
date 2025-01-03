@@ -26,15 +26,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
     /**
-     * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值 这里整合 swagger
-     * 出现了问题，swagger 相关的不拦截
+     * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值
      */
     @Override
-    public boolean supports(@NotNull MethodParameter returnType,
-                            @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
-        // 需要包装
-        return returnType.hasMethodAnnotation(RestWrapper.class)
-                || returnType.getContainingClass().isAnnotationPresent(RestWrapper.class);
+    public boolean supports(@NotNull MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
+        // 不需要包装
+        if (!returnType.hasMethodAnnotation(RestWrapper.class) && !returnType.getContainingClass().isAnnotationPresent(RestWrapper.class)) {
+            return false;
+        }
+        RestWrapper wrapper = returnType.getMethodAnnotation(RestWrapper.class);
+        return wrapper.wrap() && wrapper.value();
     }
 
     /**
@@ -49,10 +50,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * @return {@link Object }
      */
     @Override
-    public Object beforeBodyWrite(@Nullable Object body, @NotNull MethodParameter returnType,
-                                  @NotNull MediaType selectedContentType,
-                                  @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType, @NotNull ServerHttpRequest request,
-                                  @NotNull ServerHttpResponse response) {
+    public Object beforeBodyWrite(@Nullable Object body, @NotNull MethodParameter returnType, @NotNull MediaType selectedContentType, @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType, @NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response) {
         if ($.isNull(body)) {
             return R.ok();
         }

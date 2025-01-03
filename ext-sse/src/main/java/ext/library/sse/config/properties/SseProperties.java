@@ -12,6 +12,7 @@ public class SseProperties {
 
 	public static final String PREFIX = "ext.sse";
 
+	/** 启用 */
 	private Boolean enabled;
 
 	/**

@@ -8,8 +8,6 @@ import lombok.Data;
 
 /**
  * 消息的 dto
- *
- * @author zendwang
  */
 @Data
 public class WebSocketMessage implements Serializable {

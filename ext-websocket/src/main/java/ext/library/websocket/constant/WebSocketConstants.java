@@ -2,8 +2,6 @@ package ext.library.websocket.constant;
 
 /**
  * websocket 的常量配置
- *
- * @author zendwang
  */
 public interface WebSocketConstants {
 
