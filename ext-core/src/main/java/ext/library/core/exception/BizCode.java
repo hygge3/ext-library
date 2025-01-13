@@ -158,10 +158,13 @@ public enum BizCode implements ResponseCode {
      */
     IP_LOCATION_FAIL(614, "Ip location fail"),
 
+    /** 调用第三方服务失败 */
+    CELL_THIRD_ERROR(615, "Failed to call third-party service"),
+
     /**
      * 接口未实现
      */
-    NOT_IMPLEMENTED(615, "Not Implemented");
+    NOT_IMPLEMENTED(650, "Not Implemented");
 
     // endregion
 

@@ -36,7 +36,7 @@ public class Encipher {
     }
 
     /**
-     * 通过 Pkcs7 加密
+     * 通过 PKCS7 加密
      *
      * @param plaintext 纯文本
      * @return {@code String }
@@ -48,7 +48,7 @@ public class Encipher {
     }
 
     /**
-     * 通过 Pkcs7 检查
+     * 通过 PKCS7 检查
      *
      * @param plaintext      纯文本
      * @param passwordHashed 密码散列
@@ -60,7 +60,7 @@ public class Encipher {
     }
 
     /**
-     * 通过 Pkcs7 加密
+     * 通过 PBKDF2 加密
      *
      * @param plaintext 纯文本
      * @return {@code String }
@@ -75,7 +75,7 @@ public class Encipher {
     }
 
     /**
-     * 通过 Pkcs7 检查
+     * 通过 PBKDF2 检查
      *
      * @param plaintext      纯文本
      * @param passwordHashed 密码散列
