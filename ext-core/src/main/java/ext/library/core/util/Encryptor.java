@@ -6,17 +6,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 /**
  * 加密器
  */
 @UtilityClass
 public class Encryptor {
-    PasswordEncoder DEFAULT_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    private final static PasswordEncoder DEFAULT_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     private final static Argon2PasswordEncoder ARGON2_ENCODER = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     private final static BCryptPasswordEncoder BCRYPT_ENCODER = new BCryptPasswordEncoder();
     private final static Pbkdf2PasswordEncoder PBKDF2_ENCODER = Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+    private final static SCryptPasswordEncoder SCRYPT_ENCODER = SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8();
 
     /**
      * 通过 默认加密器 BCrypt 加密
@@ -60,7 +62,6 @@ public class Encryptor {
         return ARGON2_ENCODER.matches(plaintext, passwordHashed);
     }
 
-
     /**
      * 通过 BCrypt 加密
      *
@@ -103,4 +104,24 @@ public class Encryptor {
         return PBKDF2_ENCODER.matches(plaintext, passwordHashed);
     }
 
+    /**
+     * 通过 SCrypt 加密
+     *
+     * @param plaintext 纯文本
+     * @return {@code String }
+     */
+    public String encryptBySCrypt(String plaintext) {
+        return SCRYPT_ENCODER.encode(plaintext);
+    }
+
+    /**
+     * 通过 SCrypt 检查
+     *
+     * @param plaintext      纯文本
+     * @param passwordHashed 密码散列
+     * @return boolean
+     */
+    public boolean checkBySCrypt(String plaintext, String passwordHashed) {
+        return SCRYPT_ENCODER.matches(plaintext, passwordHashed);
+    }
 }
