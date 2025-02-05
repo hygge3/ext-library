@@ -18,7 +18,6 @@ import ext.library.pay.response.WxPayResponse;
 import ext.library.pay.util.WxPayUtil;
 import ext.library.tool.$;
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 微信支付
@@ -139,7 +138,7 @@ public class WxPay {
      * @param tradeType 支付类型
      */
     public Map<String, String> pay(String sn, BigDecimal amount, String ip, String body, String notifyUrl,
-                                   @NotNull TradeType tradeType) {
+                                    TradeType tradeType) {
         Map<String, String> params = Maps.newHashMapWithExpectedSize(6);
         params.put("body", body);
         params.put("out_trade_no", sn);
@@ -174,7 +173,7 @@ public class WxPay {
      * @param params 参数
      * @param rs     请求后缀
      */
-    public Map<String, String> request(@NotNull Map<String, String> params, RequestSuffix rs) {
+    public Map<String, String> request( Map<String, String> params, RequestSuffix rs) {
         Map<String, String> map = Maps.newHashMapWithExpectedSize(params.size() + 3);
         map.putAll(params);
 
@@ -196,7 +195,7 @@ public class WxPay {
      * @param amount 支付金额，单位 元
      * @return java.lang.String
      */
-    public String yuanToFen(@NotNull BigDecimal amount) {
+    public String yuanToFen( BigDecimal amount) {
         return amount.multiply(WxPayConstant.HUNDRED).setScale(2, RoundingMode.UP).toBigInteger().toString();
     }
 
@@ -206,7 +205,7 @@ public class WxPay {
      * @param callback 回调数据
      * @return java.lang.Boolean
      */
-    public boolean checkSign(@NotNull WxPayCallback callback) {
+    public boolean checkSign( WxPayCallback callback) {
         String sign = callback.getSign();
         // 原签名不存在时，直接失败
         if ($.isBlank(sign)) {

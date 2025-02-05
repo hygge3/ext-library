@@ -9,7 +9,6 @@ import okhttp3.Credentials;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * BaseAuth
@@ -17,14 +16,14 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class BaseAuthenticator implements Authenticator {
 
-	private final String userName;
+    private final String userName;
 
-	private final String password;
+    private final String password;
 
-	@Override
-	public Request authenticate(Route route, @NotNull Response response) throws IOException {
-		String credential = Credentials.basic(userName, password, StandardCharsets.UTF_8);
-		return response.request().newBuilder().header("Authorization", credential).build();
-	}
+    @Override
+    public Request authenticate(Route route, Response response) throws IOException {
+        String credential = Credentials.basic(userName, password, StandardCharsets.UTF_8);
+        return response.request().newBuilder().header("Authorization", credential).build();
+    }
 
 }

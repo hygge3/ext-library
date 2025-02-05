@@ -7,7 +7,6 @@ import java.text.MessageFormat;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 异常处理工具类
@@ -104,7 +103,7 @@ public class Exceptions {
      *
      * @param e 异常
      */
-    public void print(@NotNull Throwable e) {
+    public void print( Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
         log.error(e.getCause().getMessage());
     }

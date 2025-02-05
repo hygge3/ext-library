@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 线程相关工具类。
@@ -91,7 +90,6 @@ public class Threads {
      *
      * @return 类名称
      */
-    @NotNull
     public String getClassName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getClassName();
     }
@@ -101,7 +99,6 @@ public class Threads {
      *
      * @return 方法名称
      */
-    @NotNull
     public String getMethodName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getMethodName();
     }

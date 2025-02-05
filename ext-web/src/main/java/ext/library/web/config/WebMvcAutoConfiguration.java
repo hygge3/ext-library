@@ -50,7 +50,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addFormatters(@NotNull FormatterRegistry registry) {
+    public void addFormatters(FormatterRegistry registry) {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setTimeFormatter(DateUtil.FORMATTER_HMS);
         registrar.setDateFormatter(DateUtil.FORMATTER_YMD);
@@ -73,7 +73,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addResourceHandlers(@NotNull ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath*:/static/")
                 .addResourceLocations("classpath*:/resources/")
@@ -107,8 +107,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         return bean;
     }
 
-    @NotNull
-    private static CorsConfiguration getCorsConfiguration(@NotNull WebMvcProperties.CorsConfig corsConfig) {
+    private static CorsConfiguration getCorsConfiguration(WebMvcProperties.CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
         corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());

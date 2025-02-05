@@ -6,7 +6,6 @@ import ext.library.ratelimiter.annotation.RateLimiter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -32,7 +31,7 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
     private static RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public boolean proceed(@NotNull RateLimiter rateLimiter, JoinPoint point) {
+    public boolean proceed(RateLimiter rateLimiter, JoinPoint point) {
         // 间隔时间解析为秒
         long interval = DurationStyle.detectAndParse(rateLimiter.interval()).getSeconds();
         final String key = getCombineKey(rateLimiter, point);

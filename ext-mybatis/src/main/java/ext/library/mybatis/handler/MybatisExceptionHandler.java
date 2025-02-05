@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import ext.library.core.exception.BizCode;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
@@ -34,7 +33,7 @@ public class MybatisExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(@NotNull HttpServletRequest request, @NotNull @Nls String message, @NotNull Exception e) {
+    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -42,7 +41,7 @@ public class MybatisExceptionHandler {
      * 主键或 UNIQUE 索引，数据重复异常
      */
     @ExceptionHandler(DuplicateKeyException.class)
-    public Map<String, Object> duplicateKeyException(@NotNull DuplicateKeyException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> duplicateKeyException(DuplicateKeyException e, HttpServletRequest request) {
         printLog(request, "数据库中已存在记录", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "数据库中已存在该记录。请联系管理员确认");
     }
@@ -51,7 +50,7 @@ public class MybatisExceptionHandler {
      * SQL 语法错误异常
      */
     @ExceptionHandler(SQLSyntaxErrorException.class)
-    public Map<String, Object> sqlSyntaxErrorException(@NotNull SQLSyntaxErrorException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> sqlSyntaxErrorException(SQLSyntaxErrorException e, HttpServletRequest request) {
         printLog(request, "SQl error", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "SQl 执行错误，请联系管理员");
     }
@@ -60,7 +59,7 @@ public class MybatisExceptionHandler {
      * SQL 语法错误异常
      */
     @ExceptionHandler(BadSqlGrammarException.class)
-    public Map<String, Object> badSqlGrammarException(@NotNull BadSqlGrammarException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> badSqlGrammarException(BadSqlGrammarException e, HttpServletRequest request) {
         printLog(request, "SQl error", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "SQl 执行错误，请联系管理员");
     }
@@ -69,7 +68,7 @@ public class MybatisExceptionHandler {
      * Mybatis 系统异常 通用处理
      */
     @ExceptionHandler(MyBatisSystemException.class)
-    public Map<String, Object> myBatisSystemException(@NotNull MyBatisSystemException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> myBatisSystemException(MyBatisSystemException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         String message = e.getMessage();
         if ("CannotFindDataSourceException".contains(message)) {
@@ -84,7 +83,7 @@ public class MybatisExceptionHandler {
      * 数据访问异常 通用处理
      */
     @ExceptionHandler(DataAccessException.class)
-    public Map<String, Object> dataAccessException(@NotNull DataAccessException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> dataAccessException(DataAccessException e, HttpServletRequest request) {
         printLog(request, "Data access exception", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Data access exception");
     }

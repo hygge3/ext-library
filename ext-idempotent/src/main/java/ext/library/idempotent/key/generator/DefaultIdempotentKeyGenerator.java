@@ -7,7 +7,6 @@ import ext.library.idempotent.annotation.Idempotent;
 import ext.library.tool.constant.Symbol;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -25,9 +24,8 @@ public class DefaultIdempotentKeyGenerator implements IdempotentKeyGenerator {
      * @param idempotentAnnotation 幂等注解
      * @return String 幂等标识
      */
-    @NotNull
     @Override
-    public String generate(JoinPoint joinPoint, @NotNull Idempotent idempotentAnnotation) {
+    public String generate(JoinPoint joinPoint,  Idempotent idempotentAnnotation) {
         String uniqueExpression = idempotentAnnotation.uniqueExpression();
         // 如果没有填写表达式，直接返回 prefix
         if (Symbol.EMPTY.equals(uniqueExpression)) {

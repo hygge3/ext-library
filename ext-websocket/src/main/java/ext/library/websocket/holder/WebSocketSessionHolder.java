@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -54,8 +52,6 @@ public class WebSocketSessionHolder {
      *
      * @return 所有 WebSocket 会话的会话键集合
      */
-    @NotNull
-    @Contract(pure = true)
     public static Set<String> getSessionsAll() {
         return USER_SESSION_MAP.keySet();
     }
@@ -66,8 +62,6 @@ public class WebSocketSessionHolder {
      * @param sessionKey 要检查的会话键
      * @return 如果存在对应的会话键，则返回 true；否则返回 false
      */
-    @NotNull
-    @Contract(pure = true)
     public static Boolean existSession(String sessionKey) {
         return USER_SESSION_MAP.containsKey(sessionKey);
     }

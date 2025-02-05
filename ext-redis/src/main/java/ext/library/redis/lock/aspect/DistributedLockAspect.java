@@ -13,7 +13,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
@@ -66,7 +65,7 @@ public class DistributedLockAspect {
      * @return {@link ext.library.redis.lock.annotation.DistributedLock}
      * @throws NoSuchMethodException 没有这样方法例外
      */
-    private ext.library.redis.lock.annotation.DistributedLock getDistributedLock(@NotNull ProceedingJoinPoint pjp)
+    private ext.library.redis.lock.annotation.DistributedLock getDistributedLock(ProceedingJoinPoint pjp)
             throws NoSuchMethodException {
         String methodName = pjp.getSignature().getName();
         Class<?> clazz = pjp.getTarget().getClass();
@@ -99,7 +98,7 @@ public class DistributedLockAspect {
      * @return {@link String}
      */
     private String getLockKey(ProceedingJoinPoint pjp,
-                              @NotNull ext.library.redis.lock.annotation.DistributedLock distributedLock) {
+                              ext.library.redis.lock.annotation.DistributedLock distributedLock) {
         @Language("spel")
         String lockKey = distributedLock.key();
         String keyPrefix = distributedLock.keyPrefix();
@@ -126,7 +125,7 @@ public class DistributedLockAspect {
      * @param args            args
      * @return {@link String}
      */
-    private String getValBySpEL(String spEL, @NotNull MethodSignature methodSignature, Object[] args) {
+    private String getValBySpEL(String spEL, MethodSignature methodSignature, Object[] args) {
         // 获取方法形参名数组
         String[] paramNames = nameDiscoverer.getParameterNames(methodSignature.getMethod());
         if (paramNames == null || paramNames.length < 1) {

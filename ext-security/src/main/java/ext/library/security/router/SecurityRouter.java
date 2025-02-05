@@ -17,8 +17,6 @@ import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.$;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -40,8 +38,6 @@ public class SecurityRouter implements RouterFunction<Method> {
         excludePathList.add("/error");
     }
 
-    @Contract("->new")
-    @NotNull
     public static SecurityRouter build() {
         return new SecurityRouter();
     }

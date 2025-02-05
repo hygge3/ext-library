@@ -28,8 +28,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
@@ -56,7 +54,7 @@ public class CacheStringAspect {
     }
 
     @Around("pointCut()")
-    public Object around(@NotNull ProceedingJoinPoint point) throws Throwable {
+    public Object around( ProceedingJoinPoint point) throws Throwable {
 
         // 获取目标方法
         MethodSignature signature = (MethodSignature) point.getSignature();
@@ -120,8 +118,6 @@ public class CacheStringAspect {
         return point.proceed();
     }
 
-    @NotNull
-    @Contract(pure = true)
     private Consumer<Object> prodCachePutFunction(ValueOperations<String, String> valueOperations, String key, long ttl,
                                                   TimeUnit unit) {
         Consumer<Object> cachePut;
@@ -142,7 +138,7 @@ public class CacheStringAspect {
      * @return result
      * @throws IOException IO 异常
      */
-    public Object cached(@NotNull CachedOps ops) throws Throwable {
+    public Object cached( CachedOps ops) throws Throwable {
 
         // 缓存查询方法
         Supplier<String> cacheQuery = ops.cacheQuery();
@@ -182,7 +178,7 @@ public class CacheStringAspect {
     /**
      * 缓存操作模板方法
      */
-    private Object cachePut(@NotNull CachePutOps ops) throws Throwable {
+    private Object cachePut( CachePutOps ops) throws Throwable {
 
         // 先执行目标方法 并拿到返回值
         Object data = ops.joinPoint().proceed();
@@ -197,7 +193,7 @@ public class CacheStringAspect {
     /**
      * 缓存删除的模板方法 在目标方法执行后 执行删除
      */
-    private Object cacheDel(@NotNull CacheDelOps ops) throws Throwable {
+    private Object cacheDel( CacheDelOps ops) throws Throwable {
 
         // 先执行目标方法 并拿到返回值
         Object data = ops.joinPoint().proceed();
@@ -210,7 +206,7 @@ public class CacheStringAspect {
     /**
      * 缓存批量删除的模板方法 在目标方法执行后 执行删除
      */
-    private Object cacheDels(@NotNull CacheDelsOps ops) throws Throwable {
+    private Object cacheDels( CacheDelsOps ops) throws Throwable {
 
         // 先执行目标方法 并拿到返回值
         Object data = ops.joinPoint().proceed();
@@ -228,8 +224,7 @@ public class CacheStringAspect {
      * @param keyGenerator       缓存键生成器
      * @return 用于执行的无返回值方法
      */
-    @NotNull
-    private VoidMethod buildCacheDelExecution(@NotNull CacheDel cacheDelAnnotation, KeyGenerator keyGenerator) {
+    private VoidMethod buildCacheDelExecution( CacheDel cacheDelAnnotation, KeyGenerator keyGenerator) {
         VoidMethod cacheDel;
         if (cacheDelAnnotation.allEntries()) {
             // 优先判断是否是删除名称空间下所有的键值对

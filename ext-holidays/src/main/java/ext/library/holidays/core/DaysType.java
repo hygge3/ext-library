@@ -3,7 +3,6 @@ package ext.library.holidays.core;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 日期类型，工作日对应结果为 0, 休息日对应结果为 1, 节假日对应的结果为 2；
@@ -34,7 +33,6 @@ public enum DaysType {
      * @param type type
      * @return DaysType
      */
-    @Contract(pure = true)
     public static DaysType from(byte type) {
         return switch (type) {
             case 0 -> WEEKDAYS;

@@ -122,7 +122,7 @@ public class CustomJacksonAutoConfiguration {
     @Bean
     @ConditionalOnClass(ObjectMapper.class)
     @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper(@NotNull Jackson2ObjectMapperBuilder builder) {
+    public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
         // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致

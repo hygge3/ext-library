@@ -13,11 +13,9 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.internal.Util;
 import okio.Buffer;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 表单构造器
- *
  */
 public class MultipartFormBuilder {
 
@@ -42,7 +40,7 @@ public class MultipartFormBuilder {
         return this;
     }
 
-    public MultipartFormBuilder add(String name, @NotNull File file) {
+    public MultipartFormBuilder add(String name, File file) {
         String fileName = file.getName();
         return add(name, fileName, file);
     }
@@ -88,14 +86,14 @@ public class MultipartFormBuilder {
         return this;
     }
 
-    public MultipartFormBuilder addList(@NotNull List<MultipartBody.Part> partList) {
+    public MultipartFormBuilder addList(List<MultipartBody.Part> partList) {
         for (MultipartBody.Part part : partList) {
             this.formBuilder.addPart(part);
         }
         return this;
     }
 
-    public MultipartFormBuilder add(@NotNull Consumer<MultipartBody.Builder> consumer) {
+    public MultipartFormBuilder add(Consumer<MultipartBody.Builder> consumer) {
         consumer.accept(this.formBuilder);
         return this;
     }

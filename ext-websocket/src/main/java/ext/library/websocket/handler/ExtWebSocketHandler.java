@@ -29,7 +29,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * 连接成功后
      */
     @Override
-    public void afterConnectionEstablished(@NotNull WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if ($.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
@@ -48,7 +48,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
-    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         // 从 WebSocket 会话中获取登录用户信息
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
 

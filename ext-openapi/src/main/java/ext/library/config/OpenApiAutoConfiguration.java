@@ -11,7 +11,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -65,8 +64,7 @@ public class OpenApiAutoConfiguration {
 		return openAPI;
 	}
 
-	@NotNull
-	private Info convertInfo(@NotNull OpenApiProperties.InfoProperties infoProperties) {
+	private Info convertInfo( OpenApiProperties.InfoProperties infoProperties) {
 		Info info = new Info();
 		info.setTitle(infoProperties.getTitle());
 		info.setDescription(infoProperties.getDescription());

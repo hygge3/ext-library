@@ -9,7 +9,6 @@ import ext.library.security.domain.SecuritySession;
 import ext.library.security.enums.Logical;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 权限校验工具
@@ -113,7 +112,6 @@ public class PermissionUtil {
     /**
      * 两个字符串是否匹配，支持正则表达式
      */
-    @Contract("null,null->true")
     public boolean strMatch(String s1, String s2) {
         // 两者均为 null 时，直接返回 true
         if (s1 == null && s2 == null) {

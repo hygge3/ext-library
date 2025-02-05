@@ -24,7 +24,7 @@ public class StartedEventListener {
     @Async
     @Order(Ordered.LOWEST_PRECEDENCE - 1)
     @EventListener(WebServerInitializedEvent.class)
-    public void afterStart(@NotNull WebServerInitializedEvent event) {
+    public void afterStart( WebServerInitializedEvent event) {
         WebServerApplicationContext context = event.getApplicationContext();
         Environment environment = context.getEnvironment();
         String appName = $.defaultIfEmpty(environment.getProperty("spring.application.name"), "APP");

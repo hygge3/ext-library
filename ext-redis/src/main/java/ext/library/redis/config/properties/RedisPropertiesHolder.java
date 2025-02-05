@@ -2,8 +2,6 @@ package ext.library.redis.config.properties;
 
 import jakarta.annotation.Resource;
 
-import org.jetbrains.annotations.Contract;
-
 /**
  * 缓存配置持有者，方便静态获取配置信息
  */
@@ -18,7 +16,6 @@ public final class RedisPropertiesHolder {
         INSTANCE.redisProperties = redisProperties;
     }
 
-    @Contract(pure = true)
     private static RedisProperties redisProperties() {
         return INSTANCE.redisProperties;
     }

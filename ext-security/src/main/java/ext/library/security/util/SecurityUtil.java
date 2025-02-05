@@ -14,7 +14,6 @@ import ext.library.security.service.SecurityService;
 import ext.library.security.util.useragent.UserAgent;
 import ext.library.security.util.useragent.UserAgentUtil;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 认证便捷操作工具
@@ -273,7 +272,6 @@ public class SecurityUtil {
      * @param roleCode 角色码
      * @return true 有 false 没有
      */
-    @NotNull
     public Boolean hasRole(String roleCode) {
         return SERVICE.hasRole(roleCode);
     }

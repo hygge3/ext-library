@@ -22,8 +22,6 @@ import ext.library.tool.core.Exceptions;
 import io.github.linpeilie.Converter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanCopier;
@@ -47,8 +45,7 @@ public class BeanUtil {
      * @param obj 对象
      * @return {@code Map<String, Object> }
      */
-    @NotNull
-    public Map<String, Object> beanToMap(@NotNull Object obj) {
+    public Map<String, Object> beanToMap(Object obj) {
         Map<String, Object> map = Maps.newHashMap();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
@@ -75,7 +72,6 @@ public class BeanUtil {
      * @param targetClass 目标类别
      * @return {@code T }
      */
-    @NotNull
     public <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
         T object = org.springframework.beans.BeanUtils.instantiateClass(targetClass);
         try {
@@ -100,7 +96,6 @@ public class BeanUtil {
      * @param propertyName 属性名
      * @return 属性值
      */
-    @Contract("null,_->null")
     public Object getProperty(Object bean, String propertyName) {
         if (bean == null) {
             return null;
@@ -129,7 +124,6 @@ public class BeanUtil {
      * @return 拷贝之后的对象
      */
 
-    @Contract("null->null")
     @SuppressWarnings("unchecked")
     public <T> T deepClone(T source) {
         if (source == null) {
@@ -157,7 +151,7 @@ public class BeanUtil {
      * @return targetType
      */
     @SuppressWarnings("unchecked")
-    public <S, T> T convert(S source, @NotNull Class<T> targetType) {
+    public <S, T> T convert(S source, Class<T> targetType) {
         if (ObjectUtils.isEmpty(source)) {
             return $.newInstance(targetType);
         }
@@ -179,7 +173,7 @@ public class BeanUtil {
      * @param target 转换后的对象
      */
     @SuppressWarnings("unchecked")
-    public <S, T> void convert(@NotNull S source, @NotNull T target) {
+    public <S, T> void convert(S source, T target) {
         if (target.getClass().equals(source.getClass())) {
             target = (T) source;
         }
@@ -200,7 +194,7 @@ public class BeanUtil {
      */
 
     @SuppressWarnings("unchecked")
-    public <S, T> List<T> convert(List<S> sourceList, @NotNull Class<T> targetType) {
+    public <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
         if ($.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
@@ -222,7 +216,7 @@ public class BeanUtil {
      * @param targetType bean 类
      * @return bean 对象
      */
-    public <T> T convert(Map<String, Object> map, @NotNull Class<T> targetType) {
+    public <T> T convert(Map<String, Object> map, Class<T> targetType) {
         if ($.isEmpty(map)) {
             return $.newInstance(targetType);
         }
@@ -234,7 +228,7 @@ public class BeanUtil {
         return mapToBean(map, targetType);
     }
 
-    private void copyByCopier(@NotNull Object source, @NotNull Object target) {
+    private void copyByCopier(Object source, Object target) {
         Class<?> sourceType = source.getClass();
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
@@ -252,7 +246,7 @@ public class BeanUtil {
         }
     }
 
-    private <T> T copyByCopier(Object source, @NotNull Class<T> targetType) {
+    private <T> T copyByCopier(Object source, Class<T> targetType) {
         T t;
         try {
             t = targetType.getDeclaredConstructor().newInstance();
@@ -264,8 +258,7 @@ public class BeanUtil {
         return t;
     }
 
-    @NotNull
-    private <S, T> List<T> copyListByCopier(@NotNull List<S> sourceList, @NotNull Class<T> targetType) {
+    private <S, T> List<T> copyListByCopier(List<S> sourceList, Class<T> targetType) {
         List<T> resultList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
             T target;

@@ -10,7 +10,6 @@ import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryOrderBy;
 import ext.library.mybatis.page.PageParam;
 import ext.library.tool.$;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 分页工具类
@@ -20,14 +19,14 @@ public class PageUtil extends PageHelper {
     /**
      * 设置请求分页数据
      */
-    public static void startPage(@NotNull PageParam param) {
+    public static void startPage( PageParam param) {
         PageHelper.startPage(Math.toIntExact(param.getPage()), Math.toIntExact(param.getSize()));
     }
 
     /**
      * 设置请求分页数据
      */
-    public static <E> PageInfo<E> startPage(@NotNull PageParam param, Supplier<List<E>> select) {
+    public static <E> PageInfo<E> startPage( PageParam param, Supplier<List<E>> select) {
         return PageHelper.startPage(Math.toIntExact(param.getPage()), Math.toIntExact(param.getSize())).doSelectPageInfo(select::get);
     }
 
@@ -41,8 +40,7 @@ public class PageUtil extends PageHelper {
     /**
      * 构建排序
      */
-    @NotNull
-    public static QueryOrderBy[] buildOrderBy(@NotNull PageParam param) {
+    public static QueryOrderBy[] buildOrderBy( PageParam param) {
         List<PageParam.Sort> sorts = param.getSorts();
         if ($.isEmpty(sorts)) {
             return new QueryOrderBy[]{};

@@ -5,8 +5,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.Contract;
-
 
 /**
  * 加载一次
@@ -15,7 +13,6 @@ public class Once {
 
     private final AtomicBoolean value;
 
-    @Contract(pure = true)
     public Once() {
         this.value = new AtomicBoolean(false);
     }

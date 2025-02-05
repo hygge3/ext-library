@@ -10,7 +10,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.core.config.properties.ThreadPoolProperties;
 import ext.library.tool.core.Threads;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,7 +33,7 @@ public class ThreadPoolConfig {
 
     @Bean(name = "threadPoolTaskExecutor")
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor(@NotNull ThreadPoolProperties threadPoolProperties) {
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor( ThreadPoolProperties threadPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(core);
         executor.setMaxPoolSize(core * 2);

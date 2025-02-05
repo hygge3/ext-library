@@ -22,7 +22,6 @@ import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
 import lombok.SneakyThrows;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -54,7 +53,7 @@ public class Captcha implements ICaptcha {
         this(new RandomCaptchaDraw());
     }
 
-    public Captcha(@NotNull CaptchaType type) {
+    public Captcha( CaptchaType type) {
         this(type.getCaptchaDraw());
     }
 
@@ -113,8 +112,7 @@ public class Captcha implements ICaptcha {
         return captchaDraw.validate(code, userInputCaptcha);
     }
 
-    @NotNull
-    private static Graphics2D initGraphics(@NotNull BufferedImage image) {
+    private static Graphics2D initGraphics( BufferedImage image) {
         // 获取图形上下文
         Graphics2D graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -126,7 +124,6 @@ public class Captcha implements ICaptcha {
         return graphics;
     }
 
-    @NotNull
     private static Font[] loadFonts() {
         List<Font> fontList = new ArrayList<>();
         for (String fontName : FONT_NAMES) {
@@ -137,7 +134,7 @@ public class Captcha implements ICaptcha {
     }
 
     @SneakyThrows
-    private static Font loadFont(@NotNull ClassPathResource resource) {
+    private static Font loadFont( ClassPathResource resource) {
         return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
     }
 

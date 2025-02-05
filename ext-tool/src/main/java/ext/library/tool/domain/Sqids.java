@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
 
 /**
  * Sqids is designed to generate short YouTube-looking IDs from numbers.
@@ -34,7 +31,7 @@ public final class Sqids {
 
     private final Set<String> blockList;
 
-    private Sqids(@NotNull final Builder builder) {
+    private Sqids( final Builder builder) {
         final String alphabet = builder.alphabet;
         final int alphabetLength = alphabet.length();
         final int minLength = builder.minLength;
@@ -81,8 +78,6 @@ public final class Sqids {
      *
      * @return New Builder instance.
      */
-    @Contract("->new")
-    @NotNull
     public static Builder builder() {
         return new Builder();
     }
@@ -93,8 +88,7 @@ public final class Sqids {
      * @param numbers Numbers to encode.
      * @return Sqids ID.
      */
-    @NotNull
-    public String encode(@NotNull final List<Long> numbers) {
+    public String encode( final List<Long> numbers) {
         if (numbers.isEmpty()) {
             return "";
         }
@@ -112,7 +106,7 @@ public final class Sqids {
      * @param id ID to decode.
      * @return List of decoded numbers.
      */
-    public List<Long> decode(@NotNull final String id) {
+    public List<Long> decode( final String id) {
         List<Long> ret = new ArrayList<>();
         if (id.isEmpty()) {
             return ret;
@@ -154,12 +148,10 @@ public final class Sqids {
         return ret;
     }
 
-    @NotNull
     private String encodeNumbers(final List<Long> numbers) {
         return this.encodeNumbers(numbers, 0);
     }
 
-    @NotNull
     private String encodeNumbers(final List<Long> numbers, final int increment) {
         if (increment > this.alphabetLength) {
             throw new RuntimeException("Reached max attempts to re-generate the ID");
@@ -203,9 +195,7 @@ public final class Sqids {
         return id.toString();
     }
 
-    @NotNull
-    @Contract("_->new")
-    private String shuffle(@NotNull final String alphabet) {
+    private String shuffle( final String alphabet) {
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
         for (int i = 0, j = charLength - 1; j > 0; i++, j--) {
@@ -218,8 +208,7 @@ public final class Sqids {
         return new String(chars);
     }
 
-    @NotNull
-    private StringBuilder toId(long num, @NotNull final String alphabet) {
+    private StringBuilder toId(long num,  final String alphabet) {
         StringBuilder id = new StringBuilder();
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
@@ -233,7 +222,7 @@ public final class Sqids {
         return id.reverse();
     }
 
-    private long toNumber(@NotNull final String id, @NotNull final String alphabet) {
+    private long toNumber( final String id,  final String alphabet) {
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
         long number = 0;
@@ -245,7 +234,7 @@ public final class Sqids {
         return number;
     }
 
-    private boolean isBlockedId(@NotNull final String id) {
+    private boolean isBlockedId( final String id) {
         final String lowercaseId = id.toLowerCase();
         final int lowercaseIdLength = lowercaseId.length();
         for (String word : this.blockList) {
@@ -272,7 +261,6 @@ public final class Sqids {
      * @param id 数字 id
      * @return {@link String} 唯一 id
      */
-    @NotNull
     public static String encodeId(Long... id) {
         Sqids sqids = Sqids.builder().build();
         return sqids.encode(List.of(id));
@@ -395,7 +383,6 @@ public final class Sqids {
          * @param alphabet The new {@code Builder}'s alphabet
          * @return this {@code Builder} object
          */
-        @Contract(value = "null->this", mutates = "this")
         public Builder alphabet(final String alphabet) {
             if (alphabet != null) {
                 this.alphabet = alphabet;
@@ -409,7 +396,6 @@ public final class Sqids {
          * @param minLength The new {@code Builder}'s minimum length.
          * @return this {@code Builder} object
          */
-        @Contract(value = "_->this", mutates = "this")
         public Builder minLength(final int minLength) {
             this.minLength = minLength;
             return this;
@@ -421,7 +407,6 @@ public final class Sqids {
          * @param blockList The new {@code Builder}'s block list. A copy will be created.
          * @return this {@code Builder} object
          */
-        @Contract(value = "null->this", mutates = "this")
         public Builder blockList(final Set<String> blockList) {
             if (blockList != null) {
                 this.blockList = Set.copyOf(blockList);
@@ -435,8 +420,6 @@ public final class Sqids {
          *
          * @return New Sqids instance.
          */
-        @Contract("->new")
-        @NotNull
         public Sqids build() {
             return new Sqids(this);
         }

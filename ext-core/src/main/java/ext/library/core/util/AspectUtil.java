@@ -6,8 +6,6 @@ import java.lang.reflect.Method;
 import lombok.experimental.UtilityClass;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * 切面工具类
@@ -21,8 +19,7 @@ public final class AspectUtil {
      * @param point 切面
      * @return java.lang.reflect.Method
      */
-    @Nullable
-    public Method getMethod(@NotNull ProceedingJoinPoint point) {
+    public Method getMethod(ProceedingJoinPoint point) {
         if (point.getSignature() instanceof MethodSignature ms) {
             return ms.getMethod();
         }

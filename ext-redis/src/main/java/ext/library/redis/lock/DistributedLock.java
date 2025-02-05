@@ -8,8 +8,6 @@ import java.util.function.UnaryOperator;
 import ext.library.redis.lock.function.ExceptionHandler;
 import ext.library.tool.core.Threads;
 import ext.library.tool.holder.function.CheckedSupplier;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.util.Assert;
 
 /**
@@ -35,14 +33,11 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
 
     ExceptionHandler exceptionHandler = DistributedLock::throwException;
 
-    @NotNull
-    @Contract("->new")
     public static <T> Action<T> instance() {
         return new DistributedLock<>();
     }
 
     @Override
-    @Contract("_,_,_,_->this")
     public StateHandler<T> action(String lockKey, long timeout, TimeUnit timeUnit, CheckedSupplier<T> action) {
         Assert.isTrue(this.executeAction == null, "必须设置执行方法");
         Assert.notNull(action, "执行方法不能为空");
@@ -54,7 +49,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
         return this;
     }
 
-    @Contract("_->this")
     @Override
     public StateHandler<T> onSuccess(UnaryOperator<T> action) {
         Assert.isTrue(this.successAction == null, "必须设置加锁成功后方法");
@@ -63,7 +57,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
         return this;
     }
 
-    @Contract("_->this")
     @Override
     public StateHandler<T> onLockFail(Supplier<T> action) {
         Assert.isTrue(this.lockFailAction == null, "必须设置加锁失败后方法");
@@ -72,7 +65,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
         return this;
     }
 
-    @Contract(value = "_->this", mutates = "this")
     @Override
     public StateHandler<T> onException(ExceptionHandler exceptionHandler) {
         Assert.notNull(exceptionHandler, "必须设置异常处理");
@@ -81,7 +73,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
     }
 
     @Override
-    @Contract(value = "_->this", mutates = "this")
     public StateHandler<T> retryCount(int retryCount) {
         this.retryCount = retryCount;
         return this;
@@ -114,7 +105,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
 
     }
 
-    @NotNull
     private Boolean tryLock(String requestId) {
         Fibonacci fibonacci = new Fibonacci(10);
         int tryCount = 0;
@@ -135,7 +125,6 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
     }
 
     @SuppressWarnings("unchecked")
-    @Contract(value = "_->fail", pure = true)
     private static <E extends Throwable> void throwException(Throwable t) throws E {
         throw (E) t;
     }
@@ -148,12 +137,10 @@ public final class DistributedLock<T> implements Action<T>, StateHandler<T> {
 
         private boolean first = true;
 
-        @Contract(pure = true)
         Fibonacci() {
             this(1);
         }
 
-        @Contract(pure = true)
         Fibonacci(int initial) {
             this.current = initial;
         }

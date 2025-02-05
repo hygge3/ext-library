@@ -16,7 +16,6 @@ import java.util.Objects;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -37,7 +36,7 @@ public class MapUtil {
      * @since 5.0.5
      */
     @SuppressWarnings("unchecked")
-    public <K, V> Map<K, V> removeAny(Map<K, V> map, @NotNull final K... keys) {
+    public <K, V> Map<K, V> removeAny(Map<K, V> map, final K... keys) {
         for (K key : keys) {
             map.remove(key);
         }
@@ -52,7 +51,7 @@ public class MapUtil {
      * @param canContainKeys  可包含的 key（非必传）
      * @return 是否满足条件
      */
-    public boolean isKeys(Map<String, Object> paramMap, @NotNull String[] mustContainKeys, String... canContainKeys) {
+    public boolean isKeys(Map<String, Object> paramMap, String[] mustContainKeys, String... canContainKeys) {
         // 1. 必传参数校验
         for (String key : mustContainKeys) {
             if (!paramMap.containsKey(key)) {
@@ -92,7 +91,7 @@ public class MapUtil {
      * @param keys     条件
      * @return 匹配所有的 key 且大小一致（true）
      */
-    public boolean isKeysEqual(@NotNull Map<String, Object> paramMap, @NotNull String[] keys) {
+    public boolean isKeysEqual(Map<String, Object> paramMap, String[] keys) {
         if (paramMap.size() != keys.length) {
             return false;
         }
@@ -111,7 +110,7 @@ public class MapUtil {
      * @param keys     条件
      * @return 只要包含一个 key（true）
      */
-    public boolean isContainsOneOfKey(Map<String, Object> paramMap, @NotNull String[] keys) {
+    public boolean isContainsOneOfKey(Map<String, Object> paramMap, String[] keys) {
         for (String key : keys) {
             if (paramMap.containsKey(key)) {
                 return true;
@@ -130,7 +129,7 @@ public class MapUtil {
      * @param keys      条件数组
      * @return Map 数组元素 0 包含所有的 key（true）
      */
-    public boolean isMapsKeys(@NotNull Map<String, Object>[] paramMaps, String[] keys) {
+    public boolean isMapsKeys(Map<String, Object>[] paramMaps, String[] keys) {
         return isKeys(paramMaps[0], keys);
     }
 
@@ -153,7 +152,7 @@ public class MapUtil {
      * @param paramMap 要判断的 Map
      * @return value 值是否为空
      */
-    public boolean isStringValueEmpty(@NotNull Map<String, Object> paramMap) {
+    public boolean isStringValueEmpty(Map<String, Object> paramMap) {
         if (paramMap.isEmpty()) {
             return true;
         }
@@ -170,7 +169,7 @@ public class MapUtil {
      *
      * @param paramMap 需要处理的 map
      */
-    public void trimStringValues(@NotNull Map<String, Object> paramMap) {
+    public void trimStringValues(Map<String, Object> paramMap) {
         for (String key : paramMap.keySet()) {
             String str = MapUtil.getObject(paramMap, key, String.class);
             String value = str.trim();
@@ -186,7 +185,7 @@ public class MapUtil {
      * @param paramMap 要操作的 Map
      * @param keys     被移除的 key 数组
      */
-    public void remove(Map<String, Object> paramMap, @NotNull String[] keys) {
+    public void remove(Map<String, Object> paramMap, String[] keys) {
         for (String key : keys) {
             paramMap.remove(key);
         }
@@ -197,7 +196,7 @@ public class MapUtil {
      *
      * @param paramMap 要操作的 Map
      */
-    public void removeEmpty(@NotNull Map<String, Object> paramMap) {
+    public void removeEmpty(Map<String, Object> paramMap) {
         Iterator<Map.Entry<String, Object>> iter = paramMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<String, Object> entry = iter.next();
@@ -218,7 +217,7 @@ public class MapUtil {
      *
      * @param paramMap 要操作的 Map
      */
-    public void removeBlankStr(@NotNull Map<String, Object> paramMap) {
+    public void removeBlankStr(Map<String, Object> paramMap) {
         Iterator<Map.Entry<String, Object>> iter = paramMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<String, Object> entry = iter.next();
@@ -236,7 +235,7 @@ public class MapUtil {
      * @param key        被替换的 key
      * @param replaceKey 替换的 key
      */
-    public void replaceKey(@NotNull Map<String, Object> paramMap, String key, String replaceKey) {
+    public void replaceKey(Map<String, Object> paramMap, String key, String replaceKey) {
         Object value = paramMap.get(key);
         paramMap.put(replaceKey, value);
         paramMap.remove(key);
@@ -248,7 +247,7 @@ public class MapUtil {
      * @param paramMap 需要获取 keys 的 map
      * @return keyList
      */
-    public List<String> keyList(@NotNull Map<String, Object> paramMap) {
+    public List<String> keyList(Map<String, Object> paramMap) {
         return new ArrayList<>(paramMap.keySet());
     }
 

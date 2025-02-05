@@ -12,7 +12,6 @@ import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
 import ext.library.tool.$;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -94,7 +93,7 @@ public class SseEmitterManager {
      * @param userId  要发送消息的用户 id
      * @param message 要发送的消息内容
      */
-    public void sendMessage(@NotNull String userId, @NotNull String message) {
+    public void sendMessage(String userId, String message) {
         Map<String, SseEmitter> emitters = USER_TOKEN_EMITTERS.get(userId);
         if (emitters != null) {
             for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
@@ -112,7 +111,7 @@ public class SseEmitterManager {
      *
      * @param message 要发送的消息内容
      */
-    public void sendMessage(@NotNull String message) {
+    public void sendMessage(String message) {
         for (String userId : USER_TOKEN_EMITTERS.keySet()) {
             sendMessage(userId, message);
         }
@@ -123,7 +122,7 @@ public class SseEmitterManager {
      *
      * @param sseMessage 要发布的 SSE 消息对象
      */
-    public void publishMessage(@NotNull SseMessage sseMessage) {
+    public void publishMessage(SseMessage sseMessage) {
         List<String> unsentUserIds = new ArrayList<>();
         // 当前服务内用户，直接发送消息
         for (String userId : sseMessage.getUserIds()) {
@@ -148,7 +147,7 @@ public class SseEmitterManager {
      *
      * @param message 要发布的消息内容
      */
-    public void publishAll(@NotNull String message) {
+    public void publishAll(String message) {
         SseMessage broadcastMessage = new SseMessage();
         broadcastMessage.setMessage(message);
         log.info("[📨] SSE 发送主题订阅消息，topic:{},message:{}", SSE_TOPIC, message);

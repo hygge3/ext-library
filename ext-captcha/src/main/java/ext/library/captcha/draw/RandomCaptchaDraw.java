@@ -5,8 +5,6 @@ import java.util.Random;
 
 import ext.library.captcha.core.CaptchaUtil;
 import ext.library.tool.$;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -26,12 +24,10 @@ public class RandomCaptchaDraw implements CaptchaDraw {
 
     private final int codeSize;
 
-    @Contract(pure = true)
     public RandomCaptchaDraw() {
         this(CODE_SIZE);
     }
 
-    @Contract(pure = true)
     public RandomCaptchaDraw(int codeSize) {
         this.codeSize = codeSize;
     }
@@ -74,8 +70,6 @@ public class RandomCaptchaDraw implements CaptchaDraw {
      * @param random Random
      * @return 验证码字符串
      */
-    @NotNull
-    @Contract("_,_->new")
     private static String generateCode(Random random, int size) {
         char[] buffer = new char[size];
         for (int i = 0; i < size; i++) {

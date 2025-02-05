@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import okhttp3.FormBody;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 表单构造器
@@ -16,7 +14,6 @@ public class FormBuilder {
 
     private final FormBody.Builder formBuilder;
 
-    @Contract(pure = true)
     FormBuilder(HttpRequest request) {
         this.request = request;
         this.formBuilder = new FormBody.Builder();
@@ -39,7 +36,7 @@ public class FormBuilder {
         return this;
     }
 
-    public FormBuilder add(@NotNull Consumer<FormBody.Builder> consumer) {
+    public FormBuilder add(Consumer<FormBody.Builder> consumer) {
         consumer.accept(this.formBuilder);
         return this;
     }

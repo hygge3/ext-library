@@ -4,8 +4,6 @@ package ext.library.tool.domain;
 import java.util.Objects;
 
 import ext.library.tool.constant.Symbol;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 版本号比较工具
@@ -33,11 +31,9 @@ public class Version {
     /**
      * 私有实例化构造方法
      */
-    @Contract(pure = true)
     private Version() {
     }
 
-    @Contract(pure = true)
     private Version(String version) {
         this.version = version;
     }
@@ -58,8 +54,6 @@ public class Version {
      * @param version 版本
      * @return {Version}
      */
-    @NotNull
-    @Contract(value = "_->new", pure = true)
     public static Version of(String version) {
         return new Version(version);
     }

@@ -12,7 +12,6 @@ import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -52,7 +51,7 @@ public interface IRateLimitHandler {
      * @param point       观点
      * @return {@code String }
      */
-    default String getCombineKey(@NotNull RateLimiter rateLimiter, JoinPoint point) {
+    default String getCombineKey( RateLimiter rateLimiter, JoinPoint point) {
         String key = rateLimiter.key();
         if ($.isNotBlank(key)) {
             MethodSignature signature = (MethodSignature) point.getSignature();

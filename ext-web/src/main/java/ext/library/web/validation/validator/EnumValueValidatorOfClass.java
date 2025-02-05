@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import ext.library.web.validation.constraints.OneOfClasses;
-import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -12,27 +11,27 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EnumValueValidatorOfClass implements ConstraintValidator<OneOfClasses, Class<?>> {
 
-	private Class<?>[] classList;
+    private Class<?>[] classList;
 
-	private boolean allowNull;
+    private boolean allowNull;
 
-	@Override
-	public void initialize(@NotNull OneOfClasses constraintAnnotation) {
-		this.classList = constraintAnnotation.value();
-		this.allowNull = constraintAnnotation.allowNull();
-	}
+    @Override
+    public void initialize(OneOfClasses constraintAnnotation) {
+        this.classList = constraintAnnotation.value();
+        this.allowNull = constraintAnnotation.allowNull();
+    }
 
-	@Override
-	public boolean isValid(Class value, ConstraintValidatorContext context) {
-		if (value == null) {
-			return this.allowNull;
-		}
-		for (Class<?> clazz : this.classList) {
-			if (clazz.isAssignableFrom(value)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean isValid(Class value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return this.allowNull;
+        }
+        for (Class<?> clazz : this.classList) {
+            if (clazz.isAssignableFrom(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

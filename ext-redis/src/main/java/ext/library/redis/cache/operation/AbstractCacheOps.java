@@ -2,14 +2,12 @@ package ext.library.redis.cache.operation;
 
 import ext.library.redis.config.properties.RedisPropertiesHolder;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 抽象缓存操作
  */
 public abstract class AbstractCacheOps {
 
-    @Contract(pure = true)
     protected AbstractCacheOps(ProceedingJoinPoint joinPoint) {
         this.joinPoint = joinPoint;
     }

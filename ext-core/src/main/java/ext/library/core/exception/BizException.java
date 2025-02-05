@@ -4,7 +4,6 @@ package ext.library.core.exception;
 import ext.library.core.response.ResponseCode;
 import lombok.Getter;
 import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 业务异常
@@ -19,7 +18,7 @@ public class BizException extends RuntimeException {
      *
      * @param resultCode 结果代码
      */
-    public BizException(@NotNull ResponseCode resultCode) {
+    public BizException( ResponseCode resultCode) {
         super(resultCode.getMsg());
         this.code = resultCode.getCode();
     }
@@ -30,7 +29,7 @@ public class BizException extends RuntimeException {
      * @param resultCode 结果代码
      * @param message    消息
      */
-    public BizException(@NotNull ResponseCode resultCode, @NotNull @Nls String message) {
+    public BizException( ResponseCode resultCode,  @Nls String message) {
         super(message);
         this.code = resultCode.getCode();
     }

@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Getter;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -98,8 +97,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @return the new id
      */
-    @Contract("->new")
-    @NotNull
     public static ObjectId get() {
         return new ObjectId();
     }
@@ -115,8 +112,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * @return the ObjectId
      * @since 4.1
      */
-    @Contract("_->new")
-    @NotNull
     public static ObjectId getSmallestWithDate(final Date date) {
         return new ObjectId(dateToTimestampSeconds(date), 0, (short) 0, 0, false);
     }
@@ -128,7 +123,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * @return whether the string could be an object id
      * @throws IllegalArgumentException if hexString is null
      */
-    @Contract("null->fail")
     public static boolean isValid(final String hexString) {
         if (hexString == null) {
             throw new IllegalArgumentException();
@@ -244,7 +238,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *                                  bytes remaining
      * @since 3.4
      */
-    @Contract("null->fail")
     public ObjectId(final ByteBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException("buffer can not be null");
@@ -267,7 +260,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @return the byte array
      */
-    public byte @NotNull [] toByteArray() {
+    public byte[] toByteArray() {
         ByteBuffer buffer = ByteBuffer.allocate(OBJECT_ID_LENGTH);
         putToByteBuffer(buffer);
         return buffer.array(); // using .allocate ensures there is a backing array that
@@ -283,7 +276,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *                                  bytes remaining
      * @since 3.4
      */
-    @Contract("null->fail")
     public void putToByteBuffer(final ByteBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException("buffer can not be null");
@@ -311,8 +303,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @return the Date
      */
-    @Contract(value = "->new", pure = true)
-    @NotNull
     public Date getDate() {
         return new Date((this.timestamp & 0xFFFFFFFFL) * 1000L);
     }
@@ -322,8 +312,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @return a string representation of the ObjectId in hexadecimal format
      */
-    @Contract(value = "->new")
-    @NotNull
     public String toHexString() {
         char[] chars = new char[OBJECT_ID_LENGTH * 2];
         int i = 0;
@@ -335,7 +323,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     }
 
     @Override
-    @Contract(value = "null -> false", pure = true)
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -361,7 +348,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     }
 
     @Override
-    @Contract(pure = true)
     public int hashCode() {
         int result = this.timestamp;
         result = 31 * result + this.counter;
@@ -371,7 +357,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     }
 
     @Override
-    public int compareTo(@NotNull ObjectId other) {
+    public int compareTo( ObjectId other) {
         byte[] byteArray = toByteArray();
         byte[] otherByteArray = other.toByteArray();
         for (int i = 0; i < OBJECT_ID_LENGTH; i++) {
@@ -383,8 +369,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     }
 
     @Override
-    @NotNull
-    @Contract(" -> new")
     public String toString() {
         return toHexString();
     }
@@ -401,8 +385,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * @return a proxy for the document
      */
     @Serial
-    @NotNull
-    @Contract(" -> new")
     private Object writeReplace() {
         return new SerializationProxy(this);
     }
@@ -420,7 +402,6 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * @throws InvalidObjectException in all cases
      */
     @Serial
-    @Contract(value = "null -> fail", pure = true)
     private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException("Proxy required");
     }
@@ -453,8 +434,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
         }
     }
 
-    @Contract(value = "null -> fail")
-    private static byte @NotNull [] parseHexString(final String s) {
+    private static byte[] parseHexString(final String s) {
         if (s == null) {
             throw new IllegalArgumentException("hexString can not be null");
         }
@@ -470,7 +450,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
         }
         return b;
     }
-    @Contract(pure = true)
+
     private static int hexCharToInt(final char c) {
         if (c >= '0' && c <= '9') {
             return c - 48;
@@ -482,53 +462,44 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
         throw new IllegalArgumentException("invalid hexadecimal character: [" + c + "]");
     }
 
-    @Contract(pure = true)
     private static int dateToTimestampSeconds(final Date time) {
         return (int) (time.getTime() / 1000);
     }
 
     // Big-Endian helpers, in this class because all other BSON numbers are little-endian
 
-    @Contract(pure = true)
     private static int makeInt(final byte b3, final byte b2, final byte b1, final byte b0) {
         // CHECKSTYLE:OFF
         return (((b3) << 24) | ((b2 & 0xff) << 16) | ((b1 & 0xff) << 8) | ((b0 & 0xff)));
         // CHECKSTYLE:ON
     }
 
-    @Contract(pure = true)
     private static short makeShort(final byte b1, final byte b0) {
         // CHECKSTYLE:OFF
         return (short) (((b1 & 0xff) << 8) | ((b0 & 0xff)));
         // CHECKSTYLE:ON
     }
 
-    @Contract(pure = true)
     private static byte int3(final int x) {
         return (byte) (x >> 24);
     }
 
-    @Contract(pure = true)
     private static byte int2(final int x) {
         return (byte) (x >> 16);
     }
 
-    @Contract(pure = true)
     private static byte int1(final int x) {
         return (byte) (x >> 8);
     }
 
-    @Contract(pure = true)
     private static byte int0(final int x) {
         return (byte) (x);
     }
 
-    @Contract(pure = true)
     private static byte short1(final short x) {
         return (byte) (x >> 8);
     }
 
-    @Contract(pure = true)
     private static byte short0(final short x) {
         return (byte) (x);
     }

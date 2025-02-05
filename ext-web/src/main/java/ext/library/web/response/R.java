@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * HTTP 请求最外层响应对象，更适应 RESTful 风格 API
@@ -59,11 +58,11 @@ public class R<T> implements Serializable {
         return new R<T>().setCode(code).setMsg(message);
     }
 
-    public static <T> R<T> failed(@NotNull ResponseCode failMsg) {
+    public static <T> R<T> failed( ResponseCode failMsg) {
         return failed(failMsg.getCode(), failMsg.getMsg());
     }
 
-    public static <T> R<T> failed(@NotNull ResponseCode failMsg, String message) {
+    public static <T> R<T> failed( ResponseCode failMsg, String message) {
         return failed(failMsg.getCode(), message);
     }
 

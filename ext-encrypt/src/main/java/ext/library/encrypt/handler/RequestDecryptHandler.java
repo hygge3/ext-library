@@ -10,7 +10,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import com.google.common.base.Charsets;
 import ext.library.encrypt.annotation.RequestDecrypt;
+import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
+import ext.library.encrypt.util.AESUtil;
 import ext.library.encrypt.util.RSAUtil;
 import ext.library.tool.core.Exceptions;
 import lombok.RequiredArgsConstructor;
@@ -39,20 +41,25 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
     final CryptoProperties cryptoProperties;
 
     @Override
-    public boolean supports(@NotNull MethodParameter methodParameter, @NotNull Type targetType,
+    public boolean supports(MethodParameter methodParameter, @NotNull Type targetType,
                             @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         return methodParameter.hasMethodAnnotation(RequestDecrypt.class);
     }
 
-    @NotNull
     @Override
-    public HttpInputMessage beforeBodyRead(@NotNull HttpInputMessage inputMessage, @NotNull MethodParameter parameter,
-                                           @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType)
+    public @NotNull HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, @NotNull MethodParameter parameter,
+                                                    @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType)
             throws IOException {
         String decryptStr = StreamUtils.copyToString(inputMessage.getBody(), Charset.defaultCharset());
 
         try {
-            String decrypt = RSAUtil.decryptByPrivateKey(decryptStr, cryptoProperties.getSecretKey());
+            Algorithm algo = cryptoProperties.getAlgo();
+            String decrypt = switch (algo) {
+                case AES:
+                    yield new String(AESUtil.ecbDecrypt(decryptStr.getBytes(), cryptoProperties.getSecretKey().getBytes()));
+                case RSA:
+                    yield RSAUtil.decryptByPrivateKey(decryptStr, cryptoProperties.getSecretKey());
+            };
             return new HttpInputMessage() {
                 @NotNull
                 @Override

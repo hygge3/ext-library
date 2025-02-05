@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 import ext.library.core.constant.PatternPool;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
 
 /**
  * Validator 校验框架工具
@@ -20,7 +19,6 @@ public class ValidatorUtil {
      * @param value   值
      * @return 是否匹配正则
      */
-    @Contract("_,null->false;null,!null->false")
     public boolean isMatchRegex(final Pattern pattern, final CharSequence value) {
         if (value == null || pattern == null) {
             // 提供 null 的字符串为不匹配
@@ -35,7 +33,6 @@ public class ValidatorUtil {
      * @param value 值
      * @return 是否为手机号码（中国）
      */
-    @Contract("null->false")
     public boolean isMobile(final CharSequence value) {
         return isMatchRegex(PatternPool.MOBILE, value);
     }
@@ -46,7 +43,6 @@ public class ValidatorUtil {
      * @param value 值
      * @return 是否为汉字
      */
-    @Contract("null->false")
     public boolean isChinese(final CharSequence value) {
         return isMatchRegex(PatternPool.CHINESES, value);
     }
@@ -58,7 +54,6 @@ public class ValidatorUtil {
      * @return 是否是字母（包括大写和小写字母）
      * @since 4.1.8
      */
-    @Contract("null->false")
     public boolean isWord(final CharSequence value) {
         return isMatchRegex(PatternPool.WORD, value);
     }
@@ -82,7 +77,6 @@ public class ValidatorUtil {
      * @param value 值
      * @return 是否为邮政编码（中国）
      */
-    @Contract("null->false")
     public boolean isZipCode(final CharSequence value) {
         return isMatchRegex(PatternPool.ZIP_CODE, value);
     }

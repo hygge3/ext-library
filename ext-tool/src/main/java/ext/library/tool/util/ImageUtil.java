@@ -16,8 +16,6 @@ import javax.imageio.stream.ImageOutputStream;
 
 import ext.library.tool.core.Exceptions;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * image 工具
@@ -59,7 +57,7 @@ public class ImageUtil {
      * @param url 图片链接地址
      * @return BufferedImage
      */
-    public BufferedImage read(@NotNull String url) {
+    public BufferedImage read(String url) {
         return url.startsWith("http://") || url.startsWith("https://") ? readUrl(url) : read(new File(url));
     }
 
@@ -146,7 +144,7 @@ public class ImageUtil {
      * @param formatName a String containing the informal name of the format.
      * @return byte array.
      */
-    public byte @NotNull [] writeAsBytes(RenderedImage im, String formatName) {
+    public byte[] writeAsBytes(RenderedImage im, String formatName) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             if (ImageIO.write(im, formatName, output)) {
                 return output.toByteArray();
@@ -164,8 +162,6 @@ public class ImageUtil {
      * @param formatName a String containing the informal name of the format.
      * @return byte array input stream.
      */
-    @Contract("_,_->new")
-    @NotNull
     public ByteArrayInputStream writeAsStream(RenderedImage im, String formatName) {
         return new ByteArrayInputStream(writeAsBytes(im, formatName));
     }

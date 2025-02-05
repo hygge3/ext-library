@@ -9,8 +9,6 @@ import java.util.Enumeration;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -93,7 +91,6 @@ public class INetUtil {
      *
      * @throws UnknownHostException If the LAN address of the machine cannot be found.
      */
-    @NotNull
     private static InetAddress getLocalHostLanAddress() throws UnknownHostException {
         try {
             InetAddress candidateAddress = null;
@@ -213,8 +210,7 @@ public class INetUtil {
      * @param addr ip
      * @return boolean
      */
-    @Contract(pure = true)
-    public static boolean isInternalIp(byte @NotNull [] addr) {
+    public static boolean isInternalIp(byte[] addr) {
         final byte b0 = addr[0];
         final byte b1 = addr[1];
         // 10.x.x.x/8

@@ -1,8 +1,6 @@
 package ext.library.desensitize.util;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 脱敏工具类
@@ -114,8 +112,6 @@ public final class DesensitizationUtil {
      * @param input 待处理的文本
      * @return 屏蔽后的文本
      */
-    @NotNull
-    @Contract(pure = true)
     public String maskPassword(String input) {
         return "******";
     }
@@ -131,7 +127,6 @@ public final class DesensitizationUtil {
      * @param input 待处理的文本
      * @return 屏蔽后的文本
      */
-    @Contract("null->null")
     public String maskIp(String input) {
         if (null == input) {
             return null;
@@ -234,7 +229,6 @@ public final class DesensitizationUtil {
      * @param text 字符串
      * @return true-无效字符串
      */
-    @Contract(value = "null->true", pure = true)
     private boolean isEmptyText(String text) {
         return null == text || text.isEmpty();
     }

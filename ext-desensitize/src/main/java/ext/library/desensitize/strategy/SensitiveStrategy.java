@@ -4,7 +4,6 @@ import java.util.function.Function;
 
 import ext.library.desensitize.util.DesensitizationUtil;
 import lombok.AllArgsConstructor;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 脱敏策略，枚举类，针对不同的数据定制特定的策略
@@ -50,7 +49,6 @@ public enum SensitiveStrategy implements IDesensitizeRule {
      * @return {@link String}
      */
     @Override
-    @Contract(pure = true)
     public Function<String, String> desensitize() {
         return desensitizer;
     }

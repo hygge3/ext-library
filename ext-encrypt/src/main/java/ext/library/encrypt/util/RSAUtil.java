@@ -11,7 +11,6 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * RSA 加解密工具
@@ -47,7 +46,7 @@ public class RSAUtil {
      * @return base64 编码后的字符串
      * @throws Exception 加密过程中的异常信息
      */
-    public String encryptByPublicKey(@NotNull String str, String publicKeyStr) throws Exception {
+    public String encryptByPublicKey(String str, String publicKeyStr) throws Exception {
         // Java 原生 base64 解码
         byte[] pubKey = Base64.getDecoder().decode(publicKeyStr);
         // 创建 X509 编码密钥规范
@@ -101,7 +100,7 @@ public class RSAUtil {
      * @return base64 编码后后的字符串
      * @throws Exception 加密过程中的异常信息
      */
-    public String encryptByPrivateKey(@NotNull String str, String privateKeyStr) throws Exception {
+    public String encryptByPrivateKey(String str, String privateKeyStr) throws Exception {
         // Java 原生 base64 解码
         byte[] priKey = Base64.getDecoder().decode(privateKeyStr);
         // 创建 PKCS8 编码密钥规范

@@ -13,7 +13,6 @@ import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 数据脱敏 json 序列化工具
@@ -35,7 +34,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
 
     @SneakyThrows
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, @NotNull BeanProperty property)
+    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
             throws JsonMappingException {
         Sensitive annotation = property.getAnnotation(Sensitive.class);
         if (Objects.nonNull(annotation) && Objects.equals(String.class, property.getType().getRawClass())) {

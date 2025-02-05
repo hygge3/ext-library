@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
-import org.jetbrains.annotations.Contract;
 
 /**
  * 常用正则表达式集合。更多正则见:<br>
@@ -213,11 +212,9 @@ public class PatternPool {
          * @param regex 正则
          * @param flag  标识
          */
-        @Contract(pure = true)
         private RegexWithFlag {
         }
 
-        @Contract(value = "null->false", pure = true)
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {

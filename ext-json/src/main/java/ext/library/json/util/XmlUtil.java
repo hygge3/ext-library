@@ -16,8 +16,6 @@ import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -44,20 +42,14 @@ public class XmlUtil {
         path = XmlUtil.getXpathFactory().newXPath();
     }
 
-    @NotNull
-    @Contract("_->new")
     private static XmlUtil createSafe(InputSource inputSource) {
         return create(inputSource, false);
     }
 
-    @NotNull
-    @Contract("_->new")
     private static XmlUtil createUnsafe(InputSource inputSource) {
         return create(inputSource, true);
     }
 
-    @NotNull
-    @Contract("_,_->new")
     private static XmlUtil create(InputSource inputSource, boolean unsafe) {
         try {
             return new XmlUtil(inputSource, unsafe);
@@ -72,7 +64,6 @@ public class XmlUtil {
      * @param is InputStream
      * @return XmlHelper
      */
-    @NotNull
     public static XmlUtil safe(InputStream is) {
         InputSource inputSource = new InputSource(is);
         return createSafe(inputSource);
@@ -84,7 +75,6 @@ public class XmlUtil {
      * @param xmlStr xml 字符串
      * @return XmlHelper
      */
-    @NotNull
     public static XmlUtil safe(@Language("xml") String xmlStr) {
         try (StringReader sr = new StringReader(xmlStr.trim())) {
             InputSource inputSource = new InputSource(sr);
@@ -98,7 +88,6 @@ public class XmlUtil {
      * @param is InputStream
      * @return XmlHelper
      */
-    @NotNull
     public static XmlUtil unsafe(InputStream is) {
         InputSource inputSource = new InputSource(is);
         return createUnsafe(inputSource);
@@ -110,7 +99,6 @@ public class XmlUtil {
      * @param xmlStr xml 字符串
      * @return XmlHelper
      */
-    @NotNull
     public static XmlUtil unsafe(@Language("xml") String xmlStr) {
         try (StringReader sr = new StringReader(xmlStr.trim())) {
             InputSource inputSource = new InputSource(sr);
@@ -118,7 +106,6 @@ public class XmlUtil {
         }
     }
 
-    @Contract(pure = true)
     private static DocumentBuilderFactory getDocumentBuilderFactory() {
         return XmlHelperHolder.DOCUMENT_BUILDER_FACTORY;
     }
@@ -128,12 +115,10 @@ public class XmlUtil {
      *
      * @return DocumentBuilderFactory
      */
-    @Contract(pure = true)
     private static DocumentBuilderFactory getUnsafeDocumentBuilderFactory() {
         return XmlHelperHolder.UNSAFE_DOCUMENT_BUILDER_FACTORY;
     }
 
-    @Contract(pure = true)
     private static XPathFactory getXpathFactory() {
         return XmlHelperHolder.XPATH_FACTORY;
     }
@@ -146,7 +131,7 @@ public class XmlUtil {
      * @param returnType 返回的类型
      * @return {Object}
      */
-    public Object evalXPath( String expression, @Nullable Object item, QName returnType) {
+    public Object evalXPath(String expression, @Nullable Object item, QName returnType) {
         item = $.defaultIfNull(item, doc);
         try {
             return path.evaluate(expression, item, returnType);
@@ -278,7 +263,6 @@ public class XmlUtil {
 
         private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
 
-        @NotNull
         private static DocumentBuilderFactory newDocumentBuilderFactory() {
             DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
             // Set parser features to prevent against XXE etc.

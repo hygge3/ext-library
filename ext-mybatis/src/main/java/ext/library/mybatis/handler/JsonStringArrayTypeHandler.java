@@ -13,7 +13,6 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Mybatis 数组，符串互转
@@ -25,28 +24,28 @@ import org.jetbrains.annotations.NotNull;
 public class JsonStringArrayTypeHandler extends BaseTypeHandler<String[]> {
 
     @Override
-    public void setNonNullParameter(@NotNull PreparedStatement ps, int i, String[] parameter, JdbcType jdbcType)
+    public void setNonNullParameter(PreparedStatement ps, int i, String[] parameter, JdbcType jdbcType)
             throws SQLException {
         ps.setString(i, ArrayUtil.join(parameter, Symbol.COMMA));
     }
 
     @Override
     @SneakyThrows
-    public String[] getNullableResult(@NotNull ResultSet rs, String columnName) {
+    public String[] getNullableResult(ResultSet rs, String columnName) {
         String reString = rs.getString(columnName);
         return toStrArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public String[] getNullableResult(@NotNull ResultSet rs, int columnIndex) {
+    public String[] getNullableResult(ResultSet rs, int columnIndex) {
         String reString = rs.getString(columnIndex);
         return toStrArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public String[] getNullableResult(@NotNull CallableStatement cs, int columnIndex) {
+    public String[] getNullableResult(CallableStatement cs, int columnIndex) {
         String reString = cs.getString(columnIndex);
         return toStrArray(reString);
     }

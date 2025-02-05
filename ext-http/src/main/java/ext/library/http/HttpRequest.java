@@ -57,13 +57,10 @@ import okhttp3.RequestBody;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpMethod;
 import okhttp3.logging.HttpLoggingInterceptor;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.util.ResourceUtils;
 
 /**
  * ok http 封装，请求结构体
- *
  */
 public class HttpRequest {
 
@@ -125,63 +122,43 @@ public class HttpRequest {
 
     private X509TrustManager trustManager;
 
-    @NotNull
-    @Contract("_->new")
     public static HttpRequest get(final String url) {
         return new HttpRequest(new Request.Builder(), url, Method.GET);
     }
 
-    @NotNull
-    @Contract("_->new")
-    public static HttpRequest get(@NotNull final URI uri) {
+    public static HttpRequest get(final URI uri) {
         return get(uri.toString());
     }
 
-    @NotNull
-    @Contract("_->new")
     public static HttpRequest post(final String url) {
         return new HttpRequest(new Request.Builder(), url, Method.POST);
     }
 
-    @NotNull
-    @Contract("_->new")
-    public static HttpRequest post(@NotNull final URI uri) {
+    public static HttpRequest post(final URI uri) {
         return post(uri.toString());
     }
 
-    @NotNull
-    @Contract("_->new")
     public static HttpRequest patch(final String url) {
         return new HttpRequest(new Request.Builder(), url, Method.PATCH);
     }
 
-    @NotNull
-    @Contract("_->new")
-    public static HttpRequest patch(@NotNull final URI uri) {
+    public static HttpRequest patch(final URI uri) {
         return patch(uri.toString());
     }
 
-    @NotNull
-    @Contract("_->new")
     public static HttpRequest put(final String url) {
         return new HttpRequest(new Request.Builder(), url, Method.PUT);
     }
 
-    @NotNull
-    @Contract("_->new")
-    public static HttpRequest put(@NotNull final URI uri) {
+    public static HttpRequest put(final URI uri) {
         return put(uri.toString());
     }
 
-    @NotNull
-    @Contract("_->new")
     public static HttpRequest delete(final String url) {
         return new HttpRequest(new Request.Builder(), url, Method.DELETE);
     }
 
-    @NotNull
-    @Contract("_->new")
-    public static HttpRequest delete(@NotNull final URI uri) {
+    public static HttpRequest delete(final URI uri) {
         return delete(uri.toString());
     }
 
@@ -291,8 +268,7 @@ public class HttpRequest {
         this.userAgent = DEFAULT_USER_AGENT;
     }
 
-    @NotNull
-    private Call internalCall(@NotNull final OkHttpClient client) {
+    private Call internalCall(final OkHttpClient client) {
         OkHttpClient.Builder builder = client.newBuilder();
         if (connectTimeout != null) {
             builder.connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -415,12 +391,12 @@ public class HttpRequest {
         return this;
     }
 
-    public HttpRequest addCookie(@NotNull final Cookie cookie) {
+    public HttpRequest addCookie(final Cookie cookie) {
         this.addHeader("Cookie", cookie.toString());
         return this;
     }
 
-    public HttpRequest addCookie(@NotNull Consumer<Cookie.Builder> consumer) {
+    public HttpRequest addCookie(Consumer<Cookie.Builder> consumer) {
         Cookie.Builder builder = new Cookie.Builder();
         consumer.accept(builder);
         this.addHeader("Cookie", builder.build().toString());
@@ -447,7 +423,6 @@ public class HttpRequest {
         return this;
     }
 
-    @NotNull
     private static HttpLoggingInterceptor getLoggingInterceptor(HttpLoggingInterceptor.Logger httpLogger,
                                                                 HttpLoggingInterceptor.Level level) {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(httpLogger);
@@ -681,29 +656,24 @@ public class HttpRequest {
     /**
      * 设置全局的 ssl 配置
      */
-    @NotNull
     public static OkHttpClient setGlobalSSL() {
         return setGlobalSSL((InputStream) null, null);
     }
 
-    @NotNull
     public static OkHttpClient setGlobalSSL(String keyStoreFile, String keyPass) {
         return setGlobalSSL(keyStoreFile, keyPass, null, null);
     }
 
-    @NotNull
     public static OkHttpClient setGlobalSSL(String keyStoreFile, String keyPass, String trustStoreFile,
                                             String trustPass) {
         Pair<SSLContext, X509TrustManager> pair = getSslContext(keyStoreFile, keyPass, trustStoreFile, trustPass);
         return setGlobalSSL(pair.getLeft().getSocketFactory(), pair.getRight());
     }
 
-    @NotNull
     public static OkHttpClient setGlobalSSL(InputStream keyStoreInputStream, String keyPass) {
         return setGlobalSSL(keyStoreInputStream, keyPass, null, null);
     }
 
-    @NotNull
     public static OkHttpClient setGlobalSSL(InputStream keyStoreInputStream, String keyPass,
                                             InputStream trustInputStream, String trustPass) {
         Pair<SSLContext, X509TrustManager> pair = getSslContext(keyStoreInputStream, keyPass, trustInputStream,
@@ -711,7 +681,6 @@ public class HttpRequest {
         return setGlobalSSL(pair.getLeft().getSocketFactory(), pair.getRight());
     }
 
-    @NotNull
     public static OkHttpClient setGlobalSSL(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
         X509TrustManager tm = trustManager == null ? DisableValidationTrustManager.INSTANCE : trustManager;
         OkHttpClient okHttpClient = httpClient.newBuilder()
@@ -722,8 +691,7 @@ public class HttpRequest {
         return okHttpClient;
     }
 
-    @Contract(pure = true)
-    static String handleValue( Object value) {
+    static String handleValue(Object value) {
         if (value == null) {
             return Symbol.EMPTY;
         }
@@ -780,7 +748,6 @@ public class HttpRequest {
         }
     }
 
-    @Contract("null,_->new")
     private static TrustManager[] getTrustManagers(InputStream trustInputStream, char[] trustPassword)
             throws NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
         if (trustInputStream == null) {
@@ -800,7 +767,7 @@ public class HttpRequest {
      * @param path 相对于 ClassPath 路径，可以以 classpath:开头
      * @return {@link InputStream}资源
      */
-    private static InputStream getResourceAsStream(@NotNull String path) {
+    private static InputStream getResourceAsStream(String path) {
         if (path.toLowerCase().startsWith("classpath:")) {
             path = path.substring("classpath:".length());
         }
@@ -813,7 +780,6 @@ public class HttpRequest {
      * @param file 文件
      * @return {@link InputStream}资源
      */
-    @NotNull
     private static InputStream getFileResource(String file) {
         try {
             return Files.newInputStream(Paths.get(file));

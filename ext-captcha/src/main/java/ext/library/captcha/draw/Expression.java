@@ -3,8 +3,6 @@ package ext.library.captcha.draw;
 import java.util.Random;
 
 import ext.library.captcha.core.CaptchaUtil;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 数学表达式生成和计算
@@ -37,7 +35,6 @@ class Expression {
         return -1;
     }
 
-    @Contract(pure = true)
     private static int eval(int num1, char operator, int num2) {
         return switch (operator) {
             case PLUS -> num1 + num2;
@@ -52,7 +49,6 @@ class Expression {
      *
      * @return 表达式
      */
-    @NotNull
     public static String randomExpr(Random random) {
         char[] chars = new char[]{PLUS, MINUS, MULTIPLY};
         char operator = chars[random.nextInt(chars.length)];

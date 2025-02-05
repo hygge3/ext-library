@@ -14,7 +14,6 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Mybatis 数组，符串互转
@@ -26,32 +25,31 @@ import org.jetbrains.annotations.NotNull;
 public class JsonLongArrayTypeHandler extends BaseTypeHandler<Long[]> {
 
     @Override
-    public void setNonNullParameter(@NotNull PreparedStatement ps, int i, Long[] parameter, JdbcType jdbcType)
+    public void setNonNullParameter( PreparedStatement ps, int i, Long[] parameter, JdbcType jdbcType)
         throws SQLException {
         ps.setString(i, ArrayUtil.join(parameter, Symbol.COMMA));
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult(@NotNull ResultSet rs, String columnName) {
+    public Long[] getNullableResult( ResultSet rs, String columnName) {
         String reString = rs.getString(columnName);
         return toLongArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult(@NotNull ResultSet rs, int columnIndex) {
+    public Long[] getNullableResult( ResultSet rs, int columnIndex) {
         String reString = rs.getString(columnIndex);
         return toLongArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult(@NotNull CallableStatement cs, int columnIndex) {
+    public Long[] getNullableResult( CallableStatement cs, int columnIndex) {
         String reString = cs.getString(columnIndex);
         return toLongArray(reString);
     }
-    @NotNull
     private Long[] toLongArray(String str) {
         return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).stream().map(
             $::toLong

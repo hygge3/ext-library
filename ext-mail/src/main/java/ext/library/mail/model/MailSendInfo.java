@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 邮件发送详情
@@ -12,7 +11,6 @@ import org.jetbrains.annotations.Contract;
 @Getter
 public class MailSendInfo {
 
-    @Contract(pure = true)
     public MailSendInfo(MailDetails mailDetails) {
         this.mailDetails = mailDetails;
     }

@@ -10,7 +10,6 @@ import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -67,7 +66,7 @@ public class MailSenderImpl implements MailSender {
      *
      * @param mailDetails 邮件发送设置
      */
-    private void sendMimeMail(@NotNull MailDetails mailDetails) throws MessagingException {
+    private void sendMimeMail( MailDetails mailDetails) throws MessagingException {
         // true 表示支持复杂类型
         MimeMessageHelper messageHelper = new MimeMessageHelper(mailSender.createMimeMessage(), true);
         String from = StringUtils.hasText(mailDetails.getFrom()) ? mailDetails.getFrom() : this.defaultFrom;

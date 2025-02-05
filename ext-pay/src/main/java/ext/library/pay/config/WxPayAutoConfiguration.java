@@ -2,7 +2,6 @@ package ext.library.pay.config;
 
 import ext.library.pay.WxPay;
 import ext.library.pay.config.properties.WxPayProperties;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,7 +18,7 @@ public class WxPayAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(WxPay.class)
-	public WxPay wxPay(@NotNull WxPayProperties properties) {
+	public WxPay wxPay( WxPayProperties properties) {
 
 		WxPay wxPay = new WxPay(properties.getAppId(), properties.getMchId(), properties.getMckKey(),
 				properties.getSandbox());

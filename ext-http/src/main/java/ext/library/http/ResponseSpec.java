@@ -22,7 +22,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 响应接口
@@ -89,7 +88,7 @@ public interface ResponseSpec {
      *
      * @return Headers value
      */
-    default <T> T header(@NotNull Function<Headers, T> consumer) {
+    default <T> T header(Function<Headers, T> consumer) {
         return consumer.apply(this.headers());
     }
 
@@ -99,7 +98,7 @@ public interface ResponseSpec {
      * @param consumer Consumer
      * @return Headers
      */
-    default ResponseSpec headers(@NotNull Consumer<Headers> consumer) {
+    default ResponseSpec headers(Consumer<Headers> consumer) {
         consumer.accept(this.headers());
         return this;
     }
@@ -145,7 +144,7 @@ public interface ResponseSpec {
      * @param consumer Consumer
      * @return ResponseSpec
      */
-    default ResponseSpec cookies(@NotNull Consumer<List<Cookie>> consumer) {
+    default ResponseSpec cookies(Consumer<List<Cookie>> consumer) {
         consumer.accept(this.cookies());
         return this;
     }
@@ -346,7 +345,7 @@ public interface ResponseSpec {
      * @param consumer Consumer
      * @return ResponseSpec
      */
-    default ResponseSpec rawRequest(@NotNull Consumer<Request> consumer) {
+    default ResponseSpec rawRequest(Consumer<Request> consumer) {
         consumer.accept(this.rawRequest());
         return this;
     }
@@ -364,7 +363,7 @@ public interface ResponseSpec {
      * @param consumer Consumer
      * @return Response
      */
-    default ResponseSpec rawResponse(@NotNull Consumer<Response> consumer) {
+    default ResponseSpec rawResponse(Consumer<Response> consumer) {
         consumer.accept(this.rawResponse());
         return this;
     }
@@ -382,7 +381,7 @@ public interface ResponseSpec {
      * @param consumer Consumer
      * @return ResponseBody
      */
-    default ResponseSpec rawBody(@NotNull Consumer<ResponseBody> consumer) {
+    default ResponseSpec rawBody(Consumer<ResponseBody> consumer) {
         consumer.accept(this.rawBody());
         return this;
     }

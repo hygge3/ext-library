@@ -8,7 +8,6 @@ import lombok.Getter;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * HttpException
@@ -47,7 +46,6 @@ public class HttpException extends IOException {
      * @param message message
      * @return HttpResponse
      */
-    @NotNull
     private static HttpResponse getResponse(Request request, String message) {
         Response response = new Response.Builder().request(request)
                 .protocol(Protocol.HTTP_1_1)

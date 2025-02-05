@@ -21,7 +21,6 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.domain.Range;
@@ -1561,7 +1560,7 @@ public class RedisUtil {
         return xAdd(Record.of(content).withStreamKey(key), xAddOptions);
     }
 
-    public RecordId xAdd(@NotNull MapRecord<String, String, String> mapRecord,
+    public RecordId xAdd(MapRecord<String, String, String> mapRecord,
                          RedisStreamCommands.XAddOptions xAddOptions) {
         RedisSerializer<String> keySerializer = getKeySerializer();
         RedisSerializer<String> valueSerializer = getValueSerializer();

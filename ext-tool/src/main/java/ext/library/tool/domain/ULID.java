@@ -9,8 +9,6 @@ import java.util.Random;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("PMD.ShortClassName")
 public class ULID {
@@ -68,7 +66,6 @@ public class ULID {
         this(new SecureRandom());
     }
 
-    @Contract(pure = true)
     public ULID(Random random) {
         Objects.requireNonNull(random, "random must not be null!");
         this.random = random;
@@ -119,8 +116,6 @@ public class ULID {
         return Optional.of(result);
     }
 
-    @NotNull
-    @Contract("_->new")
     public static Value parseULID(String ulidString) {
         Objects.requireNonNull(ulidString, "ulidString must not be null!");
         if (ulidString.length() != 26) {
@@ -142,8 +137,6 @@ public class ULID {
         return new Value(most, least);
     }
 
-    @NotNull
-    @Contract("_->new")
     public static Value fromBytes(byte[] data) {
         Objects.requireNonNull(data, "data must not be null!");
         if (data.length != 16) {
@@ -272,8 +265,6 @@ public class ULID {
         }
     }
 
-    @NotNull
-    @Contract("_,_->new")
     static String internalUIDString(long timestamp, Random random) {
         checkTimestamp(timestamp);
 
@@ -294,8 +285,6 @@ public class ULID {
         internalAppendCrockford(builder, random.nextLong(), 8);
     }
 
-    @NotNull
-    @Contract("_,_->new")
     static Value internalNextValue(long timestamp, Random random) {
         checkTimestamp(timestamp);
         long mostSignificantBits = random.nextLong();
@@ -305,7 +294,6 @@ public class ULID {
         return new Value(mostSignificantBits, leastSignificantBits);
     }
 
-    @Contract(pure = true)
     private static void checkTimestamp(long timestamp) {
         if ((timestamp & TIMESTAMP_OVERFLOW_MASK) != 0) {
             throw new IllegalArgumentException("ULID does not support timestamps after +10889-08-02T05:31:50.655Z!");

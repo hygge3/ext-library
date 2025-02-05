@@ -13,7 +13,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 速率限制拦截切面处理类
@@ -36,7 +35,7 @@ public class RateLimiterAspect {
 	 * @throws Throwable 限流异常
 	 */
 	@Around("@annotation(ext.library.ratelimiter.annotation.RateLimiter)")
-	public Object interceptor(@NotNull ProceedingJoinPoint pjp) throws Throwable {
+	public Object interceptor( ProceedingJoinPoint pjp) throws Throwable {
 		MethodSignature signature = (MethodSignature) pjp.getSignature();
 		Method method = signature.getMethod();
 		RateLimiter rateLimiter = getRateLimit(signature.getMethod(), method.getName());

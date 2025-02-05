@@ -4,9 +4,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import ext.library.core.util.ValidatorUtil;
-import ext.library.web.validation.constraints.English;
 import ext.library.tool.$;
-import org.jetbrains.annotations.NotNull;
+import ext.library.web.validation.constraints.English;
 
 
 /**
@@ -14,20 +13,20 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EnglishValidator implements ConstraintValidator<English, String> {
 
-	private boolean notNull;
+    private boolean notNull;
 
-	@Override
-	public void initialize(@NotNull English constraintAnnotation) {
-		this.notNull = constraintAnnotation.notNull();
-	}
+    @Override
+    public void initialize(English constraintAnnotation) {
+        this.notNull = constraintAnnotation.notNull();
+    }
 
-	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if ($.isNotBlank(value)) {
-			return ValidatorUtil.isWord(value);
-		}
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if ($.isNotBlank(value)) {
+            return ValidatorUtil.isWord(value);
+        }
 
-		return !notNull;
-	}
+        return !notNull;
+    }
 
 }

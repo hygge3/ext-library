@@ -13,8 +13,6 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 时间工具类
@@ -47,8 +45,7 @@ public final class DateUtil {
     /** 时间格式化 HMS */
     public final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
 
-    @NotNull
-    public String format(@NotNull Temporal temporal, @NotNull DateTimeFormatter formatter) {
+    public String format(Temporal temporal, DateTimeFormatter formatter) {
         return formatter.format(temporal);
     }
 
@@ -62,8 +59,6 @@ public final class DateUtil {
      * @param str yyyy-MM-dd HH:mm:ss 格式字符串
      * @return java.time.LocalDateTime 时间
      */
-    @NotNull
-    @Contract(pure = true)
     public LocalDateTime parse(String str) {
         return LocalDateTime.parse(str, FORMATTER_YMD_HMS);
     }
@@ -74,8 +69,6 @@ public final class DateUtil {
      * @param timestamp 时间戳 - 毫秒
      * @return java.time.LocalDateTime
      */
-    @NotNull
-    @Contract(pure = true)
     public LocalDateTime parse(Long timestamp) {
         return parse(timestamp, DEFAULT_ZONE_ID);
     }
@@ -87,8 +80,6 @@ public final class DateUtil {
      * @param zoneId    时区
      * @return java.time.LocalDateTime
      */
-    @NotNull
-    @Contract("_,_->new")
     public LocalDateTime parse(Long timestamp, ZoneId zoneId) {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId);
     }
@@ -99,7 +90,6 @@ public final class DateUtil {
      * @param dateTime 日期时间
      * @return {@code Long }
      */
-    @NotNull
     public Long toTimestamp(LocalDateTime dateTime) {
         return toTimestamp(dateTime, DEFAULT_ZONE_OFFSET);
     }
@@ -111,8 +101,7 @@ public final class DateUtil {
      * @param offset   时区
      * @return {@code Long }
      */
-    @NotNull
-    public Long toTimestamp(@NotNull LocalDateTime dateTime, ZoneOffset offset) {
+    public Long toTimestamp(LocalDateTime dateTime, ZoneOffset offset) {
         return dateTime.toInstant(offset).toEpochMilli();
     }
 
@@ -122,7 +111,6 @@ public final class DateUtil {
      * @param dateTime 日期时间
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalDateTime dateTime) {
         return format(dateTime, FORMATTER_YMD_HMS);
     }
@@ -134,7 +122,6 @@ public final class DateUtil {
      * @param formatter 格式化模板
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalDateTime dateTime, String formatter) {
         return format(dateTime, DateTimeFormatter.ofPattern(formatter));
     }
@@ -149,8 +136,6 @@ public final class DateUtil {
      * @param str yyyy-MM-dd 格式字符串
      * @return java.time.LocalDate 日期
      */
-    @NotNull
-    @Contract(pure = true)
     public LocalDate parseDate(String str) {
         return LocalDate.parse(str, FORMATTER_YMD);
     }
@@ -161,7 +146,6 @@ public final class DateUtil {
      * @param date 日期
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalDate date) {
         return format(date, FORMATTER_YMD);
     }
@@ -173,7 +157,6 @@ public final class DateUtil {
      * @param formatter 格式化模板
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalDate date, String formatter) {
         return format(date, DateTimeFormatter.ofPattern(formatter));
     }
@@ -188,8 +171,6 @@ public final class DateUtil {
      * @param str HH:mm:ss 格式字符串
      * @return java.time.LocalTime 日期
      */
-    @NotNull
-    @Contract(pure = true)
     public LocalTime parseTime(String str) {
         return LocalTime.parse(str, FORMATTER_HMS);
     }
@@ -200,7 +181,6 @@ public final class DateUtil {
      * @param time 时间
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalTime time) {
         return format(time, FORMATTER_HMS);
     }
@@ -212,7 +192,6 @@ public final class DateUtil {
      * @param formatter 格式化模板
      * @return {@code String }
      */
-    @NotNull
     public String format(LocalTime time, String formatter) {
         return format(time, DateTimeFormatter.ofPattern(formatter));
     }
@@ -240,7 +219,7 @@ public final class DateUtil {
      * @param endTime   结束时间
      * @return 是否在…之间
      */
-    public boolean isBetween(LocalDateTime startTime, @NotNull LocalDateTime dateTime, LocalDateTime endTime) {
+    public boolean isBetween(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
         return dateTime.isBefore(endTime) && dateTime.isAfter(startTime);
     }
 
@@ -250,8 +229,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当天的开始时间
      */
-    @NotNull
-    public LocalDateTime getDayStart(@NotNull LocalDateTime time) {
+    public LocalDateTime getDayStart(LocalDateTime time) {
         return time.with(LocalTime.MIN);
     }
 
@@ -261,8 +239,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当天的结束时间
      */
-    @NotNull
-    public LocalDateTime getDayEnd(@NotNull LocalDateTime time) {
+    public LocalDateTime getDayEnd(LocalDateTime time) {
         return time.with(LocalTime.MAX);
     }
 
@@ -272,8 +249,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当周的开始时间
      */
-    @NotNull
-    public LocalDateTime getWeekStart(@NotNull LocalDateTime time) {
+    public LocalDateTime getWeekStart(LocalDateTime time) {
         return time.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
     }
 
@@ -283,8 +259,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当周的结束时间
      */
-    @NotNull
-    public LocalDateTime getWeekEnd(@NotNull LocalDateTime time) {
+    public LocalDateTime getWeekEnd(LocalDateTime time) {
         return time.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX);
     }
 
@@ -294,8 +269,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当月的开始时间
      */
-    @NotNull
-    public LocalDateTime getMonthStart(@NotNull LocalDateTime time) {
+    public LocalDateTime getMonthStart(LocalDateTime time) {
         return time.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
     }
 
@@ -305,8 +279,7 @@ public final class DateUtil {
      * @param time 时间
      * @return 当月的结束时间
      */
-    @NotNull
-    public LocalDateTime getMonthEnd(@NotNull LocalDateTime time) {
+    public LocalDateTime getMonthEnd(LocalDateTime time) {
         return time.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
     }
 

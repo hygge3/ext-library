@@ -1,8 +1,6 @@
 package ext.library.pay.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 交易状态
@@ -47,8 +45,7 @@ public enum TradeState {
     ERROR;
 
     @JsonCreator
-    @Contract(pure = true)
-    public static TradeState of(@NotNull String status) {
+    public static TradeState of(String status) {
         return switch (status) {
             case "SUCCESS" -> SUCCESS;
             case "REFUND" -> REFUND;

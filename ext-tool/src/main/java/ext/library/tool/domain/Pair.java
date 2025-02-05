@@ -3,7 +3,6 @@ package ext.library.tool.domain;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.jetbrains.annotations.Contract;
 
 /**
  * tuple Pair
@@ -23,7 +22,6 @@ public class Pair<L, R> {
      * Returns an empty pair.
      */
     @SuppressWarnings("unchecked")
-    @Contract(pure = true)
     public static <L, R> Pair<L, R> empty() {
         return (Pair<L, R>) EMPTY;
     }
@@ -34,7 +32,6 @@ public class Pair<L, R> {
      *
      * @return the constructed pair or an empty pair if {@code left} is null.
      */
-    @Contract("!null->new")
     public static <L, R> Pair<L, R> createLeft(L left) {
         if (left == null) {
             return empty();
@@ -49,7 +46,6 @@ public class Pair<L, R> {
      *
      * @return the constructed pair or an empty pair if {@code right} is null.
      */
-    @Contract("!null->new")
     public static <L, R> Pair<L, R> createRight(R right) {
         if (right == null) {
             return empty();
@@ -58,7 +54,6 @@ public class Pair<L, R> {
         }
     }
 
-    @Contract("_,!null->new;!null,null->new")
     public static <L, R> Pair<L, R> create(L left, R right) {
         if (right == null && left == null) {
             return empty();
@@ -67,7 +62,6 @@ public class Pair<L, R> {
         }
     }
 
-    @Contract(pure = true)
     private Pair(L left, R right) {
         this.left = left;
         this.right = right;

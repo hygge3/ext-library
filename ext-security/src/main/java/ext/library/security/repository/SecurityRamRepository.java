@@ -16,7 +16,6 @@ import ext.library.security.domain.SecurityToken;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>
@@ -83,7 +82,7 @@ public class SecurityRamRepository implements SecurityRepository {
     }
 
     @Override
-    public boolean saveSecuritySession(@NotNull SecuritySession session) {
+    public boolean saveSecuritySession(SecuritySession session) {
         Long version = versionMap.get().get(session.getLoginId());
         version = null == version ? 0L : version;
         if (null != session.getVersion() && !session.getVersion().equals(version)) {

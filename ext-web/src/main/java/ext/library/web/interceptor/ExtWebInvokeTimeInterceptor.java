@@ -70,7 +70,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
      * @param request request
      * @return boolean
      */
-    private boolean isJsonRequest(@NotNull HttpServletRequest request) {
+    private boolean isJsonRequest( HttpServletRequest request) {
         String contentType = request.getContentType();
         if (contentType != null) {
             return contentType.startsWith(MediaType.APPLICATION_JSON_VALUE);

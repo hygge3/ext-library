@@ -12,7 +12,6 @@ import ext.library.pay.enums.TradeType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 微信支付回调
@@ -69,7 +68,7 @@ public class WxPayCallback {
 	 * @param wxPay 微信支付信息
 	 * @return boolean
 	 */
-	public boolean checkSign(@NotNull WxPay wxPay) {
+	public boolean checkSign( WxPay wxPay) {
 		return wxPay.checkSign(this);
 	}
 

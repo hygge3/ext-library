@@ -10,7 +10,6 @@ import cn.dev33.satoken.exception.NotRoleException;
 import ext.library.core.exception.BizCode;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -27,7 +26,7 @@ public class SaTokenExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(@NotNull HttpServletRequest request, @NotNull @Nls String message, @NotNull Exception e) {
+    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -35,7 +34,7 @@ public class SaTokenExceptionHandler {
      * 权限码异常
      */
     @ExceptionHandler(NotPermissionException.class)
-    public Map<String, Object> notPermissionException(@NotNull NotPermissionException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> notPermissionException(NotPermissionException e, HttpServletRequest request) {
         printLog(request, "权限校验失败", e);
         return Map.of("code", BizCode.FORBIDDEN, "msg", "没有访问权限，请联系管理员授权");
     }
@@ -44,7 +43,7 @@ public class SaTokenExceptionHandler {
      * 角色权限异常
      */
     @ExceptionHandler(NotRoleException.class)
-    public Map<String, Object> notRoleException(@NotNull NotRoleException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> notRoleException(NotRoleException e, HttpServletRequest request) {
         printLog(request, "角色校验失败", e);
         return Map.of("code", BizCode.FORBIDDEN, "msg", "没有角色权限，请联系管理员授权");
     }
@@ -53,7 +52,7 @@ public class SaTokenExceptionHandler {
      * 认证失败
      */
     @ExceptionHandler(NotLoginException.class)
-    public Map<String, Object> notLoginException(@NotNull NotLoginException e, @NotNull HttpServletRequest request) {
+    public Map<String, Object> notLoginException(NotLoginException e, HttpServletRequest request) {
         printLog(request, "认证校验失败", e);
         return Map.of("code", BizCode.UNAUTHORIZED, "msg", "认证失败，无法访问系统资源");
     }

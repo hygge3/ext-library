@@ -12,7 +12,6 @@ import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -51,7 +50,7 @@ public class WebSocketUtil {
      *
      * @param webSocketMessage 要发布的 WebSocket 消息对象
      */
-    public void publishMessage(@NotNull WebSocketMessage webSocketMessage) {
+    public void publishMessage(WebSocketMessage webSocketMessage) {
         List<String> unsentSessionKeys = new ArrayList<>();
         // 当前服务内 session，直接发送消息
         for (String sessionKey : webSocketMessage.getSessionKeys()) {

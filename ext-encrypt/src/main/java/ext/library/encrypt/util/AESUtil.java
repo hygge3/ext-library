@@ -16,7 +16,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 对称加密算法：AES
@@ -201,7 +200,7 @@ public class AESUtil {
         return gcmDecrypt(data, getSecretKey(key), getGCMParameterSpec(iv, tagLength), aad);
     }
 
-    public byte[] gcmDecrypt(byte @NotNull [] ciphertext, byte @NotNull [] tag, byte[] key, byte[] iv, byte[] aad)
+    public byte[] gcmDecrypt(byte[] ciphertext, byte[] tag, byte[] key, byte[] iv, byte[] aad)
             throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 
@@ -219,28 +218,25 @@ public class AESUtil {
         return gcmDecrypt(ciphertext, tag, key, iv, null);
     }
 
-    public byte @NotNull [] getGcmCiphertext(byte[] data, int tagLength) {
+    public byte[] getGcmCiphertext(byte[] data, int tagLength) {
         return Arrays.copyOfRange(data, 0, data.length - tagLength / 8);
     }
 
-    public byte @NotNull [] getGcmAuthenticationTag(byte[] data, int tagLength) {
+    public byte[] getGcmAuthenticationTag(byte[] data, int tagLength) {
         return Arrays.copyOfRange(data, data.length - tagLength / 8, data.length);
     }
 
     /**
      * 生成 AES 密钥，字节数必须为 16 字节、24 字节或 32 字节
      */
-    @NotNull
     public Key getSecretKey(byte[] key) {
         return new SecretKeySpec(key, "AES");
     }
 
-    @NotNull
     public IvParameterSpec getIvParameter(byte[] iv) {
         return new IvParameterSpec(iv);
     }
 
-    @NotNull
     public GCMParameterSpec getGCMParameterSpec(int authenticationTagLength, byte[] iv) {
         return new GCMParameterSpec(authenticationTagLength, iv);
     }
@@ -248,7 +244,6 @@ public class AESUtil {
     /**
      * @param tagLength authentication tag 比特位数，必须是 128、120、112、104、96 之一
      */
-    @NotNull
     public GCMParameterSpec getGCMParameterSpec(byte[] iv, int tagLength) {
         return getGCMParameterSpec(tagLength, iv);
     }

@@ -7,7 +7,6 @@ import ext.library.redis.util.RedisUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
@@ -24,7 +23,6 @@ public class DistributedLockUtil {
      * @param key 锁的 key
      * @return 锁对象
      */
-    @NotNull
     public Boolean lock(String key) {
         return getLock(key, LOCK_VALUE);
     }
@@ -37,7 +35,6 @@ public class DistributedLockUtil {
      * @param unit     {@code lockTime} 参数的时间单位
      * @return 锁对象
      */
-    @NotNull
     public Boolean lock(String key, long lockTime, TimeUnit unit) {
         return RedisUtil.setNxEx(key, LOCK_VALUE, lockTime, unit);
     }

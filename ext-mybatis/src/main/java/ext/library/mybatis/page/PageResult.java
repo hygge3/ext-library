@@ -9,7 +9,6 @@ import ext.library.core.util.BeanUtil;
 import ext.library.tool.$;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 分页返回结果
@@ -54,14 +53,14 @@ public class PageResult<T> {
         this.total = total;
     }
 
-    public PageResult(@NotNull Page<T> page) {
+    public PageResult(Page<T> page) {
         this.page = page.getPageNumber();
         this.size = page.getPageSize();
         this.records = page.getRecords();
         this.total = page.getTotalRow();
     }
 
-    public <S> PageResult(@NotNull Page<S> page, Class<T> targetClass) {
+    public <S> PageResult(Page<S> page, Class<T> targetClass) {
         this.page = page.getPageNumber();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getRecords())) {
@@ -72,14 +71,14 @@ public class PageResult<T> {
         this.total = page.getTotalRow();
     }
 
-    public PageResult(@NotNull com.github.pagehelper.Page<T> page) {
+    public PageResult(com.github.pagehelper.Page<T> page) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         this.records = page.getResult();
         this.total = page.getTotal();
     }
 
-    public <S> PageResult(@NotNull com.github.pagehelper.Page<S> page, Class<T> targetClass) {
+    public <S> PageResult(com.github.pagehelper.Page<S> page, Class<T> targetClass) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getResult())) {
@@ -90,14 +89,14 @@ public class PageResult<T> {
         this.total = page.getTotal();
     }
 
-    public PageResult(@NotNull PageInfo<T> page) {
+    public PageResult(PageInfo<T> page) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         this.records = page.getList();
         this.total = page.getTotal();
     }
 
-    public <S> PageResult(@NotNull PageInfo<S> page, Class<T> targetClass) {
+    public <S> PageResult(PageInfo<S> page, Class<T> targetClass) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getList())) {
@@ -108,7 +107,7 @@ public class PageResult<T> {
         this.total = page.getTotal();
     }
 
-    public PageResult(long page, long size, @NotNull List<T> list) {
+    public PageResult(long page, long size, List<T> list) {
         this.page = page;
         this.size = size;
         this.total = (long) list.size();
@@ -129,7 +128,7 @@ public class PageResult<T> {
         }
     }
 
-    public PageResult(@NotNull List<T> list) {
+    public PageResult(List<T> list) {
         this.records = list;
         this.total = (long) list.size();
     }

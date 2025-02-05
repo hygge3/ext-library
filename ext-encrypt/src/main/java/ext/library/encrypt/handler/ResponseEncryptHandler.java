@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import ext.library.encrypt.annotation.ResponseEncrypt;
 import ext.library.encrypt.properties.CryptoProperties;
+import ext.library.encrypt.util.AESUtil;
 import ext.library.encrypt.util.RSAUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.core.Exceptions;
@@ -31,7 +32,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
     final CryptoProperties cryptoProperties;
 
     @Override
-    public boolean supports(@NotNull MethodParameter returnType,
+    public boolean supports(MethodParameter returnType,
                             @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(ResponseEncrypt.class);
     }
@@ -46,9 +47,13 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
             return null;
         }
         String json = JsonUtil.toJson(body);
-        String publicKey = cryptoProperties.getPublicKey();
         try {
-            return RSAUtil.encryptByPublicKey(json, publicKey);
+            return switch (cryptoProperties.getAlgo()) {
+                case AES:
+                    yield new String(AESUtil.ecbEncrypt(json.getBytes(), cryptoProperties.getPublicKey().getBytes()));
+                case RSA:
+                    yield RSAUtil.encryptByPublicKey(json, cryptoProperties.getPublicKey());
+            };
         } catch (Exception e) {
             throw Exceptions.throwOut("响应加密异常，uri:{0}", request.getURI().toString());
         }

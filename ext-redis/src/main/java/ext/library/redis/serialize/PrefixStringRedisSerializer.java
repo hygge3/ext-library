@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 
 import ext.library.redis.prefix.IRedisPrefixConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
@@ -21,14 +20,13 @@ public class PrefixStringRedisSerializer extends StringRedisSerializer {
     }
 
     @Override
-    @NotNull
     public String deserialize(byte[] bytes) {
         byte[] unwrap = this.iRedisPrefixConverter.unwrap(bytes);
         return super.deserialize(unwrap);
     }
 
     @Override
-    public byte @NotNull [] serialize(String key) {
+    public byte[] serialize(String key) {
         byte[] originBytes = super.serialize(key);
         return this.iRedisPrefixConverter.wrap(originBytes);
     }

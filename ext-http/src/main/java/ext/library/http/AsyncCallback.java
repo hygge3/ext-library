@@ -7,7 +7,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 异步处理
@@ -17,7 +16,6 @@ public class AsyncCallback implements Callback {
 
     private final AsyncExchange exchange;
 
-    @Contract(pure = true)
     AsyncCallback(AsyncExchange exchange) {
         this.exchange = exchange;
     }

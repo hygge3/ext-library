@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import com.google.common.base.Preconditions;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <b>数学计算</b>
@@ -28,7 +27,7 @@ public class CalcUtil {
      * @param addends 加数
      * @return 参数的和
      */
-    public BigDecimal add(Object augend, @NotNull Object... addends) {
+    public BigDecimal add(Object augend, Object... addends) {
         BigDecimal bdAugend = $.toBigDecimal(augend);
         for (Object addend : addends) {
             BigDecimal bdAddend = $.toBigDecimal(addend);
@@ -44,7 +43,7 @@ public class CalcUtil {
      * @param subtrahends 减数
      * @return 参数的差
      */
-    public BigDecimal sub(Object minuend, @NotNull Object... subtrahends) {
+    public BigDecimal sub(Object minuend, Object... subtrahends) {
         BigDecimal bdMinuend = $.toBigDecimal(minuend);
         for (Object subtrahend : subtrahends) {
             BigDecimal bdSubtrahend = $.toBigDecimal(subtrahend);
@@ -60,7 +59,6 @@ public class CalcUtil {
      * @param v2 乘数
      * @return 两个参数的积
      */
-    @NotNull
     public BigDecimal mul(Object v1, Object v2) {
         BigDecimal b1 = $.toBigDecimal(v1);
         BigDecimal b2 = $.toBigDecimal(v2);
@@ -74,7 +72,6 @@ public class CalcUtil {
      * @param v2 除数
      * @return 两个参数的商
      */
-    @NotNull
     public BigDecimal div(Object v1, Object v2) {
         return div(v1, v2, DEFAULT_DIV_SCALE);
     }
@@ -87,7 +84,6 @@ public class CalcUtil {
      * @param scale 表示表示需要精确到小数点以后几位（如果精确范围小于 0，将抛出异常信息）
      * @return 两个参数的商
      */
-    @NotNull
     public BigDecimal div(Object v1, Object v2, int scale) {
         return div(v1, v2, scale, RoundingMode.HALF_UP);
     }
@@ -100,7 +96,6 @@ public class CalcUtil {
      * @param scale 表示表示需要精确到小数点以后几位（如果精确范围小于 0，将抛出异常信息）
      * @return 两个参数的商
      */
-    @NotNull
     public BigDecimal div(Object v1, Object v2, int scale, RoundingMode roundingMode) {
         Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
         BigDecimal b1 = $.toBigDecimal(v1);
@@ -115,7 +110,6 @@ public class CalcUtil {
      * @param scale 小数点后保留几位
      * @return 四舍五入后的结果
      */
-    @NotNull
     public static BigDecimal round(Object v, int scale) {
         return roundingMode(v, scale, RoundingMode.HALF_UP);
     }
@@ -128,7 +122,6 @@ public class CalcUtil {
      * @param roundingMode 舍入模式
      * @return 舍入后的结果
      */
-    @NotNull
     public static BigDecimal roundingMode(Object v, int scale, RoundingMode roundingMode) {
         Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
         BigDecimal b = $.toBigDecimal(v);
@@ -156,7 +149,6 @@ public class CalcUtil {
      * @param moneySumCent 金额（单位：分）
      * @return 金额（单位：元）
      */
-    @NotNull
     public static BigDecimal centToYuan(int moneySumCent) {
         return div(moneySumCent, 100);
     }

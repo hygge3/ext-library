@@ -11,7 +11,6 @@ import ext.library.holidays.config.HolidaysProperties;
 import ext.library.json.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ResourceUtils;
 
@@ -30,7 +29,7 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
     private final HolidaysProperties properties;
 
     @Override
-    public DaysType getDaysType(@NotNull LocalDate localDate) {
+    public DaysType getDaysType(LocalDate localDate) {
         int year = localDate.getYear();
         Map<String, Byte> dataMap = YEAR_DATA_MAP.get(year);
         // 对于没有数据的，我们按正常的周六日来判断，
@@ -71,7 +70,7 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
      * @param localDate LocalDate
      * @return DaysType
      */
-    private static DaysType isWeekDay(@NotNull LocalDate localDate) {
+    private static DaysType isWeekDay(LocalDate localDate) {
         int week = localDate.getDayOfWeek().getValue();
         return week == DayOfWeek.SATURDAY.getValue() || week == DayOfWeek.SUNDAY.getValue() ? DaysType.REST_DAYS : DaysType.WEEKDAYS;
     }

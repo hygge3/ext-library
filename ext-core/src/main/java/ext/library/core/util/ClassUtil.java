@@ -5,7 +5,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -57,7 +56,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      * @param <A>            泛型标记
      * @return {Annotation}
      */
-    public <A extends Annotation> A getAnnotation(@NotNull Method method, Class<A> annotationType) {
+    public <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
         Class<?> targetClass = method.getDeclaringClass();
         // The method may be on an interface, but we need attributes from the target
         // class.
@@ -83,7 +82,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      * @param <A>            泛型标记
      * @return {Annotation}
      */
-    public <A extends Annotation> A getAnnotation(@NotNull HandlerMethod handlerMethod, Class<A> annotationType) {
+    public <A extends Annotation> A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
         // 先找方法，再找方法上的类
         A annotation = handlerMethod.getMethodAnnotation(annotationType);
         if (null != annotation) {

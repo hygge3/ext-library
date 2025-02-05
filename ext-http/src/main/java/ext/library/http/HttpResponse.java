@@ -23,12 +23,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * ok http 封装，相应结构体
- *
  */
 public class HttpResponse implements ResponseSpec, Closeable {
 
@@ -38,7 +35,7 @@ public class HttpResponse implements ResponseSpec, Closeable {
 
     private final ResponseBody body;
 
-    HttpResponse(@NotNull final Response response) {
+    HttpResponse(final Response response) {
         this.request = response.request();
         this.response = response;
         this.body = ifNullBodyToEmpty(response.body());
@@ -148,7 +145,7 @@ public class HttpResponse implements ResponseSpec, Closeable {
     }
 
     @Override
-    public File toFile(@NotNull File file) {
+    public File toFile(File file) {
         toFile(file.toPath());
         return file;
     }
@@ -178,7 +175,6 @@ public class HttpResponse implements ResponseSpec, Closeable {
         return response.toString();
     }
 
-    @Contract(value = "!null->param1", pure = true)
     static ResponseBody ifNullBodyToEmpty(@Nullable ResponseBody body) {
         return body == null ? Util.EMPTY_RESPONSE : body;
     }

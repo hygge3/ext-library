@@ -32,7 +32,6 @@ import ext.library.tool.constant.Symbol;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,8 +67,7 @@ public final class WxPayUtil {
      * @param data map
      * @return java.lang.String
      */
-    @NotNull
-    public static String mapToXml(@NotNull Map<String, String> data) throws ParserConfigurationException, TransformerException {
+    public static String mapToXml(Map<String, String> data) throws ParserConfigurationException, TransformerException {
         Document document = getDocument();
         Element root = document.createElement("xml");
         document.appendChild(root);
@@ -109,8 +107,7 @@ public final class WxPayUtil {
      * @param xml xml 字符串
      * @return java.util.Map<java.lang.String, java.lang.String>
      */
-    @NotNull
-    public static Map<String, String> xmlToMap(@NotNull String xml)
+    public static Map<String, String> xmlToMap(String xml)
             throws ParserConfigurationException, IOException, SAXException {
         Map<String, String> data = new HashMap<>(30);
 
@@ -141,8 +138,8 @@ public final class WxPayUtil {
      * @param mckKey 密钥
      * @return java.lang.String 签名结果
      */
-    @NotNull
-    public static String sign(@NotNull Map<String, String> params, String mckKey) {
+
+    public static String sign(Map<String, String> params, String mckKey) {
         SignType st = SignType.of(params.get(WxPayConstant.FIELD_SIGN_TYPE));
         if (null == st) {
             throw new IllegalArgumentException("签名类型不能为空");
@@ -150,9 +147,9 @@ public final class WxPayUtil {
         return sign(params, st, mckKey);
     }
 
-    @NotNull
+
     @SneakyThrows({InvalidKeyException.class, NoSuchAlgorithmException.class})
-    public static String sign(@NotNull Map<String, String> params, SignType type, String mckKey) {
+    public static String sign(Map<String, String> params, SignType type, String mckKey) {
         String[] keyArray = params.keySet().toArray(new String[0]);
         // 参数 key 排序
         Arrays.sort(keyArray);

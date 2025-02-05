@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import lombok.Getter;
-import org.jetbrains.annotations.Contract;
 
 /**
  * User-agent 信息
@@ -47,7 +46,6 @@ public class UserAgentInfo implements Serializable {
      * @param name    名字
      * @param pattern 匹配模式
      */
-    @Contract(pure = true)
     public UserAgentInfo(String name, Pattern pattern) {
         this.name = name;
         this.pattern = pattern;
@@ -81,7 +79,6 @@ public class UserAgentInfo implements Serializable {
     }
 
     @Override
-    @Contract(value = "null->false", pure = true)
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

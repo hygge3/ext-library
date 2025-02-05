@@ -10,19 +10,16 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * cookie 管理
- *
  */
 @ParametersAreNonnullByDefault
 public class InMemoryCookieManager implements CookieJar {
 
     private final Set<Cookie> cookieSet;
 
-    @Contract(pure = true)
     public InMemoryCookieManager() {
         this.cookieSet = new CopyOnWriteArraySet<>();
     }

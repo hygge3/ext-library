@@ -17,7 +17,6 @@ import ext.library.tool.holder.function.CheckedPredicate;
 import ext.library.tool.holder.function.CheckedRunnable;
 import ext.library.tool.holder.function.CheckedSupplier;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Lambda 受检异常处理
@@ -37,7 +36,6 @@ public class Unchecked {
      * @param <T>      泛型
      * @return Function
      */
-    @NotNull
     public <T, R> Function<T, R> function(CheckedFunction<T, R> function) {
         Objects.requireNonNull(function);
         return t -> {

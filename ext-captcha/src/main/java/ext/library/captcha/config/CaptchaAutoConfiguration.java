@@ -6,7 +6,6 @@ import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
 import ext.library.captcha.service.CaptchaServiceImpl;
 import ext.library.captcha.service.ICaptchaService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,7 +23,7 @@ public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Captcha imageCaptcha(@NotNull CaptchaProperties properties) {
+    public Captcha imageCaptcha(CaptchaProperties properties) {
         return new Captcha(properties.getCaptchaType());
     }
 

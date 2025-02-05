@@ -5,7 +5,6 @@ import java.util.List;
 
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
@@ -49,7 +48,6 @@ public class SpelUtil {
 	 * @param args 方法实际入参
 	 * @return StandardEvaluationContext spel 上下文
 	 */
-	@NotNull
 	public static StandardEvaluationContext getSpelContext(Object rootObject, Method method, Object[] args) {
 		// spel 上下文
 		StandardEvaluationContext context = new MethodBasedEvaluationContext(rootObject, method, args,

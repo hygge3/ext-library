@@ -21,9 +21,6 @@ import com.google.common.net.HttpHeaders;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.ObjectUtils;
@@ -40,7 +37,6 @@ public class ServletUtil {
     /**
      * 获取 request
      */
-    @NotNull
     public HttpServletRequest getRequest() {
         return getRequestAttributes().getRequest();
     }
@@ -71,7 +67,6 @@ public class ServletUtil {
     /**
      * 获取 Integer 参数
      */
-    @NotNull
     public Integer getParameterToInt(String name) {
         return $.toInt(getParameter(name));
     }
@@ -79,7 +74,6 @@ public class ServletUtil {
     /**
      * 获取 Integer 参数
      */
-    @NotNull
     public Integer getParameterToInt(String name, Integer defaultValue) {
         return $.toInt(getParameter(name), defaultValue);
     }
@@ -104,9 +98,8 @@ public class ServletUtil {
      * @param request 请求对象{@link ServletRequest}
      * @return Map
      */
-    @NotNull
     @UnmodifiableView
-    public Map<String, String[]> getParams(@NotNull ServletRequest request) {
+    public Map<String, String[]> getParams(ServletRequest request) {
         final Map<String, String[]> map = request.getParameterMap();
         return Collections.unmodifiableMap(map);
     }
@@ -117,7 +110,6 @@ public class ServletUtil {
      * @param request 请求对象{@link ServletRequest}
      * @return Map
      */
-    @NotNull
     public Map<String, String> getParamMap(ServletRequest request) {
         Map<String, String[]> paramsMap = getParams(request);
         Map<String, String> params = Maps.newHashMapWithExpectedSize(paramsMap.size());
@@ -162,7 +154,7 @@ public class ServletUtil {
         getRequest().removeAttribute(name);
     }
 
-    public String getHeader(@NotNull HttpServletRequest request, String name) {
+    public String getHeader(HttpServletRequest request, String name) {
         return $.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
     }
 
@@ -184,8 +176,7 @@ public class ServletUtil {
         getResponse().addHeader(name, value);
     }
 
-    @NotNull
-    public Map<String, String> getHeaders(@NotNull HttpServletRequest request) {
+    public Map<String, String> getHeaders(HttpServletRequest request) {
         Map<String, String> map = new LinkedCaseInsensitiveMap<>();
         Enumeration<String> enumeration = request.getHeaderNames();
         if (enumeration != null) {
@@ -216,7 +207,6 @@ public class ServletUtil {
         return readCookieMap().get(name);
     }
 
-    @Nullable
     public String getCookieValue(String name) {
         Cookie cookie = getCookie(name);
         return cookie != null ? cookie.getValue() : null;
@@ -287,7 +277,7 @@ public class ServletUtil {
      * @return IP 地址
      * @since 4.4.1
      */
-    public String getClientIpByHeader(HttpServletRequest request, @NotNull String... headerNames) {
+    public String getClientIpByHeader(HttpServletRequest request, String... headerNames) {
         String ip;
         for (String header : headerNames) {
             ip = request.getHeader(header);
@@ -312,7 +302,6 @@ public class ServletUtil {
      * @param ip ip
      * @return 真实 ip
      */
-    @Contract("null->null")
     private String getMultistageReverseProxyIp(String ip) {
         if (null == ip || ip.indexOf(Symbol.COMMA) <= 0) {
             return ip;
@@ -326,7 +315,6 @@ public class ServletUtil {
         return ip;
     }
 
-    @Contract(value = "null->true", pure = true)
     private boolean checkNotUnknown(String checkString) {
         return !"unknown".equalsIgnoreCase(checkString);
     }

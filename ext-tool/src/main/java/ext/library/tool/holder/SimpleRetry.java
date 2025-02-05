@@ -9,7 +9,6 @@ import ext.library.tool.holder.retry.IRetry;
 import ext.library.tool.holder.retry.RetryCallback;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 简单的 retry 重试
@@ -38,17 +37,14 @@ public final class SimpleRetry implements IRetry {
      */
     private final long sleepMillis;
 
-    @Contract(pure = true)
     public SimpleRetry() {
         this(DEFAULT_MAX_ATTEMPTS, DEFAULT_BACK_OFF_PERIOD);
     }
 
-    @Contract(pure = true)
     public SimpleRetry(int maxAttempts) {
         this(maxAttempts, DEFAULT_BACK_OFF_PERIOD);
     }
 
-    @Contract(pure = true)
     public SimpleRetry(int maxAttempts, long sleepMillis) {
         this.maxAttempts = maxAttempts;
         this.sleepMillis = (sleepMillis > 0 ? sleepMillis : 1);

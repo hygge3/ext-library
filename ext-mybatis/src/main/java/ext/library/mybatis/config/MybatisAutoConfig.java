@@ -15,7 +15,6 @@ import ext.library.tool.constant.Symbol;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -40,13 +39,12 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         QueryColumnBehavior.setSmartConvertInToEquals(true);
     }
 
-    @NotNull
-    private static String formatSQL(@NotNull @Language("sql") String sql) {
+    private static String formatSQL(@Language("sql") String sql) {
         return sql.replaceAll("\\s+", Symbol.SPACE).replace("\\r", Symbol.SPACE).replace("\\n", Symbol.SPACE);
     }
 
     @Override
-    public void customize(@NotNull FlexGlobalConfig globalConfig) {
+    public void customize(FlexGlobalConfig globalConfig) {
         // 全局配置逻辑删除字段
         globalConfig.setLogicDeleteColumn(mybatisProperties.getDeleteField());
         if (mybatisProperties.getSqlPrint()) {

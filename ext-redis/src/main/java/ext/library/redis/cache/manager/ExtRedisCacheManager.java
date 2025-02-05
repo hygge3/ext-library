@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit;
 
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.cache.RedisCache;
@@ -18,14 +17,12 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
  */
 public class ExtRedisCacheManager extends RedisCacheManager {
 
-    @Contract("_,null->fail;null,!null->fail")
     public ExtRedisCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration) {
         super(cacheWriter, defaultCacheConfiguration);
     }
 
     @Override
-    @NotNull
-    protected RedisCache createRedisCache(@NotNull String name, RedisCacheConfiguration cacheConfig) {
+    protected @NotNull RedisCache createRedisCache(@NotNull String name, RedisCacheConfiguration cacheConfig) {
         if ($.isBlank(name) || !name.contains(Symbol.SHARP)) {
             return super.createRedisCache(name, cacheConfig);
         }

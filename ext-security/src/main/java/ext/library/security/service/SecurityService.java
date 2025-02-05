@@ -21,8 +21,6 @@ import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -602,7 +600,7 @@ public interface SecurityService {
      *
      * @param securitySession SecuritySession
      */
-    private void setRequestInfo(@NotNull SecuritySession securitySession) {
+    private void setRequestInfo(SecuritySession securitySession) {
         // 清空全局存储的自定义 token，防止登录时用户传入导致登录异常
         ServletUtil.removeRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN);
         // 将 token 设置到请求参数中
@@ -613,8 +611,6 @@ public interface SecurityService {
     /**
      * 拼接 token 前缀
      */
-    @NotNull
-    @Contract(pure = true)
     private static String appendTokenPrefix(String token) {
         return SecurityConstant.AUTHORIZATION_PREFIX + token;
     }
@@ -624,7 +620,7 @@ public interface SecurityService {
      *
      * @param securitySession SecuritySession
      */
-    private void setResponseInfo(@NotNull SecuritySession securitySession) {
+    private void setResponseInfo(SecuritySession securitySession) {
         // 设置 header
         ServletUtil.setHeader(PROPERTIES.getSecurityName(),
                 appendTokenPrefix(securitySession.getCurrentSecurityToken().getToken()));

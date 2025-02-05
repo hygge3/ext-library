@@ -3,9 +3,6 @@ package ext.library.tool.holder;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
 
 /**
  * Holder of a value that is computed lazy.
@@ -23,13 +20,10 @@ public class Lazy<T> implements Supplier<T>, Serializable {
      * @param <T>      泛型标记
      * @return Lazy
      */
-    @NotNull
-    @Contract(value = "_->new", pure = true)
     public static <T> Lazy<T> of(final Supplier<T> supplier) {
         return new Lazy<>(supplier);
     }
 
-    @Contract(pure = true)
     private Lazy(final Supplier<T> supplier) {
         this.supplier = supplier;
     }

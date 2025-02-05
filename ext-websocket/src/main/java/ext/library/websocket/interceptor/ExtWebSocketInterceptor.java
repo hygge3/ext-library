@@ -30,7 +30,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
      */
     @Override
     public boolean beforeHandshake(@NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response, @NotNull WebSocketHandler wsHandler,
-                                   @NotNull Map<String, Object> attributes) {
+                                    Map<String, Object> attributes) {
         try {
             // 检查是否登录 是否有 token
             SecurityUtil.checkToken();

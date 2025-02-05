@@ -8,7 +8,6 @@ import cn.dev33.satoken.stp.StpUtil;
 import ext.library.satoken.domain.SecurityUser;
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -44,7 +43,7 @@ public class LoginUtil {
      * @param loginUser 登录用户信息
      * @param model     配置参数
      */
-    public static void login(@NotNull SecurityUser loginUser, SaLoginModel model) {
+    public static void login( SecurityUser loginUser, SaLoginModel model) {
         model = $.defaultIfNull(model, new SaLoginModel());
         StpUtil.login(loginUser.loginId(), model.setExtra(TENANT_KEY, loginUser.tenantId()).setExtra(USER_KEY, loginUser.loginId()).setExtra(USER_NAME_KEY, loginUser.username()));
         StpUtil.getTokenSession().set(LOGIN_USER_KEY, loginUser);
@@ -77,7 +76,6 @@ public class LoginUtil {
     /**
      * 获取用户 id
      */
-    @NotNull
     public static Long getUserId() {
         return $.toLong(getExtra(USER_KEY));
     }
@@ -92,7 +90,6 @@ public class LoginUtil {
     /**
      * 获取部门 ID
      */
-    @NotNull
     public static Long getDeptId() {
         return $.toLong(getExtra(DEPT_KEY));
     }

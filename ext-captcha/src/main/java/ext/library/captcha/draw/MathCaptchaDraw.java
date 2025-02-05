@@ -5,7 +5,6 @@ import java.util.Random;
 
 import ext.library.captcha.core.CaptchaUtil;
 import ext.library.tool.$;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 算术型验证码
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class MathCaptchaDraw implements CaptchaDraw {
 
     @Override
-    public String draw(@NotNull Graphics2D g, int width, int height, @NotNull Font[] fonts, @NotNull Random random) {
+    public String draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
         // 设定字体，每次随机
         Font fontTemp = fonts[random.nextInt(fonts.length)];
         // 深色

@@ -93,7 +93,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @return Bean
      */
     @SuppressWarnings("unchecked")
-    @NotNull
     public static <T> T getBean(String name) {
         return (T) context.getBean(name);
     }
@@ -105,7 +104,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param clazz Bean 类
      * @return Bean 对象
      */
-    @NotNull
     public static <T> T getBean(Class<T> clazz) {
         return context.getBean(clazz);
     }
@@ -118,7 +116,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param clazz bean 类型
      * @return Bean 对象
      */
-    @NotNull
     public static <T> T getBean(String name, Class<T> clazz) {
         return context.getBean(name, clazz);
     }
@@ -130,7 +127,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param type 类、接口，null 表示获取所有 bean
      * @return 类型对应的 bean，key 是 bean 注册的 name，value 是 Bean
      */
-    @NotNull
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
         return context.getBeansOfType(type);
     }
@@ -141,7 +137,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param type 类、接口，null 表示获取所有 bean 名称
      * @return bean 名称
      */
-    @NotNull
     public static String[] getBeanNamesForType(Class<?> type) {
         return context.getBeanNamesForType(type);
     }
@@ -152,7 +147,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param type 类、接口，null 表示获取所有 bean 名称
      * @return bean 名称
      */
-    @NotNull
     public static String[] getBeanNamesForType(ResolvableType type) {
         return context.getBeanNamesForType(type);
     }
@@ -172,7 +166,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @return 当前的环境配置
      */
-    @NotNull
     public static String[] getActiveProfiles() {
         return context.getEnvironment().getActiveProfiles();
     }
@@ -180,7 +173,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     /**
      * 获取环境
      */
-    @NotNull
     public static Environment getEnvironment() {
         return context.getEnvironment();
     }
@@ -200,7 +192,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @return 代理对象
      */
     @SuppressWarnings("unchecked")
-    @NotNull
     public static <T> T getCurrentProxy() {
         return (T) AopContext.currentProxy();
     }

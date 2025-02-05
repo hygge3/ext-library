@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import ext.library.json.util.JsonUtil;
@@ -24,11 +23,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * body 使用 bytes 避免流关闭的问题，同时为了更好的支持异步
- *
  */
 public class BytesResponse implements ResponseSpec, Closeable {
 
@@ -40,7 +37,7 @@ public class BytesResponse implements ResponseSpec, Closeable {
 
     private final byte[] body;
 
-    public BytesResponse(@NotNull Response response) {
+    public BytesResponse(Response response) {
         this.request = response.request();
         this.response = response;
         this.responseBody = HttpResponse.ifNullBodyToEmpty(response.body());
@@ -128,7 +125,7 @@ public class BytesResponse implements ResponseSpec, Closeable {
     }
 
     @Override
-    public File toFile(@NotNull File file) {
+    public File toFile(File file) {
         toFile(file.toPath());
         return file;
     }

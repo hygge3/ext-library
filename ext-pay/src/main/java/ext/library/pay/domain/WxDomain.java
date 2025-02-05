@@ -10,7 +10,6 @@ import ext.library.pay.enums.SignType;
 import ext.library.pay.response.WxPayResponse;
 import ext.library.pay.util.WxPayUtil;
 import ext.library.tool.core.Exceptions;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public interface WxDomain {
      * @param wxPay 支付信息
      * @return 微信支付响应信息
      */
-    default WxPayResponse sandbox(@NotNull WxPay wxPay) {
+    default WxPayResponse sandbox( WxPay wxPay) {
         HashMap<String, String> map = new HashMap<>();
         map.put("mch_id", wxPay.getMchId());
         map.put("nonce_str", WxPayUtil.generateNonceStr());

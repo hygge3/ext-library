@@ -8,7 +8,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 采用 CompletableFuture 简化异步使用
@@ -19,7 +18,6 @@ public class CompletableCallback implements Callback {
 
 	private final CompletableFuture<ResponseSpec> future;
 
-	@Contract(pure = true)
 	public CompletableCallback(CompletableFuture<ResponseSpec> future) {
 		this.future = future;
 	}

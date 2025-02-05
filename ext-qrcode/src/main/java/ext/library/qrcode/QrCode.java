@@ -33,8 +33,6 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ImageUtil;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * QRCode 读写，基于 nutz-plugins-qrcode 调整，简化使用
@@ -109,7 +107,6 @@ public class QrCode {
      * <li>图片空白区域大小：0 个单位</li>
      * </ul>
      */
-    @Contract(pure = true)
     private QrCode(String content) {
         this.content = content;
         this.size = 512;
@@ -129,8 +126,6 @@ public class QrCode {
      * @param content 所要生成 QRCode 的内容
      * @return QRCode
      */
-    @NotNull
-    @Contract(value = "_->new", pure = true)
     public static QrCode form(final String content) {
         return new QrCode(content);
     }
@@ -172,7 +167,7 @@ public class QrCode {
      * @param errorCorrectionLevel 错误修正等级
      * @return QRCode
      */
-    public QrCode errorCorrectionLevel(@NotNull ErrorCorrectionLevel errorCorrectionLevel) {
+    public QrCode errorCorrectionLevel(ErrorCorrectionLevel errorCorrectionLevel) {
         switch (errorCorrectionLevel) {
             case L -> {
                 this.errorCorrectionLevel = errorCorrectionLevel;
@@ -365,7 +360,7 @@ public class QrCode {
      * @param qrCodeFile 指定的文件
      * @return 文件
      */
-    public File toFile(@NotNull File qrCodeFile) {
+    public File toFile(File qrCodeFile) {
         if (!qrCodeFile.exists()) {
             qrCodeFile.getParentFile().mkdirs();
         }
@@ -585,7 +580,7 @@ public class QrCode {
         }
     }
 
-    private static void addLogo(@NotNull BufferedImage qrCodeImage, @NotNull BufferedImage logoImage, @NotNull QrCode qrCode) {
+    private static void addLogo(BufferedImage qrCodeImage, BufferedImage logoImage, QrCode qrCode) {
         int baseWidth = qrCodeImage.getWidth();
         int baseHeight = qrCodeImage.getHeight();
         // 计算 icon 的最大边长
@@ -618,9 +613,7 @@ public class QrCode {
         gc.dispose();
     }
 
-    @Contract("_->new")
-    @NotNull
-    private static Color getColor(@NotNull String hexString) {
+    private static Color getColor(String hexString) {
         if ('#' == hexString.charAt(0)) {
             return new Color(Long.decode(hexString).intValue());
         } else {
@@ -628,8 +621,7 @@ public class QrCode {
         }
     }
 
-    @NotNull
-    private static BitMatrix deleteWhite(@NotNull BitMatrix matrix) {
+    private static BitMatrix deleteWhite(BitMatrix matrix) {
         int[] rec = matrix.getEnclosingRectangle();
         int resWidth = rec[2] + 1;
         int resHeight = rec[3] + 1;

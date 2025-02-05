@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 节假日接口
@@ -26,7 +25,7 @@ public interface HolidaysApi {
      * @param localDateTime LocalDateTime
      * @return DaysType
      */
-    default DaysType getDaysType(@NotNull LocalDateTime localDateTime) {
+    default DaysType getDaysType(LocalDateTime localDateTime) {
         return getDaysType(localDateTime.toLocalDate());
     }
 
@@ -36,7 +35,7 @@ public interface HolidaysApi {
      * @param date Date
      * @return DaysType
      */
-    default DaysType getDaysType(@NotNull Date date) {
+    default DaysType getDaysType(Date date) {
         return getDaysType(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
     }
 

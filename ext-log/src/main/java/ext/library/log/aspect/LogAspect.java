@@ -24,7 +24,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StopWatch;
@@ -128,7 +127,7 @@ public class LogAspect {
      * @param operLog    操作日志
      * @param jsonResult json 结果
      */
-    public void getControllerMethodDescription(JoinPoint joinPoint, @NotNull LogRecord log, @NotNull OperLogEvent operLog, Object jsonResult) {
+    public void getControllerMethodDescription(JoinPoint joinPoint, LogRecord log, OperLogEvent operLog, Object jsonResult) {
         // 设置 action 动作
         operLog.setBusinessType(log.businessType().ordinal());
         // 设置标题
@@ -151,11 +150,11 @@ public class LogAspect {
      *
      * @param operLog 操作日志
      */
-    private void setRequestValue(JoinPoint joinPoint, @NotNull OperLogEvent operLog, String[] excludeParamNames) {
+    private void setRequestValue(JoinPoint joinPoint, OperLogEvent operLog, String[] excludeParamNames) {
         Map<String, String> paramsMap = ServletUtil.getParamMap(ServletUtil.getRequest());
         String requestMethod = operLog.getRequestMethod();
         if ($.isEmpty(paramsMap) && HttpMethod.PUT.name().equals(requestMethod)
-                || HttpMethod.POST.name().equals(requestMethod)) {
+            || HttpMethod.POST.name().equals(requestMethod)) {
             String params = argsArrayToString(joinPoint.getArgs(), excludeParamNames);
             operLog.setOperParam(params.substring(0, 2000));
         } else {
@@ -195,7 +194,7 @@ public class LogAspect {
      * @return 如果是需要过滤的对象，则返回 true；否则返回 false。
      */
     @SuppressWarnings("rawtypes")
-    public boolean isFilterObject(@NotNull final Object o) {
+    public boolean isFilterObject(final Object o) {
         Class<?> clazz = o.getClass();
         if (clazz.isArray()) {
             return MultipartFile.class.isAssignableFrom(clazz.getComponentType());
@@ -211,7 +210,7 @@ public class LogAspect {
             }
         }
         return o instanceof MultipartFile || o instanceof HttpServletRequest || o instanceof HttpServletResponse
-                || o instanceof BindingResult;
+               || o instanceof BindingResult;
     }
 
 }

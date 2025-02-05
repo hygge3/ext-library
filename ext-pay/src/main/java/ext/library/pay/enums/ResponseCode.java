@@ -3,7 +3,6 @@ package ext.library.pay.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 返回 code
@@ -26,7 +25,6 @@ public enum ResponseCode {
     ERROR;
 
     @JsonCreator
-    @Contract(pure = true)
     public static ResponseCode of(String status) {
         return switch (status) {
             case "SUCCESS" -> SUCCESS;

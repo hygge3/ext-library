@@ -25,7 +25,7 @@ public class RetryInterceptor implements Interceptor {
     private final Predicate<ResponseSpec> respPredicate;
 
     @Override
-    public @NotNull Response intercept(@NotNull Chain chain) throws IOException {
+    public @NotNull Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         return retry.execute(() -> {
             Response response = chain.proceed(request);

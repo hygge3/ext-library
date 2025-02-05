@@ -8,7 +8,6 @@ import ext.library.idempotent.key.store.IdempotentKeyStore;
 import ext.library.idempotent.key.store.InMemoryIdempotentKeyStore;
 import ext.library.idempotent.key.store.RedisIdempotentKeyStore;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,7 +38,7 @@ public class IdempotentAutoConfiguration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public IdempotentKeyStore idempotentKeyStore(@NotNull IdempotentProperties properties) {
+	public IdempotentKeyStore idempotentKeyStore( IdempotentProperties properties) {
 		IdempotentProperties.KeyStoreType keyStoreType = properties.getKeyStoreType();
 		if (keyStoreType.equals(IdempotentProperties.KeyStoreType.REDIS)) {
 			return new RedisIdempotentKeyStore();

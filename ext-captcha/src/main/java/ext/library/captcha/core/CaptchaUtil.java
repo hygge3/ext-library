@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.convert.DurationStyle;
 
 /**
@@ -21,7 +20,7 @@ public class CaptchaUtil {
      * @param cacheName 缓存名
      * @return 超时时间
      */
-    public long getTTLFormCacheName(@NotNull String cacheName) {
+    public long getTTLFormCacheName(String cacheName) {
         String[] cacheArray = cacheName.split("#");
         if (cacheArray.length < 2) {
             return -1L;
@@ -33,7 +32,7 @@ public class CaptchaUtil {
     /**
      * 生成指定范围的随机数
      */
-    public int randNum(@NotNull Random random, int min, int max) {
+    public int randNum(Random random, int min, int max) {
         int diff = max - min;
         int rand = random.nextInt(diff);
         return min + rand;

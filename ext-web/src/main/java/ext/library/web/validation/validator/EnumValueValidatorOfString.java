@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import ext.library.web.validation.constraints.OneOfStrings;
-import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -12,27 +11,27 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EnumValueValidatorOfString implements ConstraintValidator<OneOfStrings, String> {
 
-	private String[] stringList;
+    private String[] stringList;
 
-	private boolean allowNull;
+    private boolean allowNull;
 
-	@Override
-	public void initialize(@NotNull OneOfStrings constraintAnnotation) {
-		this.stringList = constraintAnnotation.value();
-		this.allowNull = constraintAnnotation.allowNull();
-	}
+    @Override
+    public void initialize(OneOfStrings constraintAnnotation) {
+        this.stringList = constraintAnnotation.value();
+        this.allowNull = constraintAnnotation.allowNull();
+    }
 
-	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if (value == null) {
-			return this.allowNull;
-		}
-		for (String strValue : this.stringList) {
-			if (strValue.equals(value)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return this.allowNull;
+        }
+        for (String strValue : this.stringList) {
+            if (strValue.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

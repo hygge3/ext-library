@@ -3,7 +3,6 @@ package ext.library.tool.util;
 import java.util.List;
 
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Boolean 工具类
@@ -26,7 +25,7 @@ public class BoolUtil {
      * @param obj 要检查的对象
      * @return 如果对象表示“真”值，则返回 true；否则返回 false
      */
-    public boolean isTrue(@NotNull Object obj) {
+    public boolean isTrue(Object obj) {
         // 根据对象类型判断其是否表示“真”值
         return switch (obj) {
             // 如果是字符串，检查是否在表示真的字符串集合中
@@ -48,7 +47,7 @@ public class BoolUtil {
      * @param obj 要进行检查的对象，可以是任何类型
      * @return 如果对象表示“假”或无效状态，则返回 true；否则返回 false
      */
-    public boolean isFalse(@NotNull Object obj) {
+    public boolean isFalse(Object obj) {
         // 根据对象类型，判断其是否表示“假”或无效状态
         return switch (obj) {
             // 当对象为字符串时，检查其是否包含在预定义的表示“假”的字符串集合中

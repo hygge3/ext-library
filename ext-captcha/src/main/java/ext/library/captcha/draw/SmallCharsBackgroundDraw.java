@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.Random;
 
 import ext.library.captcha.core.CaptchaUtil;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 小字符背景
@@ -22,7 +21,7 @@ public enum SmallCharsBackgroundDraw implements BackgroundDraw {
     private static final char[] CHAR_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     @Override
-    public void draw(@NotNull Graphics2D g, int width, int height, @NotNull Font[] fonts, @NotNull Random random) {
+    public void draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
         // 设定字体，每次随机
         Font fontTemp = fonts[random.nextInt(fonts.length)];
         // 设定背景色，淡色

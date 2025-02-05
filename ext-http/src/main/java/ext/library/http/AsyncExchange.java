@@ -8,7 +8,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import okhttp3.Call;
 import okhttp3.Request;
-import org.jetbrains.annotations.Contract;
 
 /**
  * 异步执行器
@@ -24,7 +23,6 @@ public class AsyncExchange {
 
 	private BiConsumer<Request, HttpException> failedBiConsumer;
 
-	@Contract(pure = true)
 	AsyncExchange(Call call) {
 		this.call = call;
 		this.successConsumer = null;
