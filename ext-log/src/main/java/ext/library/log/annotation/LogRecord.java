@@ -15,7 +15,7 @@ import ext.library.log.enums.OperatorType;
 @Target({ ElementType.PARAMETER, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Log {
+public @interface LogRecord {
 
 	/**
 	 * 模块

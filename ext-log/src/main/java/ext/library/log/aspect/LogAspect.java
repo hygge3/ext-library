@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
-import ext.library.log.annotation.Log;
+import ext.library.log.annotation.LogRecord;
 import ext.library.log.enums.BusinessStatus;
 import ext.library.log.event.OperLogEvent;
 import ext.library.security.domain.SecurityToken;
@@ -53,7 +53,7 @@ public class LogAspect {
      * 处理请求前执行
      */
     @Before(value = "@annotation(controllerLog)")
-    public void doBefore(JoinPoint joinPoint, Log controllerLog) {
+    public void doBefore(JoinPoint joinPoint, LogRecord controllerLog) {
         StopWatch stopWatch = new StopWatch();
         KEY_CACHE.set(stopWatch);
         stopWatch.start();
@@ -65,7 +65,7 @@ public class LogAspect {
      * @param joinPoint 切点
      */
     @AfterReturning(pointcut = "@annotation(controllerLog)", returning = "jsonResult")
-    public void doAfterReturning(JoinPoint joinPoint, Log controllerLog, Object jsonResult) {
+    public void doAfterReturning(JoinPoint joinPoint, LogRecord controllerLog, Object jsonResult) {
         handleLog(joinPoint, controllerLog, null, jsonResult);
     }
 
@@ -76,11 +76,11 @@ public class LogAspect {
      * @param e         异常
      */
     @AfterThrowing(value = "@annotation(controllerLog)", throwing = "e")
-    public void doAfterThrowing(JoinPoint joinPoint, Log controllerLog, Exception e) {
+    public void doAfterThrowing(JoinPoint joinPoint, LogRecord controllerLog, Exception e) {
         handleLog(joinPoint, controllerLog, e, null);
     }
 
-    protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
+    protected void handleLog(final JoinPoint joinPoint, LogRecord controllerLog, final Exception e, Object jsonResult) {
         try {
             HttpServletRequest request = ServletUtil.getRequest();
             // *========数据库日志=========*//
@@ -128,7 +128,7 @@ public class LogAspect {
      * @param operLog    操作日志
      * @param jsonResult json 结果
      */
-    public void getControllerMethodDescription(JoinPoint joinPoint, @NotNull Log log, @NotNull OperLogEvent operLog, Object jsonResult) {
+    public void getControllerMethodDescription(JoinPoint joinPoint, @NotNull LogRecord log, @NotNull OperLogEvent operLog, Object jsonResult) {
         // 设置 action 动作
         operLog.setBusinessType(log.businessType().ordinal());
         // 设置标题
