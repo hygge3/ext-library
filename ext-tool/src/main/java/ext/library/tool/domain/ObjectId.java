@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>

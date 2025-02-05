@@ -24,6 +24,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.intellij.lang.annotations.Language;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StopWatch;
@@ -174,7 +175,7 @@ public class LogAspect {
         }
         for (Object o : paramsArray) {
             if (Objects.nonNull(o) && !isFilterObject(o)) {
-                String str = JsonUtil.toJson(o);
+                @Language("json") String str = JsonUtil.toJson(o);
                 Map<String, Object> dict = JsonUtil.readMap(str);
                 if ($.isNotEmpty(dict)) {
                     MapUtil.removeAny(dict, EXCLUDE_PROPERTIES);

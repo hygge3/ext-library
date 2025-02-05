@@ -32,9 +32,7 @@ public class WebSocketSessionHolder {
      * @param sessionKey 要移除的会话键
      */
     public static void removeSession(String sessionKey) {
-        if (USER_SESSION_MAP.containsKey(sessionKey)) {
-            USER_SESSION_MAP.remove(sessionKey);
-        }
+        USER_SESSION_MAP.remove(sessionKey);
     }
 
     /**

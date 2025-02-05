@@ -82,11 +82,11 @@ public class OpenApiAutoConfiguration {
 	@Bean
 	public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI, SecurityService securityParser,
 			SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils,
-			Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomisers,
-			Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomisers,
+			Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers,
+			Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers,
 			Optional<JavadocProvider> javadocProvider) {
 		return new OpenApiHandler(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils,
-				openApiBuilderCustomisers, serverBaseUrlCustomisers, javadocProvider);
+				openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
 	}
 
 	/**

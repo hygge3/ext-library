@@ -69,7 +69,6 @@ public class MybatisExceptionHandler {
      */
     @ExceptionHandler(MyBatisSystemException.class)
     public Map<String, Object> myBatisSystemException(MyBatisSystemException e, HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
         String message = e.getMessage();
         if ("CannotFindDataSourceException".contains(message)) {
             printLog(request, "未找到数据源", e);

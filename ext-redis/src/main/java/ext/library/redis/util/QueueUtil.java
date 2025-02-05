@@ -65,7 +65,7 @@ public class QueueUtil {
      * @param time      延迟时间
      * @param timeUnit  单位
      */
-    public <T> void delayedProducer(String queueName, String data, long time,  TimeUnit timeUnit) {
+    public void delayedProducer(String queueName, String data, long time, TimeUnit timeUnit) {
         long seconds = timeUnit.toSeconds(time);
         delayedProducer(queueName, data, seconds);
     }

@@ -5,5 +5,4 @@ package ext.library.encrypt.enums;
  */
 public enum Algorithm {
     AES, RSA,
-    ;
 }

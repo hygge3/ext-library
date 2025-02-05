@@ -3,7 +3,6 @@ package ext.library.web.launch;
 import java.util.stream.Stream;
 
 import ext.library.tool.$;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.context.WebServerApplicationContext;

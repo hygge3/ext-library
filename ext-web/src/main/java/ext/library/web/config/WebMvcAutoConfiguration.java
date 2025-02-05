@@ -50,7 +50,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addFormatters(FormatterRegistry registry) {
+    public void addFormatters(@NotNull FormatterRegistry registry) {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setTimeFormatter(DateUtil.FORMATTER_HMS);
         registrar.setDateFormatter(DateUtil.FORMATTER_YMD);
