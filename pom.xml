@@ -61,7 +61,7 @@
         <mapstruct-plus.version>1.4.6</mapstruct-plus.version>
         <swagger.version>2.2.28</swagger.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <mybatis-flex.version>1.10.5</mybatis-flex.version>
+        <mybatis-flex.version>1.10.7</mybatis-flex.version>
         <sa-token.version>1.40.0</sa-token.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
         <oshi.version>6.6.6</oshi.version>
