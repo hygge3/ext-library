@@ -55,7 +55,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
                     yield RSAUtil.encryptByPublicKey(json, cryptoProperties.getPublicKey());
             };
         } catch (Exception e) {
-            throw Exceptions.throwOut("响应加密异常，uri:{0}", request.getURI().toString());
+            throw Exceptions.throwOut("响应加密异常，uri:{}", request.getURI().toString());
         }
     }
 

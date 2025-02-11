@@ -1,6 +1,5 @@
 package ext.library.web.handler;
 
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,9 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        Integer code = e.getCode();
-        return Objects.nonNull(code) ? R.failed(code, e.getMessage())
-                : R.failed(BizCode.WARN, e.getMessage());
+        return R.failed(e.getCode(), e.getMessage());
     }
 
     /**

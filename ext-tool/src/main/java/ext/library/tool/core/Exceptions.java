@@ -56,7 +56,6 @@ public class Exceptions {
      * @param args    object(s) to format
      * @return {RuntimeException}
      */
-
     public RuntimeException throwOut(Exception e, String message, Object... args) {
         if ($.isEmpty(args)) {
             return new RuntimeException(message);
@@ -102,7 +101,7 @@ public class Exceptions {
      *
      * @param e 异常
      */
-    public void print( Throwable e) {
+    public void print(Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
         log.error(e.getCause().getMessage());
     }

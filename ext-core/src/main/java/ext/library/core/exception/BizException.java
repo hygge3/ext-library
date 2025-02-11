@@ -2,6 +2,7 @@ package ext.library.core.exception;
 
 
 import ext.library.core.response.ResponseCode;
+import ext.library.tool.$;
 import lombok.Getter;
 import org.jetbrains.annotations.Nls;
 
@@ -18,7 +19,7 @@ public class BizException extends RuntimeException {
      *
      * @param resultCode 结果代码
      */
-    public BizException( ResponseCode resultCode) {
+    public BizException(ResponseCode resultCode) {
         super(resultCode.getMsg());
         this.code = resultCode.getCode();
     }
@@ -29,9 +30,31 @@ public class BizException extends RuntimeException {
      * @param resultCode 结果代码
      * @param message    消息
      */
-    public BizException( ResponseCode resultCode,  @Nls String message) {
+    public BizException(ResponseCode resultCode, @Nls String message) {
         super(message);
         this.code = resultCode.getCode();
+    }
+
+    /**
+     * 异常提示消息构造
+     *
+     * @param resultCode 结果代码
+     * @param message    消息
+     */
+    public BizException(ResponseCode resultCode, @Nls String message, Object... args) {
+        super($.format(message, args));
+        this.code = resultCode.getCode();
+    }
+
+    /**
+     * 异常提示消息构造
+     *
+     * @param message 消息
+     * @param args    参数
+     */
+    public BizException(@Nls String message, Object... args) {
+        super($.format(message, args));
+        this.code = BizCode.WARN.getCode();
     }
 
 }

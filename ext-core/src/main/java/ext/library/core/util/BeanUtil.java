@@ -252,7 +252,7 @@ public class BeanUtil {
             t = targetType.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw Exceptions.throwOut(e, "创建 {0} 的新实例失败：｛1｝", targetType, e.getMessage());
+            throw Exceptions.throwOut(e, "创建 {} 的新实例失败：｛｝", targetType, e.getMessage());
         }
         org.springframework.beans.BeanUtils.copyProperties(source, t);
         return t;
