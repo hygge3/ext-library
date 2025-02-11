@@ -20,7 +20,9 @@ import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 
 /**
- * 树工具
+ * TreeUtils 类提供了树形结构的构建方法，当一个列表数据需要转换成树形结构时，可以使用该类提供的方法。
+ * <p>
+ * 但列表类型必须实现接口{@link TreeNode}，在接口中定义了父子结构的关联属性，此处构建则是依据该关联属性进行构建。
  */
 @UtilityClass
 public class TreeUtil {
@@ -34,7 +36,7 @@ public class TreeUtil {
      * @param <I>    TreeNodeId 的类型
      * @return 树列表
      */
-    public <T extends TreeNode<I>, I> List<T> buildTree(List<T> nodes, I rootId) {
+    public <T extends TreeNode<T, I>, I> List<T> buildTree(List<T> nodes, I rootId) {
         return buildTree(nodes, rootId, Function.identity(), null);
     }
 
@@ -48,8 +50,8 @@ public class TreeUtil {
      * @param <I>        TreeNodeId 的类型
      * @return 树列表
      */
-    public <T extends TreeNode<I>, I> List<T> buildTree(List<T> nodes, I rootId,
-                                                        Comparator<? super T> comparator) {
+    public <T extends TreeNode<T, I>, I> List<T> buildTree(List<T> nodes, I rootId,
+                                                           Comparator<? super T> comparator) {
         return buildTree(nodes, rootId, Function.identity(), comparator);
     }
 
@@ -64,8 +66,8 @@ public class TreeUtil {
      * @param <R>           源数据类型
      * @return 树列表
      */
-    public <T extends TreeNode<I>, I, R> List<T> buildTree(List<R> list, I rootId,
-                                                           Function<R, T> convertToTree) {
+    public <T extends TreeNode<T, I>, I, R> List<T> buildTree(List<R> list, I rootId,
+                                                              Function<R, T> convertToTree) {
         return buildTree(list, rootId, convertToTree, null);
     }
 
@@ -81,8 +83,8 @@ public class TreeUtil {
      * @param <R>           源数据类型
      * @return 树列表
      */
-    public <T extends TreeNode<I>, I, R> List<T> buildTree(List<R> list, I rootId, Function<R, T> convertToTree,
-                                                           Comparator<? super T> comparator) {
+    public <T extends TreeNode<T, I>, I, R> List<T> buildTree(List<R> list, I rootId, Function<R, T> convertToTree,
+                                                              Comparator<? super T> comparator) {
         if ($.isEmpty(list)) {
             return Lists.newArrayList();
         }
@@ -95,7 +97,7 @@ public class TreeUtil {
         }
         // 根据 parentId 进行分组
         Map<I, List<T>> childrenMap = tStream
-                .collect(Collectors.groupingBy(T::getParentKey, LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(T::getParentId, LinkedHashMap::new, Collectors.toList()));
 
         // 根据根节点 ID 拿到一级节点
         List<T> treeList = childrenMap.get(rootId);
@@ -112,8 +114,8 @@ public class TreeUtil {
      * @param parent      父节点
      * @param childrenMap 子节点集合 Map(k: parentId, v: Node)
      */
-    public <T extends TreeNode<I>, I> void setChildren(@Nonnull T parent, @Nonnull Map<I, List<T>> childrenMap) {
-        I parentId = parent.getKey();
+    public <T extends TreeNode<T, I>, I> void setChildren(@Nonnull T parent, @Nonnull Map<I, List<T>> childrenMap) {
+        I parentId = parent.getId();
         List<T> children = childrenMap.get(parentId);
         // 如果有孩子节点则赋值，且给孩子节点的孩子节点赋值
         if ($.isNotEmpty(children)) {
@@ -132,7 +134,7 @@ public class TreeUtil {
      * @param <I>    树节点的 id 类型
      * @return 叶子节点
      */
-    public <T extends TreeNode<I>, I> List<T> getLeafs(T parent) {
+    public <T extends TreeNode<T, I>, I> List<T> getLeafs(T parent) {
         List<T> leafs = Lists.newArrayList();
         fillLeaf(parent, leafs);
         return leafs;
@@ -145,7 +147,7 @@ public class TreeUtil {
      * @param leafs  叶子节点列表
      * @param <T>    实际节点类型
      */
-    public <T extends TreeNode<I>, I> void fillLeaf(@Nonnull T parent, List<T> leafs) {
+    public <T extends TreeNode<T, I>, I> void fillLeaf(@Nonnull T parent, List<T> leafs) {
         List<T> children = parent.getChildren();
         // 如果节点没有子节点则说明为叶子节点
         if ($.isEmpty(children)) {
@@ -166,7 +168,7 @@ public class TreeUtil {
      * @param <I>      TreeNodeId 类型
      * @return List<I> 节点 Id 列表
      */
-    public <T extends TreeNode<I>, I> List<I> getTreeNodeIds(List<T> treeList) {
+    public <T extends TreeNode<T, I>, I> List<I> getTreeNodeIds(List<T> treeList) {
         List<I> ids = Lists.newArrayList();
         fillTreeNodeIds(ids, treeList);
         return ids;
@@ -180,13 +182,13 @@ public class TreeUtil {
      * @param <T>      TreeNode 实现类
      * @param <I>      TreeNodeId 类型
      */
-    public <T extends TreeNode<I>, I> void fillTreeNodeIds(List<I> ids, List<T> treeList) {
+    public <T extends TreeNode<T, I>, I> void fillTreeNodeIds(List<I> ids, List<T> treeList) {
         // 如果节点没有子节点则说明为叶子节点
         if ($.isEmpty(treeList)) {
             return;
         }
         for (T treeNode : treeList) {
-            ids.add(treeNode.getKey());
+            ids.add(treeNode.getId());
             List<T> children = treeNode.getChildren();
             if ($.isNotEmpty(children)) {
                 fillTreeNodeIds(ids, children);
@@ -202,7 +204,7 @@ public class TreeUtil {
      * @param <I>      树节点的 id 类型
      * @return 所有树节点组成的列表
      */
-    public <T extends TreeNode<I>, I> List<T> treeToList(T treeNode) {
+    public <T extends TreeNode<T, I>, I> List<T> treeToList(T treeNode) {
         return treeToList(treeNode, Function.identity());
     }
 
@@ -216,7 +218,7 @@ public class TreeUtil {
      * @param <R>       转换器转换后的类型
      * @return List<R>
      */
-    public <T extends TreeNode<I>, I, R> List<R> treeToList(T treeNode, Function<T, R> converter) {
+    public <T extends TreeNode<T, I>, I, R> List<R> treeToList(T treeNode, Function<T, R> converter) {
         List<R> list = Lists.newArrayList();
 
         // 使用队列存储未处理的树节点
@@ -252,7 +254,7 @@ public class TreeUtil {
      * @param <I>       树节点的 id 类型
      * @return 所有树节点组成的列表
      */
-    public <T extends TreeNode<I>, I> List<T> treeToList(List<T> treeNodes) {
+    public <T extends TreeNode<T, I>, I> List<T> treeToList(List<T> treeNodes) {
         return treeToList(treeNodes, Function.identity());
     }
 
@@ -266,7 +268,7 @@ public class TreeUtil {
      * @param <R>       转换器转换后的类型
      * @return 所有树节点组成的列表
      */
-    public <T extends TreeNode<I>, I, R> List<R> treeToList(@Nonnull List<T> treeNodes, Function<T, R> converter) {
+    public <T extends TreeNode<T, I>, I, R> List<R> treeToList(@Nonnull List<T> treeNodes, Function<T, R> converter) {
         return treeNodes.stream()
                 .map(node -> treeToList(node, converter))
                 .flatMap(Collection::stream)
@@ -281,7 +283,7 @@ public class TreeUtil {
      * @param matcher   匹配规则
      * @return 剪枝完成后的树节点列表
      */
-    public <T extends TreeNode<I>, I> List<T> pruneTree(List<T> treeNodes, Predicate<T> matcher) {
+    public <T extends TreeNode<T, I>, I> List<T> pruneTree(List<T> treeNodes, Predicate<T> matcher) {
         List<T> result = Lists.newArrayList();
         if ($.isEmpty(treeNodes)) {
             return result;
@@ -307,7 +309,7 @@ public class TreeUtil {
      * @param matcher  匹配规则
      * @return 剪枝完成后的树节点
      */
-    public <T extends TreeNode<I>, I> T pruneTree(@Nonnull T treeNode, Predicate<T> matcher) {
+    public <T extends TreeNode<T, I>, I> T pruneTree(@Nonnull T treeNode, Predicate<T> matcher) {
         List<T> children = pruneTree(treeNode.getChildren(), matcher);
         boolean childrenMatched = !children.isEmpty();
         if (childrenMatched) {
@@ -320,7 +322,7 @@ public class TreeUtil {
     /**
      * 遍历树节点（深度优先）
      */
-    public <T extends TreeNode<I>, I> void forEachDFS(T treeNode, T parentTreeNode, @Nonnull BiConsumer<T, T> action) {
+    public <T extends TreeNode<T, I>, I> void forEachDFS(T treeNode, T parentTreeNode, @Nonnull BiConsumer<T, T> action) {
         action.accept(treeNode, parentTreeNode);
         List<T> children = treeNode.getChildren();
         forEachDFS(children, parentTreeNode, action);
@@ -329,8 +331,8 @@ public class TreeUtil {
     /**
      * 遍历树节点（深度优先）
      */
-    public <T extends TreeNode<I>, I> void forEachDFS(List<T> treeNodes, T parentTreeNode,
-                                                      BiConsumer<T, T> action) {
+    public <T extends TreeNode<T, I>, I> void forEachDFS(List<T> treeNodes, T parentTreeNode,
+                                                         BiConsumer<T, T> action) {
         if ($.isEmpty(treeNodes)) {
             return;
         }
