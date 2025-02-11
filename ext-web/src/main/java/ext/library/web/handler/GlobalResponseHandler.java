@@ -33,6 +33,10 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
             return false;
         }
         RestWrapper wrapper = returnType.getMethodAnnotation(RestWrapper.class);
+        wrapper = $.defaultIfNull(wrapper, returnType.getContainingClass().getAnnotation(RestWrapper.class));
+        if ($.isNull(wrapper)) {
+            return false;
+        }
         return wrapper.wrap() && wrapper.value();
     }
 

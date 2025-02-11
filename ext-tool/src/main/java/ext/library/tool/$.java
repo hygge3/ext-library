@@ -666,13 +666,14 @@ public class $ {
         // 将剩余的 message 部分添加到 sb 中
         sb.append(message.substring(lastEnd));
 
+        String result = sb.toString();
         // 检查是否有未匹配的 {}
-        if (message.contains("{") || message.contains("}")) {
+        if (result.contains("{") || result.contains("}")) {
             throw new IllegalArgumentException("Unmatched placeholder in the message");
         }
 
         // 返回转换后的字符串
-        return sb.toString();
+        return result;
     }
 
     /**

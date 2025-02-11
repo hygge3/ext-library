@@ -59,8 +59,7 @@ public class SecurityAutoConfig {
     @ConditionalOnMissingBean(SecurityAuthority.class)
     public SecurityAuthority securityAuthority() {
         log.warn("[🛡️] 将使用默认权限认证接口，所有权限皆无，建议实现 SecurityAuthority 接口中的业务逻辑！");
-        return new SecurityAuthority() {
-        };
+        return new SecurityAuthority() {};
     }
 
 }
