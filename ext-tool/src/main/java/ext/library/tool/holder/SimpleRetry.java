@@ -1,8 +1,8 @@
 package ext.library.tool.holder;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 
+import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.core.Threads;
 import ext.library.tool.holder.retry.IRetry;
@@ -67,7 +67,7 @@ public final class SimpleRetry implements IRetry {
             }
         }
         if (lastThrowable == null) {
-            lastThrowable = new IOException(MessageFormat.format("retry on {0} times,still fail.", maxAttempts));
+            lastThrowable = new IOException($.format("retry on {} times,still fail.", maxAttempts));
         }
         throw Exceptions.unchecked(lastThrowable);
     }

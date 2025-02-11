@@ -17,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +32,7 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import lombok.Getter;
 import lombok.Setter;
@@ -891,7 +891,7 @@ public class HttpUtil {
         } else if (InputStream.class == resClass) {
             t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).body();
         } else {
-            throw new UnsupportedOperationException(MessageFormat.format("不支持的返回类型:[{0}]", resClass));
+            throw new UnsupportedOperationException($.format("不支持的返回类型:[{}]", resClass));
         }
         return t;
     }
@@ -906,7 +906,7 @@ public class HttpUtil {
         } else if (InputStream.class == resClass) {
             response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         } else {
-            throw new UnsupportedOperationException(MessageFormat.format("不支持的返回类型:[{0}]", resClass));
+            throw new UnsupportedOperationException($.format("不支持的返回类型:[{}]", resClass));
         }
         return response;
     }

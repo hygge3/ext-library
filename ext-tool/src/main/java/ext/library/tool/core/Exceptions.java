@@ -2,7 +2,6 @@ package ext.library.tool.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.text.MessageFormat;
 
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
@@ -47,7 +46,7 @@ public class Exceptions {
         if ($.isEmpty(args)) {
             return new RuntimeException(message);
         }
-        return new RuntimeException(MessageFormat.format(message, args));
+        return new RuntimeException($.format(message, args));
     }
 
     /**
@@ -62,7 +61,7 @@ public class Exceptions {
         if ($.isEmpty(args)) {
             return new RuntimeException(message);
         }
-        return new RuntimeException(MessageFormat.format(message, args), e);
+        return new RuntimeException($.format(message, args), e);
     }
 
     /**

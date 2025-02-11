@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -595,18 +595,24 @@ public class $ {
         if (params == null || params.isEmpty()) {
             return message;
         }
-        // 替换变量
+        // 使用正则表达式匹配占位符
+        Pattern pattern = Pattern.compile("\\$\\{([^}]*)\\}");
+        Matcher matcher = pattern.matcher(message);
         StringBuilder sb = new StringBuilder((int) (message.length() * 1.5));
-        int cursor = 0;
-        for (int start, end; (start = message.indexOf("${", cursor)) != -1
-                && (end = message.indexOf("}", start)) != -1; ) {
-            sb.append(message, cursor, start);
-            String key = message.substring(start + 2, end);
-            Object value = params.get(key.trim());
-            sb.append(value == null ? Symbol.EMPTY : value);
-            cursor = end + 1;
+        int lastEnd = 0;
+        while (matcher.find()) {
+            sb.append(message, lastEnd, matcher.start());
+            String key = matcher.group(1).trim();
+            Object value = params.get(key);
+            if (value == null) {
+                // 处理无效占位符，可以选择保留原样或者替换为空字符串
+                sb.append(matcher.group(0));
+            } else {
+                sb.append(value);
+            }
+            lastEnd = matcher.end();
         }
-        sb.append(message.substring(cursor));
+        sb.append(message.substring(lastEnd));
         return sb.toString();
     }
 
@@ -614,6 +620,10 @@ public class $ {
      * 同 log 格式的 format 规则
      * <p>
      * use: format("my name is {}, and i like {}!", "L.cm", "Java")
+     * <p>
+     * 注意：
+     * 在循环结束后检查是否还有未匹配的 {}，如果有则抛出 IllegalArgumentException
+     * 如果 arguments 数组长度小于 message 中的占位符数量，抛出 IllegalArgumentException
      *
      * @param message   需要转换的字符串
      * @param arguments 需要替换的变量
@@ -628,18 +638,40 @@ public class $ {
         if (arguments == null || arguments.length == 0) {
             return message;
         }
+
+        // 使用正则表达式匹配所有的 {}
+        Pattern pattern = Pattern.compile("\\{\\}");
+        Matcher matcher = pattern.matcher(message);
+
+        // 初始化 StringBuilder，预期转换后的字符串长度为原长度的 1.5 倍
         StringBuilder sb = new StringBuilder((int) (message.length() * 1.5));
-        int cursor = 0;
+
         int index = 0;
-        int argsLength = arguments.length;
-        for (int start, end; (start = message.indexOf("{", cursor)) != -1 && (end = message.indexOf("}", start)) != -1
-                && index < argsLength; ) {
-            sb.append(message, cursor, start);
+        int lastEnd = 0;
+
+        while (matcher.find()) {
+            if (index >= arguments.length) {
+                throw new IllegalArgumentException("Not enough arguments for placeholders in the message");
+            }
+            // 将当前光标到找到的 {} 之间的字符串添加到 sb 中
+            sb.append(message, lastEnd, matcher.start());
+            // 将 arguments 中对应的值添加到 sb 中
             sb.append(arguments[index]);
-            cursor = end + 1;
+            // 更新光标位置
+            lastEnd = matcher.end();
+            // 更新 arguments 索引
             index++;
         }
-        sb.append(message.substring(cursor));
+
+        // 将剩余的 message 部分添加到 sb 中
+        sb.append(message.substring(lastEnd));
+
+        // 检查是否有未匹配的 {}
+        if (message.contains("{") || message.contains("}")) {
+            throw new IllegalArgumentException("Unmatched placeholder in the message");
+        }
+
+        // 返回转换后的字符串
         return sb.toString();
     }
 
@@ -812,7 +844,7 @@ public class $ {
             } else {
                 // 检查字符串是否以表达式的非通配符部分开头，如果是，递归匹配剩余部分
                 return str.length() >= firstIndex && pattern.startsWith(str.substring(0, firstIndex))
-                        && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
+                       && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
             }
         } else {
             // 如果参数为空，返回 false
@@ -1362,10 +1394,10 @@ public class $ {
         } else if (object instanceof CharSequence cs) {
             String value = cs.toString();
             if ("true".equalsIgnoreCase(value) || "y".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value)
-                    || "on".equalsIgnoreCase(value) || "1".equalsIgnoreCase(value)) {
+                || "on".equalsIgnoreCase(value) || "1".equalsIgnoreCase(value)) {
                 return true;
             } else if ("false".equalsIgnoreCase(value) || "n".equalsIgnoreCase(value) || "no".equalsIgnoreCase(value)
-                    || "off".equalsIgnoreCase(value) || "0".equalsIgnoreCase(value)) {
+                       || "off".equalsIgnoreCase(value) || "0".equalsIgnoreCase(value)) {
                 return false;
             }
         }
@@ -2221,7 +2253,7 @@ public class $ {
         } else if (object instanceof String str) {
             return format(str, new Object[]{pattern});
         }
-        throw new IllegalArgumentException(MessageFormat.format("Unsupported object:{0},pattern:{1}", object, pattern));
+        throw new IllegalArgumentException(format("Unsupported object:{},pattern:{}", object, pattern));
     }
 
     /**

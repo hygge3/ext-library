@@ -1,6 +1,5 @@
 package ext.library.web.handler;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Set;
 
@@ -75,7 +74,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
-        String message = MessageFormat.format("不适当的参数:{0}", e.getMessage());
+        String message = $.format("不适当的参数:{}", e.getMessage());
         printLog(request, message, e);
         return R.failed(BizCode.ILLEGAL_ARGUMENT, message);
     }
@@ -86,7 +85,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public R<Void> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e,
                                                           HttpServletRequest request) {
-        String message = MessageFormat.format("({0}) 未支持", e.getMethod());
+        String message = $.format("({}) 未支持", e.getMethod());
         printLog(request, message, e);
         return R.failed(BizCode.METHOD_NOT_ALLOWED, message);
     }
@@ -96,7 +95,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MissingPathVariableException.class)
     public R<Void> missingPathVariableException(MissingPathVariableException e, HttpServletRequest request) {
-        String message = MessageFormat.format("缺少 path 变量：{0}", e.getVariableName());
+        String message = $.format("缺少 path 变量：{}", e.getVariableName());
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
     }
@@ -107,9 +106,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public R<Void> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
                                                        HttpServletRequest request) {
-        String message = MessageFormat.format("方法参数类型不匹配：{0}", e.getMessage());
+        String message = $.format("方法参数类型不匹配：{}", e.getMessage());
         printLog(request, message, e);
-        return R.failed(BizCode.BAD_REQUEST, String.format("方法参数类型不匹配，参数 [%s] 要求类型为：'%s'，但输入值为：'%s'",
+        return R.failed(BizCode.BAD_REQUEST, $.format("方法参数类型不匹配，参数 [{}] 要求类型为：'{}'，但输入值为：'{}'",
                 e.getName(), e.getRequiredType().getName(), e.getValue()));
     }
 
@@ -121,7 +120,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public R<Void> missingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
-        String message = MessageFormat.format("缺少请求参数：{0}", e.getParameterName());
+        String message = $.format("缺少请求参数：{}", e.getParameterName());
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
     }
@@ -141,7 +140,7 @@ public class GlobalExceptionHandler {
             return parameterName + Symbol.COLON + defaultMessage;
         }, Symbol.SEMICOLON);
 
-        String message = MessageFormat.format("参数校验未通过：{0}", param);
+        String message = $.format("参数校验未通过：{}", param);
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
     }
@@ -279,7 +278,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public R<Void> maxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
         long maxUploadSize = e.getMaxUploadSize();
-        String message = MessageFormat.format("超出最大上传大小，最大：{0}", maxUploadSize);
+        String message = $.format("超出最大上传大小，最大：{}", maxUploadSize);
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
     }
@@ -305,7 +304,7 @@ public class GlobalExceptionHandler {
         FieldError error = result.getFieldError();
         String message = Symbol.EMPTY;
         if (error != null) {
-            message = String.format("%s:%s", error.getField(), error.getDefaultMessage());
+            message = $.format("{}:{}", error.getField(), error.getDefaultMessage());
         } else {
             ObjectError globalError = result.getGlobalError();
             if (globalError != null) {
@@ -324,7 +323,7 @@ public class GlobalExceptionHandler {
     private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
         ConstraintViolation<?> violation = violations.iterator().next();
         String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
-        String message = String.format("%s:%s", path, violation.getMessage());
+        String message = $.format("{}:{}", path, violation.getMessage());
         return R.failed(BizCode.BAD_REQUEST, message);
     }
 

@@ -1,6 +1,5 @@
 package ext.library.security.repository;
 
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public SecuritySession getSecuritySessionByLoginId(String loginId) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         SecuritySession session = RedisUtil.get(redisKey, SecuritySession.class);
         return Objects.isNull(session) ? null : session;
     }
@@ -50,13 +49,13 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public Long getSessionTimeoutByLoginId(String loginId) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         return RedisUtil.ttl(redisKey);
     }
 
     @Override
     public boolean saveSecuritySession(SecuritySession session) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
+        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
         String sessionJson = JsonUtil.toJson(session);
         if (null == session.getTimeout() || SecurityConstant.NON_EXPIRING.equals(session.getTimeout())) {
             RedisUtil.set(redisKey, sessionJson);
@@ -76,7 +75,7 @@ public class SecurityRedisRepository implements SecurityRepository {
     @Override
     public boolean removeSecuritySessionByLoginId(String loginId) {
         // 删除 session 信息
-        String redisKey = MessageFormat.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         return Boolean.TRUE.equals(RedisUtil.del(redisKey));
     }
 
@@ -88,7 +87,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public SecurityToken getSecurityTokenByTokenValue(String tokenValue) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         SecurityToken token = RedisUtil.get(redisKey, SecurityToken.class);
         return Objects.isNull(token) ? null : token;
     }
@@ -116,7 +115,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public Long getTokenTimeOutByTokenValue(String tokenValue) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         return RedisUtil.ttl(redisKey);
     }
 
@@ -153,7 +152,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public boolean saveToken(SecurityToken token) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
+        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
         String tokenJson = JsonUtil.toJson(token);
         if (null == token.getTimeout() || SecurityConstant.NON_EXPIRING.equals(token.getTimeout())) {
             RedisUtil.set(redisKey, tokenJson);
@@ -177,7 +176,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public boolean removeTokenByTokenValue(String tokenValue) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         return Boolean.TRUE.equals(RedisUtil.del(redisKey));
     }
 
@@ -206,7 +205,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      */
     @Override
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
-        String redisKey = MessageFormat.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
+        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
                 $.isNotBlank(tokenValue) ? tokenValue + "*" : "*");
         Set<String> setList = RedisUtil.keys(redisKey);
         List<String> list = null == setList ? new ArrayList<>()
