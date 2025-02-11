@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
+        log.error("[⚠️] URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());
     }
 
