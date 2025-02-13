@@ -14,6 +14,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -98,6 +99,17 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     }
 
     /**
+     * 通过 name，以及 Clazz 返回指定的 Bean
+     *
+     * @param name Bean 名称
+     * @param args 创建 bean 需要的参数属性
+     * @return Bean 对象
+     */
+    public static Object getBean(String name, Object... args) {
+        return getBeanFactory().getBean(name, args);
+    }
+
+    /**
      * 通过 class 获取 Bean
      *
      * @param <T>   Bean 类型
@@ -106,6 +118,18 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     public static <T> T getBean(Class<T> clazz) {
         return context.getBean(clazz);
+    }
+
+    /**
+     * 通过 class 获取 Bean
+     *
+     * @param <T>   Bean 类型
+     * @param clazz Bean 类
+     * @param args  创建 bean 需要的参数属性
+     * @return Bean 对象
+     */
+    public static <T> T getBean(Class<T> clazz, Object... args) {
+        return getBeanFactory().getBean(clazz, args);
     }
 
     /**
@@ -162,6 +186,39 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     }
 
     /**
+     * 获取配置文件配置项的值
+     *
+     * @param key          配置项 key
+     * @param defaultValue 默认值
+     * @return 属性值
+     */
+    public static String getProperty(String key, String defaultValue) {
+        return context.getEnvironment().getProperty(key, defaultValue);
+    }
+
+    /**
+     * 获取配置文件配置项的值
+     *
+     * @param <T>          属性值类型
+     * @param key          配置项 key
+     * @param targetType   配置项类型
+     * @param defaultValue 默认值
+     * @return 属性值
+     */
+    public static <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+        return context.getEnvironment().getProperty(key, targetType, defaultValue);
+    }
+
+    /**
+     * 获取应用程序名称
+     *
+     * @return 应用程序名称
+     */
+    public static String getApplicationName() {
+        return getProperty("spring.application.name");
+    }
+
+    /**
      * 获取当前的环境配置，无配置返回 null
      *
      * @return 当前的环境配置
@@ -175,6 +232,44 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     public static Environment getEnvironment() {
         return context.getEnvironment();
+    }
+
+    /**
+     * 动态向 Spring 注册 Bean
+     * <p>
+     * 由{@link org.springframework.beans.factory.BeanFactory} 实现，通过工具开放 API
+     * <p>
+     * 更新：shadow 2021-07-29 17:20:44 增加自动注入，修复注册 bean 无法反向注入的问题
+     *
+     * @param <T>      Bean 类型
+     * @param beanName 名称
+     * @param bean     bean
+     * @author shadow
+     * @since 5.4.2
+     */
+    public static <T> void registerBean(String beanName, T bean) {
+        final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
+        factory.autowireBean(bean);
+        factory.registerSingleton(beanName, bean);
+    }
+
+    /**
+     * 注销 bean
+     * <p>
+     * 将 Spring 中的 bean 注销，请谨慎使用
+     *
+     * @param beanName bean 名称
+     * @author shadow
+     * @since 5.7.7
+     */
+    public static void unregisterBean(String beanName) {
+        final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
+        if (factory instanceof DefaultSingletonBeanRegistry) {
+            DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) factory;
+            registry.destroySingleton(beanName);
+        } else {
+            throw Exceptions.throwOut("无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-package ext.library.security.util.useragent;
+package ext.library.http.useragent;
 
 import java.io.Serial;
 import java.util.List;
@@ -32,6 +32,8 @@ public class Browser extends UserAgentInfo {
 			// 部分特殊浏览器是基于安卓、Iphone 等的，需要优先判断
 			// 企业微信 企业微信使用微信浏览器内核，会包含 MicroMessenger 所以要放在前面
 			new Browser("wxwork", "wxwork", "wxwork\\/([\\d\\w\\.\\-]+)"),
+			// issue#IB3SJF 微信电脑端
+			new Browser("WindowsWechat", "WindowsWechat", "MicroMessenger" + Other_Version),
 			// 微信
 			new Browser("MicroMessenger", "MicroMessenger", Other_Version),
 			// 微信小程序
@@ -56,24 +58,30 @@ public class Browser extends UserAgentInfo {
 			new Browser("Lenovo", "SLBrowser", "SLBrowser/([\\d\\w\\.\\-]+)"),
 			new Browser("MSEdge", "Edge|Edg", "(?:edge|Edg|EdgA)\\/([\\d\\w\\.\\-]+)"),
 			new Browser("Chrome", "chrome|(iphone.*crios.*safari)", "(?:Chrome|CriOS)\\/([\\d\\w\\.\\-]+)"),
-			new Browser("Firefox", "firefox", Other_Version), new Browser("IEMobile", "iemobile", Other_Version),
+			new Browser("Firefox", "firefox", Other_Version),
+			new Browser("IEMobile", "iemobile", Other_Version),
 			new Browser("Android Browser", "android", "version\\/([\\d\\w\\.\\-]+)"),
 			new Browser("Safari", "safari", "version\\/([\\d\\w\\.\\-]+)"),
-			new Browser("Opera", "opera", Other_Version), new Browser("Konqueror", "konqueror", Other_Version),
+			new Browser("Opera", "opera", Other_Version),
+			new Browser("Konqueror", "konqueror", Other_Version),
 			new Browser("PS3", "playstation 3", "([\\d\\w\\.\\-]+)\\)\\s*$"),
 			new Browser("PSP", "playstation portable", "([\\d\\w\\.\\-]+)\\)?\\s*$"),
 			new Browser("Lotus", "lotus.notes", "Lotus-Notes\\/([\\w.]+)"),
 			new Browser("Thunderbird", "thunderbird", Other_Version),
-			new Browser("Netscape", "netscape", Other_Version), new Browser("Seamonkey", "seamonkey", Other_Version),
+			new Browser("Netscape", "netscape", Other_Version),
+			new Browser("Seamonkey", "seamonkey", Other_Version),
 			new Browser("Outlook", "microsoft.outlook", Other_Version),
-			new Browser("Evolution", "evolution", Other_Version), new Browser("MSIE", "msie", "msie ([\\d\\w\\.\\-]+)"),
-			new Browser("MSIE11", "rv:11", "rv:([\\d\\w\\.\\-]+)"), new Browser("Gabble", "Gabble", Other_Version),
+			new Browser("Evolution", "evolution", Other_Version),
+			new Browser("MSIE", "msie", "msie ([\\d\\w\\.\\-]+)"),
+			new Browser("MSIE11", "rv:11", "rv:([\\d\\w\\.\\-]+)"),
+			new Browser("Gabble", "Gabble", Other_Version),
 			new Browser("Yammer Desktop", "AdobeAir", "([\\d\\w\\.\\-]+)\\/Yammer"),
 			new Browser("Yammer Mobile", "Yammer[\\s]+([\\d\\w\\.\\-]+)", "Yammer[\\s]+([\\d\\w\\.\\-]+)"),
 			new Browser("Apache HTTP Client", "Apache\\\\-HttpClient", "Apache\\-HttpClient\\/([\\d\\w\\.\\-]+)"),
 			new Browser("BlackBerry", "BlackBerry", "BlackBerry[\\d]+\\/([\\d\\w\\.\\-]+)"),
 			// issue#I847JY 百度浏览器
-			new Browser("Baidu", "Baidu", "baiduboxapp\\/([\\d\\w\\.\\-]+)"));
+			new Browser("Baidu", "Baidu", "baiduboxapp\\/([\\d\\w\\.\\-]+)")
+	);
 
 	/**
 	 * 添加自定义的浏览器类型

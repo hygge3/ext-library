@@ -3,4 +3,4 @@
  *
  * @author looly
  */
-package ext.library.security.util.useragent;
+package ext.library.http.useragent;

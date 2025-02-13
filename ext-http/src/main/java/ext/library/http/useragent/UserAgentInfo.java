@@ -1,4 +1,4 @@
-package ext.library.security.util.useragent;
+package ext.library.http.useragent;
 
 import java.io.Serial;
 import java.io.Serializable;
