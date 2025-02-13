@@ -5,14 +5,14 @@ import java.util.List;
 
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
+import ext.library.http.useragent.UserAgent;
+import ext.library.http.useragent.UserAgentUtil;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.function.IdentitySwitchFunction;
 import ext.library.security.service.SecurityService;
-import ext.library.security.util.useragent.UserAgent;
-import ext.library.security.util.useragent.UserAgentUtil;
 import lombok.experimental.UtilityClass;
 
 /**

@@ -13,6 +13,10 @@
     <dependencies>
         <dependency>
             <groupId>ext.library</groupId>
+            <artifactId>ext-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
             <artifactId>ext-redis</artifactId>
             <optional>true</optional>
         </dependency>

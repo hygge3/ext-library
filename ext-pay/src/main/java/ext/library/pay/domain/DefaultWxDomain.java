@@ -6,10 +6,10 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import ext.library.http.HttpUtil;
 import ext.library.pay.enums.RequestSuffix;
 import ext.library.pay.util.WxPayUtil;
 import ext.library.tool.constant.Symbol;
-import ext.library.tool.util.HttpUtil;
 import lombok.SneakyThrows;
 
 /**

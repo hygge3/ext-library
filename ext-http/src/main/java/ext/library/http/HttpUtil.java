@@ -1,4 +1,4 @@
-package ext.library.tool.util;
+package ext.library.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -463,7 +463,7 @@ public class HttpUtil {
     }
 
     // endregion
-    // region download
+    // region Download
 
     /**
      * 同步下载文件，构建 httpRequest 的方式参见

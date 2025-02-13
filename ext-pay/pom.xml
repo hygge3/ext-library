@@ -15,6 +15,10 @@
             <groupId>ext.library</groupId>
             <artifactId>ext-json</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-http</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
