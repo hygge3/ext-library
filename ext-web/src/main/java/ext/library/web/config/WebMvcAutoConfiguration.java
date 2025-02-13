@@ -1,7 +1,10 @@
 package ext.library.web.config;
 
 
+import java.util.List;
+
 import ext.library.tool.util.DateUtil;
+import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -36,6 +40,15 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
     private final WebMvcProperties webMvcProperties;
+
+    /**
+     * 注册自定义的 Body 参数解析器
+     */
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
+        WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
+    }
 
     /**
      * 增加 GET 请求参数中时间类型转换
