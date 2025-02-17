@@ -22,7 +22,7 @@ public class SelectData<T> {
 	 * 选中获取的属性
 	 */
 	@Schema(title = "选中获取的属性", requiredMode = REQUIRED)
-	private Object value;
+	private T value;
 
 	/**
 	 * 是否被选中
