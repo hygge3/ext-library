@@ -830,10 +830,8 @@ public class $ {
                             return simpleMatch(pattern.substring(nextIndex), str);
                         } else {
                             // 遍历字符串中所有出现的 part，尝试递归匹配
-                            for (int partIndex = str.indexOf(part); partIndex != -1; partIndex = str.indexOf(part,
-                                    partIndex + 1)) {
-                                if (simpleMatch(pattern.substring(nextIndex),
-                                        str.substring(partIndex + part.length()))) {
+                            for (int partIndex = str.indexOf(part); partIndex != -1; partIndex = str.indexOf(part, partIndex + 1)) {
+                                if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) {
                                     return true;
                                 }
                             }
@@ -844,8 +842,7 @@ public class $ {
                 // 如果通配符不在表达式开头
             } else {
                 // 检查字符串是否以表达式的非通配符部分开头，如果是，递归匹配剩余部分
-                return str.length() >= firstIndex && pattern.startsWith(str.substring(0, firstIndex))
-                       && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
+                return str.length() >= firstIndex && pattern.startsWith(str.substring(0, firstIndex)) && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
             }
         } else {
             // 如果参数为空，返回 false
@@ -1394,11 +1391,9 @@ public class $ {
             return bool;
         } else if (object instanceof CharSequence cs) {
             String value = cs.toString();
-            if ("true".equalsIgnoreCase(value) || "y".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value)
-                || "on".equalsIgnoreCase(value) || "1".equalsIgnoreCase(value)) {
+            if ("true".equalsIgnoreCase(value) || "y".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value) || "1".equalsIgnoreCase(value)) {
                 return true;
-            } else if ("false".equalsIgnoreCase(value) || "n".equalsIgnoreCase(value) || "no".equalsIgnoreCase(value)
-                       || "off".equalsIgnoreCase(value) || "0".equalsIgnoreCase(value)) {
+            } else if ("false".equalsIgnoreCase(value) || "n".equalsIgnoreCase(value) || "no".equalsIgnoreCase(value) || "off".equalsIgnoreCase(value) || "0".equalsIgnoreCase(value)) {
                 return false;
             }
         }
@@ -1412,10 +1407,7 @@ public class $ {
      * @return 短字符串
      */
     public String to62Str(long num) {
-        byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
-                'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-                'Z', '_', '-'};
+        byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_', '-'};
         int radix = 62;
         byte[] buf = new byte[65];
         int charPos = 64;
@@ -1677,9 +1669,7 @@ public class $ {
      * @return digest as a hex string
      */
     public String hmacMd5Hex(String data, String key) {
-        return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .toString();
+        return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
     /**
@@ -1701,9 +1691,7 @@ public class $ {
      * @return digest as a byte array
      */
     public byte[] hmacSha1(String data, String key) {
-        return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .asBytes();
+        return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
     /**
@@ -1725,9 +1713,7 @@ public class $ {
      * @return digest as a hex string
      */
     public String hmacSha1Hex(String data, String key) {
-        return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .toString();
+        return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
     /**
@@ -1749,9 +1735,7 @@ public class $ {
      * @return digest as a hex string
      */
     public byte[] hmacSha256(String data, String key) {
-        return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .asBytes();
+        return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
     /**
@@ -1773,9 +1757,7 @@ public class $ {
      * @return digest as a byte array
      */
     public String hmacSha256Hex(String data, String key) {
-        return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .toString();
+        return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
     /**
@@ -1797,9 +1779,7 @@ public class $ {
      * @return digest as a byte array
      */
     public byte[] hmacSha512(String data, String key) {
-        return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .asBytes();
+        return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
     /**
@@ -1821,9 +1801,7 @@ public class $ {
      * @return digest as a hex string
      */
     public String hmacSha512Hex(String data, String key) {
-        return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8))
-                .hashString(data, StandardCharsets.UTF_8)
-                .toString();
+        return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
     /**
@@ -2245,16 +2223,18 @@ public class $ {
      * @return 格式化后的字符串
      */
     public String format(Object object, String pattern) {
+        if (object instanceof String str) {
+            return format(str, new Object[]{pattern});
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         if (object instanceof Number) {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
             return decimalFormat.format(object);
         } else if (object instanceof TemporalAccessor accessor) {
             return formatter.format(accessor);
-        } else if (object instanceof String str) {
-            return format(str, new Object[]{pattern});
+        } else {
+            throw new IllegalArgumentException(format("Unsupported object:{},pattern:{}", object, pattern));
         }
-        throw new IllegalArgumentException(format("Unsupported object:{},pattern:{}", object, pattern));
     }
 
     /**
@@ -2413,8 +2393,7 @@ public class $ {
      */
 
     public <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
-        return defaultIfNull(method.getAnnotation(annotationType),
-                method.getDeclaringClass().getAnnotation(annotationType));
+        return defaultIfNull(method.getAnnotation(annotationType), method.getDeclaringClass().getAnnotation(annotationType));
     }
 
     /**
