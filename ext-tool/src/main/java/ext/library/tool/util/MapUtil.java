@@ -335,6 +335,57 @@ public class MapUtil {
      * <p>
      * 数据 3：key：3，name：王五，sex：man
      * <p>
+     * 方法调用：ListPOJOExtractKeyToMap(list,"key","name");
+     * <p>
+     * 处理后返回结果为一个 map，值为一个对象，json 表示为：
+     * <p>
+     * {"1":"张三","2":"李四","3":"王五"}
+     *
+     * @param objectList list 数据
+     * @param key        需要提取的 key
+     * @param value      需要提取的 value
+     * @return Map&lt;String, T&gt;
+     */
+    public Map<String, Object> listPOJOExtractKeyToMap(List<?> objectList, String key, String value) {
+        // 声明一个返回的 map 集合
+        Map<String, Object> map = new LinkedHashMap<>();
+        // 如果需要转换的值是空的，直接返回一个空的集合
+        if ($.isEmpty(objectList)) {
+            return map;
+        }
+        // 循环集合，转换为 map
+        for (Object item : objectList) {
+            // 声明一个 object 对象接收 key 的值
+            Object mapKey = null, mapValue = null;
+            try {
+                // 通过对象和属性值获取对应的值
+                mapKey = getValue(item, key);
+                mapValue = getValue(item, value);
+            } catch (Exception e) {
+                // 未找到方法值时不处理，采用默认的 null
+                log.warn("[🛠️] No value found", e);
+            }
+            // 将取到的值作为 key，当前对象作为值，插入 map 中，如果有相同的 key 会覆盖之前的值
+            map.put(mapKey == null ? null : mapKey.toString(), mapValue);
+        }
+
+        return map;
+    }
+
+    /**
+     * <p>
+     * 将 list 对象中数据提取为单个 map 键值对
+     * <p>
+     * 注：如果有相同的 key 时，后面的值会覆盖第一次出现的 key 对应的值
+     * <p>
+     * 例：一个用户集合中的对象有 key、name、sex
+     * <p>
+     * 数据 1：key：1，name：张三，sex：man
+     * <p>
+     * 数据 2：key：2，name：李四，sex:woman
+     * <p>
+     * 数据 3：key：3，name：王五，sex：man
+     * <p>
      * 方法调用：ListPOJOExtractKeyToList(list,"key");
      * <p>
      * 处理后返回结果为一个 map，值为一个对象，json 表示为：
@@ -362,7 +413,7 @@ public class MapUtil {
                 mapKey = getValue(item, key);
             } catch (Exception e) {
                 // 未找到方法值时不处理，采用默认的 null
-                log.warn("[🛠️] [🛠️] No value found", e);
+                log.warn("[🛠️] No value found", e);
             }
             // 将取到的值作为 key，当前对象作为值，插入 map 中，如果有相同的 key 会覆盖之前的值
             map.put(mapKey == null ? null : mapKey.toString(), item);
