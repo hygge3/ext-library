@@ -346,9 +346,9 @@ public class MapUtil {
      * @param value      需要提取的 value
      * @return Map&lt;String, T&gt;
      */
-    public Map<String, Object> listPOJOExtractKeyToMap(List<?> objectList, String key, String value) {
+    public <T> Map<String, T> listPOJOExtractKeyToMap(List<?> objectList, String key, String value, Class<T> valueClazz) {
         // 声明一个返回的 map 集合
-        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, T> map = new LinkedHashMap<>();
         // 如果需要转换的值是空的，直接返回一个空的集合
         if ($.isEmpty(objectList)) {
             return map;
@@ -366,7 +366,7 @@ public class MapUtil {
                 log.warn("[🛠️] No value found", e);
             }
             // 将取到的值作为 key，当前对象作为值，插入 map 中，如果有相同的 key 会覆盖之前的值
-            map.put(mapKey == null ? null : mapKey.toString(), mapValue);
+            map.put(mapKey == null ? null : mapKey.toString(), $.convert(mapValue, valueClazz));
         }
 
         return map;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ValueConstants;
 
 /**
  * 自定义注解接收 Body 单个参数，仿 @RequestParam
+ * 支持：基类及其包装类、String、List
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

@@ -1,11 +1,14 @@
 package ext.library.web.body.resolver;
 
 import java.io.BufferedReader;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
@@ -56,16 +59,26 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
 
         BufferedReader reader = request.getReader();
         Class<?> parameterType = parameter.getParameterType();
+        Type genericParameterType = parameter.getGenericParameterType();
 
         JsonNode jsonNode = JsonUtil.readTree(request.getReader());
-        Object result = JsonUtil.treeToObj(jsonNode.get(paramName), parameterType);
+
+        Object result;
+        if (List.class.isAssignableFrom(parameterType)) {
+            // 集合
+            result = JsonUtil.treeToList(jsonNode.get(paramName), TypeFactory.rawClass(genericParameterType));
+        } else {
+            // 对象
+            result = JsonUtil.treeToObj(jsonNode.get(paramName), parameterType);
+        }
+
         if (jsonNode.isEmpty() || $.isNull(result)) {
             if (param.required()) {
                 throw new MissingServletRequestParameterException(paramName, parameter.getNestedParameterType().getSimpleName());
             } else if ($.equals(ValueConstants.DEFAULT_NONE, param.defaultValue())) {
                 throw new IllegalArgumentException($.format("参数解析异常，值为 null 时必须指定默认值", parameter.getNestedParameterType().getSimpleName(), paramName));
             } else {
-                return $.convert(param.defaultValue(),parameterType);
+                return $.convert(param.defaultValue(), parameterType);
             }
         }
 

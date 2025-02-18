@@ -1430,8 +1430,10 @@ public class $ {
      * @throws IllegalArgumentException if targetType is {@code null}, or sourceType is
      *                                  {@code null} but source is not {@code null}
      */
-
     public <T> T convert(Object source, Class<T> targetType) {
+        if (source.getClass().isAssignableFrom(targetType)) {
+           return (T) source;
+        }
         return Converter.cast(source, targetType);
     }
 

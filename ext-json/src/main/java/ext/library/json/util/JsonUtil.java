@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -561,36 +560,49 @@ public class JsonUtil {
 
     // endregion
 
-    // region TreeNode 与对象互转
+    // region JsonNode 与对象互转
 
     /**
-     * tree 转对象
+     * jsonNode 转对象
      *
-     * @param treeNode  TreeNode
+     * @param jsonNode  JSON 节点
      * @param valueType valueType
      * @param <T>       泛型标记
      * @return 转换结果
      */
     @SneakyThrows(JsonProcessingException.class)
-    public <T> T treeToObj(TreeNode treeNode, Class<T> valueType) {
-        return MAPPER.treeToValue(treeNode, valueType);
+    public <T> T treeToObj(JsonNode jsonNode, Class<T> valueType) {
+        return MAPPER.treeToValue(jsonNode, valueType);
     }
 
     /**
      * tree 转对象
      *
-     * @param treeNode  TreeNode
+     * @param jsonNode  JSON 节点
      * @param valueType valueType
      * @param <T>       泛型标记
      * @return 转换结果
      */
     @SneakyThrows(JsonProcessingException.class)
-    public <T> T treeToObj(TreeNode treeNode, JavaType valueType) {
-        return MAPPER.treeToValue(treeNode, valueType);
+    public <T> T treeToObj(JsonNode jsonNode, JavaType valueType) {
+        return MAPPER.treeToValue(jsonNode, valueType);
     }
 
     /**
-     * 对象转 tree
+     * tree 转带泛型的集合
+     *
+     * @param jsonNode    JSON 节点
+     * @param elementType elementType
+     * @param <T>         泛型标记
+     * @return 转换结果
+     */
+    @SneakyThrows(IOException.class)
+    public <T> List<T> treeToList(JsonNode jsonNode, Class<T> elementType) {
+        return MAPPER.readerForListOf(elementType).readValue(jsonNode);
+    }
+
+    /**
+     * 对象转 JsonNode
      *
      * @param fromValue fromValue
      * @param <T>       泛型标记
