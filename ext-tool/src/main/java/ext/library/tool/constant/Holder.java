@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 import ext.library.tool.domain.ObjectId;
+import ext.library.tool.domain.SnowflakeId;
 import ext.library.tool.domain.ULID;
 
 /**
@@ -26,5 +27,8 @@ public interface Holder {
 
     /** MongoDB 的 ObjectId */
     ObjectId OBJECT_ID = new ObjectId();
+
+    /** Twitter 的 Snowflake 算法实现 */
+    SnowflakeId SNOWFLAKE_ID = new SnowflakeId(0, 0);
 
 }
