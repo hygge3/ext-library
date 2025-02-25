@@ -251,6 +251,13 @@ public class ServletUtil {
     /**
      * 获取客户端 IP
      */
+    public String getIpAddr() {
+        return getIpAddr(getRequest(), NODE_FORWARDED_IP);
+    }
+
+    /**
+     * 获取客户端 IP
+     */
     public String getIpAddr(HttpServletRequest request) {
         return getIpAddr(request, NODE_FORWARDED_IP);
     }
