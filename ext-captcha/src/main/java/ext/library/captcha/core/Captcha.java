@@ -53,7 +53,7 @@ public class Captcha implements ICaptcha {
         this(new RandomCaptchaDraw());
     }
 
-    public Captcha( CaptchaType type) {
+    public Captcha(CaptchaType type) {
         this(type.getCaptchaDraw());
     }
 
@@ -67,7 +67,7 @@ public class Captcha implements ICaptcha {
         this.captchaDraw = captchaDraw;
         this.interferenceDraw = interferenceDraw;
         this.random = random;
-        this.fonts = loadFonts();
+        this.fonts = loadAndRegisterFont();
     }
 
     public void setBackgroundDraw(BackgroundDraw backgroundDraw) {
@@ -112,7 +112,7 @@ public class Captcha implements ICaptcha {
         return captchaDraw.validate(code, userInputCaptcha);
     }
 
-    private static Graphics2D initGraphics( BufferedImage image) {
+    private static Graphics2D initGraphics(BufferedImage image) {
         // 获取图形上下文
         Graphics2D graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -124,17 +124,22 @@ public class Captcha implements ICaptcha {
         return graphics;
     }
 
-    private static Font[] loadFonts() {
+    private static Font[] loadAndRegisterFont() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         List<Font> fontList = new ArrayList<>();
         for (String fontName : FONT_NAMES) {
             String path = "fonts/" + fontName;
-            fontList.add(loadFont(new ClassPathResource(path)));
+            // 加载字体
+            Font font = loadFont(new ClassPathResource(path));
+            // 注册字体
+            ge.registerFont(font);
+            fontList.add(font);
         }
         return fontList.toArray(new Font[0]);
     }
 
     @SneakyThrows
-    private static Font loadFont( ClassPathResource resource) {
+    private static Font loadFont(ClassPathResource resource) {
         return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
     }
 

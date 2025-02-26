@@ -2,11 +2,11 @@ package ext.library.tool.domain;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+import ext.library.tool.constant.Holder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -63,7 +63,7 @@ public class ULID {
     private final Random random;
 
     public ULID() {
-        this(new SecureRandom());
+        this(Holder.SECURE_RANDOM);
     }
 
     public ULID(Random random) {

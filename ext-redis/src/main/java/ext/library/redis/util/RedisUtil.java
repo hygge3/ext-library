@@ -37,7 +37,9 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.GeoOperations;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.HyperLogLogOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -107,6 +109,13 @@ public class RedisUtil {
 
     public StreamOperations<String, String, String> streamOps() {
         return getRedisTemplate().opsForStream();
+    }
+    public GeoOperations<String, String> getGeoOps() {
+        return getRedisTemplate().opsForGeo();
+    }
+
+    public HyperLogLogOperations<String, String> getHllOps() {
+        return getRedisTemplate().opsForHyperLogLog();
     }
 
     // endregion
