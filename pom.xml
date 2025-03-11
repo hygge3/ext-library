@@ -59,7 +59,7 @@
         <lombok.version>1.18.36</lombok.version>
         <spring-boot.version>3.4.3</spring-boot.version>
         <mapstruct-plus.version>1.4.6</mapstruct-plus.version>
-        <swagger.version>2.2.28</swagger.version>
+        <swagger.version>2.2.29</swagger.version>
         <mybatis-flex.version>1.10.8</mybatis-flex.version>
         <sa-token.version>1.40.0</sa-token.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
