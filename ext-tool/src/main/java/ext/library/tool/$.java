@@ -1,5 +1,24 @@
 package ext.library.tool;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
+import com.google.common.html.HtmlEscapers;
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
+import ext.library.tool.constant.Holder;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.core.Exceptions;
+import ext.library.tool.domain.ObjectId;
+import ext.library.tool.util.BoolUtil;
+import ext.library.tool.util.Converter;
+import ext.library.tool.util.DateUtil;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.Closeable;
@@ -19,6 +38,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -48,25 +68,6 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
-import com.google.common.html.HtmlEscapers;
-import com.google.common.io.BaseEncoding;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
-import ext.library.tool.constant.Holder;
-import ext.library.tool.constant.Symbol;
-import ext.library.tool.core.Exceptions;
-import ext.library.tool.util.BoolUtil;
-import ext.library.tool.util.Converter;
-import ext.library.tool.util.DateUtil;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -923,17 +924,50 @@ public class $ {
 
     /**
      * 生成 uuid
+     * 长度：32
      *
-     * @return UUID
+     * @return {@code String }
      */
     public String getUUID() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
     /**
-     * 生成 ulid
+     * UUID 版本 7 (v7) 由时间戳和随机数据生成。
+     * 长度：32
      *
-     * @return ULID
+     * @return {@code String }
+     */
+    public static String getUUIDv7() {
+        // random bytes
+        byte[] value = new byte[16];
+        Holder.SECURE_RANDOM.nextBytes(value);
+
+        // current timestamp in ms
+        long timestamp = System.currentTimeMillis();
+
+        // timestamp
+        value[0] = (byte) ((timestamp >> 40) & 0xFF);
+        value[1] = (byte) ((timestamp >> 32) & 0xFF);
+        value[2] = (byte) ((timestamp >> 24) & 0xFF);
+        value[3] = (byte) ((timestamp >> 16) & 0xFF);
+        value[4] = (byte) ((timestamp >> 8) & 0xFF);
+        value[5] = (byte) (timestamp & 0xFF);
+
+        // version and variant
+        value[6] = (byte) ((value[6] & 0x0F) | 0x70);
+        value[8] = (byte) ((value[8] & 0x3F) | 0x80);
+        ByteBuffer buf = ByteBuffer.wrap(value);
+        long high = buf.getLong();
+        long low = buf.getLong();
+        return new UUID(high, low).toString().replaceAll("-", "");
+    }
+
+    /**
+     * 生成 ULID
+     * 长度：26
+     *
+     * @return {@code String }
      */
     public String getULID() {
         return Holder.ULID.nextULID();
@@ -941,11 +975,42 @@ public class $ {
 
     /**
      * 生成 ObjectId
+     * 长度：24
      *
-     * @return ObjectId
+     * @return {@code String }
      */
     public String getObjectId() {
-        return Holder.OBJECT_ID.toHexString();
+        return ObjectId.get().toHexString();
+    }
+
+    /**
+     * 生成 SnowflakeId
+     * 长度：16
+     *
+     * @return {@code String }
+     */
+    public String getSnowflakeId() {
+        return String.valueOf(Holder.SNOWFLAKE_ID.nextId());
+    }
+
+    /**
+     * Sqids 编码
+     *
+     * @param numbers 数字
+     * @return {@code String }
+     */
+    public String sqidsEncode(List<Long> numbers) {
+        return Holder.SQIDS.encode(numbers);
+    }
+
+    /**
+     * Sqids 解码
+     *
+     * @param sqids SQIDS
+     * @return {@code List<Long> }
+     */
+    public List<Long> sqidsDecode(String sqids) {
+        return Holder.SQIDS.decode(sqids);
     }
 
     /**
@@ -1432,7 +1497,7 @@ public class $ {
      */
     public <T> T convert(Object source, Class<T> targetType) {
         if (source.getClass().isAssignableFrom(targetType)) {
-           return (T) source;
+            return (T) source;
         }
         return Converter.cast(source, targetType);
     }
