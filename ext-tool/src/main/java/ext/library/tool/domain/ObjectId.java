@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import lombok.Getter;
 
 /**
@@ -54,42 +53,42 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
 
     /** unused, as this class uses a proxy for serialization */
     @Serial
-    private static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-    private static final int OBJECT_ID_LENGTH = 12;
+    static final int OBJECT_ID_LENGTH = 12;
 
-    private static final int LOW_ORDER_THREE_BYTES = 0x00ffffff;
+    static final int LOW_ORDER_THREE_BYTES = 0x00ffffff;
 
     /** Use primitives to represent the 5-byte random value. */
-    private static final int RANDOM_VALUE1;
+    static final int RANDOM_VALUE1;
 
-    private static final short RANDOM_VALUE2;
+    static final short RANDOM_VALUE2;
 
-    private static final AtomicInteger NEXT_COUNTER = new AtomicInteger(new SecureRandom().nextInt());
+    static final AtomicInteger NEXT_COUNTER = new AtomicInteger(new SecureRandom().nextInt());
 
-    private static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+    static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
             'f'};
 
     /**
      * The timestamp (number of seconds since the Unix
      */
     @Getter
-    private final int timestamp;
+    final int timestamp;
 
     /**
      * The counter.
      */
-    private final int counter;
+    final int counter;
 
     /**
      * the first four bits of randomness.
      */
-    private final int randomValue1;
+    final int randomValue1;
 
     /**
      * The last two bits of randomness.
      */
-    private final short randomValue2;
+    final short randomValue2;
 
     /**
      * Gets a new object id.
@@ -356,7 +355,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     }
 
     @Override
-    public int compareTo( ObjectId other) {
+    public int compareTo(ObjectId other) {
         byte[] byteArray = toByteArray();
         byte[] otherByteArray = other.toByteArray();
         for (int i = 0; i < OBJECT_ID_LENGTH; i++) {

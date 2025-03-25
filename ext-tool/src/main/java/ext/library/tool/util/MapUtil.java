@@ -1,5 +1,6 @@
 package ext.library.tool.util;
 
+import ext.library.tool.$;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -15,11 +16,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Map 工具
@@ -382,7 +380,6 @@ public class MapUtil {
     /**
      * 获取
      */
-    @Nullable
     private <T> T getValue(Object obj, String name, Class<T> calzz) {
         if (obj instanceof Map<?, ?> map) {
             return $.convert(map.get(name), calzz);

@@ -1,22 +1,21 @@
 package ext.library.tool.domain;
 
+import ext.library.tool.constant.Holder;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-
-import ext.library.tool.constant.Holder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("PMD.ShortClassName")
 public class ULID {
 
-    private static final char[] ENCODING_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+    static final char[] ENCODING_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
             'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z',};
 
-    private static final byte[] DECODING_CHARS = {
+    static final byte[] DECODING_CHARS = {
             // 0
             -1, -1, -1, -1, -1, -1, -1, -1,
             // 8
@@ -50,17 +49,17 @@ public class ULID {
             // 120
             29, 30, 31,};
 
-    private static final int MASK = 0x1F;
+    static final int MASK = 0x1F;
 
-    private static final int MASK_BITS = 5;
+    static final int MASK_BITS = 5;
 
-    private static final long TIMESTAMP_OVERFLOW_MASK = 0xFFFF_0000_0000_0000L;
+    static final long TIMESTAMP_OVERFLOW_MASK = 0xFFFF_0000_0000_0000L;
 
-    private static final long TIMESTAMP_MSB_MASK = 0xFFFF_FFFF_FFFF_0000L;
+    static final long TIMESTAMP_MSB_MASK = 0xFFFF_FFFF_FFFF_0000L;
 
-    private static final long RANDOM_MSB_MASK = 0xFFFFL;
+    static final long RANDOM_MSB_MASK = 0xFFFFL;
 
-    private final Random random;
+    final Random random;
 
     public ULID() {
         this(Holder.SECURE_RANDOM);

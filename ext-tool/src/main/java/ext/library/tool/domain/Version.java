@@ -1,9 +1,8 @@
 package ext.library.tool.domain;
 
 
-import java.util.Objects;
-
 import ext.library.tool.constant.Symbol;
+import java.util.Objects;
 
 /**
  * 版本号比较工具
@@ -16,17 +15,17 @@ import ext.library.tool.constant.Symbol;
  */
 public class Version {
 
-    private static final String DELIMITER = "\\.";
+    static final String DELIMITER = "\\.";
 
     /**
      * 版本号
      */
-    private String version;
+    String version;
 
     /**
      * 是否完整模式，默认使用完整模式
      */
-    private boolean complete = true;
+    boolean complete = true;
 
     /**
      * 私有实例化构造方法

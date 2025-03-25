@@ -1,5 +1,8 @@
 package ext.library.tool.core;
 
+import jakarta.validation.constraints.Positive;
+
+import ext.library.tool.$;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -7,8 +10,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +23,7 @@ public class Threads {
     /**
      * sleep 等待，单位为毫秒
      */
-    public void sleep(long milliseconds) {
+    public void sleep(@Positive long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {

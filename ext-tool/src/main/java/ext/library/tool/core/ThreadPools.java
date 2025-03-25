@@ -1,5 +1,9 @@
 package ext.library.tool.core;
 
+
+import jakarta.annotation.Nonnull;
+
+import ext.library.tool.$;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -8,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -20,7 +23,7 @@ import org.slf4j.MDC;
 @UtilityClass
 public class ThreadPools {
 
-    private static final Integer QUEUE_MAX = 10;
+    static final Integer QUEUE_MAX = 10;
 
     /**
      * Singleton instance to use.
@@ -32,7 +35,7 @@ public class ThreadPools {
             10000,
             // 存活时间。非核心线程数如果空闲指定时间。就回收
             // 存活时间不宜过长。避免任务量遇到尖峰情况时。大量空闲线程占用资源
-            10,
+            QUEUE_MAX,
             // 存活时间的单位
             TimeUnit.SECONDS,
             // 等待任务存放队列 - 队列最大值
@@ -44,7 +47,7 @@ public class ThreadPools {
             new ThreadPoolExecutor.CallerRunsPolicy());
 
 
-    public void update(ThreadPoolExecutor executor) {
+    public void update(@Nonnull ThreadPoolExecutor executor) {
         INSTANCE = executor;
     }
 
@@ -97,10 +100,10 @@ public class ThreadPools {
         }
 
         // 占比达到 90% 的情况下，剩余可用线程数小于 10 则可能触发拒绝
-        return size - activeCount < 10;
+        return size - activeCount < QUEUE_MAX;
     }
 
-    public void execute(Runnable runnable) {
+    public void execute(@Nonnull Runnable runnable) {
         execute(null, runnable);
     }
 
@@ -110,20 +113,19 @@ public class ThreadPools {
      * @param name     任务名
      * @param runnable 任务
      */
-    public void execute(String name, Runnable runnable) {
+    public void execute(String name, @Nonnull Runnable runnable) {
         // 获取当前线程的配置
         Map<String, String> map = MDC.getCopyOfContextMap();
         INSTANCE.execute(() -> {
             Thread thread = Thread.currentThread();
             String oldName = thread.getName();
-            if (name != null && !name.isEmpty()) {
+            if ($.isNotBlank(name)) {
                 thread.setName(name);
             }
             // 存在则填充
-            if (map != null && !map.isEmpty()) {
+            if ($.isNotEmpty(map)) {
                 MDC.setContextMap(map);
             }
-
             try {
                 runnable.run();
             } catch (Throwable throwable) {
@@ -135,11 +137,11 @@ public class ThreadPools {
         });
     }
 
-    public <T> CompletableFuture<T> async(Supplier<T> supplier) {
+    public <T> CompletableFuture<T> async(@Nonnull Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, INSTANCE);
     }
 
-    public <T> Future<T> submit(Callable<T> callable) {
+    public <T> Future<T> submit(@Nonnull Callable<T> callable) {
         return INSTANCE.submit(callable);
     }
 

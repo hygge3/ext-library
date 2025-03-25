@@ -1,15 +1,12 @@
 package ext.library.core.util.dict;
 
+import ext.library.core.util.ReflectUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import jakarta.validation.constraints.NotNull;
-
-import ext.library.core.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +23,7 @@ public class DictUtil {
      * @param lambdas 获取属性方法
      * @return {@code @NotNull List<Map<String, Object>> }
      */
-    public static <D extends IDict> @NotNull List<Map<String, Object>> getDictionaryList(@NotNull Class<D> clazz, Function... lambdas) {
+    public static <D extends IDict> List<Map<String, Object>> getDictionaryList(Class<D> clazz, Function<D, Object>... lambdas) {
         List<Map<String, Object>> mapList = new ArrayList<>();
         // 取出所有枚举类型
         Arrays.stream(clazz.getEnumConstants()).forEach(enumItem -> {
@@ -34,7 +31,7 @@ public class DictUtil {
             // 依次取出参数的值
             Arrays.stream(lambdas).forEach(lambda -> {
                 try {
-                    // String prop = 从 lamba 表达式中取出属性名 并取消首字母的大写
+                    // String prop = 从 lambda 表达式中取出属性名 并取消首字母的大写
                     String prop = StringUtils.uncapitalize(ReflectUtil.getLambdaFunctionName(lambda));
                     item.put(prop, lambda.apply(enumItem));
                 } catch (Exception exception) {

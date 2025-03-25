@@ -1,12 +1,9 @@
-package ext.library.tool.holder;
-
-import java.io.IOException;
+package ext.library.tool.holder.retry;
 
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.core.Threads;
-import ext.library.tool.holder.retry.IRetry;
-import ext.library.tool.holder.retry.RetryCallback;
+import java.io.IOException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,22 +17,22 @@ public final class SimpleRetry implements IRetry {
     /**
      * The default limit to the number of attempts for a new policy.
      */
-    public static final int DEFAULT_MAX_ATTEMPTS = 3;
+    static final int DEFAULT_MAX_ATTEMPTS = 3;
 
     /**
      * Default back off period - 1ms.
      */
-    private static final long DEFAULT_BACK_OFF_PERIOD = 1L;
+    static final long DEFAULT_BACK_OFF_PERIOD = 1L;
 
     /**
      * 重试次数
      */
-    private final int maxAttempts;
+    final int maxAttempts;
 
     /**
      * 重试时间间隔
      */
-    private final long sleepMillis;
+    final long sleepMillis;
 
     public SimpleRetry() {
         this(DEFAULT_MAX_ATTEMPTS, DEFAULT_BACK_OFF_PERIOD);

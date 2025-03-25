@@ -1,13 +1,12 @@
 package ext.library.tool.core;
 
+import com.google.common.base.Joiner;
+import ext.library.tool.$;
+import ext.library.tool.constant.Symbol;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-
-import com.google.common.base.Joiner;
-import ext.library.tool.$;
-import ext.library.tool.constant.Symbol;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -16,9 +15,9 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Runtimes {
 
-    private volatile int pId = -1;
+    volatile int pId = -1;
 
-    private final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+    final int CPU_NUM = Runtime.getRuntime().availableProcessors();
 
     /**
      * 获得当前进程的 PID

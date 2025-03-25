@@ -16,46 +16,46 @@ public class SnowflakeId {
 
     // ==============================Fields===========================================
     /** 开始时间截 (2025-01-01) */
-    private final long twepoch = 1420041600000L;
+    final long twepoch = 1420041600000L;
 
     /** 机器 id 所占的位数 */
-    private final long workerIdBits = 5L;
+    final long workerIdBits = 5L;
 
     /** 数据标识 id 所占的位数 */
-    private final long datacenterIdBits = 5L;
+    final long datacenterIdBits = 5L;
 
     /** 支持的最大机器 id，结果是 31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数) */
-    private final long maxWorkerId = ~(-1L << workerIdBits);
+    final long maxWorkerId = ~(-1L << workerIdBits);
 
     /** 支持的最大数据标识 id，结果是 31 */
-    private final long maxDatacenterId = ~(-1L << datacenterIdBits);
+    final long maxDatacenterId = ~(-1L << datacenterIdBits);
 
     /** 序列在 id 中占的位数 */
-    private final long sequenceBits = 12L;
+    final long sequenceBits = 12L;
 
     /** 机器 ID 向左移 12 位 */
-    private final long workerIdShift = sequenceBits;
+    final long workerIdShift = sequenceBits;
 
     /** 数据标识 id 向左移 17 位 (12+5) */
-    private final long datacenterIdShift = sequenceBits + workerIdBits;
+    final long datacenterIdShift = sequenceBits + workerIdBits;
 
     /** 时间截向左移 22 位 (5+5+12) */
-    private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+    final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
 
     /** 生成序列的掩码，这里为 4095 (0b111111111111=0xfff=4095) */
-    private final long sequenceMask = ~(-1L << sequenceBits);
+    final long sequenceMask = ~(-1L << sequenceBits);
 
     /** 工作机器 ID(0~31) */
-    private long workerId;
+    long workerId;
 
     /** 数据中心 ID(0~31) */
-    private long datacenterId;
+    long datacenterId;
 
     /** 毫秒内序列 (0~4095) */
-    private long sequence = 0L;
+    long sequence = 0L;
 
     /** 上次生成 ID 的时间截 */
-    private long lastTimestamp = -1L;
+    long lastTimestamp = -1L;
 
     //==============================Constructors=====================================
 

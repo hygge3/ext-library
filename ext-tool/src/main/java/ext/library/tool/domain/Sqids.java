@@ -17,21 +17,21 @@ import java.util.Set;
  */
 public final class Sqids {
 
-    private static final int MIN_ALPHABET_LENGTH = 3;
+    static final int MIN_ALPHABET_LENGTH = 3;
 
-    private static final int MIN_LENGTH_LIMIT = 255;
+    static final int MIN_LENGTH_LIMIT = 255;
 
-    private static final int MIN_BLOCK_LIST_WORD_LENGTH = 3;
+    static final int MIN_BLOCK_LIST_WORD_LENGTH = 3;
 
-    private final String alphabet;
+    final String alphabet;
 
-    private final int alphabetLength;
+    final int alphabetLength;
 
-    private final int minLength;
+    final int minLength;
 
-    private final Set<String> blockList;
+    final Set<String> blockList;
 
-    private Sqids( final Builder builder) {
+    private Sqids(final Builder builder) {
         final String alphabet = builder.alphabet;
         final int alphabetLength = alphabet.length();
         final int minLength = builder.minLength;
@@ -88,7 +88,7 @@ public final class Sqids {
      * @param numbers Numbers to encode.
      * @return Sqids ID.
      */
-    public String encode( final List<Long> numbers) {
+    public String encode(final List<Long> numbers) {
         if (numbers.isEmpty()) {
             return "";
         }
@@ -106,7 +106,7 @@ public final class Sqids {
      * @param id ID to decode.
      * @return List of decoded numbers.
      */
-    public List<Long> decode( final String id) {
+    public List<Long> decode(final String id) {
         List<Long> ret = new ArrayList<>();
         if (id.isEmpty()) {
             return ret;
@@ -195,7 +195,7 @@ public final class Sqids {
         return id.toString();
     }
 
-    private String shuffle( final String alphabet) {
+    private String shuffle(final String alphabet) {
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
         for (int i = 0, j = charLength - 1; j > 0; i++, j--) {
@@ -208,7 +208,7 @@ public final class Sqids {
         return new String(chars);
     }
 
-    private StringBuilder toId(long num,  final String alphabet) {
+    private StringBuilder toId(long num, final String alphabet) {
         StringBuilder id = new StringBuilder();
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
@@ -222,7 +222,7 @@ public final class Sqids {
         return id.reverse();
     }
 
-    private long toNumber( final String id,  final String alphabet) {
+    private long toNumber(final String id, final String alphabet) {
         char[] chars = alphabet.toCharArray();
         int charLength = chars.length;
         long number = 0;
@@ -234,7 +234,7 @@ public final class Sqids {
         return number;
     }
 
-    private boolean isBlockedId( final String id) {
+    private boolean isBlockedId(final String id) {
         final String lowercaseId = id.toLowerCase();
         final int lowercaseIdLength = lowercaseId.length();
         for (String word : this.blockList) {

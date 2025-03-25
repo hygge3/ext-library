@@ -239,9 +239,6 @@ public interface Symbol {
     /** 空 JSON */
     String EMPTY_JSON = "{}";
 
-    /** 数字字符 */
-    String NUMBER_CHARACTER = "0123456789ABCDEFGHJKLMNPQRTUWXY";
-
     /** 十六进制字符大写字符串 */
     String HEX_CHAR_STRING_UPPER = "0123456789ABCDEF";
 
