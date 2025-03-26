@@ -18,9 +18,9 @@ import org.springframework.expression.Expression;
  */
 public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
 
-    private final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
+     final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
 
-    private final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
+     final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
 
     /**
      * Create an {@link EvaluationContext}.

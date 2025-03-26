@@ -1,14 +1,6 @@
 package ext.library.core.util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,8 +12,15 @@ import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -98,7 +97,6 @@ public class ServletUtil {
      * @param request 请求对象{@link ServletRequest}
      * @return Map
      */
-    @UnmodifiableView
     public Map<String, String[]> getParams(ServletRequest request) {
         final Map<String, String[]> map = request.getParameterMap();
         return Collections.unmodifiableMap(map);
@@ -154,7 +152,7 @@ public class ServletUtil {
         getRequest().removeAttribute(name);
     }
 
-    public String getHeader(HttpServletRequest request, String name) {
+    public String getHeader(@Nonnull HttpServletRequest request, String name) {
         return $.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
     }
 
@@ -176,7 +174,7 @@ public class ServletUtil {
         getResponse().addHeader(name, value);
     }
 
-    public Map<String, String> getHeaders(HttpServletRequest request) {
+    public Map<String, String> getHeaders(@Nonnull HttpServletRequest request) {
         Map<String, String> map = new LinkedCaseInsensitiveMap<>();
         Enumeration<String> enumeration = request.getHeaderNames();
         if (enumeration != null) {
@@ -284,7 +282,7 @@ public class ServletUtil {
      * @return IP 地址
      * @since 4.4.1
      */
-    public String getClientIpByHeader(HttpServletRequest request, String... headerNames) {
+    public String getClientIpByHeader(HttpServletRequest request, @Nonnull String... headerNames) {
         String ip;
         for (String header : headerNames) {
             ip = request.getHeader(header);

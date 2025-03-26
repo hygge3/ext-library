@@ -13,16 +13,16 @@ public class ThreadPoolProperties {
     /**
      * 是否开启自定义线程池
      */
-    private boolean enabled;
+     boolean enabled;
 
     /**
      * 队列最大长度
      */
-    private int queueCapacity;
+     int queueCapacity;
 
     /**
      * 线程池维护线程所允许的空闲时间
      */
-    private int keepAliveSeconds;
+     int keepAliveSeconds;
 
 }

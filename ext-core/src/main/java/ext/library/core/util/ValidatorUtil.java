@@ -1,9 +1,8 @@
 package ext.library.core.util;
 
-import java.util.regex.Pattern;
-
 import ext.library.core.constant.PatternPool;
 import ext.library.tool.$;
+import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 
 /**

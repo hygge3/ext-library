@@ -168,8 +168,8 @@ public enum BizCode implements ResponseCode {
 
     // endregion
 
-    private final int code;
+     final int code;
 
-    private final String msg;
+     final String msg;
 
 }

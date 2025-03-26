@@ -1,14 +1,13 @@
 package ext.library.core.config;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import jakarta.annotation.PreDestroy;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.core.config.properties.ThreadPoolProperties;
 import ext.library.tool.core.Threads;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,9 +26,9 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
-    private final int core = Runtime.getRuntime().availableProcessors() + 1;
+     final int core = Runtime.getRuntime().availableProcessors() + 1;
 
-    private ScheduledExecutorService scheduledExecutorService;
+     ScheduledExecutorService scheduledExecutorService;
 
     @Bean(name = "threadPoolTaskExecutor")
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")

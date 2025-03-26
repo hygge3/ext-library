@@ -1,5 +1,7 @@
 package ext.library.core.util;
 
+import jakarta.annotation.Nonnull;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,9 +37,9 @@ import org.springframework.util.ObjectUtils;
 @UtilityClass
 public class BeanUtil {
 
-    private static final Converter CONVERTER = SpringUtil.getBean(Converter.class);
+     static final Converter CONVERTER = SpringUtil.getBean(Converter.class);
 
-    private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
+     static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 对象转 Map
@@ -45,7 +47,7 @@ public class BeanUtil {
      * @param obj 对象
      * @return {@code Map<String, Object> }
      */
-    public Map<String, Object> beanToMap(Object obj) {
+    public Map<String, Object> beanToMap(@Nonnull Object obj) {
         Map<String, Object> map = Maps.newHashMap();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
@@ -173,7 +175,7 @@ public class BeanUtil {
      * @param target 转换后的对象
      */
     @SuppressWarnings("unchecked")
-    public <S, T> void convert(S source, T target) {
+    public <S, T> void convert(@Nonnull S source, @Nonnull T target) {
         if (target.getClass().equals(source.getClass())) {
             target = (T) source;
         }
@@ -228,7 +230,7 @@ public class BeanUtil {
         return mapToBean(map, targetType);
     }
 
-    private void copyByCopier(Object source, Object target) {
+    private void copyByCopier(@Nonnull Object source, @Nonnull Object target) {
         Class<?> sourceType = source.getClass();
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
@@ -246,7 +248,7 @@ public class BeanUtil {
         }
     }
 
-    private <T> T copyByCopier(Object source, Class<T> targetType) {
+    private <T> T copyByCopier(Object source, @Nonnull Class<T> targetType) {
         T t;
         try {
             t = targetType.getDeclaredConstructor().newInstance();
@@ -258,7 +260,7 @@ public class BeanUtil {
         return t;
     }
 
-    private <S, T> List<T> copyListByCopier(List<S> sourceList, Class<T> targetType) {
+    @Nonnull private <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
         List<T> resultList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
             T target;

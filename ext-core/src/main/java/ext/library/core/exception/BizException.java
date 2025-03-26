@@ -4,7 +4,6 @@ package ext.library.core.exception;
 import ext.library.core.response.ResponseCode;
 import ext.library.tool.$;
 import lombok.Getter;
-import org.jetbrains.annotations.Nls;
 
 /**
  * 业务异常
@@ -12,7 +11,7 @@ import org.jetbrains.annotations.Nls;
 @Getter
 public class BizException extends RuntimeException {
 
-    private final Integer code;
+    final Integer code;
 
     /**
      * 异常提示消息构造
@@ -30,7 +29,7 @@ public class BizException extends RuntimeException {
      * @param resultCode 结果代码
      * @param message    消息
      */
-    public BizException(ResponseCode resultCode, @Nls String message) {
+    public BizException(ResponseCode resultCode, String message) {
         super(message);
         this.code = resultCode.getCode();
     }
@@ -41,7 +40,7 @@ public class BizException extends RuntimeException {
      * @param resultCode 结果代码
      * @param message    消息
      */
-    public BizException(ResponseCode resultCode, @Nls String message, Object... args) {
+    public BizException(ResponseCode resultCode, String message, Object... args) {
         super($.format(message, args));
         this.code = resultCode.getCode();
     }
@@ -52,7 +51,7 @@ public class BizException extends RuntimeException {
      * @param message 消息
      * @param args    参数
      */
-    public BizException(@Nls String message, Object... args) {
+    public BizException(String message, Object... args) {
         super($.format(message, args));
         this.code = BizCode.WARN.getCode();
     }

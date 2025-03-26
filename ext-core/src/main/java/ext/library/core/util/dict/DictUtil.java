@@ -1,5 +1,7 @@
 package ext.library.core.util.dict;
 
+import jakarta.annotation.Nonnull;
+
 import ext.library.core.util.ReflectUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +25,8 @@ public class DictUtil {
      * @param lambdas 获取属性方法
      * @return {@code @NotNull List<Map<String, Object>> }
      */
-    public static <D extends IDict> List<Map<String, Object>> getDictionaryList(Class<D> clazz, Function<D, Object>... lambdas) {
+    @SafeVarargs
+    public static <D extends IDict> List<Map<String, Object>> getDictionaryList(@Nonnull Class<D> clazz, Function<D, Object>... lambdas) {
         List<Map<String, Object>> mapList = new ArrayList<>();
         // 取出所有枚举类型
         Arrays.stream(clazz.getEnumConstants()).forEach(enumItem -> {

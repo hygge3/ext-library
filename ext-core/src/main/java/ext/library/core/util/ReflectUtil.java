@@ -1,11 +1,11 @@
 package ext.library.core.util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.NotNull;
+
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
 import java.util.function.Function;
-
-import jakarta.validation.constraints.NotNull;
-
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
@@ -21,7 +21,7 @@ public class ReflectUtil {
      * @return 函数名
      */
     @SneakyThrows
-    public static @NotNull String getLambdaFunctionName(@NotNull Function<?, ?> lambda) {
+    public static @NotNull String getLambdaFunctionName(@Nonnull @NotNull Function<?, ?> lambda) {
         Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
         replaceMethod.setAccessible(true);
         SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);

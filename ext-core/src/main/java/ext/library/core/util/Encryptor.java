@@ -13,12 +13,12 @@ import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
  */
 @UtilityClass
 public class Encryptor {
-    private final static PasswordEncoder DEFAULT_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+     final static PasswordEncoder DEFAULT_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
-    private final static Argon2PasswordEncoder ARGON2_ENCODER = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-    private final static BCryptPasswordEncoder BCRYPT_ENCODER = new BCryptPasswordEncoder();
-    private final static Pbkdf2PasswordEncoder PBKDF2_ENCODER = Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-    private final static SCryptPasswordEncoder SCRYPT_ENCODER = SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8();
+     final static Argon2PasswordEncoder ARGON2_ENCODER = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+     final static BCryptPasswordEncoder BCRYPT_ENCODER = new BCryptPasswordEncoder();
+     final static Pbkdf2PasswordEncoder PBKDF2_ENCODER = Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+     final static SCryptPasswordEncoder SCRYPT_ENCODER = SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8();
 
     /**
      * 通过 默认加密器 BCrypt 加密

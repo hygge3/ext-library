@@ -1,5 +1,7 @@
 package ext.library.core.util;
 
+import jakarta.annotation.Nonnull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -19,7 +21,7 @@ public final class AspectUtil {
      * @param point 切面
      * @return java.lang.reflect.Method
      */
-    public Method getMethod(ProceedingJoinPoint point) {
+    public Method getMethod(@Nonnull ProceedingJoinPoint point) {
         if (point.getSignature() instanceof MethodSignature ms) {
             return ms.getMethod();
         }

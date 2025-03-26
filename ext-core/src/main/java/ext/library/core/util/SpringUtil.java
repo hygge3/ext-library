@@ -1,14 +1,14 @@
 package ext.library.core.util;
 
-import java.util.Map;
+import jakarta.annotation.Nonnull;
 
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -36,21 +36,21 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     @Getter
     @Setter
-    private static ApplicationContext context;
+    static ApplicationContext context;
 
     /**
      * "@PostConstruct"注解标记的类中，由于 ApplicationContext 还未加载，导致空指针<br>
      * 因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
      */
-    private static ConfigurableListableBeanFactory beanFactory;
+    static ConfigurableListableBeanFactory beanFactory;
 
     @Override
-    public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
+    public void setApplicationContext(@Nonnull ApplicationContext context) throws BeansException {
         setContext(context);
     }
 
     @Override
-    public void postProcessBeanFactory(@NotNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
         SpringUtil.beanFactory = beanFactory;
     }
 
