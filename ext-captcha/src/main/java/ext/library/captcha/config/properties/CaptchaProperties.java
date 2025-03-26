@@ -18,11 +18,11 @@ public class CaptchaProperties {
 	/**
 	 * 验证码类型，默认：随机数
 	 */
-	private CaptchaType captchaType = CaptchaType.RANDOM;
+	 CaptchaType captchaType = CaptchaType.RANDOM;
 
 	/**
 	 * 验证码 cache 名，默认：captcha:cache#5m，配合 mica-redis 5 分钟缓存
 	 */
-	private String cacheName = "captcha:cache#5m";
+	 String cacheName = "captcha:cache#5m";
 
 }

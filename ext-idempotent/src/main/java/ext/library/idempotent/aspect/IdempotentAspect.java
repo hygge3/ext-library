@@ -18,9 +18,9 @@ import org.springframework.util.Assert;
 @RequiredArgsConstructor
 public class IdempotentAspect {
 
-	private final IdempotentKeyStore idempotentKeyStore;
+	 final IdempotentKeyStore idempotentKeyStore;
 
-	private final IdempotentKeyGenerator idempotentKeyGenerator;
+	 final IdempotentKeyGenerator idempotentKeyGenerator;
 
 	@Around("@annotation(idempotentAnnotation)")
 	public Object around(ProceedingJoinPoint joinPoint, Idempotent idempotentAnnotation) throws Throwable {

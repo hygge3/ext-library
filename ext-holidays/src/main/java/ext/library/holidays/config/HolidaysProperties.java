@@ -2,7 +2,6 @@ package ext.library.holidays.config;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -20,7 +19,7 @@ public class HolidaysProperties {
 	/**
 	 * 自行扩展的 json 文件路径
 	 */
-	private List<ExtData> extData = new ArrayList<>();
+	 List<ExtData> extData = new ArrayList<>();
 
 	@Getter
 	@Setter

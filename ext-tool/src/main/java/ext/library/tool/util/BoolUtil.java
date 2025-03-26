@@ -1,7 +1,6 @@
 package ext.library.tool.util;
 
 import java.util.List;
-
 import lombok.experimental.UtilityClass;
 
 /**

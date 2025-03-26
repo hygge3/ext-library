@@ -1,5 +1,7 @@
 package ext.library.redis.util;
 
+import ext.library.core.util.SpringUtil;
+import ext.library.json.util.JsonUtil;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,14 +16,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import ext.library.core.util.SpringUtil;
-import ext.library.json.util.JsonUtil;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.Limit;
@@ -261,7 +258,6 @@ public class RedisUtil {
      * @return java.util.Set<java.lang.String>
      * @see <a href="http://redis.io/commands/keys">Keys Command</a>
      */
-    @Nullable
     public Set<String> keys(String pattern) {
         return getRedisTemplate().keys(pattern);
     }
@@ -275,7 +271,6 @@ public class RedisUtil {
      * @return TTL 以秒为单位，或负值以指示错误
      * @see <a href="http://redis.io/commands/ttl">TTL Command</a>
      */
-    @Nullable
     public Long ttl(String key) {
         return getRedisTemplate().getExpire(key);
     }
@@ -360,7 +355,6 @@ public class RedisUtil {
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
     public <T> T get(String key, Class<T> clazz) {
-        @Language("json")
         String value = get(key);
         if (Objects.isNull(value)) {
             return null;

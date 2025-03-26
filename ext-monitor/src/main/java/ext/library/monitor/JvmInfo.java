@@ -48,16 +48,16 @@ public class JvmInfo {
 	/**
 	 * 内存使用率
 	 */
-	private double usePercent;
+	 double usePercent;
 
 	/**
 	 * 返回 Java 虚拟机的启动时间（毫秒）。此方法返回 Java 虚拟机启动的大致时间。
 	 */
-	private long startTime;
+	 long startTime;
 
 	/**
 	 * 返回 Java 虚拟机的正常运行时间（毫秒）
 	 */
-	private long uptime;
+	 long uptime;
 
 }

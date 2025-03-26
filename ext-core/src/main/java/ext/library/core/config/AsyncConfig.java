@@ -1,11 +1,10 @@
 package ext.library.core.config;
 
-import java.util.Arrays;
-import java.util.concurrent.Executor;
-
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

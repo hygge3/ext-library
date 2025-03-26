@@ -1,9 +1,8 @@
 package ext.library.satoken.service;
 
+import cn.dev33.satoken.stp.StpInterface;
 import java.util.Collections;
 import java.util.List;
-
-import cn.dev33.satoken.stp.StpInterface;
 
 /**
  * sa-token 权限管理实现类

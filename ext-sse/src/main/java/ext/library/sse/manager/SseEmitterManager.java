@@ -1,16 +1,17 @@
 package ext.library.sse.manager;
 
+import jakarta.annotation.Nonnull;
+
+import ext.library.json.util.JsonUtil;
+import ext.library.redis.util.RedisUtil;
+import ext.library.sse.domain.SseMessage;
+import ext.library.tool.$;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-
-import ext.library.json.util.JsonUtil;
-import ext.library.redis.util.RedisUtil;
-import ext.library.sse.domain.SseMessage;
-import ext.library.tool.$;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -23,9 +24,9 @@ public class SseEmitterManager {
     /**
      * 订阅的频道
      */
-    private final static String SSE_TOPIC = "global:sse";
+     final static String SSE_TOPIC = "global:sse";
 
-    private final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
+     final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
 
     /**
      * 建立与指定用户的 SSE 连接
@@ -122,7 +123,7 @@ public class SseEmitterManager {
      *
      * @param sseMessage 要发布的 SSE 消息对象
      */
-    public void publishMessage(SseMessage sseMessage) {
+    public void publishMessage(@Nonnull SseMessage sseMessage) {
         List<String> unsentUserIds = new ArrayList<>();
         // 当前服务内用户，直接发送消息
         for (String userId : sseMessage.getUserIds()) {

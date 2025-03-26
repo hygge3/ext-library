@@ -1,5 +1,6 @@
 package ext.library.encrypt.handler;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import ext.library.encrypt.annotation.ResponseEncrypt;
@@ -9,7 +10,6 @@ import ext.library.encrypt.util.RSAUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.core.Exceptions;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -32,16 +32,16 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
     final CryptoProperties cryptoProperties;
 
     @Override
-    public boolean supports(MethodParameter returnType,
-                            @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(@Nonnull MethodParameter returnType,
+                            @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(ResponseEncrypt.class);
     }
 
     @Override
-    public Object beforeBodyWrite(Object body, @NotNull MethodParameter returnType,
-                                  @NotNull MediaType selectedContentType,
-                                  @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType, @NotNull ServerHttpRequest request,
-                                  @NotNull ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body, @Nonnull MethodParameter returnType,
+                                  @Nonnull MediaType selectedContentType,
+                                  @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request,
+                                  @Nonnull ServerHttpResponse response) {
         // NULL 值不做加密处理
         if (body == null) {
             return null;

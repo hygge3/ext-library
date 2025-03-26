@@ -1,5 +1,6 @@
 package ext.library.web.validation.validator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -11,10 +12,10 @@ import ext.library.web.validation.constraints.Xss;
  */
 public class XssValidator implements ConstraintValidator<Xss, String> {
 
-    private boolean notNull;
+     boolean notNull;
 
     @Override
-    public void initialize(Xss constraintAnnotation) {
+    public void initialize(@Nonnull Xss constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

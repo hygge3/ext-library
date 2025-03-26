@@ -1,19 +1,6 @@
 package ext.library.qrcode;
 
-import java.awt.*;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.EnumMap;
-import java.util.Hashtable;
-import java.util.Map;
+import jakarta.annotation.Nonnull;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -33,6 +20,20 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ImageUtil;
+import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.EnumMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * QRCode 读写，基于 nutz-plugins-qrcode 调整，简化使用
@@ -42,57 +43,57 @@ public class QrCode {
     /**
      * 二维码内容
      */
-    private final String content;
+    final String content;
 
     /**
      * 图片大小
      */
-    private int size;
+    int size;
 
     /**
      * 内容编码格式
      */
-    private Charset encode;
+    Charset encode;
 
     /**
      * 错误修正等级 (Error Collection Level)
      */
-    private ErrorCorrectionLevel errorCorrectionLevel;
+    ErrorCorrectionLevel errorCorrectionLevel;
 
     /**
      * 错误修正等级的具体值
      */
-    private double errorCorrectionLevelValue;
+    double errorCorrectionLevelValue;
 
     /**
      * 前景色
      */
-    private Color foreGroundColor;
+    Color foreGroundColor;
 
     /**
      * 背景色
      */
-    private Color backGroundColor;
+    Color backGroundColor;
 
     /**
      * 图片的文件格式
      */
-    private String imageFormat;
+    String imageFormat;
 
     /**
      * 删除图片的外白边
      */
-    private boolean deleteMargin;
+    boolean deleteMargin;
 
     /**
      * 提供给编码器额外的参数
      */
-    private final Map<EncodeHintType, Object> hints;
+    final Map<EncodeHintType, Object> hints;
 
     /**
      * 需要添加的图片
      */
-    private BufferedImage logo;
+    BufferedImage logo;
 
     /**
      * 创建一个带有默认值的 QRCode 生成器的格式。默认值如下
@@ -360,7 +361,7 @@ public class QrCode {
      * @param qrCodeFile 指定的文件
      * @return 文件
      */
-    public File toFile(File qrCodeFile) {
+    public File toFile(@Nonnull File qrCodeFile) {
         if (!qrCodeFile.exists()) {
             qrCodeFile.getParentFile().mkdirs();
         }
@@ -580,7 +581,7 @@ public class QrCode {
         }
     }
 
-    private static void addLogo(BufferedImage qrCodeImage, BufferedImage logoImage, QrCode qrCode) {
+    private static void addLogo(@Nonnull BufferedImage qrCodeImage, @Nonnull BufferedImage logoImage, @Nonnull QrCode qrCode) {
         int baseWidth = qrCodeImage.getWidth();
         int baseHeight = qrCodeImage.getHeight();
         // 计算 icon 的最大边长
@@ -613,7 +614,7 @@ public class QrCode {
         gc.dispose();
     }
 
-    private static Color getColor(String hexString) {
+    private static Color getColor(@Nonnull String hexString) {
         if ('#' == hexString.charAt(0)) {
             return new Color(Long.decode(hexString).intValue());
         } else {
@@ -621,7 +622,7 @@ public class QrCode {
         }
     }
 
-    private static BitMatrix deleteWhite(BitMatrix matrix) {
+    private static BitMatrix deleteWhite(@Nonnull BitMatrix matrix) {
         int[] rec = matrix.getEnclosingRectangle();
         int resWidth = rec[2] + 1;
         int resHeight = rec[3] + 1;

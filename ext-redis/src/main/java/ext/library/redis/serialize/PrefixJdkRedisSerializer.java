@@ -10,7 +10,7 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 @Slf4j
 public class PrefixJdkRedisSerializer extends JdkSerializationRedisSerializer {
 
-	private final IRedisPrefixConverter redisPrefixConverter;
+	 final IRedisPrefixConverter redisPrefixConverter;
 
 	public PrefixJdkRedisSerializer(IRedisPrefixConverter redisPrefixConverter) {
 		this.redisPrefixConverter = redisPrefixConverter;

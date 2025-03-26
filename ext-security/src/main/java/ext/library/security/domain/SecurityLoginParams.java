@@ -1,10 +1,5 @@
 package ext.library.security.domain;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-
 import com.google.common.collect.Maps;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
@@ -12,6 +7,10 @@ import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.tool.$;
 import ext.library.tool.constant.Holder;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,27 +26,27 @@ public class SecurityLoginParams implements Serializable {
     /**
      * 设备类型
      */
-    private String deviceType;
+     String deviceType;
 
     /**
      * 超时时间
      */
-    private Long timeout;
+     Long timeout;
 
     /**
      * 活跃超时时间
      */
-    private Long activityTimeout;
+     Long activityTimeout;
 
     /**
      * session 挂载数据
      */
-    private final Map<String, Object> mountData = Maps.newHashMap();
+     final Map<String, Object> mountData = Maps.newHashMap();
 
     /**
      * token 挂载数据
      */
-    private final Map<String, Object> tokenMountData = Maps.newHashMap();
+     final Map<String, Object> tokenMountData = Maps.newHashMap();
 
     /**
      * 获取设备类型

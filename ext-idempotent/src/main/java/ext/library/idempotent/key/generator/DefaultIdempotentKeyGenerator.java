@@ -1,10 +1,11 @@
 package ext.library.idempotent.key.generator;
 
-import java.lang.reflect.Method;
+import jakarta.annotation.Nonnull;
 
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.idempotent.annotation.Idempotent;
 import ext.library.tool.constant.Symbol;
+import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -25,7 +26,7 @@ public class DefaultIdempotentKeyGenerator implements IdempotentKeyGenerator {
      * @return String 幂等标识
      */
     @Override
-    public String generate(JoinPoint joinPoint,  Idempotent idempotentAnnotation) {
+    public String generate(JoinPoint joinPoint,  @Nonnull Idempotent idempotentAnnotation) {
         String uniqueExpression = idempotentAnnotation.uniqueExpression();
         // 如果没有填写表达式，直接返回 prefix
         if (Symbol.EMPTY.equals(uniqueExpression)) {

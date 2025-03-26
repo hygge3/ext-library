@@ -1,13 +1,14 @@
 package ext.library.mybatis.page;
 
-import java.util.Collections;
-import java.util.List;
+import jakarta.annotation.Nonnull;
 
 import com.github.pagehelper.PageInfo;
 import com.mybatisflex.core.paginate.Page;
 import ext.library.core.util.BeanUtil;
 import ext.library.tool.$;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Collections;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -24,10 +25,10 @@ public class PageResult<T> {
     protected List<T> records = Collections.emptyList();
 
     @Schema(title = "当前页码")
-    private long page = 1;
+    long page = 1;
 
     @Schema(title = "每页显示条数")
-    private long size = 10;
+    long size = 10;
 
     /**
      * 总数
@@ -53,14 +54,14 @@ public class PageResult<T> {
         this.total = total;
     }
 
-    public PageResult(Page<T> page) {
+    public PageResult(@Nonnull Page<T> page) {
         this.page = page.getPageNumber();
         this.size = page.getPageSize();
         this.records = page.getRecords();
         this.total = page.getTotalRow();
     }
 
-    public <S> PageResult(Page<S> page, Class<T> targetClass) {
+    public <S> PageResult(@Nonnull Page<S> page, Class<T> targetClass) {
         this.page = page.getPageNumber();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getRecords())) {
@@ -71,14 +72,14 @@ public class PageResult<T> {
         this.total = page.getTotalRow();
     }
 
-    public PageResult(com.github.pagehelper.Page<T> page) {
+    public PageResult(@Nonnull com.github.pagehelper.Page<T> page) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         this.records = page.getResult();
         this.total = page.getTotal();
     }
 
-    public <S> PageResult(com.github.pagehelper.Page<S> page, Class<T> targetClass) {
+    public <S> PageResult(@Nonnull com.github.pagehelper.Page<S> page, Class<T> targetClass) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getResult())) {
@@ -89,14 +90,14 @@ public class PageResult<T> {
         this.total = page.getTotal();
     }
 
-    public PageResult(PageInfo<T> page) {
+    public PageResult(@Nonnull PageInfo<T> page) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         this.records = page.getList();
         this.total = page.getTotal();
     }
 
-    public <S> PageResult(PageInfo<S> page, Class<T> targetClass) {
+    public <S> PageResult(@Nonnull PageInfo<S> page, Class<T> targetClass) {
         this.page = page.getPages();
         this.size = page.getPageSize();
         if ($.isEmpty(page.getList())) {
@@ -107,7 +108,7 @@ public class PageResult<T> {
         this.total = page.getTotal();
     }
 
-    public PageResult(long page, long size, List<T> list) {
+    public PageResult(long page, long size, @Nonnull List<T> list) {
         this.page = page;
         this.size = size;
         this.total = (long) list.size();
@@ -128,7 +129,7 @@ public class PageResult<T> {
         }
     }
 
-    public PageResult(List<T> list) {
+    public PageResult(@Nonnull List<T> list) {
         this.records = list;
         this.total = (long) list.size();
     }

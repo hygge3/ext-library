@@ -1,4 +1,4 @@
-package ext.library.core.util;
+package ext.library.security.util;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;

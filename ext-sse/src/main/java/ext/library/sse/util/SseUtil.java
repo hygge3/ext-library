@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class SseUtil {
 
-	private final static SseEmitterManager MANAGER = SpringUtil.getBean(SseEmitterManager.class);
+	 final static SseEmitterManager MANAGER = SpringUtil.getBean(SseEmitterManager.class);
 
 	/**
 	 * 向指定的 WebSocket 会话发送消息

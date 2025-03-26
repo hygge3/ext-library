@@ -1,8 +1,7 @@
 package ext.library.captcha.cache;
 
-import java.util.Objects;
-
 import ext.library.captcha.config.properties.CaptchaProperties;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -14,9 +13,9 @@ import org.springframework.cache.CacheManager;
 @RequiredArgsConstructor
 public class SpringCacheCaptchaCache implements ICaptchaCache, InitializingBean {
 
-	private final CaptchaProperties properties;
+	 final CaptchaProperties properties;
 
-	private final CacheManager cacheManager;
+	 final CacheManager cacheManager;
 
 	@Override
 	public void put(String cacheName, String uuid, String value) {

@@ -1,10 +1,6 @@
 package ext.library.security.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import jakarta.annotation.Nonnull;
 
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
@@ -21,7 +17,11 @@ import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
-import org.jetbrains.annotations.Nullable;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 认证接口
@@ -148,7 +148,6 @@ public interface SecurityService {
      * @param token 令牌
      * @return {@link String }
      */
-    @Nullable
     private static String cutPrefixToken(String token) {
         if ($.isEmpty(token)) {
             return null;
@@ -600,7 +599,7 @@ public interface SecurityService {
      *
      * @param securitySession SecuritySession
      */
-    private void setRequestInfo(SecuritySession securitySession) {
+    private void setRequestInfo(@Nonnull SecuritySession securitySession) {
         // 清空全局存储的自定义 token，防止登录时用户传入导致登录异常
         ServletUtil.removeRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN);
         // 将 token 设置到请求参数中
@@ -620,7 +619,7 @@ public interface SecurityService {
      *
      * @param securitySession SecuritySession
      */
-    private void setResponseInfo(SecuritySession securitySession) {
+    private void setResponseInfo(@Nonnull SecuritySession securitySession) {
         // 设置 header
         ServletUtil.setHeader(PROPERTIES.getSecurityName(),
                 appendTokenPrefix(securitySession.getCurrentSecurityToken().getToken()));

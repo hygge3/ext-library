@@ -1,12 +1,5 @@
 package ext.library.security.router;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
-
 import ext.library.core.util.ServletUtil;
 import ext.library.security.annotion.RequiresPermissions;
 import ext.library.security.annotion.RequiresRoles;
@@ -16,6 +9,12 @@ import ext.library.security.function.RouterFunction;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.$;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -31,7 +30,7 @@ public class SecurityRouter implements RouterFunction<Method> {
     /**
      * 忽略路由匹配列表
      */
-    private final List<String> excludePathList = new ArrayList<>();
+     final List<String> excludePathList = new ArrayList<>();
 
     private SecurityRouter() {
         // 全局忽略

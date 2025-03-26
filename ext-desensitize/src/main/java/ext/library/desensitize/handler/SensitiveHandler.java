@@ -1,7 +1,6 @@
 package ext.library.desensitize.handler;
 
-import java.io.IOException;
-import java.util.Objects;
+import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -11,6 +10,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
+import java.io.IOException;
+import java.util.Objects;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SensitiveHandler extends JsonSerializer<String> implements ContextualSerializer {
 
-    private IDesensitizeRule strategy;
+     IDesensitizeRule strategy;
 
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -34,7 +35,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
 
     @SneakyThrows
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+    public JsonSerializer<?> createContextual(SerializerProvider prov, @Nonnull BeanProperty property)
             throws JsonMappingException {
         Sensitive annotation = property.getAnnotation(Sensitive.class);
         if (Objects.nonNull(annotation) && Objects.equals(String.class, property.getType().getRawClass())) {

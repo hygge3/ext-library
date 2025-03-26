@@ -1,15 +1,16 @@
 package ext.library.websocket.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import jakarta.annotation.Nonnull;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.tool.$;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.PongMessage;
@@ -50,7 +51,7 @@ public class WebSocketUtil {
      *
      * @param webSocketMessage 要发布的 WebSocket 消息对象
      */
-    public void publishMessage(WebSocketMessage webSocketMessage) {
+    public void publishMessage(@Nonnull WebSocketMessage webSocketMessage) {
         List<String> unsentSessionKeys = new ArrayList<>();
         // 当前服务内 session，直接发送消息
         for (String sessionKey : webSocketMessage.getSessionKeys()) {

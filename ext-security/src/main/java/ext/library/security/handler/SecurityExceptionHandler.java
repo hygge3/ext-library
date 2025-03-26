@@ -1,14 +1,13 @@
 package ext.library.security.handler;
 
-import java.util.Map;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import ext.library.core.exception.BizCode;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.exception.UnauthorizedException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nls;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,7 +28,7 @@ public class SecurityExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
 
     }

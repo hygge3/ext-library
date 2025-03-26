@@ -1,5 +1,14 @@
 package ext.library.http;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import jakarta.annotation.Nonnull;
+
+import ext.library.tool.$;
+import ext.library.tool.core.Exceptions;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,14 +35,6 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import ext.library.tool.$;
-import ext.library.tool.core.Exceptions;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -933,20 +934,16 @@ public class HttpUtil {
                 .uri(URI.create(url)).timeout(duration).build();
     }
 
-    public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
+    public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, @Nonnull Map<String, Object> form, long timeout) {
         StringJoiner sj = new StringJoiner("&");
-        form.forEach((k, v) -> {
-            sj.add(k + "=" + v.toString());
-        });
+        form.forEach((k, v) -> sj.add(k + "=" + v.toString()));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPostRequest(url, headerMap, bodyPublisher, timeout);
     }
 
-    public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
+    public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, @Nonnull Map<String, Object> form, long timeout) {
         StringJoiner sj = new StringJoiner("&");
-        form.forEach((k, v) -> {
-            sj.add(k + "=" + v.toString());
-        });
+        form.forEach((k, v) -> sj.add(k + "=" + v.toString()));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPutRequest(url, headerMap, bodyPublisher, timeout);
     }

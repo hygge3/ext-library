@@ -1,15 +1,14 @@
 package ext.library.satoken.handler;
 
-import java.util.Map;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import ext.library.core.exception.BizCode;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nls;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,7 +25,7 @@ public class SaTokenExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 

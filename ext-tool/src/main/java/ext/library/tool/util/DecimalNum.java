@@ -2,7 +2,6 @@ package ext.library.tool.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
 import lombok.Getter;
 
 /**

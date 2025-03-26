@@ -1,10 +1,8 @@
 package ext.library.redis.serialize;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.lang.reflect.Type;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import ext.library.redis.serialize.CacheSerializer;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -13,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JacksonSerializer implements ext.library.redis.serialize.CacheSerializer {
 
-	private final ObjectMapper objectMapper;
+	 final ObjectMapper objectMapper;
 
 	/**
 	 * 反序列化方法

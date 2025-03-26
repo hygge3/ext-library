@@ -1,16 +1,8 @@
 package ext.library.captcha.core;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.function.Supplier;
-
 import javax.imageio.ImageIO;
+
+import jakarta.annotation.Nonnull;
 
 import ext.library.captcha.draw.BackgroundDraw;
 import ext.library.captcha.draw.CaptchaDraw;
@@ -21,6 +13,15 @@ import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.function.Supplier;
 import lombok.SneakyThrows;
 import org.springframework.core.io.ClassPathResource;
 
@@ -32,28 +33,28 @@ public class Captcha implements ICaptcha {
     /**
      * 默认的验证码大小，暂时不支持外部设置，因为字体大小是写死的，后期会加自动计算
      */
-    private static final int WIDTH = 130;
+     static final int WIDTH = 130;
 
-    private static final int HEIGHT = 48;
+     static final int HEIGHT = 48;
 
-    private static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf",
-            "JetBrainsMonoNL.ttf"};
+     static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf",
+     "JetBrainsMonoNL.ttf"};
 
-    private BackgroundDraw backgroundDraw;
+     BackgroundDraw backgroundDraw;
 
-    private CaptchaDraw captchaDraw;
+     CaptchaDraw captchaDraw;
 
-    private InterferenceDraw interferenceDraw;
+     InterferenceDraw interferenceDraw;
 
-    private Random random;
+     Random random;
 
-    private final Font[] fonts;
+     final Font[] fonts;
 
     public Captcha() {
         this(new RandomCaptchaDraw());
     }
 
-    public Captcha(CaptchaType type) {
+    public Captcha(@Nonnull CaptchaType type) {
         this(type.getCaptchaDraw());
     }
 
@@ -112,7 +113,7 @@ public class Captcha implements ICaptcha {
         return captchaDraw.validate(code, userInputCaptcha);
     }
 
-    private static Graphics2D initGraphics(BufferedImage image) {
+    private static Graphics2D initGraphics(@Nonnull BufferedImage image) {
         // 获取图形上下文
         Graphics2D graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -139,7 +140,7 @@ public class Captcha implements ICaptcha {
     }
 
     @SneakyThrows
-    private static Font loadFont(ClassPathResource resource) {
+    private static Font loadFont(@Nonnull ClassPathResource resource) {
         return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
     }
 

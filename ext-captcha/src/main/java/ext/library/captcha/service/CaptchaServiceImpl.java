@@ -1,11 +1,10 @@
 package ext.library.captcha.service;
 
-import java.io.OutputStream;
-
 import ext.library.captcha.cache.ICaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
 import ext.library.tool.$;
+import java.io.OutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,11 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CaptchaServiceImpl implements ICaptchaService {
 
-	private final CaptchaProperties properties;
+	final CaptchaProperties properties;
 
-	private final ICaptchaCache captchaCache;
+	final ICaptchaCache captchaCache;
 
-	private final Captcha captcha;
+	final Captcha captcha;
 
 	@Override
 	public void generate(String uuid, OutputStream outputStream) {

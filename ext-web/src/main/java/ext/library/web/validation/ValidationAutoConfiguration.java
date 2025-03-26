@@ -1,11 +1,10 @@
 package ext.library.web.validation;
 
-import java.util.Properties;
-
 import jakarta.validation.MessageInterpolator;
 import jakarta.validation.Validator;
 import jakarta.validation.executable.ExecutableValidator;
 
+import java.util.Properties;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

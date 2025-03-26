@@ -1,8 +1,7 @@
 package ext.library.tool.util.tree;
 
-import java.util.List;
-
 import ext.library.tool.$;
+import java.util.List;
 
 /**
  * 树形节点标识，同时定义树形结果中节点的基本行为。

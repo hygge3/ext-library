@@ -14,7 +14,7 @@ public class IdempotentProperties {
 
 	public static final String PREFIX = "ext.idempotent";
 
-	private KeyStoreType keyStoreType = KeyStoreType.MEMORY;
+	 KeyStoreType keyStoreType = KeyStoreType.MEMORY;
 
 	/**
 	 * 存储方式

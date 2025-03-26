@@ -1,7 +1,6 @@
 package ext.library.web.handler;
 
-import java.util.Set;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -12,9 +11,9 @@ import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StreamUtil;
 import ext.library.web.response.R;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.jetbrains.annotations.Nls;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.annotation.Order;
@@ -52,7 +51,7 @@ public class GlobalExceptionHandler {
      * 业务异常
      */
     @ExceptionHandler(BizException.class)
-    public R<Void> bizException(BizException e, HttpServletRequest request) {
+    public R<Void> bizException(@Nonnull BizException e, @Nonnull HttpServletRequest request) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());
     }
@@ -70,7 +69,7 @@ public class GlobalExceptionHandler {
      * 内部参数异常
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
+    public R<Void> illegalArgumentException(@Nonnull IllegalArgumentException e, HttpServletRequest request) {
         String message = $.format("不适当的参数:{}", e.getMessage());
         printLog(request, message, e);
         return R.failed(BizCode.ILLEGAL_ARGUMENT, message);
@@ -80,7 +79,7 @@ public class GlobalExceptionHandler {
      * 请求方式不支持
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public R<Void> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e,
+    public R<Void> httpRequestMethodNotSupportedException(@Nonnull HttpRequestMethodNotSupportedException e,
                                                           HttpServletRequest request) {
         String message = $.format("({}) 未支持", e.getMethod());
         printLog(request, message, e);
@@ -91,7 +90,7 @@ public class GlobalExceptionHandler {
      * 请求路径中缺少必需的路径变量
      */
     @ExceptionHandler(MissingPathVariableException.class)
-    public R<Void> missingPathVariableException(MissingPathVariableException e, HttpServletRequest request) {
+    public R<Void> missingPathVariableException(@Nonnull MissingPathVariableException e, HttpServletRequest request) {
         String message = $.format("缺少 path 变量：{}", e.getVariableName());
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
@@ -101,7 +100,7 @@ public class GlobalExceptionHandler {
      * 请求参数类型不匹配
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public R<Void> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
+    public R<Void> methodArgumentTypeMismatchException(@Nonnull MethodArgumentTypeMismatchException e,
                                                        HttpServletRequest request) {
         String message = $.format("方法参数类型不匹配：{}", e.getMessage());
         printLog(request, message, e);
@@ -116,7 +115,7 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public R<Void> missingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
+    public R<Void> missingServletRequestParameterException(@Nonnull MissingServletRequestParameterException e, HttpServletRequest request) {
         String message = $.format("缺少请求参数：{}", e.getParameterName());
         printLog(request, message, e);
         return R.failed(BizCode.BAD_REQUEST, message);
@@ -129,7 +128,7 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public R<Void> handlerMethodValidationException(HandlerMethodValidationException e,
+    public R<Void> handlerMethodValidationException(@Nonnull HandlerMethodValidationException e,
                                                     HttpServletRequest request) {
         String param = StreamUtil.join(e.getParameterValidationResults(), (allValidationResult) -> {
             String parameterName = allValidationResult.getMethodParameter().getParameterName();
@@ -273,7 +272,7 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public R<Void> maxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
+    public R<Void> maxUploadSizeExceededException(@Nonnull MaxUploadSizeExceededException e, HttpServletRequest request) {
         long maxUploadSize = e.getMaxUploadSize();
         String message = $.format("超出最大上传大小，最大：{}", maxUploadSize);
         printLog(request, message, e);
@@ -287,7 +286,7 @@ public class GlobalExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request,  String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -297,7 +296,7 @@ public class GlobalExceptionHandler {
      * @param result BindingResult
      * @return R
      */
-    private static R<Void> handleBindingResult(BindingResult result) {
+    private static R<Void> handleBindingResult(@Nonnull BindingResult result) {
         FieldError error = result.getFieldError();
         String message = Symbol.EMPTY;
         if (error != null) {
@@ -317,7 +316,7 @@ public class GlobalExceptionHandler {
      * @param violations 校验结果
      * @return R
      */
-    private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
+    private static R<Void> handleConstraintViolation(@Nonnull Set<ConstraintViolation<?>> violations) {
         ConstraintViolation<?> violation = violations.iterator().next();
         String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
         String message = $.format("{}:{}", path, violation.getMessage());

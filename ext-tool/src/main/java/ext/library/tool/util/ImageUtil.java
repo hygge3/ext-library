@@ -1,5 +1,9 @@
 package ext.library.tool.util;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+
+import ext.library.tool.core.Exceptions;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
@@ -10,11 +14,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-
-import ext.library.tool.core.Exceptions;
 import lombok.experimental.UtilityClass;
 
 /**

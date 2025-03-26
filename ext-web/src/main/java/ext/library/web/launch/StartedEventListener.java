@@ -1,8 +1,9 @@
 package ext.library.web.launch;
 
-import java.util.stream.Stream;
+import jakarta.annotation.Nonnull;
 
 import ext.library.tool.$;
+import java.util.stream.Stream;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.context.WebServerApplicationContext;
@@ -23,7 +24,7 @@ public class StartedEventListener {
     @Async
     @Order(Ordered.LOWEST_PRECEDENCE - 1)
     @EventListener(WebServerInitializedEvent.class)
-    public void afterStart( WebServerInitializedEvent event) {
+    public void afterStart( @Nonnull WebServerInitializedEvent event) {
         WebServerApplicationContext context = event.getApplicationContext();
         Environment environment = context.getEnvironment();
         String appName = $.defaultIfEmpty(environment.getProperty("spring.application.name"), "APP");

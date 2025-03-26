@@ -1,30 +1,13 @@
-/*
- * Copyright (c) 2019-2029, Dreamlu 卢春梦 (596392912@qq.com & www.dreamlu.net).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ext.library.web.validation.validator;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import ext.library.web.validation.constraints.RangeIn;
 import ext.library.tool.$;
+import ext.library.web.validation.constraints.RangeIn;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.util.StringUtils;
 
 /**
@@ -34,7 +17,7 @@ import org.springframework.util.StringUtils;
  */
 public class RangeInValidator implements ConstraintValidator<RangeIn, Object> {
 
-	private RangeIn rangeIn;
+	 RangeIn rangeIn;
 
 	@Override
 	public void initialize(RangeIn constraintAnnotation) {

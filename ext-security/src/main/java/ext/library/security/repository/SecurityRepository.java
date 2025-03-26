@@ -1,9 +1,8 @@
 package ext.library.security.repository;
 
-import java.util.List;
-
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
+import java.util.List;
 
 /**
  * <p>

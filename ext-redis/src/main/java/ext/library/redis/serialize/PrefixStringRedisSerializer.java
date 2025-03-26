@@ -1,8 +1,7 @@
 package ext.library.redis.serialize;
 
-import java.nio.charset.StandardCharsets;
-
 import ext.library.redis.prefix.IRedisPrefixConverter;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -12,7 +11,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Slf4j
 public class PrefixStringRedisSerializer extends StringRedisSerializer {
 
-    private final IRedisPrefixConverter iRedisPrefixConverter;
+     final IRedisPrefixConverter iRedisPrefixConverter;
 
     public PrefixStringRedisSerializer(IRedisPrefixConverter iRedisPrefixConverter) {
         super(StandardCharsets.UTF_8);

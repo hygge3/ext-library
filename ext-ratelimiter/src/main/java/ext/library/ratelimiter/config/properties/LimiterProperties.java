@@ -1,7 +1,6 @@
 package ext.library.ratelimiter.config.properties;
 
 import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,6 +21,6 @@ public class LimiterProperties implements Serializable {
 	/**
 	 * 开启限流
 	 */
-	private boolean enable;
+	 boolean enable;
 
 }

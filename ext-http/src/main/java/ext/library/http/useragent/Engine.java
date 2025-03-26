@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class Engine extends UserAgentInfo {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/** 未知 */
 	public static final Engine Unknown = new Engine(NameUnknown, null);
@@ -24,7 +24,7 @@ public class Engine extends UserAgentInfo {
 			new Engine("Gecko", "gecko"), new Engine("KHTML", "khtml"), new Engine("Konqueror", "konqueror"),
 			new Engine("MIDP", "MIDP"));
 
-	private final Pattern versionPattern;
+	 final Pattern versionPattern;
 
 	/**
 	 * 构造

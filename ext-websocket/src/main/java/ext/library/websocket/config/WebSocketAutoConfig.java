@@ -1,5 +1,7 @@
 package ext.library.websocket.config;
 
+import jakarta.annotation.Nonnull;
+
 import ext.library.tool.$;
 import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.handler.ExtWebSocketHandler;
@@ -27,7 +29,7 @@ public class WebSocketAutoConfig {
 
     @Bean
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor handshakeInterceptor,
-                                                   WebSocketHandler webSocketHandler, WebSocketProperties webSocketProperties) {
+                                                   WebSocketHandler webSocketHandler, @Nonnull WebSocketProperties webSocketProperties) {
         // 如果 WebSocket 的路径为空，则设置默认路径为 "/websocket"
         if ($.isBlank(webSocketProperties.getPath())) {
             webSocketProperties.setPath("/websocket");

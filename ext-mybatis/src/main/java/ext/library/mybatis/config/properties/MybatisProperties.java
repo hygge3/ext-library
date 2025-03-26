@@ -17,9 +17,9 @@ public class MybatisProperties {
 	 * <p>
 	 * 默认：false
 	 */
-	private Boolean sqlPrint = false;
+	 Boolean sqlPrint = false;
 
 	/** 删除字段 */
-	private String deleteField = "delete_time";
+	 String deleteField = "delete_time";
 
 }

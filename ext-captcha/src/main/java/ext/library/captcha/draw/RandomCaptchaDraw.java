@@ -1,10 +1,9 @@
 package ext.library.captcha.draw;
 
-import java.awt.*;
-import java.util.Random;
-
 import ext.library.captcha.core.CaptchaUtil;
 import ext.library.tool.$;
+import java.awt.*;
+import java.util.Random;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -15,14 +14,14 @@ public class RandomCaptchaDraw implements CaptchaDraw {
     /**
      * 默认的验证码数量，由于字体大小定死，后期再扩展自动一数量
      */
-    private static final int CODE_SIZE = 4;
+     static final int CODE_SIZE = 4;
 
     /**
      * 验证码随机字符数组
      */
-    private static final char[] CHAR_ARRAY = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+     static final char[] CHAR_ARRAY = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    private final int codeSize;
+     final int codeSize;
 
     public RandomCaptchaDraw() {
         this(CODE_SIZE);

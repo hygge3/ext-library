@@ -1,12 +1,11 @@
 package ext.library.holidays;
 
-import java.time.LocalDate;
-
 import ext.library.holidays.config.HolidaysAutoConfiguration;
 import ext.library.holidays.config.HolidaysProperties;
 import ext.library.holidays.core.DaysType;
 import ext.library.holidays.core.HolidaysApi;
 import ext.library.holidays.core.HolidaysApiImpl;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

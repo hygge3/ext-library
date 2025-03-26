@@ -1,11 +1,10 @@
 package ext.library.mail.sender;
 
-import java.util.List;
+import jakarta.annotation.Nonnull;
 
 import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.Nls;
+import java.util.List;
 import org.springframework.mail.MailSendException;
 import org.springframework.util.StringUtils;
 
@@ -31,7 +30,7 @@ public interface MailSender {
      * @param to       收件人，多个邮箱使用，号间隔
      * @return MailSendInfo
      */
-    default MailSendInfo sendMail(@Nls(capitalization = Nls.Capitalization.Title) String subject, String content, boolean showHtml, String... to) {
+    default MailSendInfo sendMail(String subject, String content, boolean showHtml, String... to) {
         MailDetails mailDetails = new MailDetails();
         mailDetails.setShowHtml(showHtml);
         mailDetails.setSubject(subject);
@@ -48,7 +47,7 @@ public interface MailSender {
      * @param to      收件人
      * @return MailSendInfo
      */
-    default MailSendInfo sendTextMail(@Nls(capitalization = Nls.Capitalization.Title) String subject, String content, String... to) {
+    default MailSendInfo sendTextMail(String subject, String content, String... to) {
         return sendMail(subject, content, false, to);
     }
 
@@ -60,7 +59,7 @@ public interface MailSender {
      * @param to      收件人
      * @return MailSendInfo
      */
-    default MailSendInfo sendTextMail(@Nls(capitalization = Nls.Capitalization.Title) String subject, String content, List<String> to) {
+    default MailSendInfo sendTextMail(String subject, String content, @Nonnull List<String> to) {
         return sendMail(subject, content, false, to.toArray(new String[0]));
     }
 
@@ -72,7 +71,7 @@ public interface MailSender {
      * @param to      收件人
      * @return MailSendInfo
      */
-    default MailSendInfo sendHtmlMail(@Nls(capitalization = Nls.Capitalization.Title) String subject, @Language("html") String content, String... to) {
+    default MailSendInfo sendHtmlMail(String subject, String content, String... to) {
         return sendMail(subject, content, true, to);
     }
 
@@ -84,7 +83,7 @@ public interface MailSender {
      * @param to      收件人
      * @return MailSendInfo 邮件发送结果信息
      */
-    default MailSendInfo sendHtmlMail(String subject, @Language("html") String content, List<String> to) {
+    default MailSendInfo sendHtmlMail(String subject, String content, @Nonnull List<String> to) {
         return sendHtmlMail(subject, content, to.toArray(new String[0]));
     }
 
@@ -93,7 +92,7 @@ public interface MailSender {
      *
      * @param mailDetails 邮件信息
      */
-    default void checkMail(MailDetails mailDetails) {
+    default void checkMail(@Nonnull MailDetails mailDetails) {
         boolean noTo = mailDetails.getTo() == null || mailDetails.getTo().length == 0;
         boolean noCc = mailDetails.getCc() == null || mailDetails.getCc().length == 0;
         boolean noBcc = mailDetails.getBcc() == null || mailDetails.getBcc().length == 0;

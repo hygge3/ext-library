@@ -264,8 +264,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     public static void unregisterBean(String beanName) {
         final ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
-        if (factory instanceof DefaultSingletonBeanRegistry) {
-            DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) factory;
+        if (factory instanceof DefaultSingletonBeanRegistry registry) {
             registry.destroySingleton(beanName);
         } else {
             throw Exceptions.throwOut("无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");

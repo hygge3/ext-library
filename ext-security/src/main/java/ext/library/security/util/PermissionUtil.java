@@ -1,13 +1,12 @@
 package ext.library.security.util;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
 import ext.library.core.util.SpringUtil;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.enums.Logical;
 import ext.library.tool.$;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -16,7 +15,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class PermissionUtil {
 
-    private static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
+     static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
 
     /**
      * 当前用户是否有角色

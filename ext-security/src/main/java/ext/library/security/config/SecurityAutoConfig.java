@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Bean;
 @Slf4j
 public class SecurityAutoConfig {
 
-    private final SecurityProperties securityProperties;
+     final SecurityProperties securityProperties;
 
     /**
      * 权限服务注入

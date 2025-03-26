@@ -13,16 +13,16 @@ public class WebSocketProperties {
     public static final String PREFIX = "ext.websocket";
 
     /** 启用 */
-    private Boolean enabled;
+     Boolean enabled;
 
     /**
      * 路径
      */
-    private String path;
+     String path;
 
     /**
      * 设置访问源地址
      */
-    private String allowedOrigins;
+     String allowedOrigins;
 
 }

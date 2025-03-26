@@ -1,12 +1,11 @@
 package ext.library.mybatis.base;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.mybatisflex.annotation.Column;
 import ext.library.core.util.BeanUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,40 +17,40 @@ import lombok.Setter;
 public abstract class BaseEntity implements Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * 创建者
 	 */
 	@Schema(title = "创建者")
-	private Long createBy;
+	 Long createBy;
 
 	/**
 	 * 创建时间
 	 */
 	@Schema(title = "创建时间")
 	@Column(onInsertValue = "NOW()")
-	private LocalDateTime createTime;
+	 LocalDateTime createTime;
 
 	/**
 	 * 更新者
 	 */
 	@Schema(title = "更新者")
-	private Long updateBy;
+	 Long updateBy;
 
 	/**
 	 * 修改时间
 	 */
 	@Schema(title = "修改时间")
 	@Column(onUpdateValue = "NOW()")
-	private LocalDateTime updateTime;
+	 LocalDateTime updateTime;
 
 	/**
 	 * 记录删除时间
 	 */
 	@Schema(title = "逻辑删除标识，已删除：删除时间戳，未删除：NULL")
 	@Column(isLogicDelete = true)
-	private LocalDateTime deleteTime;
+	 LocalDateTime deleteTime;
 
 	/**
 	 * 类型转换

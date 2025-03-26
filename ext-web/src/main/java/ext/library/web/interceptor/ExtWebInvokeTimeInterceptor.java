@@ -1,16 +1,15 @@
 package ext.library.web.interceptor;
 
-import java.util.Map;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,11 +22,11 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 @RequiredArgsConstructor
 public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
 
-    private final static ThreadLocal<StopWatch> KEY_CACHE = new ThreadLocal<>();
+    final static ThreadLocal<StopWatch> KEY_CACHE = new ThreadLocal<>();
 
     @Override
-    public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-                             @NotNull Object handler) throws Exception {
+    public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
+                             @Nonnull Object handler) throws Exception {
 
         // 打印请求参数
         if (isJsonRequest(request)) {
@@ -56,8 +55,8 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-                                @NotNull Object handler, Exception ex) throws Exception {
+    public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
+                                @Nonnull Object handler, Exception ex) throws Exception {
         StopWatch stopWatch = KEY_CACHE.get();
         stopWatch.stop();
         log.info("[🌐] {}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
@@ -70,7 +69,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
      * @param request request
      * @return boolean
      */
-    private boolean isJsonRequest( HttpServletRequest request) {
+    private boolean isJsonRequest(@Nonnull HttpServletRequest request) {
         String contentType = request.getContentType();
         if (contentType != null) {
             return contentType.startsWith(MediaType.APPLICATION_JSON_VALUE);

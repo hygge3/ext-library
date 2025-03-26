@@ -1,8 +1,7 @@
 package ext.library.desensitize.strategy;
 
-import java.util.function.Function;
-
 import ext.library.desensitize.util.DesensitizationUtil;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 
 /**
@@ -41,7 +40,7 @@ public enum SensitiveStrategy implements IDesensitizeRule {
 
     // 可自行添加其他脱敏策略
 
-    private final Function<String, String> desensitizer;
+     final Function<String, String> desensitizer;
 
     /**
      * 脱敏操作

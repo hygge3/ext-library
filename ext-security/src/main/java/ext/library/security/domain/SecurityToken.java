@@ -1,14 +1,13 @@
 package ext.library.security.domain;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.tool.core.Exceptions;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,57 +25,57 @@ import lombok.NoArgsConstructor;
 public class SecurityToken implements Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * token
 	 */
-	private String token;
+	 String token;
 
 	/**
 	 * 登录 Id
 	 */
-	private String loginId;
+	 String loginId;
 
 	/**
 	 * 设备类型
 	 */
-	private String deviceType;
+	 String deviceType;
 
 	/**
 	 * 过期时间 单位秒
 	 */
-	private Long timeout;
+	 Long timeout;
 
 	/**
 	 * 活跃时间 格式 yyyy-MM-dd HH:mm:ss
 	 */
-	private String activityTime;
+	 String activityTime;
 
 	/**
 	 * 活跃超时时间 单位秒
 	 */
-	private Long activityTimeout;
+	 Long activityTimeout;
 
 	/**
 	 * 状态标记 1 正常 2 被踢下线 3 被顶下线 4 封禁
 	 */
-	private String state;
+	 String state;
 
 	/**
 	 * 创建时间 格式 yyyy-MM-dd HH:mm:ss
 	 */
-	private String createTime;
+	 String createTime;
 
 	/**
 	 * 更新时间 格式 yyyy-MM-dd HH:mm:ss
 	 */
-	private String updateTime;
+	 String updateTime;
 
 	/**
 	 * token 挂载数据
 	 */
-	private final Map<String, Object> tokenMountData = new HashMap<>();
+	 final Map<String, Object> tokenMountData = new HashMap<>();
 
 	/**
 	 * 设置存储信息

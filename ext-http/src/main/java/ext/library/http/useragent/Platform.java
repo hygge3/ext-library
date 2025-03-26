@@ -10,7 +10,7 @@ import java.util.List;
 public class Platform extends UserAgentInfo {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * 未知

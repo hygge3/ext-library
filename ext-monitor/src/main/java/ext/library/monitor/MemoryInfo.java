@@ -13,21 +13,21 @@ public class MemoryInfo {
 	/**
 	 * 总计
 	 */
-	private String total;
+	 String total;
 
 	/**
 	 * 已使用
 	 */
-	private String used;
+	 String used;
 
 	/**
 	 * 未使用
 	 */
-	private String free;
+	 String free;
 
 	/**
 	 * 使用率
 	 */
-	private double usePercent;
+	 double usePercent;
 
 }

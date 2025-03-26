@@ -1,12 +1,10 @@
 package ext.library.json.util;
 
-import java.util.Map;
-import java.util.Objects;
-
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
+import java.util.Map;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
-import org.intellij.lang.annotations.Language;
 
 /**
  * JsonPath 工具类
@@ -23,7 +21,7 @@ public class JsonPathUtil {
      * @param path 路径
      * @return {@link T }
      */
-    public <T> T readPath(@Language("json") String json, @Language("jsonpath") String path) {
+    public <T> T readPath(String json, String path) {
         return readPath(json).read(path);
     }
 
@@ -35,7 +33,7 @@ public class JsonPathUtil {
      * @param json json 字符串
      * @return {@link ReadContext }
      */
-    public ReadContext readPath(@Language("json") String json) {
+    public ReadContext readPath(String json) {
         return JsonPath.parse(json);
     }
 
@@ -46,7 +44,7 @@ public class JsonPathUtil {
      * @param path    路径
      * @return {@link ReadContext }
      */
-    public Boolean existPath(ReadContext context, @Language("jsonpath") String path) {
+    public Boolean existPath(ReadContext context, String path) {
         return Objects.nonNull(context.read(path));
     }
 

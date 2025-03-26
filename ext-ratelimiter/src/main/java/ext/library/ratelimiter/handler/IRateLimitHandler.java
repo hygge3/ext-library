@@ -1,7 +1,6 @@
 package ext.library.ratelimiter.handler;
 
-import java.lang.reflect.Method;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import ext.library.core.util.ServletUtil;
@@ -10,6 +9,7 @@ import ext.library.ratelimiter.annotation.RateLimiter;
 import ext.library.redis.constant.RedisKey;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.BeanFactoryResolver;
@@ -51,7 +51,7 @@ public interface IRateLimitHandler {
      * @param point       观点
      * @return {@code String }
      */
-    default String getCombineKey( RateLimiter rateLimiter, JoinPoint point) {
+    default String getCombineKey(@Nonnull RateLimiter rateLimiter, JoinPoint point) {
         String key = rateLimiter.key();
         if ($.isNotBlank(key)) {
             MethodSignature signature = (MethodSignature) point.getSignature();

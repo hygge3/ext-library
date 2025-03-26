@@ -1,14 +1,14 @@
 package ext.library.satoken.util;
 
-import java.util.Objects;
+import jakarta.annotation.Nonnull;
 
 import cn.dev33.satoken.session.SaSession;
-import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import ext.library.satoken.domain.SecurityUser;
 import ext.library.tool.$;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * 登录鉴权助手
@@ -41,18 +41,17 @@ public class LoginUtil {
      * 登录系统 基于 设备类型 针对相同用户体系不同设备
      *
      * @param loginUser 登录用户信息
-     * @param model     配置参数
+     * @param param     配置参数
      */
-    public static void login( SecurityUser loginUser, SaLoginModel model) {
-        model = $.defaultIfNull(model, new SaLoginModel());
-        StpUtil.login(loginUser.loginId(), model.setExtra(TENANT_KEY, loginUser.tenantId()).setExtra(USER_KEY, loginUser.loginId()).setExtra(USER_NAME_KEY, loginUser.username()));
+    public static void login(@Nonnull SecurityUser loginUser, SaLoginParameter param) {
+        param = $.defaultIfNull(param, new SaLoginParameter());
+        StpUtil.login(loginUser.loginId(), param.setExtra(TENANT_KEY, loginUser.tenantId()).setExtra(USER_KEY, loginUser.loginId()).setExtra(USER_NAME_KEY, loginUser.username()));
         StpUtil.getTokenSession().set(LOGIN_USER_KEY, loginUser);
     }
 
     /**
      * 获取用户 (多级缓存)
      */
-    @Nullable
     public static SecurityUser getLoginUser() {
         SaSession session = StpUtil.getTokenSession();
         if (Objects.isNull(session)) {
@@ -64,7 +63,6 @@ public class LoginUtil {
     /**
      * 获取用户基于 token
      */
-    @Nullable
     public static SecurityUser getLoginUser(String token) {
         SaSession session = StpUtil.getTokenSessionByToken(token);
         if (Objects.isNull(session)) {
@@ -114,7 +112,6 @@ public class LoginUtil {
      * @param key 键值
      * @return 对应的扩展数据
      */
-    @Nullable
     private static Object getExtra(String key) {
         try {
             return StpUtil.getExtra(key);

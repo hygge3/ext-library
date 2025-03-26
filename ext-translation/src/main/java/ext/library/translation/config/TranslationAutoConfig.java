@@ -1,9 +1,5 @@
 package ext.library.translation.config;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +7,9 @@ import ext.library.translation.annotation.TranslationType;
 import ext.library.translation.handler.TranslationBeanSerializerModifier;
 import ext.library.translation.handler.TranslationHandler;
 import ext.library.translation.service.TranslationInterface;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -23,9 +22,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 @AutoConfiguration(after = ObjectMapper.class)
 public class TranslationAutoConfig {
 
-	private final List<TranslationInterface<?>> list;
+	 final List<TranslationInterface<?>> list;
 
-	private final ObjectMapper objectMapper;
+	 final ObjectMapper objectMapper;
 
 	@PostConstruct
 	public void init() {

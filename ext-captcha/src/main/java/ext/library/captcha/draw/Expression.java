@@ -1,19 +1,20 @@
 package ext.library.captcha.draw;
 
-import java.util.Random;
+import jakarta.annotation.Nonnull;
 
 import ext.library.captcha.core.CaptchaUtil;
+import java.util.Random;
 
 /**
  * 数学表达式生成和计算
  */
 class Expression {
 
-    private static final char PLUS = '+';
+    static final char PLUS = '+';
 
-    private static final char MINUS = '-';
+    static final char MINUS = '-';
 
-    private static final char MULTIPLY = '×';
+    static final char MULTIPLY = '×';
 
     /**
      * 执行表达式
@@ -21,7 +22,7 @@ class Expression {
      * @param expr 表达式
      * @return 结果，-1 为 expr 表达式不合法
      */
-    public static int eval(String expr) {
+    public static int eval(@Nonnull String expr) {
         char[] chars = expr.toCharArray();
         int length = expr.length();
         for (int i = 0; i < chars.length; i++) {
@@ -49,7 +50,7 @@ class Expression {
      *
      * @return 表达式
      */
-    public static String randomExpr(Random random) {
+    public static String randomExpr(@Nonnull Random random) {
         char[] chars = new char[]{PLUS, MINUS, MULTIPLY};
         char operator = chars[random.nextInt(chars.length)];
         int num1;
@@ -71,7 +72,7 @@ class Expression {
         return String.valueOf(num1) + operator + num2;
     }
 
-    private static int findInt(String expr, int start, int end) {
+    private static int findInt(@Nonnull String expr, int start, int end) {
         return Integer.parseInt(expr.substring(start, end));
     }
 

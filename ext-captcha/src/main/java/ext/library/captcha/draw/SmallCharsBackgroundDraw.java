@@ -1,9 +1,10 @@
 package ext.library.captcha.draw;
 
-import java.awt.*;
-import java.util.Random;
+import jakarta.annotation.Nonnull;
 
 import ext.library.captcha.core.CaptchaUtil;
+import java.awt.*;
+import java.util.Random;
 
 /**
  * 小字符背景
@@ -18,10 +19,10 @@ public enum SmallCharsBackgroundDraw implements BackgroundDraw {
     /**
      * 验证码随机字符数组
      */
-    private static final char[] CHAR_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+     static final char[] CHAR_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     @Override
-    public void draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
+    public void draw(@Nonnull Graphics2D g, int width, int height, @Nonnull Font[] fonts, @Nonnull Random random) {
         // 设定字体，每次随机
         Font fontTemp = fonts[random.nextInt(fonts.length)];
         // 设定背景色，淡色

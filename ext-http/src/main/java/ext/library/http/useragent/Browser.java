@@ -1,11 +1,10 @@
 package ext.library.http.useragent;
 
+import com.google.common.collect.Lists;
 import java.io.Serial;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Lists;
 
 /**
  * 浏览器对象
@@ -13,7 +12,7 @@ import com.google.common.collect.Lists;
 public class Browser extends UserAgentInfo {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * 未知
@@ -94,7 +93,7 @@ public class Browser extends UserAgentInfo {
 		browers.add(new Browser(name, regex, versionRegex));
 	}
 
-	private Pattern versionPattern;
+	 Pattern versionPattern;
 
 	/**
 	 * 构造

@@ -1,7 +1,6 @@
 package ext.library.config;
 
-import java.util.List;
-import java.util.Optional;
+import jakarta.annotation.Nonnull;
 
 import ext.library.config.properties.OpenApiProperties;
 import ext.library.handler.OpenApiHandler;
@@ -10,6 +9,8 @@ import ext.library.tool.constant.Symbol;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
@@ -36,9 +37,9 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfiguration {
 
-	private final OpenApiProperties openApiProperties;
+	 final OpenApiProperties openApiProperties;
 
-	private final ServerProperties serverProperties;
+	 final ServerProperties serverProperties;
 
 	@Bean
 	@ConditionalOnMissingBean(OpenAPI.class)
@@ -64,7 +65,7 @@ public class OpenApiAutoConfiguration {
 		return openAPI;
 	}
 
-	private Info convertInfo( OpenApiProperties.InfoProperties infoProperties) {
+	private Info convertInfo( @Nonnull OpenApiProperties.InfoProperties infoProperties) {
 		Info info = new Info();
 		info.setTitle(infoProperties.getTitle());
 		info.setDescription(infoProperties.getDescription());

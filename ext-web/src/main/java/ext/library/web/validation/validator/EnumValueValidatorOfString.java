@@ -1,5 +1,6 @@
 package ext.library.web.validation.validator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -11,12 +12,12 @@ import ext.library.web.validation.constraints.OneOfStrings;
  */
 public class EnumValueValidatorOfString implements ConstraintValidator<OneOfStrings, String> {
 
-    private String[] stringList;
+     String[] stringList;
 
-    private boolean allowNull;
+     boolean allowNull;
 
     @Override
-    public void initialize(OneOfStrings constraintAnnotation) {
+    public void initialize(@Nonnull OneOfStrings constraintAnnotation) {
         this.stringList = constraintAnnotation.value();
         this.allowNull = constraintAnnotation.allowNull();
     }

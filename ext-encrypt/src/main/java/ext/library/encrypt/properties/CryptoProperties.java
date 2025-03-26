@@ -19,16 +19,16 @@ public class CryptoProperties {
 	public static final String PREFIX = "ext.crypto";
 
 	/** 算法 */
-	private Algorithm algo;
+	 Algorithm algo;
 
 	/**
 	 * RSA 公钥
 	 */
-	private String publicKey;
+	 String publicKey;
 
 	/**
 	 * RSA 私钥
 	 */
-	private String secretKey;
+	 String secretKey;
 
 }

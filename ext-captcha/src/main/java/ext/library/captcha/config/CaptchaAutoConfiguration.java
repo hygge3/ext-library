@@ -1,5 +1,7 @@
 package ext.library.captcha.config;
 
+import jakarta.annotation.Nonnull;
+
 import ext.library.captcha.cache.ICaptchaCache;
 import ext.library.captcha.cache.SpringCacheCaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
@@ -23,7 +25,7 @@ public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Captcha imageCaptcha(CaptchaProperties properties) {
+    public Captcha imageCaptcha(@Nonnull CaptchaProperties properties) {
         return new Captcha(properties.getCaptchaType());
     }
 

@@ -1,9 +1,10 @@
 package ext.library.web.validation;
 
+import jakarta.annotation.Nonnull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Locale;
-
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 
@@ -14,7 +15,7 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
  */
 public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessageInterpolator {
 
-    private static final String EMPTY_CURLY_BRACES = "{}";
+     static final String EMPTY_CURLY_BRACES = "{}";
 
     public EmptyCurlyToDefaultMessageInterpolator() {
     }
@@ -24,7 +25,7 @@ public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessag
     }
 
     @Override
-    public String interpolate(String message, Context context, Locale locale) {
+    public String interpolate(@Nonnull String message, Context context, Locale locale) {
 
         // 如果包含花括号占位符
         if (message.contains(EMPTY_CURLY_BRACES)) {

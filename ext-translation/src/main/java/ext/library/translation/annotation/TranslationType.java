@@ -1,13 +1,12 @@
 package ext.library.translation.annotation;
 
+import ext.library.translation.service.TranslationInterface;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import ext.library.translation.service.TranslationInterface;
 
 /**
  * 翻译类型注解 (标注到{@link TranslationInterface} 的实现类)

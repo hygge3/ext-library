@@ -17,7 +17,7 @@ import org.springframework.core.annotation.Order;
 public class SseTopicListener implements ApplicationRunner {
 
     @Autowired
-    private SseEmitterManager sseEmitterManager;
+     SseEmitterManager sseEmitterManager;
 
     /**
      * 在 Spring Boot 应用程序启动时初始化 SSE 主题订阅监听器

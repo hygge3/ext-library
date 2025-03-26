@@ -1,12 +1,12 @@
 package ext.library.web.validation.validator;
 
-import java.util.Map;
-
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import ext.library.core.util.BeanUtil;
 import ext.library.web.validation.constraints.Exclusion;
+import java.util.Map;
 
 
 /**
@@ -14,10 +14,10 @@ import ext.library.web.validation.constraints.Exclusion;
  */
 public class ExclusionValidator implements ConstraintValidator<Exclusion, Object> {
 
-    private String[] exclusions;
+     String[] exclusions;
 
     @Override
-    public void initialize(Exclusion constraintAnnotation) {
+    public void initialize(@Nonnull Exclusion constraintAnnotation) {
         this.exclusions = constraintAnnotation.value();
     }
 

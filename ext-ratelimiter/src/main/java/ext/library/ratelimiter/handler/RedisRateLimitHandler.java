@@ -1,8 +1,9 @@
 package ext.library.ratelimiter.handler;
 
-import java.util.Collections;
+import jakarta.annotation.Nonnull;
 
 import ext.library.ratelimiter.annotation.RateLimiter;
+import java.util.Collections;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -18,7 +19,7 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
 
     /** Redis Lua 脚本 */
     // language=redis
-    private static final RedisScript<Long> REDIS_SCRIPT_RATE_LIMIT = RedisScript.of("""
+    static final RedisScript<Long> REDIS_SCRIPT_RATE_LIMIT = RedisScript.of("""
             local key = KEYS[1];
             local count = tonumber(ARGV[1]);
             local interval = tonumber(ARGV[2]);
@@ -28,10 +29,10 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
             """, Long.class);
 
     @Setter
-    private static RedisTemplate<String, String> redisTemplate;
+    static RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public boolean proceed(RateLimiter rateLimiter, JoinPoint point) {
+    public boolean proceed(@Nonnull RateLimiter rateLimiter, JoinPoint point) {
         // 间隔时间解析为秒
         long interval = DurationStyle.detectAndParse(rateLimiter.interval()).getSeconds();
         final String key = getCombineKey(rateLimiter, point);

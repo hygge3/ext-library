@@ -1,15 +1,15 @@
 package ext.library.web.config;
 
 
-import java.util.List;
+import jakarta.annotation.Nonnull;
 
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -39,13 +39,13 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @ConditionalOnWebApplication(type = SERVLET)
 public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
-    private final WebMvcProperties webMvcProperties;
+    final WebMvcProperties webMvcProperties;
 
     /**
      * 注册自定义的 Body 参数解析器
      */
     @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+    public void addArgumentResolvers(@Nonnull List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
         WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
     }
@@ -63,7 +63,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addFormatters(@NotNull FormatterRegistry registry) {
+    public void addFormatters(@Nonnull FormatterRegistry registry) {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setTimeFormatter(DateUtil.FORMATTER_HMS);
         registrar.setDateFormatter(DateUtil.FORMATTER_YMD);
@@ -72,7 +72,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Override
-    public void addInterceptors(@NotNull InterceptorRegistry registry) {
+    public void addInterceptors(@Nonnull InterceptorRegistry registry) {
         if (webMvcProperties.getInvokeTimeEnabled()) {
             log.info("[⏱️] 请求调用时间统计拦截器");
             // 全局访问性能拦截
@@ -86,7 +86,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(@Nonnull ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/favicon.ico")
                 .addResourceLocations("classpath*:/static/")
                 .addResourceLocations("classpath*:/resources/")
@@ -120,7 +120,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         return bean;
     }
 
-    private static CorsConfiguration getCorsConfiguration(WebMvcProperties.CorsConfig corsConfig) {
+    private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
         corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());

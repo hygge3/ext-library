@@ -1,12 +1,9 @@
-package ext.library.redis.lock;
+package ext.library.redis.util;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-
-import ext.library.redis.util.RedisUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.intellij.lang.annotations.Language;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
@@ -68,7 +65,7 @@ public class DistributedLockUtil {
      * 释放锁
      **/
     public void releaseLock(String key, String value) {
-        @Language("Redis") String luaScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        String luaScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
         RedisUtil.execute(redisScript, Collections.singletonList(key), value);
     }

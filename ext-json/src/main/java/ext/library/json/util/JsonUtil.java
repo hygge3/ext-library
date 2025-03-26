@@ -1,13 +1,5 @@
 package ext.library.json.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,10 +15,16 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
 import ext.library.json.module.CustomJavaTimeModule;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import org.intellij.lang.annotations.Language;
 
 /**
  * json 工具类
@@ -165,7 +163,7 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
-    public <T> T readObj(@Language("json") String json, Class<T> valueType) {
+    public <T> T readObj(String json, Class<T> valueType) {
         return MAPPER.readValue(json, valueType);
     }
 
@@ -217,7 +215,7 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
-    public <T> T readObj(@Language("json") String json, JavaType javaType) {
+    public <T> T readObj(String json, JavaType javaType) {
         return MAPPER.readValue(json, javaType);
     }
 
@@ -269,7 +267,7 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
-    public <T> T readObj(@Language("json") String json, TypeReference<T> typeReference) {
+    public <T> T readObj(String json, TypeReference<T> typeReference) {
         return MAPPER.readValue(json, typeReference);
     }
 
@@ -324,7 +322,7 @@ public class JsonUtil {
      * @param <T>          泛型
      * @return {@link List}<{@link T}>
      */
-    public <T> List<T> readList(@Language("json") String json, Class<T> elementClass) {
+    public <T> List<T> readList(String json, Class<T> elementClass) {
         return readObj(json, getListType(elementClass));
     }
 
@@ -377,7 +375,7 @@ public class JsonUtil {
      * @param json jsonString
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public Map<String, Object> readMap(@Language("json") String json) {
+    public Map<String, Object> readMap(String json) {
         return readMap(json, String.class, Object.class);
     }
 
@@ -419,7 +417,7 @@ public class JsonUtil {
      * @param <V>        泛型
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public <V> Map<String, V> readMap(@Language("json") String json, Class<?> valueClass) {
+    public <V> Map<String, V> readMap(String json, Class<?> valueClass) {
         return readMap(json, String.class, valueClass);
     }
 
@@ -469,7 +467,7 @@ public class JsonUtil {
      * @param <V>        泛型
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public <K, V> Map<K, V> readMap(@Language("json") String json, Class<?> keyClass, Class<?> valueClass) {
+    public <K, V> Map<K, V> readMap(String json, Class<?> keyClass, Class<?> valueClass) {
         return readObj(json, getMapType(keyClass, valueClass));
     }
 
@@ -622,7 +620,7 @@ public class JsonUtil {
      * @param json json 字符串
      * @return 是否成功
      */
-    public boolean isValidJson(@Language("json") String json) {
+    public boolean isValidJson(String json) {
         ObjectMapper mapper = MAPPER.copy();
         mapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
         mapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
@@ -645,7 +643,7 @@ public class JsonUtil {
      * @return jsonString json 字符串
      */
     @SneakyThrows({JsonProcessingException.class})
-    public JsonNode readTree(@Language("json") String json) {
+    public JsonNode readTree(String json) {
         return MAPPER.readTree(Objects.requireNonNull(json, "jsonString is null"));
     }
 

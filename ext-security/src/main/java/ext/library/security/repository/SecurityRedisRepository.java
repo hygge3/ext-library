@@ -1,5 +1,14 @@
 package ext.library.security.repository;
 
+import jakarta.annotation.Nonnull;
+
+import ext.library.json.util.JsonUtil;
+import ext.library.redis.util.RedisUtil;
+import ext.library.security.constants.SecurityConstant;
+import ext.library.security.constants.SecurityRedisConstant;
+import ext.library.security.domain.SecuritySession;
+import ext.library.security.domain.SecurityToken;
+import ext.library.tool.$;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -10,14 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import ext.library.json.util.JsonUtil;
-import ext.library.redis.util.RedisUtil;
-import ext.library.security.constants.SecurityConstant;
-import ext.library.security.constants.SecurityRedisConstant;
-import ext.library.security.domain.SecuritySession;
-import ext.library.security.domain.SecurityToken;
-import ext.library.tool.$;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,7 +55,7 @@ public class SecurityRedisRepository implements SecurityRepository {
     }
 
     @Override
-    public boolean saveSecuritySession(SecuritySession session) {
+    public boolean saveSecuritySession(@Nonnull SecuritySession session) {
         String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
         String sessionJson = JsonUtil.toJson(session);
         if (null == session.getTimeout() || SecurityConstant.NON_EXPIRING.equals(session.getTimeout())) {
@@ -151,7 +152,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      * @return boolean
      */
     @Override
-    public boolean saveToken(SecurityToken token) {
+    public boolean saveToken(@Nonnull SecurityToken token) {
         String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
         String tokenJson = JsonUtil.toJson(token);
         if (null == token.getTimeout() || SecurityConstant.NON_EXPIRING.equals(token.getTimeout())) {

@@ -13,26 +13,26 @@ public class SysInfo {
 	/**
 	 * 系统名称
 	 */
-	private String name;
+	 String name;
 
 	/**
 	 * 系统 ip
 	 */
-	private String ip;
+	 String ip;
 
 	/**
 	 * 操作系统
 	 */
-	private String osName;
+	 String osName;
 
 	/**
 	 * 系统架构
 	 */
-	private String osArch;
+	 String osArch;
 
 	/**
 	 * 项目路径
 	 */
-	private String userDir;
+	 String userDir;
 
 }

@@ -11,7 +11,7 @@ import org.springframework.cache.CacheManager;
 @UtilityClass
 public class CacheUtil {
 
-    private static final CacheManager CACHE_MANAGER = SpringUtil.getBean(CacheManager.class);
+     static final CacheManager CACHE_MANAGER = SpringUtil.getBean(CacheManager.class);
 
     /**
      * 获取缓存值

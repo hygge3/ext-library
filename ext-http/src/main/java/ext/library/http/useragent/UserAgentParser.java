@@ -2,7 +2,6 @@ package ext.library.http.useragent;
 
 import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * User-Agent 解析器
@@ -16,7 +15,6 @@ public class UserAgentParser {
      * @param userAgentString User-Agent 字符串
      * @return {@link UserAgent}
      */
-    @Nullable
     public UserAgent parse(String userAgentString) {
         if ($.isEmpty(userAgentString)) {
             return null;

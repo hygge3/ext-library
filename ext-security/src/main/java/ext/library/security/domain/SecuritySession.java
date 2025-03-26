@@ -1,5 +1,12 @@
 package ext.library.security.domain;
 
+import ext.library.core.util.SpringUtil;
+import ext.library.json.util.JsonUtil;
+import ext.library.security.constants.SecurityConstant;
+import ext.library.security.listener.SecurityEventPublishManager;
+import ext.library.security.repository.SecurityRepository;
+import ext.library.tool.$;
+import ext.library.tool.core.Exceptions;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,14 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import ext.library.core.util.SpringUtil;
-import ext.library.json.util.JsonUtil;
-import ext.library.security.constants.SecurityConstant;
-import ext.library.security.listener.SecurityEventPublishManager;
-import ext.library.security.repository.SecurityRepository;
-import ext.library.tool.$;
-import ext.library.tool.core.Exceptions;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,52 +35,52 @@ import lombok.extern.slf4j.Slf4j;
 public class SecuritySession implements Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * sessionId
 	 */
-	private String securitySessionId;
+	 String securitySessionId;
 
 	/**
 	 * 登录 Id
 	 */
-	private String loginId;
+	 String loginId;
 
 	/**
 	 * 过期时间 单位秒
 	 */
-	private Long timeout;
+	 Long timeout;
 
 	/**
 	 * 当前的 SecurityToken
 	 */
-	private SecurityToken currentSecurityToken;
+	 SecurityToken currentSecurityToken;
 
 	/**
 	 * 挂载数据
 	 */
-	private final Map<String, Object> mountData = new HashMap<>();
+	 final Map<String, Object> mountData = new HashMap<>();
 
 	/**
 	 * 创建时间 格式 yyyy-MM-dd HH:mm:ss
 	 */
-	private String createTime;
+	 String createTime;
 
 	/**
 	 * 更新时间 格式 yyyy-MM-dd HH:mm:ss
 	 */
-	private String updateTime;
+	 String updateTime;
 
 	/**
 	 * 登录的 token 列表
 	 */
-	private List<SecurityToken> tokenInfoList = new ArrayList<>();
+	 List<SecurityToken> tokenInfoList = new ArrayList<>();
 
 	/**
 	 * 版本号
 	 */
-	private Long version;
+	 Long version;
 
 	public SecuritySession(boolean isCreate) {
 		if (isCreate) {

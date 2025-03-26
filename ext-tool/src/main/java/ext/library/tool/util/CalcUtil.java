@@ -1,10 +1,9 @@
 package ext.library.tool.util;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 import com.google.common.base.Preconditions;
 import ext.library.tool.$;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import lombok.experimental.UtilityClass;
 
 /**

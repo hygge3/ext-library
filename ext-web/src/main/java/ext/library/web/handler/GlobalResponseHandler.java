@@ -1,6 +1,8 @@
 package ext.library.web.handler;
 
 
+import jakarta.annotation.Nonnull;
+
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.web.annotation.RestWrapper;
@@ -27,7 +29,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值
      */
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
         // 不需要包装
         if (!returnType.hasMethodAnnotation(RestWrapper.class) && !returnType.getContainingClass().isAnnotationPresent(RestWrapper.class)) {
             return false;
@@ -52,7 +54,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * @return {@link Object }
      */
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body,@Nonnull  MethodParameter returnType,@Nonnull  MediaType selectedContentType,@Nonnull  Class<? extends HttpMessageConverter<?>> selectedConverterType,@Nonnull  ServerHttpRequest request,@Nonnull  ServerHttpResponse response) {
         if ($.isNull(body)) {
             return R.ok();
         }

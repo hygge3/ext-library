@@ -3,7 +3,6 @@ package ext.library.websocket.holder;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.socket.WebSocketSession;
@@ -14,7 +13,7 @@ import org.springframework.web.socket.WebSocketSession;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WebSocketSessionHolder {
 
-    private static final Map<String, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
+     static final Map<String, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
 
     /**
      * 将 WebSocket 会话添加到用户会话 Map 中

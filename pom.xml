@@ -23,12 +23,10 @@
         <module>ext-holidays</module>
         <module>ext-http</module>
         <module>ext-idempotent</module>
-        <module>ext-log</module>
         <module>ext-mail</module>
         <module>ext-monitor</module>
         <module>ext-mybatis</module>
         <module>ext-openapi</module>
-        <module>ext-pay</module>
         <module>ext-qrcode</module>
         <module>ext-ratelimiter</module>
         <module>ext-satoken</module>
@@ -146,11 +144,6 @@
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-log</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
                 <artifactId>ext-mail</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -167,11 +160,6 @@
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-openapi</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-pay</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -242,12 +230,6 @@
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
-            </dependency>
-            <!-- jetbrains-annotations -->
-            <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${jetbrains-annotations.version}</version>
             </dependency>
             <!-- oshi -->
             <dependency>

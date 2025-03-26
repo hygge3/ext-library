@@ -1,23 +1,22 @@
 package ext.library.encrypt.handler;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
-import com.google.common.base.Charsets;
 import ext.library.encrypt.annotation.RequestDecrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.encrypt.util.AESUtil;
 import ext.library.encrypt.util.RSAUtil;
 import ext.library.tool.core.Exceptions;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -41,14 +40,14 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
     final CryptoProperties cryptoProperties;
 
     @Override
-    public boolean supports(MethodParameter methodParameter, @NotNull Type targetType,
-                            @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(@Nonnull MethodParameter methodParameter, @Nonnull Type targetType,
+                            @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
         return methodParameter.hasMethodAnnotation(RequestDecrypt.class);
     }
 
     @Override
-    public @NotNull HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, @NotNull MethodParameter parameter,
-                                                    @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType)
+    public @Nonnull HttpInputMessage beforeBodyRead(@Nonnull HttpInputMessage inputMessage, @Nonnull MethodParameter parameter,
+                                                    @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType)
             throws IOException {
         String decryptStr = StreamUtils.copyToString(inputMessage.getBody(), Charset.defaultCharset());
 
@@ -61,13 +60,13 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
                     yield RSAUtil.decryptByPrivateKey(decryptStr, cryptoProperties.getSecretKey());
             };
             return new HttpInputMessage() {
-                @NotNull
+                @Nonnull
                 @Override
                 public InputStream getBody() throws IOException {
-                    return new ByteArrayInputStream(decrypt.getBytes(Charsets.UTF_8));
+                    return new ByteArrayInputStream(decrypt.getBytes(StandardCharsets.UTF_8));
                 }
 
-                @NotNull
+                @Nonnull
                 @Override
                 public HttpHeaders getHeaders() {
                     return inputMessage.getHeaders();

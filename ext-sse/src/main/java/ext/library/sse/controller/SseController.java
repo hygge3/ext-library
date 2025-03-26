@@ -1,12 +1,11 @@
 package ext.library.sse.controller;
 
-import java.util.List;
-
 import ext.library.security.util.SecurityUtil;
 import ext.library.sse.config.properties.SseProperties;
 import ext.library.sse.domain.SseMessage;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.web.annotation.RestWrapper;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class SseController implements DisposableBean {
 
-	private final SseEmitterManager sseEmitterManager;
+	 final SseEmitterManager sseEmitterManager;
 
 	/**
 	 * 建立 SSE 连接

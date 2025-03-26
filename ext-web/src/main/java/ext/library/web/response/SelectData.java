@@ -16,36 +16,36 @@ public class SelectData<T> {
 	 * 显示的数据
 	 */
 	@Schema(title = "显示的数据", requiredMode = REQUIRED)
-	private String name;
+	 String name;
 
 	/**
 	 * 选中获取的属性
 	 */
 	@Schema(title = "选中获取的属性", requiredMode = REQUIRED)
-	private T value;
+	 T value;
 
 	/**
 	 * 是否被选中
 	 */
 	@Schema(title = "是否被选中")
-	private Boolean selected;
+	 Boolean selected;
 
 	/**
 	 * 是否禁用
 	 */
 	@Schema(title = "是否禁用")
-	private Boolean disabled;
+	 Boolean disabled;
 
 	/**
 	 * 分组标识
 	 */
 	@Schema(title = "分组标识")
-	private String type;
+	 String type;
 
 	/**
 	 * 附加属性
 	 */
 	@Schema(title = "附加属性")
-	private T attributes;
+	 T attributes;
 
 }

@@ -1,13 +1,14 @@
 package ext.library.ratelimiter.aspect;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import jakarta.annotation.Nonnull;
 
 import ext.library.ratelimiter.annotation.RateLimiter;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -24,9 +25,9 @@ public class RateLimiterAspect {
 	/**
 	 * 缓存方法上的源注解信息。减少反射的开销
 	 */
-	private static final Map<String, RateLimiter> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
+	 static final Map<String, RateLimiter> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
 
-	private final IRateLimitHandler rateLimitHandler;
+	 final IRateLimitHandler rateLimitHandler;
 
 	/**
 	 * 限流注解切面
@@ -35,7 +36,7 @@ public class RateLimiterAspect {
 	 * @throws Throwable 限流异常
 	 */
 	@Around("@annotation(ext.library.ratelimiter.annotation.RateLimiter)")
-	public Object interceptor( ProceedingJoinPoint pjp) throws Throwable {
+	public Object interceptor( @Nonnull ProceedingJoinPoint pjp) throws Throwable {
 		MethodSignature signature = (MethodSignature) pjp.getSignature();
 		Method method = signature.getMethod();
 		RateLimiter rateLimiter = getRateLimit(signature.getMethod(), method.getName());

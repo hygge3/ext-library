@@ -3,7 +3,6 @@ package ext.library.http.useragent;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.regex.Pattern;
-
 import lombok.Getter;
 
 /**
@@ -13,22 +12,22 @@ import lombok.Getter;
 public class UserAgentInfo implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
+     static final long serialVersionUID = 1L;
 
     /**
      * 未知类型
      */
-    public static final String NameUnknown = "Unknown";
+     static final String NameUnknown = "Unknown";
 
     /**
      * 信息名称
      */
-    private final String name;
+     final String name;
 
     /**
      * 信息匹配模式
      */
-    private final Pattern pattern;
+     final Pattern pattern;
 
     /**
      * 构造

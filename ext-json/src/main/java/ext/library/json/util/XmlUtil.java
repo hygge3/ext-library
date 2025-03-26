@@ -1,8 +1,5 @@
 package ext.library.json.util;
 
-import java.io.InputStream;
-import java.io.StringReader;
-
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -12,11 +9,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import jakarta.annotation.Nullable;
+
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import java.io.InputStream;
+import java.io.StringReader;
 import lombok.extern.slf4j.Slf4j;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -75,7 +74,7 @@ public class XmlUtil {
      * @param xmlStr xml 字符串
      * @return XmlHelper
      */
-    public static XmlUtil safe(@Language("xml") String xmlStr) {
+    public static XmlUtil safe(String xmlStr) {
         try (StringReader sr = new StringReader(xmlStr.trim())) {
             InputSource inputSource = new InputSource(sr);
             return XmlUtil.createSafe(inputSource);
@@ -99,7 +98,7 @@ public class XmlUtil {
      * @param xmlStr xml 字符串
      * @return XmlHelper
      */
-    public static XmlUtil unsafe(@Language("xml") String xmlStr) {
+    public static XmlUtil unsafe(String xmlStr) {
         try (StringReader sr = new StringReader(xmlStr.trim())) {
             InputSource inputSource = new InputSource(sr);
             return XmlUtil.createUnsafe(inputSource);

@@ -1,16 +1,15 @@
 package ext.library.desensitize.annotion;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import ext.library.desensitize.handler.SensitiveHandler;
 import ext.library.desensitize.strategy.IDesensitizeRule;
 import ext.library.desensitize.strategy.SensitiveStrategy;
 import ext.library.desensitize.strategy.UnknownDesensitizeRule;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 自定义 jackson 注解，标注在属性上

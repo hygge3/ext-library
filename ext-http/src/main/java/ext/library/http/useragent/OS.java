@@ -1,11 +1,10 @@
 package ext.library.http.useragent;
 
+import com.google.common.collect.Lists;
 import java.io.Serial;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Lists;
 
 /**
  * 系统对象
@@ -13,7 +12,7 @@ import com.google.common.collect.Lists;
 public class OS extends UserAgentInfo {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * 未知

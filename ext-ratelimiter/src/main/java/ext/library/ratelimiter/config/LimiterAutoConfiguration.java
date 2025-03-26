@@ -1,8 +1,8 @@
 package ext.library.ratelimiter.config;
 
 import ext.library.ratelimiter.aspect.RateLimiterAspect;
-import ext.library.ratelimiter.handler.IRateLimitHandler;
 import ext.library.ratelimiter.config.properties.LimiterProperties;
+import ext.library.ratelimiter.handler.IRateLimitHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

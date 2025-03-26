@@ -1,13 +1,12 @@
 package ext.library.mybatis.handler;
 
-import java.sql.SQLSyntaxErrorException;
-import java.util.Map;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import ext.library.core.exception.BizCode;
+import java.sql.SQLSyntaxErrorException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nls;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
@@ -33,7 +32,7 @@ public class MybatisExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(HttpServletRequest request, @Nls String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request,  String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -68,7 +67,7 @@ public class MybatisExceptionHandler {
      * Mybatis 系统异常 通用处理
      */
     @ExceptionHandler(MyBatisSystemException.class)
-    public Map<String, Object> myBatisSystemException(MyBatisSystemException e, HttpServletRequest request) {
+    public Map<String, Object> myBatisSystemException(@Nonnull MyBatisSystemException e, HttpServletRequest request) {
         String message = e.getMessage();
         if ("CannotFindDataSourceException".contains(message)) {
             printLog(request, "未找到数据源", e);

@@ -1,5 +1,12 @@
 package ext.library.security.repository;
 
+import jakarta.annotation.Nonnull;
+
+import ext.library.security.constants.SecurityConstant;
+import ext.library.security.domain.SecuritySession;
+import ext.library.security.domain.SecurityToken;
+import ext.library.tool.$;
+import ext.library.tool.core.Exceptions;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -9,12 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-
-import ext.library.security.constants.SecurityConstant;
-import ext.library.security.domain.SecuritySession;
-import ext.library.security.domain.SecurityToken;
-import ext.library.tool.$;
-import ext.library.tool.core.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,19 +29,19 @@ public class SecurityRamRepository implements SecurityRepository {
     /**
      * SecuritySession 存储
      */
-    private static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
+     static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * SecurityToken 存储
      */
-    private static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
+     static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * 记录数据版本信息
      */
-    private static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
+     static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     @Override
@@ -82,7 +83,7 @@ public class SecurityRamRepository implements SecurityRepository {
     }
 
     @Override
-    public boolean saveSecuritySession(SecuritySession session) {
+    public boolean saveSecuritySession(@Nonnull SecuritySession session) {
         Long version = versionMap.get().get(session.getLoginId());
         version = null == version ? 0L : version;
         if (null != session.getVersion() && !session.getVersion().equals(version)) {

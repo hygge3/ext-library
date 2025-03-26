@@ -1,6 +1,6 @@
 package ext.library.mybatis.config;
 
-import java.util.Properties;
+import jakarta.annotation.Nonnull;
 
 import com.github.pagehelper.PageInterceptor;
 import com.mybatisflex.core.FlexGlobalConfig;
@@ -12,9 +12,9 @@ import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import ext.library.mybatis.config.properties.MybatisProperties;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import java.util.Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.intellij.lang.annotations.Language;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,12 +39,12 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         QueryColumnBehavior.setSmartConvertInToEquals(true);
     }
 
-    private static String formatSQL(@Language("sql") String sql) {
+    private static String formatSQL(@Nonnull String sql) {
         return sql.replaceAll("\\s+", Symbol.SPACE).replace("\\r", Symbol.SPACE).replace("\\n", Symbol.SPACE);
     }
 
     @Override
-    public void customize(FlexGlobalConfig globalConfig) {
+    public void customize(@Nonnull FlexGlobalConfig globalConfig) {
         // 全局配置逻辑删除字段
         globalConfig.setLogicDeleteColumn(mybatisProperties.getDeleteField());
         if (mybatisProperties.getSqlPrint()) {

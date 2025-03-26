@@ -2,7 +2,6 @@ package ext.library.http.useragent;
 
 import java.io.Serial;
 import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,47 +13,47 @@ import lombok.Setter;
 public class UserAgent implements Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	 static final long serialVersionUID = 1L;
 
 	/**
 	 * 是否为移动平台
 	 */
-	private boolean mobile;
+	 boolean mobile;
 
 	/**
 	 * 浏览器类型
 	 */
-	private Browser browser;
+	 Browser browser;
 
 	/**
 	 * 浏览器版本
 	 *
 	 */
-	private String version;
+	 String version;
 
 	/**
 	 * 平台类型
 	 */
-	private Platform platform;
+	 Platform platform;
 
 	/**
 	 * 系统类型
 	 */
-	private OS os;
+	 OS os;
 
 	/**
 	 * 系统版本
 	 */
-	private String osVersion;
+	 String osVersion;
 
 	/**
 	 * 引擎类型
 	 */
-	private Engine engine;
+	 Engine engine;
 
 	/**
 	 * 引擎版本
 	 */
-	private String engineVersion;
+	 String engineVersion;
 
 }

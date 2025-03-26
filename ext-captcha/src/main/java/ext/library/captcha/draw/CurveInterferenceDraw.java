@@ -1,10 +1,11 @@
 package ext.library.captcha.draw;
 
+import jakarta.annotation.Nonnull;
+
+import ext.library.captcha.core.CaptchaUtil;
 import java.awt.*;
 import java.awt.geom.CubicCurve2D;
 import java.util.Random;
-
-import ext.library.captcha.core.CaptchaUtil;
 
 /**
  * 双曲线干扰
@@ -17,7 +18,7 @@ public enum CurveInterferenceDraw implements InterferenceDraw {
 	INSTANCE;
 
 	@Override
-	public void draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
+	public void draw(@Nonnull Graphics2D g, int width, int height, Font[] fonts, Random random) {
 		// 复用上层颜色，width 是线宽，float 型
 		g.setStroke(new BasicStroke(1.8F));
 		int x1 = 5;

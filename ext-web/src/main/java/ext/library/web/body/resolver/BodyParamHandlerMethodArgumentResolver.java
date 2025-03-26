@@ -1,16 +1,15 @@
 package ext.library.web.body.resolver;
 
-import java.io.BufferedReader;
-import java.util.Objects;
-
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import java.io.BufferedReader;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -24,8 +23,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 @Slf4j
 public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    private static final String POST = "post";
-    private static final String APPLICATION_JSON = "application/json";
+    static final String POST = "post";
+    static final String APPLICATION_JSON = "application/json";
 
     /**
      * 判断是否需要处理该参数
@@ -35,14 +34,14 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
      * {@code false} otherwise
      */
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(@Nonnull MethodParameter parameter) {
         // 只处理带有@BodyParam 注解的参数
         return parameter.hasParameterAnnotation(BodyParam.class);
     }
 
     @Override
-    public Object resolveArgument(@NotNull MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(@Nonnull MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  @Nonnull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String contentType = Objects.requireNonNull(request).getContentType();
 

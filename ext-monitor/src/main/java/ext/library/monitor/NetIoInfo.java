@@ -13,21 +13,21 @@ public class NetIoInfo {
 	/**
 	 * 每秒钟接收的数据包，rxpck/s
 	 */
-	private String rxpck;
+	 String rxpck;
 
 	/**
 	 * 每秒钟发送的数据包，txpck/s
 	 */
-	private String txpck;
+	 String txpck;
 
 	/**
 	 * 每秒钟接收的 KB 数，rxkB/s
 	 */
-	private String rxbyt;
+	 String rxbyt;
 
 	/**
 	 * 每秒钟发送的 KB 数，txkB/s
 	 */
-	private String txbyt;
+	 String txbyt;
 
 }

@@ -1,5 +1,6 @@
 package ext.library.web.validation.validator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -12,10 +13,10 @@ import ext.library.web.validation.constraints.ZipCode;
  */
 public class ZipCodeValidator implements ConstraintValidator<ZipCode, String> {
 
-    private boolean notNull;
+     boolean notNull;
 
     @Override
-    public void initialize(ZipCode constraintAnnotation) {
+    public void initialize(@Nonnull ZipCode constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

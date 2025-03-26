@@ -1,5 +1,6 @@
 package ext.library.web.validation.validator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,10 +14,10 @@ import ext.library.web.validation.constraints.English;
  */
 public class EnglishValidator implements ConstraintValidator<English, String> {
 
-    private boolean notNull;
+     boolean notNull;
 
     @Override
-    public void initialize(English constraintAnnotation) {
+    public void initialize(@Nonnull English constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

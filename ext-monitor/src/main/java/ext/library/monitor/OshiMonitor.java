@@ -10,7 +10,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import oshi.SystemInfo;
@@ -34,7 +33,7 @@ public class OshiMonitor {
 	/**
 	 * 获取系统信息
 	 */
-	private SystemInfo systemInfo;
+	 SystemInfo systemInfo;
 
 	/**
 	 * 获取硬件抽象层信息

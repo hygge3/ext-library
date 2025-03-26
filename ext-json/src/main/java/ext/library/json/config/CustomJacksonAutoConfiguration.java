@@ -1,10 +1,6 @@
 package ext.library.json.config;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,9 +10,13 @@ import ext.library.json.module.CustomJavaTimeModule;
 import ext.library.json.serializer.BigNumberSerializer;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.util.DateUtil;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -49,7 +49,7 @@ public class CustomJacksonAutoConfiguration {
     public Converter<String, LocalDateTime> localDateTimeConvert() {
         return new Converter<String, LocalDateTime>() {
             @Override
-            public LocalDateTime convert(@NotNull String source) {
+            public LocalDateTime convert(@Nonnull String source) {
                 return LocalDateTime.parse(source, DateUtil.FORMATTER_YMD_HMS);
             }
         };
@@ -64,7 +64,7 @@ public class CustomJacksonAutoConfiguration {
     public Converter<String, LocalDate> localDateConvert() {
         return new Converter<String, LocalDate>() {
             @Override
-            public LocalDate convert(@NotNull String source) {
+            public LocalDate convert(@Nonnull  String source) {
                 return LocalDate.parse(source, DateUtil.FORMATTER_YMD);
             }
         };
@@ -79,7 +79,7 @@ public class CustomJacksonAutoConfiguration {
     public Converter<String, LocalTime> localTimeConvert() {
         return new Converter<String, LocalTime>() {
             @Override
-            public LocalTime convert(@NotNull String source) {
+            public LocalTime convert(@Nonnull  String source) {
                 return LocalTime.parse(source, DateUtil.FORMATTER_HMS);
             }
         };
@@ -122,7 +122,7 @@ public class CustomJacksonAutoConfiguration {
     @Bean
     @ConditionalOnClass(ObjectMapper.class)
     @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
+    public ObjectMapper objectMapper(@Nonnull Jackson2ObjectMapperBuilder builder) {
         // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致

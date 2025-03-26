@@ -1,13 +1,13 @@
 package ext.library.mail.sender;
 
-import java.io.File;
-import java.time.LocalDateTime;
-
+import jakarta.annotation.Nonnull;
 import jakarta.mail.MessagingException;
 
 import ext.library.mail.event.MailSendEvent;
 import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
+import java.io.File;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +23,9 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class MailSenderImpl implements MailSender {
 
-    private final JavaMailSender mailSender;
+    final JavaMailSender mailSender;
 
-    private final ApplicationEventPublisher eventPublisher;
+    final ApplicationEventPublisher eventPublisher;
 
     /**
      * 配置文件中我的邮箱
@@ -66,7 +66,7 @@ public class MailSenderImpl implements MailSender {
      *
      * @param mailDetails 邮件发送设置
      */
-    private void sendMimeMail( MailDetails mailDetails) throws MessagingException {
+    private void sendMimeMail(@Nonnull MailDetails mailDetails) throws MessagingException {
         // true 表示支持复杂类型
         MimeMessageHelper messageHelper = new MimeMessageHelper(mailSender.createMimeMessage(), true);
         String from = StringUtils.hasText(mailDetails.getFrom()) ? mailDetails.getFrom() : this.defaultFrom;

@@ -46,10 +46,10 @@ public class SnowflakeId {
     final long sequenceMask = ~(-1L << sequenceBits);
 
     /** 工作机器 ID(0~31) */
-    long workerId;
+    final long workerId;
 
     /** 数据中心 ID(0~31) */
-    long datacenterId;
+    final long datacenterId;
 
     /** 毫秒内序列 (0~4095) */
     long sequence = 0L;

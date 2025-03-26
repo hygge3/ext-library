@@ -1,10 +1,9 @@
 package ext.library.web.response;
 
-import java.io.Serializable;
-
 import ext.library.core.exception.BizCode;
 import ext.library.core.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,19 +27,19 @@ public class R<T> implements Serializable {
      * 响应状态码
      */
     @Schema(title = "返回状态码", defaultValue = "200")
-    private int code;
+     int code;
 
     /**
      * 响应提示
      */
     @Schema(title = "返回信息", defaultValue = "Success")
-    private String msg;
+     String msg;
 
     /**
      * 业务数据
      */
     @Schema(title = "数据", nullable = true, defaultValue = "null")
-    private T data;
+     T data;
 
     public static <T> R<T> ok() {
         return ok(null);

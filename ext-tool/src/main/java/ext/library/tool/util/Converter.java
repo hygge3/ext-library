@@ -1,11 +1,10 @@
 package ext.library.tool.util;
 
+import ext.library.tool.$;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
-
-import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 
 /**

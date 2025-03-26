@@ -1,10 +1,9 @@
 package ext.library.captcha.service;
 
+import ext.library.captcha.vo.CaptchaVO;
 import java.io.OutputStream;
 import java.util.Base64;
 import java.util.UUID;
-
-import ext.library.captcha.vo.CaptchaVO;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
