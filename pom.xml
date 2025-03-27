@@ -16,6 +16,7 @@
         <module>ext-core</module>
         <module>ext-json</module>
         <module>ext-redis</module>
+        <module>ext-cache</module>
         <module>ext-security</module>
         <module>ext-captcha</module>
         <module>ext-desensitize</module>
@@ -175,6 +176,11 @@
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-cache</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
