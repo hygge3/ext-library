@@ -71,10 +71,7 @@ public class TreeBuilder<T, K> {
         // 3. 构建树结构
         nodeMap.forEach((nodeId, node) -> {
             List<T> children = parentChildrenMap.getOrDefault(nodeId, Collections.emptyList())
-                    .stream()
-                    .sorted(comparator)
-                    .toList();
-
+                    .stream().sorted(comparator).toList();
             childSetter.setChildren(node, children);
         });
 
@@ -132,8 +129,7 @@ public class TreeBuilder<T, K> {
      */
     private void detectCyclicDependencies(@Nonnull List<T> items, Map<K, T> nodeMap) {
         Set<K> verifiedNodes = new HashSet<>();
-        Map<K, K> idToParentMap = items.stream()
-                .collect(Collectors.toMap(idGetter, parentIdGetter));
+        Map<K, K> idToParentMap = items.stream().collect(Collectors.toMap(idGetter, parentIdGetter));
 
         for (T item : items) {
             K currentId = idGetter.apply(item);
