@@ -1,8 +1,6 @@
 package ext.library.satoken.config;
 
-import cn.dev33.satoken.stp.StpInterface;
 import ext.library.satoken.handler.SaTokenExceptionHandler;
-import ext.library.satoken.service.SaPermissionImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -12,20 +10,12 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 public class SaTokenAutoConfig {
 
-	/**
-	 * 权限接口实现 (使用 bean 注入方便用户替换)
-	 */
-	@Bean
-	public StpInterface stpInterface() {
-		return new SaPermissionImpl();
-	}
-
-	/**
-	 * 异常处理器
-	 */
-	@Bean
-	public SaTokenExceptionHandler saTokenExceptionHandler() {
-		return new SaTokenExceptionHandler();
-	}
+    /**
+     * 异常处理器
+     */
+    @Bean
+    public SaTokenExceptionHandler saTokenExceptionHandler() {
+        return new SaTokenExceptionHandler();
+    }
 
 }

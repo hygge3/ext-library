@@ -148,4 +148,30 @@ public class Threads {
         return THREAD_LOCAL.get().get(key);
     }
 
+
+    /**
+     * 从当前线程的本地存储中移除指定键的值。
+     *
+     * @param key 需要移除的键
+     * @return 被移除的值，若键不存在则返回 null
+     */
+    public String remove(String key) {
+        // 通过线程本地存储获取当前线程的上下文并执行移除操作
+        return THREAD_LOCAL.get().remove(key);
+    }
+
+
+    /**
+     * 清除当前线程的线程局部变量（ThreadLocal）中的值。
+     *
+     * <p>此方法调用 {@link ThreadLocal#remove()} 方法，移除当前线程中与此 ThreadLocal 关联的值。
+     * 调用此方法后，当前线程将不再持有该 ThreadLocal 的值，避免潜在的内存泄漏问题。</p>
+     *
+     * @see ThreadLocal#remove()
+     */
+    public void clear() {
+        // 移除当前线程中与 THREAD_LOCAL 关联的值
+        THREAD_LOCAL.remove();
+    }
+
 }
