@@ -5,11 +5,11 @@ import jakarta.annotation.Nonnull;
 import com.github.pagehelper.PageInterceptor;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
-import com.mybatisflex.core.logicdelete.LogicDeleteProcessor;
-import com.mybatisflex.core.logicdelete.impl.DateTimeLogicDeleteProcessor;
 import com.mybatisflex.core.query.QueryColumnBehavior;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import ext.library.mybatis.config.properties.MybatisProperties;
+import ext.library.mybatis.util.TenantUtil;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import java.util.Properties;
@@ -50,13 +50,14 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         if (mybatisProperties.getSqlPrint()) {
             AuditManager.setAuditEnable(true);
             // SQL 打印
-            AuditManager.setMessageCollector(auditMessage -> log.info("[🐦] result:{},take:{}ms,{}", auditMessage.getQueryCount(), auditMessage.getElapsedTime(), formatSQL(auditMessage.getFullSql())));
+            AuditManager.setMessageCollector(auditMessage -> log.info("[🐦] RN:{},TTE:{}ms,SQL:{}", auditMessage.getQueryCount(), auditMessage.getElapsedTime(), formatSQL(auditMessage.getFullSql())));
         }
-    }
-
-    @Bean
-    public LogicDeleteProcessor logicDeleteProcessor() {
-        return new DateTimeLogicDeleteProcessor();
+        if (mybatisProperties.getTenant()) {
+            TenantManager.setTenantFactory(() -> {
+                // 通过这里返回当前租户 ID
+                return new Object[]{TenantUtil.get()};
+            });
+        }
     }
 
     /**

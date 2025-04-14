@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.html.HtmlEscapers;
@@ -185,6 +186,43 @@ public class $ {
      */
     public boolean isNotNull(Object obj) {
         return Objects.nonNull(obj);
+    }
+
+    /**
+     * 获取对象的元素数量或长度
+     * 此方法旨在提供一个通用的途径来获取不同类型的对象的大小信息，包括集合、数组、迭代器等
+     * 对于非集合、非数组、非迭代器类型的对象，假设大小为 1，反映其存在性
+     *
+     * @param obj 要检查其大小的对象
+     * @return 对象的元素数量或长度如果对象为 null，则返回 0
+     */
+    public int size(Object obj) {
+        // 检查对象是否为 null，null 对象返回大小为 0
+        if (null == obj) {
+            return 0;
+        }
+        // 如果对象是 Collection 类型，直接调用其 size 方法返回大小
+        else if (obj instanceof Collection<?> coll) {
+            return coll.size();
+        }
+        // 如果对象是 Map 类型，直接调用其 size 方法返回大小
+        else if (obj instanceof Map<?, ?> map) {
+            return map.size();
+        }
+        // 如果对象是 Iterable 类型，将其转换为 List 后返回大小
+        else if (obj instanceof Iterable<?> iter) {
+            return Lists.newArrayList(iter).size();
+        }
+        // 如果对象是 Iterator 类型，使用 Iterators 工具类的 size 方法返回大小
+        else if (obj instanceof Iterator<?> iter) {
+            return Iterators.size(iter);
+        }
+        // 如果对象是数组类型，使用 Array 类的 getLength 方法返回数组长度
+        else if (obj.getClass().isArray()) {
+            return Array.getLength(obj);
+        }
+        // 对于非上述类型的对象，普通对象大小为 1
+        return 1;
     }
 
     /**

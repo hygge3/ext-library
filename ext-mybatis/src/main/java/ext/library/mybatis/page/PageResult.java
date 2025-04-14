@@ -6,7 +6,6 @@ import com.github.pagehelper.PageInfo;
 import com.mybatisflex.core.paginate.Page;
 import ext.library.core.util.BeanUtil;
 import ext.library.tool.$;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collections;
 import java.util.List;
 import lombok.Data;
@@ -15,33 +14,23 @@ import lombok.Data;
  * 分页返回结果
  */
 @Data
-@Schema(title = "分页返回结果")
 public class PageResult<T> {
 
     /**
      * 查询数据列表
      */
-    @Schema(title = "分页数据")
-    protected List<T> records = Collections.emptyList();
+    protected List<T> records;
 
-    @Schema(title = "当前页码")
-    long page = 1;
+    /** 当前页码 */
+    long page;
 
-    @Schema(title = "每页显示条数")
-    long size = 10;
+    /** 每页显示条数 */
+    long size;
 
     /**
-     * 总数
+     * 数据总量
      */
-    @Schema(title = "数据总量")
-    protected Long total = 0L;
-
-    public PageResult() {
-    }
-
-    public PageResult(long total) {
-        this.total = total;
-    }
+    protected Long total;
 
     /**
      * 分页
@@ -108,30 +97,41 @@ public class PageResult<T> {
         this.total = page.getTotal();
     }
 
+    /**
+     * 构造函数，用于初始化 PageResult 对象
+     * 此构造函数接收当前页码、页面大小和一个列表，计算总记录数，并根据当前页码和大小从列表中提取当前页的记录
+     *
+     * @param page 当前页码，用于确定从列表中提取哪一部分作为当前页的记录
+     * @param size 页面大小，用于确定每页包含的记录数
+     * @param list 原始列表，从中提取当前页的记录
+     */
     public PageResult(long page, long size, @Nonnull List<T> list) {
         this.page = page;
         this.size = size;
+        // 计算总记录数
         this.total = (long) list.size();
+        // 判断列表是否为空，如果为空，则将 records 设置为空列表
         if ($.isEmpty(list)) {
             this.records = Collections.emptyList();
         } else {
+            // 由于页码从 1 开始计数，所以在计算索引时需要减 1
             page = page - 1;
+            // 计算当前页的起始索引
             long fromIndex = page * size;
+            // 如果起始索引大于等于总记录数，说明当前页码已经超出列表范围，直接将整个列表作为当前页的记录返回
             if (fromIndex >= total) {
                 this.records = list;
                 return;
             }
+            // 计算当前页的结束索引
             long toIndex = ((page + 1) * size);
+            // 如果结束索引大于总记录数，说明已经超出列表范围，需要将结束索引设置为总记录数
             if (toIndex > total) {
                 toIndex = total;
             }
+            // 从列表中提取当前页的记录
             this.records = list.subList(Math.toIntExact(fromIndex), Math.toIntExact(toIndex));
         }
-    }
-
-    public PageResult(@Nonnull List<T> list) {
-        this.records = list;
-        this.total = (long) list.size();
     }
 
 }

@@ -3,7 +3,9 @@ package ext.library.mybatis.handler;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
+import com.mybatisflex.core.exception.MybatisFlexException;
 import ext.library.core.exception.BizCode;
+import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ public class MybatisExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(@Nonnull HttpServletRequest request,  String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -75,6 +77,24 @@ public class MybatisExceptionHandler {
         }
         printLog(request, "Mybatis exception", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis exception");
+    }
+
+    /**
+     * Mybatis Flex 系统异常 通用处理
+     */
+    @ExceptionHandler(MybatisFlexException.class)
+    public Map<String, Object> mybatisFlexException(@Nonnull MybatisFlexException e, HttpServletRequest request) {
+        printLog(request, "Mybatis Flex exception", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis Flex exception");
+    }
+
+    /**
+     * SQL 系统异常 通用处理
+     */
+    @ExceptionHandler(SQLException.class)
+    public Map<String, Object> sQLException(@Nonnull SQLException e, HttpServletRequest request) {
+        printLog(request, "Mybatis Flex exception", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis Flex exception");
     }
 
     /**

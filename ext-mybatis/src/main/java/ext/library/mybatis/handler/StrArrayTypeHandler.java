@@ -17,44 +17,45 @@ import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
 /**
- * Mybatis 数组，符串互转
+ * Mybatis 字符数组，字符串互转
  * <p>
  * MappedJdbcTypes 数据库中的数据类型 MappedTypes java 中的的数据类型
  */
-@MappedTypes(value = {Long[].class})
+@MappedTypes(value = {String[].class})
 @MappedJdbcTypes(value = JdbcType.VARCHAR)
-public class JsonLongArrayTypeHandler extends BaseTypeHandler<Long[]> {
+public class StrArrayTypeHandler extends BaseTypeHandler<String[]> {
 
     @Override
-    public void setNonNullParameter(@Nonnull PreparedStatement ps, int i, Long[] parameter, JdbcType jdbcType)
-        throws SQLException {
+    public void setNonNullParameter(@Nonnull PreparedStatement ps, int i, String[] parameter, JdbcType jdbcType)
+            throws SQLException {
         ps.setString(i, ArrayUtil.join(parameter, Symbol.COMMA));
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult( @Nonnull ResultSet rs, String columnName) {
+    public String[] getNullableResult(@Nonnull ResultSet rs, String columnName) {
         String reString = rs.getString(columnName);
-        return toLongArray(reString);
+        return toStrArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult( @Nonnull ResultSet rs, int columnIndex) {
+    public String[] getNullableResult(@Nonnull ResultSet rs, int columnIndex) {
         String reString = rs.getString(columnIndex);
-        return toLongArray(reString);
+        return toStrArray(reString);
     }
 
     @Override
     @SneakyThrows
-    public Long[] getNullableResult( @Nonnull CallableStatement cs, int columnIndex) {
+    public String[] getNullableResult(@Nonnull CallableStatement cs, int columnIndex) {
         String reString = cs.getString(columnIndex);
-        return toLongArray(reString);
-    }
-    private Long[] toLongArray(String str) {
-        return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).stream().map(
-            $::toLong
-        ).toArray(Long[]::new);
+        return toStrArray(reString);
     }
 
+    private String[] toStrArray(String str) {
+        if ($.isBlank(str)) {
+            return new String[0];
+        }
+        return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).toArray(String[]::new);
+    }
 }

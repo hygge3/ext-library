@@ -3,6 +3,7 @@ package ext.library.tool.core;
 import jakarta.validation.constraints.Positive;
 
 import ext.library.tool.$;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -80,7 +81,7 @@ public class Threads {
     /**
      * InheritableThreadLocal 能让子线程继承父线程中已经设置的 ThreadLocal 值
      */
-    static final InheritableThreadLocal<Map<String, String>> THREAD_LOCAL = new InheritableThreadLocal<>();
+    static final InheritableThreadLocal<Map<String, Serializable>> THREAD_LOCAL = new InheritableThreadLocal<>();
 
     public String getFileName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getFileName();
@@ -119,18 +120,18 @@ public class Threads {
      * @param key   键
      * @param value 值
      */
-    public void put(String key, String value) {
-        Map<String, String> map = get();
+    public void put(String key, Serializable value) {
+        Map<String, Serializable> map = get();
         map.put(key, value);
     }
 
     /**
      * 获取已有的值
      *
-     * @return {@code Map<String, String> }
+     * @return {@code Map<String, Serializable> }
      */
-    private Map<String, String> get() {
-        Map<String, String> map = THREAD_LOCAL.get();
+    private Map<String, Serializable> get() {
+        Map<String, Serializable> map = THREAD_LOCAL.get();
         if ($.isEmpty(map)) {
             map = new HashMap<>(0);
             THREAD_LOCAL.set(map);
@@ -142,9 +143,9 @@ public class Threads {
      * 获得字符串
      *
      * @param key 键
-     * @return {@link String}
+     * @return {@link Serializable}
      */
-    public String getStr(String key) {
+    public Serializable get(String key) {
         return THREAD_LOCAL.get().get(key);
     }
 
@@ -155,7 +156,7 @@ public class Threads {
      * @param key 需要移除的键
      * @return 被移除的值，若键不存在则返回 null
      */
-    public String remove(String key) {
+    public Serializable remove(String key) {
         // 通过线程本地存储获取当前线程的上下文并执行移除操作
         return THREAD_LOCAL.get().remove(key);
     }
