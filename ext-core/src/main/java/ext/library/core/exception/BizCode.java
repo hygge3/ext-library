@@ -177,7 +177,7 @@ public enum BizCode implements ResponseCode {
      *
      * @return {@code BizException }
      */
-    public BizException createException() {
+    public BizException create() {
         return new BizException(this);
     }
 
