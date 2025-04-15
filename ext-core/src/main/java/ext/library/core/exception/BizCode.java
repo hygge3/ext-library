@@ -168,8 +168,17 @@ public enum BizCode implements ResponseCode {
 
     // endregion
 
-     final int code;
+    final int code;
 
-     final String msg;
+    final String msg;
+
+    /**
+     * 创建异常
+     *
+     * @return {@code BizException }
+     */
+    public BizException createException() {
+        return new BizException(this);
+    }
 
 }
