@@ -195,6 +195,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Path 参数类型不匹配异常
+     *
+     * @param e       e
+     * @param request 请求
+     * @return {@code R<Object> }
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public R<Object> methodArgumentTypeMismatchExceptionHandler(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+        printLog(request, e.getMessage(), e);
+        return R.failed(BizCode.BAD_REQUEST, e.getMessage());
+    }
+
+    /**
      * 处理不支持 HTTP 媒体类型异常
      *
      * @param e       e
@@ -286,7 +299,7 @@ public class GlobalExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(@Nonnull HttpServletRequest request,  String message, Exception e) {
+    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
         log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
     }
 

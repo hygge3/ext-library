@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
 import ext.library.json.module.CustomJavaTimeModule;
+import ext.library.tool.$;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -125,6 +126,15 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public String toJson(Object obj) {
+        if ($.isNull(obj)) {
+            return "";
+        }
+        if (obj instanceof String str) {
+            return str;
+        }
+        if (obj instanceof BigDecimal bd) {
+            return bd.toPlainString();
+        }
         return MAPPER.writeValueAsString(obj);
     }
 
@@ -136,6 +146,15 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public String toPrettyJson(Object obj) {
+        if ($.isNull(obj)) {
+            return "";
+        }
+        if (obj instanceof String str) {
+            return str;
+        }
+        if (obj instanceof BigDecimal bd) {
+            return bd.toPlainString();
+        }
         return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
@@ -147,6 +166,15 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public byte[] toJsonAsBytes(Object obj) {
+        if ($.isNull(obj)) {
+            return "".getBytes();
+        }
+        if (obj instanceof String str) {
+            return str.getBytes();
+        }
+        if (obj instanceof BigDecimal bd) {
+            return bd.toPlainString().getBytes();
+        }
         return MAPPER.writeValueAsBytes(obj);
     }
 
