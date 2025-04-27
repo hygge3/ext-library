@@ -223,6 +223,28 @@ public final class DateUtil {
     }
 
     /**
+     * 判断某个时间在时间段内的位置
+     * 前:-1，中:0，后:1
+     *
+     * @param startTime 起始时间
+     * @param dateTime  比较时间
+     * @param endTime   结束时间
+     * @return 是否在…之间
+     */
+    public Integer position(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
+        // 未开始
+        if (startTime.isAfter(dateTime)) {
+            return -1;
+            // 在内
+        } else if (endTime.isAfter(dateTime)) {
+            return 0;
+            // 已结束
+        } else {
+            return 1;
+        }
+    }
+
+    /**
      * 获取当天的开始时间
      *
      * @param time 时间
