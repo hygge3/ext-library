@@ -18,8 +18,8 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 /**
  * web 的调用时间统计拦截器
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
 
     final static ThreadLocal<StopWatch> KEY_CACHE = new ThreadLocal<>();
@@ -37,12 +37,12 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
             if ($.isNotEmpty(body)) {
                 jsonParam = new String(body);
             }
-            log.info("[🌐] {}:{},[body],[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
+            log.info("[🌐] {}:{},body:[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
         } else {
             Map<String, String[]> parameterMap = request.getParameterMap();
             if ($.isNotEmpty(parameterMap)) {
                 String parameters = JsonUtil.toJson(parameterMap);
-                log.info("[🌐] {}:{},[query],[{}]", request.getMethod(), request.getRequestURI(), parameters);
+                log.info("[🌐] {}:{},query:[{}]", request.getMethod(), request.getRequestURI(), parameters);
             } else {
                 log.info("[🌐] {}:{}", request.getMethod(), request.getRequestURI());
             }
