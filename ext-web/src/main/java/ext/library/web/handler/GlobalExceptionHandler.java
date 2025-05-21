@@ -41,10 +41,10 @@ import org.springframework.web.servlet.NoHandlerFoundException;
  * 全局异常处理器
  */
 @Slf4j
-@Order(1)
 @AutoConfiguration
-@RestControllerAdvice
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@Order(1)
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
@@ -235,7 +235,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 自定义验证异常
+     * 处理@Valid 参数校验失败异常
      *
      * @param e       e
      * @param request 请求
@@ -265,7 +265,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 自定义验证异常
+     * 处理@Validated 参数校验失败异常
      *
      * @param e       e
      * @param request 请求
