@@ -2,7 +2,6 @@ package ext.library.mybatis.page;
 
 import jakarta.annotation.Nonnull;
 
-import com.github.pagehelper.PageInfo;
 import com.mybatisflex.core.paginate.Page;
 import ext.library.core.util.BeanUtil;
 import ext.library.tool.$;
@@ -10,11 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 分页返回结果
  */
 @Getter
+@Setter
 @AllArgsConstructor
 public class PageResult<T> {
 
@@ -29,17 +30,20 @@ public class PageResult<T> {
      */
     final Long total;
 
+    /** 页数 */
+    final Long pages;
+
     /**
      * 查询数据列表
      */
     final List<T> records;
 
     public static <T> PageResult<T> empty(PageParam param) {
-        return new PageResult<>(param.getPage(), param.getSize(), 0L, Collections.emptyList());
+        return new PageResult<>(param.getPage(), param.getSize(), 0L, 0L, Collections.emptyList());
     }
 
     public static <T> PageResult<T> of(@Nonnull Page<T> page) {
-        return new PageResult<>(page.getPageNumber(), page.getPageSize(), page.getTotalRow(), page.getRecords());
+        return new PageResult<>(page.getPageNumber(), page.getPageSize(), page.getTotalRow(), page.getTotalPage(), page.getRecords());
     }
 
     public static <T> PageResult<T> of(@Nonnull Page<?> page, Class<T> targetClass) {
@@ -49,35 +53,7 @@ public class PageResult<T> {
         } else {
             records = BeanUtil.convert(page.getRecords(), targetClass);
         }
-        return new PageResult<>(page.getPageNumber(), page.getPageSize(), page.getTotalRow(), records);
-    }
-
-    public static <T> PageResult<T> of(@Nonnull com.github.pagehelper.Page<T> page) {
-        return new PageResult<>(page.getPages(), page.getPageSize(), page.getTotal(), page.getResult());
-    }
-
-    public static <T> PageResult<T> of(@Nonnull com.github.pagehelper.Page<?> page, Class<T> targetClass) {
-        List<T> records;
-        if ($.isEmpty(page.getResult())) {
-            records = Collections.emptyList();
-        } else {
-            records = BeanUtil.convert(page.getResult(), targetClass);
-        }
-        return new PageResult<>(page.getPages(), page.getPageSize(), page.getTotal(), records);
-    }
-
-    public static <T> PageResult<T> of(@Nonnull PageInfo<T> page) {
-        return new PageResult<>(page.getPages(), page.getPageSize(), page.getTotal(), page.getList());
-    }
-
-    public static <T> PageResult<T> of(@Nonnull PageInfo<?> page, Class<T> targetClass) {
-        List<T> records;
-        if ($.isEmpty(page.getList())) {
-            records = Collections.emptyList();
-        } else {
-            records = BeanUtil.convert(page.getList(), targetClass);
-        }
-        return new PageResult<>(page.getPages(), page.getPageSize(), page.getTotal(), records);
+        return new PageResult<>(page.getPageNumber(), page.getPageSize(), page.getTotalRow(), page.getTotalPage(), records);
     }
 
 }

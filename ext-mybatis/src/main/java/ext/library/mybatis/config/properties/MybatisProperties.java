@@ -23,7 +23,7 @@ public class MybatisProperties {
     /** 删除字段 */
     String deleteField = DbField.DELETED;
 
-    /** 开启内置的多租户实现 */
+    /** 开启内置的多租户实现，必须使用 TenantUtil 放入 */
     Boolean tenant = false;
 
 }
