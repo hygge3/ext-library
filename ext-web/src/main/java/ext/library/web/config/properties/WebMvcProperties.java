@@ -72,7 +72,7 @@ public class WebMvcProperties {
         /**
          * 额外允许跨域请求方获取的 response header 信息
          */
-         List<String> exposedHeaders = List.of("traceId");
+         List<String> exposedHeaders = List.of("X-Trace-Id");
 
         /**
          * 是否允许跨域发送 Cookie

@@ -22,7 +22,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 @Slf4j
 public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
 
-    final static ThreadLocal<StopWatch> KEY_CACHE = new ThreadLocal<>();
+    final static ThreadLocal<StopWatch> KEY_CACHE = new InheritableThreadLocal<>();
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,

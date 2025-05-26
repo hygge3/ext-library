@@ -30,11 +30,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAd
 /**
  * 请求解密处理器
  */
-@Slf4j
-@ControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 @ConditionalOnClass(HttpServletRequest.class)
 @EnableConfigurationProperties(CryptoProperties.class)
+@ControllerAdvice
 public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
 
     final CryptoProperties cryptoProperties;
@@ -45,19 +45,19 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
         return methodParameter.hasMethodAnnotation(RequestDecrypt.class);
     }
 
+    @Nonnull
     @Override
-    public @Nonnull HttpInputMessage beforeBodyRead(@Nonnull HttpInputMessage inputMessage, @Nonnull MethodParameter parameter,
-                                                    @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType)
+    public HttpInputMessage beforeBodyRead(@Nonnull HttpInputMessage inputMessage, @Nonnull MethodParameter parameter,
+                                           @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType)
             throws IOException {
         String decryptStr = StreamUtils.copyToString(inputMessage.getBody(), Charset.defaultCharset());
 
         try {
             Algorithm algo = cryptoProperties.getAlgo();
             String decrypt = switch (algo) {
-                case AES:
-                    yield new String(AESUtil.ecbDecrypt(decryptStr.getBytes(), cryptoProperties.getSecretKey().getBytes()));
-                case RSA:
-                    yield RSAUtil.decryptByPrivateKey(decryptStr, cryptoProperties.getSecretKey());
+                case AES ->
+                        new String(AESUtil.ecbDecrypt(decryptStr.getBytes(), cryptoProperties.getSecretKey().getBytes()));
+                case RSA -> RSAUtil.decryptByPrivateKey(decryptStr, cryptoProperties.getSecretKey());
             };
             return new HttpInputMessage() {
                 @Nonnull
