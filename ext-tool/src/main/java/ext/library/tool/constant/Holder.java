@@ -12,6 +12,11 @@ import java.util.Random;
 public interface Holder {
 
     /**
+     * cpu 核心数
+     */
+    int CPU_CORE_NUM = Runtime.getRuntime().availableProcessors();
+    
+    /**
      * RANDOM
      */
     Random RANDOM = new Random();

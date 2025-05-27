@@ -34,7 +34,7 @@ SERVER_FILE_NAME=$(ls -t ${DIR_PATH} | egrep '\.jar|\.war' | head -1)
 # ------ Java 参数
 JAVA_OPT="${JAVA_OPT} -server -Djava.security.egd=file:/dev/./urandom"
 # 调整堆大小：通过 -Xms 和 -Xmx 参数来调整堆大小。合理的堆大小设置可以减少垃圾回收的频率，从而提高性能。
-JAVA_OPT="${JAVA_OPT} -Xms128m -Xmx512m"
+JAVA_OPT="${JAVA_OPT} -Xms4g -Xmx4g"
 # 异步日志
 JAVA_OPT="${JAVA_OPT} -Xlog:async"
 # 启用启动优化：启用应用程序类数据共享，以加速应用程序的启动时间。

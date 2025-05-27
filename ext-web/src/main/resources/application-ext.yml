@@ -77,7 +77,7 @@ logging:
     console: UTF-8
     file: UTF-8
   pattern:
-    dateformat:  yyyy-MM-dd HH:mm:ss
+    dateformat: yyyy-MM-dd HH:mm:ss
 server:
   servlet:
     session:
@@ -85,3 +85,5 @@ server:
   compression:
     # 开启响应内容压缩
     enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json
+    min-response-size: 1024

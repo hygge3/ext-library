@@ -4,6 +4,7 @@ package ext.library.tool.core;
 import jakarta.annotation.Nonnull;
 
 import ext.library.tool.$;
+import ext.library.tool.constant.Holder;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -19,8 +20,8 @@ import org.slf4j.MDC;
 /**
  * 公共线程池
  */
-@Slf4j
 @UtilityClass
+@Slf4j
 public class ThreadPools {
 
     static final Integer QUEUE_MAX = 10;
@@ -30,9 +31,9 @@ public class ThreadPools {
      */
     public static ThreadPoolExecutor INSTANCE = new ThreadPoolExecutor(
             // 核心线程数大小。不论是否空闲都存在的线程
-            300,
-            // 最大线程数 - 1 万个
-            10000,
+            Holder.CPU_CORE_NUM,
+            // 最大线程数 - 100 个
+            100,
             // 存活时间。非核心线程数如果空闲指定时间。就回收
             // 存活时间不宜过长。避免任务量遇到尖峰情况时。大量空闲线程占用资源
             QUEUE_MAX,

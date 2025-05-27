@@ -4,6 +4,7 @@ import jakarta.annotation.PreDestroy;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.core.config.properties.ThreadPoolProperties;
+import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Threads;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -26,13 +27,13 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
-     final int core = Runtime.getRuntime().availableProcessors() + 1;
+    final int core = Holder.CPU_CORE_NUM + 1;
 
-     ScheduledExecutorService scheduledExecutorService;
+    ScheduledExecutorService scheduledExecutorService;
 
-    @Bean(name = "threadPoolTaskExecutor")
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor( ThreadPoolProperties threadPoolProperties) {
+    @Bean(name = "threadPoolTaskExecutor")
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor(ThreadPoolProperties threadPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(core);
         executor.setMaxPoolSize(core * 2);
