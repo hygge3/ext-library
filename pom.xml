@@ -63,7 +63,7 @@
         <sa-token.version>1.43.0</sa-token.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
-        <oshi.version>6.8.1</oshi.version>
+        <oshi.version>6.8.2</oshi.version>
         <springdoc.version>2.8.8</springdoc.version>
         <zxing-core.version>3.5.3</zxing-core.version>
         <guava.version>33.4.8-jre</guava.version>
