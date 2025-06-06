@@ -79,9 +79,11 @@ logging:
   pattern:
     dateformat: yyyy-MM-dd HH:mm:ss
 server:
+  shutdown: graceful
   servlet:
     session:
       persistent: true
+      timeout: 120s
   compression:
     # 开启响应内容压缩
     enabled: true
