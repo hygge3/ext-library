@@ -29,18 +29,19 @@ public class TraceFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String traceIdHeaderName = properties.getTraceIdHeaderName();
         try {
             // 生成并设置 TraceID
             String traceId = $.getObjectId();
             TRACE_ID.set(traceId);
-            MDC.put(properties.getTraceIdHeaderName(), traceId);
+            MDC.put(traceIdHeaderName, traceId);
             // 透传 TraceID 到下游（可选）
-            response.setHeader(properties.getTraceIdHeaderName(), traceId);
+            response.setHeader(traceIdHeaderName, traceId);
             filterChain.doFilter(request, response);
         } finally {
             // 必须清理上下文
             TRACE_ID.remove();
-            MDC.remove(properties.getTraceIdHeaderName());
+            MDC.remove(traceIdHeaderName);
         }
     }
 

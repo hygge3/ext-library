@@ -25,7 +25,6 @@ public @interface BodyParam {
 
     /**
      * The name of the request parameter to bind to.
-     * @since 4.2
      */
     @AliasFor("value")
     String name() default "";

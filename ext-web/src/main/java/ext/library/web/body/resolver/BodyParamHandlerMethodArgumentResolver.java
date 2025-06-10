@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
-import java.io.BufferedReader;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -23,7 +22,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 @Slf4j
 public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    static final String POST = "post";
+
     static final String APPLICATION_JSON = "application/json";
 
     /**
@@ -53,7 +52,6 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
         BodyParam param = parameter.getParameterAnnotation(BodyParam.class);
         String paramName = $.defaultIfEmpty(param.value(), parameter.getParameterName());
 
-        BufferedReader reader = request.getReader();
         Class<?> parameterType = parameter.getParameterType();
 
         JsonNode jsonNode = JsonUtil.readTree(request.getReader());

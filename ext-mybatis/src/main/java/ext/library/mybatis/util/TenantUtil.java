@@ -1,6 +1,5 @@
 package ext.library.mybatis.util;
 
-import ext.library.tool.core.Threads;
 import java.io.Serializable;
 import lombok.experimental.UtilityClass;
 
@@ -11,6 +10,7 @@ import lombok.experimental.UtilityClass;
 public class TenantUtil {
 
     String TENANT_KEY = "TenantId";
+    static final ThreadLocal<Serializable> TENANT_ID = new InheritableThreadLocal<>();
 
     /**
      * 设置租户 ID
@@ -21,7 +21,7 @@ public class TenantUtil {
      * @param tenantId 租户 ID，作为一个可序列化的对象传递，确保其可以在分布式环境中被正确地传输和恢复
      */
     public void set(Serializable tenantId) {
-        Threads.put(TENANT_KEY, tenantId);
+        TENANT_ID.set(tenantId);
     }
 
     /**
@@ -33,7 +33,7 @@ public class TenantUtil {
      * @return Serializable 类型的租户标识，该标识是线程本地变量中存储的租户信息
      */
     public Serializable get() {
-        return Threads.get(TENANT_KEY);
+        return TENANT_ID.get();
     }
 
     /**
@@ -43,6 +43,6 @@ public class TenantUtil {
      * 主要用于在业务逻辑完成后，清理线程环境，避免信息泄露
      */
     public void clear() {
-        Threads.remove(TENANT_KEY);
+        TENANT_ID.remove();
     }
 }
