@@ -7,7 +7,7 @@ import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
 /**
- * JsonPath 工具类
+ * JSON-Path 工具类
  */
 @UtilityClass
 public class JsonPathUtil {

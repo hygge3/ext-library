@@ -77,7 +77,7 @@ public class SecurityRedisRepository implements SecurityRepository {
     public boolean removeSecuritySessionByLoginId(String loginId) {
         // 删除 session 信息
         String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
-        return Boolean.TRUE.equals(RedisUtil.del(redisKey));
+        return RedisUtil.del(redisKey);
     }
 
     /**
@@ -178,7 +178,7 @@ public class SecurityRedisRepository implements SecurityRepository {
     @Override
     public boolean removeTokenByTokenValue(String tokenValue) {
         String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
-        return Boolean.TRUE.equals(RedisUtil.del(redisKey));
+        return RedisUtil.del(redisKey);
     }
 
     /**
@@ -214,7 +214,7 @@ public class SecurityRedisRepository implements SecurityRepository {
                 .map(key -> key.substring(key.lastIndexOf(":") + 1))
                 .sorted(Comparator.comparing(String::toString))
                 .collect(Collectors.toList());
-        if (Boolean.TRUE.equals(sortedDesc)) {
+        if (sortedDesc) {
             Collections.reverse(list);
         }
         return list;

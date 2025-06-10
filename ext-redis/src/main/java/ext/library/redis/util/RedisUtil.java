@@ -168,7 +168,7 @@ public class RedisUtil {
      * @see <a href="http://redis.io/commands/del">Del Command</a>
      */
     public boolean del(String key) {
-        return Boolean.TRUE.equals(getRedisTemplate().delete(key));
+        return getRedisTemplate().delete(key);
     }
 
     /**
@@ -194,7 +194,7 @@ public class RedisUtil {
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
     public boolean exists(String key) {
-        return Boolean.TRUE.equals(getRedisTemplate().hasKey(key));
+        return getRedisTemplate().hasKey(key);
     }
 
     /**
@@ -232,7 +232,7 @@ public class RedisUtil {
      * @param timeUnit 时间单位
      */
     public boolean expire(String key, long timeout, TimeUnit timeUnit) {
-        return Boolean.TRUE.equals(getRedisTemplate().expire(key, timeout, timeUnit));
+        return getRedisTemplate().expire(key, timeout, timeUnit);
     }
 
     /**
@@ -244,7 +244,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
      */
     public boolean expireAt(String key, Date date) {
-        return Boolean.TRUE.equals(getRedisTemplate().expireAt(key, date));
+        return getRedisTemplate().expireAt(key, date);
     }
 
     public boolean expireAt(String key, Instant expireAt) {

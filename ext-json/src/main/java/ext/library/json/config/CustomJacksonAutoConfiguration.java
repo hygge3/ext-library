@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import ext.library.json.module.CustomJavaTimeModule;
 import ext.library.json.serializer.BigNumberSerializer;
-import ext.library.json.util.JsonUtil;
+import ext.library.json.util.CustomizeMapper;
 import ext.library.tool.util.DateUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -126,7 +126,7 @@ public class CustomJacksonAutoConfiguration {
         // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致
-        JsonUtil.setMAPPER(objectMapper);
+       CustomizeMapper.setMAPPER(objectMapper);
         return objectMapper;
     }
 

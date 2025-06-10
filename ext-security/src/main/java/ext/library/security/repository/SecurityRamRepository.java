@@ -180,7 +180,7 @@ public class SecurityRamRepository implements SecurityRepository {
             }
             list.add(key);
         }
-        if (Boolean.TRUE.equals(sortedDesc)) {
+        if (sortedDesc) {
             Collections.reverse(list);
         }
         return list;

@@ -32,7 +32,7 @@ public class BoolUtil {
             // 如果是数字，检查其双精度值是否大于零
             case Number num -> num.doubleValue() > 0;
             // 如果是布尔值，检查是否为 true
-            case Boolean bool -> Boolean.TRUE.equals(bool);
+            case Boolean bool -> bool;
             // 默认情况下返回 false
             default -> false;
         };
@@ -54,7 +54,7 @@ public class BoolUtil {
             // 当对象为数字时，检查其是否小于等于 0，因为这在许多上下文中表示失败或无效
             case Number num -> num.doubleValue() <= 0;
             // 当对象为布尔值时，直接检查其是否为 false
-            case Boolean bool -> Boolean.FALSE.equals(bool);
+            case Boolean bool -> !bool;
             // 对于所有其他情况，默认返回 false，表示对象不表示“假”或无效状态
             default -> false;
         };

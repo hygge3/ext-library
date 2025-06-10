@@ -4,7 +4,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import ext.library.json.util.JsonUtil;
+import ext.library.json.util.JsonNodeUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import java.util.Objects;
@@ -54,9 +54,9 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
 
         Class<?> parameterType = parameter.getParameterType();
 
-        JsonNode jsonNode = JsonUtil.readTree(request.getReader());
+        JsonNode jsonNode = JsonNodeUtil.readTree(request.getReader());
 
-        Object result = JsonUtil.treeToObj(jsonNode.get(paramName), parameterType);
+        Object result = JsonNodeUtil.treeToObj(jsonNode.get(paramName), parameterType);
 
         if (jsonNode.isEmpty() || $.isNull(result)) {
             if (param.required()) {
