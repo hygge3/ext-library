@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TenantUtil {
 
-    String TENANT_KEY = "TenantId";
     static final ThreadLocal<Serializable> TENANT_ID = new InheritableThreadLocal<>();
 
     /**

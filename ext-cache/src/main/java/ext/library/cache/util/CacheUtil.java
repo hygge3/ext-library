@@ -23,7 +23,7 @@ public class CacheUtil {
     /**
      * 获取缓存值
      *
-     * @param key        缓存 key
+     * @param key 缓存 key
      */
     public <T> T get(String key, Class<T> clazz) {
         String cachekey = genKey(key);
@@ -48,7 +48,7 @@ public class CacheUtil {
     /**
      * 获取缓存值
      *
-     * @param key        缓存 key
+     * @param key 缓存 key
      */
     public Object get(String key) {
         String cachekey = genKey(key);
@@ -73,8 +73,8 @@ public class CacheUtil {
     /**
      * 保存缓存值
      *
-     * @param key        缓存 key
-     * @param value      缓存值
+     * @param key   缓存 key
+     * @param value 缓存值
      */
     public <T> T put(String key, T value) {
         return put(key, value, CACHE_PROPERTIES.getExpireTime(), TimeUnit.SECONDS);
@@ -83,8 +83,8 @@ public class CacheUtil {
     /**
      * 保存缓存值
      *
-     * @param key        缓存 key
-     * @param value      缓存值
+     * @param key   缓存 key
+     * @param value 缓存值
      */
     public <T> T put(String key, T value, long timeout, TimeUnit timeUnit) {
         String cachekey = genKey(key);
@@ -96,7 +96,7 @@ public class CacheUtil {
     /**
      * 删除缓存值
      *
-     * @param key        缓存 key
+     * @param key 缓存 key
      */
     public void evict(String key) {
         String cachekey = genKey(key);

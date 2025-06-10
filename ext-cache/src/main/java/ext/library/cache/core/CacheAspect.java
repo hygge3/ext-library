@@ -1,9 +1,8 @@
 package ext.library.cache.core;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import ext.library.cache.annotion.L2Cache;
-import ext.library.core.util.spel.SpelUtil;
 import ext.library.cache.util.CacheUtil;
+import ext.library.core.util.spel.SpelUtil;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import java.lang.reflect.Method;

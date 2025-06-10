@@ -1,8 +1,6 @@
 package ext.library.tool.domain;
 
 import ext.library.tool.constant.Holder;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -154,16 +152,13 @@ public class ULID {
 
     @Getter
     @RequiredArgsConstructor
-    public static class Value implements Comparable<Value>, Serializable {
+    public static class Value implements Comparable<Value> {
 
         /** The most significant 64 bits of this ULID. */
         private final long mostSignificantBits;
 
         /** The least significant 64 bits of this ULID. */
         private final long leastSignificantBits;
-
-        @Serial
-        private static final long serialVersionUID = -3563159514112487717L;
 
         public long timestamp() {
             return mostSignificantBits >>> 16;

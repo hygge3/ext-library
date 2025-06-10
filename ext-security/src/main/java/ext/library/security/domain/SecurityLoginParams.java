@@ -7,6 +7,7 @@ import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.tool.$;
 import ext.library.tool.constant.Holder;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -23,30 +24,33 @@ import lombok.Setter;
 @Setter
 public class SecurityLoginParams implements Serializable {
 
+    @Serial
+    static final long serialVersionUID = 1L;
+
     /**
      * 设备类型
      */
-     String deviceType;
+    String deviceType;
 
     /**
      * 超时时间
      */
-     Long timeout;
+    Long timeout;
 
     /**
      * 活跃超时时间
      */
-     Long activityTimeout;
+    Long activityTimeout;
 
     /**
      * session 挂载数据
      */
-     final Map<String, Object> mountData = Maps.newHashMap();
+    final Map<String, Object> mountData = Maps.newHashMap();
 
     /**
      * token 挂载数据
      */
-     final Map<String, Object> tokenMountData = Maps.newHashMap();
+    final Map<String, Object> tokenMountData = Maps.newHashMap();
 
     /**
      * 获取设备类型

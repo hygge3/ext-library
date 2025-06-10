@@ -3,6 +3,7 @@ package ext.library.web.response;
 import ext.library.core.exception.BizCode;
 import ext.library.core.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Schema(title = "返回体结构")
 public class R<T> implements Serializable {
+
+    @Serial
+    static final long serialVersionUID = 1L;
 
     /**
      * 响应状态码
