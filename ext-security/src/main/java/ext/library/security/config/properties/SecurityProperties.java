@@ -1,10 +1,13 @@
 package ext.library.security.config.properties;
 
+import jakarta.validation.constraints.Pattern;
+
 import ext.library.security.enums.SecurityRepositoryEnum;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * <p>
@@ -14,6 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @ConfigurationProperties(SecurityProperties.PREFIX)
+@Validated
 public class SecurityProperties {
 
     public static final String PREFIX = "ext.security";
@@ -94,6 +98,7 @@ public class SecurityProperties {
         /**
          * 路径设置
          */
+        @Pattern(regexp = "^/(?:[a-zA-Z0-9\\-._~!$&'()*+,;=:@/%]*|\\*{1,2})*$")
         String path;
 
         /**
