@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      # 当前配置名称
+      on-profile: mybatis
+  datasource:
+    hikari:
+      # 设置最小空闲连接数，默认值：与 maximumPoolSize 相同
+      minimum-idle: 5
+      # CPU 核心数*2，池允许达到的最大大小，包括空闲和正在使用的连接，默认值：10
+      maximum-pool-size: 10
+      # 3 秒超时，客户端将等待来自池的连接的最大毫秒数。默认值：30000（30 秒）
+      connection-timeout: 3000
+      # 30 分钟，池中连接的最大生存期。默认值：1800000（30 分钟）
+      max-lifetime: 1800000
+      # 10 分钟空闲释放，允许连接在池中闲置的最长时间。默认值：600000（10 分钟）,允许的最小值是 10000ms（10 秒）
+      idle-timeout: 600000
+      # 设置连接泄漏检测阈值为 1 分钟，录消息之前连接可能离开池的时间量，表明可能存在连接泄漏。值为 0 意味着泄漏检测被禁用。启用泄漏检测的最低可接受值为 2000（2 秒）。默认值：0
+      leak-detection-threshold: 60000
+      pool-name: ExtHikariCP
+      data-source-properties:
+        # 设置预编译语句缓存大小为 250
+        prepStmtCacheSize: 250
+        # 设置预编译语句 SQL 限制为 2048
+        prepStmtCacheSqlLimit: 2048
+        # 启用预编译语句缓存
+        cachePrepStmts: true
+        # 启用服务器端预编译语句
+        useServerPrepStmts: true

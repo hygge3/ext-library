@@ -1,6 +1,5 @@
 package ext.library.tool;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -20,6 +19,8 @@ import ext.library.tool.domain.ObjectId;
 import ext.library.tool.util.BoolUtil;
 import ext.library.tool.util.Converter;
 import ext.library.tool.util.DateUtil;
+import lombok.experimental.UtilityClass;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.Closeable;
@@ -69,7 +70,6 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import lombok.experimental.UtilityClass;
 
 /**
  * 工具包集合，工具类快捷方式
@@ -88,7 +88,9 @@ public class $ {
      *
      * @param obj the object reference to check for nullity
      * @param <T> the type of the reference
+     *
      * @return {@code obj} if not {@code null}
+     *
      * @throws NullPointerException if {@code obj} is {@code null}
      */
     public <T> T requireNotNull(T obj) {
@@ -107,7 +109,9 @@ public class $ {
      * @param message detail message to be used in the event that a {@code
      *                NullPointerException} is thrown
      * @param <T>     the type of the reference
+     *
      * @return {@code obj} if not {@code null}
+     *
      * @throws NullPointerException if {@code obj} is {@code null}
      */
     public <T> T requireNotNull(T obj, String message) {
@@ -125,7 +129,9 @@ public class $ {
      * @param messageSupplier supplier of the detail message to be used in the event that
      *                        a {@code NullPointerException} is thrown
      * @param <T>             the type of the reference
+     *
      * @return {@code obj} if not {@code null}
+     *
      * @throws NullPointerException if {@code obj} is {@code null}
      */
     public <T> T requireNotNull(T obj, Supplier<String> messageSupplier) {
@@ -140,6 +146,7 @@ public class $ {
      * 判断对象为 true
      *
      * @param object 对象
+     *
      * @return 对象是否为 true
      */
     public boolean isTrue(Object object) {
@@ -150,6 +157,7 @@ public class $ {
      * 判断对象为 false
      *
      * @param object 对象
+     *
      * @return 对象是否为 false
      */
     public boolean isFalse(Object object) {
@@ -164,8 +172,10 @@ public class $ {
      * </p>
      *
      * @param obj a reference to be checked against {@code null}
+     *
      * @return {@code true} if the provided reference is {@code null} otherwise
      * {@code false}
+     *
      * @see java.util.function.Predicate
      */
     public boolean isNull(Object obj) {
@@ -180,8 +190,10 @@ public class $ {
      * </p>
      *
      * @param obj a reference to be checked against {@code null}
+     *
      * @return {@code true} if the provided reference is non-{@code null} otherwise
      * {@code false}
+     *
      * @see java.util.function.Predicate
      */
     public boolean isNotNull(Object obj) {
@@ -194,6 +206,7 @@ public class $ {
      * 对于非集合、非数组、非迭代器类型的对象，假设大小为 1，反映其存在性
      *
      * @param obj 要检查其大小的对象
+     *
      * @return 对象的元素数量或长度如果对象为 null，则返回 0
      */
     public int size(Object obj) {
@@ -229,6 +242,7 @@ public class $ {
      * 判断对象是数组
      *
      * @param obj the object to check
+     *
      * @return 是否数组
      */
     public boolean isArray(Object obj) {
@@ -239,6 +253,7 @@ public class $ {
      * 判断空对象 object、map、list、set、字符串、数组
      *
      * @param obj the object to check
+     *
      * @return 数组是否为空
      */
     public boolean isEmpty(Object obj) {
@@ -267,6 +282,7 @@ public class $ {
      * 对象不为空 object、map、list、set、字符串、数组
      *
      * @param obj the object to check
+     *
      * @return 是否不为空
      */
     public boolean isNotEmpty(Object obj) {
@@ -278,7 +294,9 @@ public class $ {
      *
      * @param o1 first Object to compare
      * @param o2 second Object to compare
+     *
      * @return whether the given objects are equal
+     *
      * @see Object#equals(Object)
      * @see Arrays#equals
      */
@@ -297,6 +315,7 @@ public class $ {
      *
      * @param o1 Object
      * @param o2 Object
+     *
      * @return 是否 eq
      */
     public boolean equals(Object o1, Object o2) {
@@ -308,6 +327,7 @@ public class $ {
      *
      * @param o1 对象 1
      * @param o2 对象 2
+     *
      * @return 是否不 eq
      */
     public boolean isNotEqual(Object o1, Object o2) {
@@ -318,6 +338,7 @@ public class $ {
      * 返回对象的 hashCode
      *
      * @param obj Object
+     *
      * @return hashCode
      */
     public int hashCode(Object obj) {
@@ -329,6 +350,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return Object
      */
     public <T> T defaultIfNull(T object, T defaultValue) {
@@ -340,6 +362,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return Object
      */
     public <T> T defaultIfEmpty(T object, T defaultValue) {
@@ -354,6 +377,7 @@ public class $ {
      * 判断数组为空
      *
      * @param array the array to check
+     *
      * @return 数组是否为空
      */
     public boolean isEmpty(Object[] array) {
@@ -364,6 +388,7 @@ public class $ {
      * 判断数组不为空
      *
      * @param array 数组
+     *
      * @return 数组是否不为空
      */
     public boolean isNotEmpty(Object[] array) {
@@ -376,6 +401,7 @@ public class $ {
      * @param array   the Array to check
      * @param element the element to look for
      * @param <T>     The generic tag
+     *
      * @return {@code true} if found, {@code false} else
      */
     public <T> boolean contains(T[] array, final T element) {
@@ -393,6 +419,7 @@ public class $ {
      * 首字母变小写
      *
      * @param str 字符串
+     *
      * @return {String}
      */
     public String firstCharToLower(String str) {
@@ -409,6 +436,7 @@ public class $ {
      * 首字母变大写
      *
      * @param str 字符串
+     *
      * @return {String}
      */
     public String firstCharToUpper(String str) {
@@ -430,6 +458,7 @@ public class $ {
      * </pre>
      *
      * @param underscoreText 下划线文本
+     *
      * @return 驼峰文本
      */
     public static String underlineToCamelCase(String underscoreText) {
@@ -464,8 +493,10 @@ public class $ {
      * </pre>
      *
      * @param str the {@code String} to check (maybe {@code null})
+     *
      * @return {@code true} if the {@code CharSequence} is not {@code null}, its length is
      * greater than 0, and it does not contain whitespace only
+     *
      * @see Character#isWhitespace
      */
     public boolean isBlank(String str) {
@@ -485,8 +516,10 @@ public class $ {
      * </pre>
      *
      * @param str the String to check, may be null
+     *
      * @return {@code true} if the CharSequence is not empty and not null and not
      * whitespace
+     *
      * @see Character#isWhitespace
      */
     public boolean isNotBlank(String str) {
@@ -497,6 +530,7 @@ public class $ {
      * 判断是否有任意一个 空字符串
      *
      * @param strs String
+     *
      * @return boolean
      */
     public boolean isAnyBlank(String... strs) {
@@ -510,6 +544,7 @@ public class $ {
      * 有 任意 一个 Blank
      *
      * @param strs 字符串列表
+     *
      * @return boolean
      */
     public boolean isAnyBlank(Collection<String> strs) {
@@ -523,6 +558,7 @@ public class $ {
      * 判断是否全为非空字符串
      *
      * @param strs 字符串列表
+     *
      * @return boolean
      */
     public boolean isNoneBlank(String... strs) {
@@ -533,6 +569,7 @@ public class $ {
      * 判断是否全为非空字符串
      *
      * @param strs 字符串列表
+     *
      * @return boolean
      */
     public boolean isNoneBlank(Collection<String> strs) {
@@ -543,6 +580,7 @@ public class $ {
      * 有任意一个非空
      *
      * @param strs 字符串列表
+     *
      * @return boolean
      */
     public boolean isAnyNotBlank(String... strs) {
@@ -556,6 +594,7 @@ public class $ {
      * 有任意一个非空
      *
      * @param strs 字符串列表
+     *
      * @return boolean
      */
     public boolean isAnyNotBlank(Collection<String> strs) {
@@ -570,6 +609,7 @@ public class $ {
      *
      * @param str    被检测字符串
      * @param prefix 开头字符串
+     *
      * @return {boolean}
      */
     public boolean startWith(String str, String prefix) {
@@ -584,6 +624,7 @@ public class $ {
      *
      * @param cs CharSequence
      * @param c  char
+     *
      * @return {boolean}
      */
     public boolean startWith(CharSequence cs, char c) {
@@ -595,6 +636,7 @@ public class $ {
      *
      * @param str    被检测字符串
      * @param prefix 结尾字符串
+     *
      * @return {boolean}
      */
     public boolean endWith(String str, String prefix) {
@@ -609,6 +651,7 @@ public class $ {
      *
      * @param cs CharSequence
      * @param c  char
+     *
      * @return {boolean}
      */
     public boolean endWith(CharSequence cs, char c) {
@@ -623,6 +666,7 @@ public class $ {
      *
      * @param message 需要转换的字符串
      * @param params  转换所需的键值对集合
+     *
      * @return 转换后的字符串
      */
     public String format(String message, Map<String, ?> params) {
@@ -666,6 +710,7 @@ public class $ {
      *
      * @param message   需要转换的字符串
      * @param arguments 需要替换的变量
+     *
      * @return 转换后的字符串
      */
     public String format(String message, Object... arguments) {
@@ -719,6 +764,7 @@ public class $ {
      * 清理字符串，清理出某些不可见字符和一些 sql 特殊字符
      *
      * @param txt 文本
+     *
      * @return {String}
      */
     public String cleanText(String txt) {
@@ -732,6 +778,7 @@ public class $ {
      * 获取标识符，用于参数清理
      *
      * @param param 参数
+     *
      * @return 清理后的标识符
      */
     public String cleanIdentifier(String param) {
@@ -752,6 +799,7 @@ public class $ {
      * 判断一个字符串是否是数字
      *
      * @param str the String to check, may be null
+     *
      * @return {boolean}
      */
     public boolean isNumeric(String str) {
@@ -771,6 +819,7 @@ public class $ {
      * 将集合拼接成字符串，默认使用`,`拼接
      *
      * @param coll the {@code Collection} to convert
+     *
      * @return the delimited {@code String}
      */
     public String join(Collection<?> coll) {
@@ -782,6 +831,7 @@ public class $ {
      *
      * @param coll  the {@code Collection} to convert
      * @param delim the delimiter to use (typically a ",")
+     *
      * @return the delimited {@code String}
      */
     public String join(Collection<?> coll, String delim) {
@@ -792,6 +842,7 @@ public class $ {
      * 将数组拼接成字符串，默认使用`,`拼接
      *
      * @param arr the array to display
+     *
      * @return the delimited {@code String}
      */
     public String join(Object[] arr) {
@@ -803,6 +854,7 @@ public class $ {
      *
      * @param arr   the array to display
      * @param delim the delimiter to use (typically a ",")
+     *
      * @return the delimited {@code String}
      */
     public String join(Object[] arr, String delim) {
@@ -814,6 +866,7 @@ public class $ {
      *
      * @param str       字符串
      * @param delimiter 分割符
+     *
      * @return 字符串数组
      */
     public String[] split(String str, String delimiter) {
@@ -825,6 +878,7 @@ public class $ {
      *
      * @param str       字符串
      * @param delimiter 分割符
+     *
      * @return 字符串数组
      */
     public String[] splitTrim(String str, String delimiter) {
@@ -840,6 +894,7 @@ public class $ {
      *
      * @param pattern 表达式
      * @param str     字符串
+     *
      * @return 是否匹配
      */
     public boolean simpleMatch(String pattern, String str) {
@@ -898,6 +953,7 @@ public class $ {
      *
      * @param patterns 表达式 数组
      * @param str      字符串
+     *
      * @return 是否匹配
      */
     public boolean simpleMatch(String[] patterns, String str) {
@@ -916,6 +972,7 @@ public class $ {
      * 转义 HTML 用于安全过滤
      *
      * @param html html
+     *
      * @return {String}
      */
     public String escapeHtml(String html) {
@@ -941,6 +998,7 @@ public class $ {
      *
      * @param str the CharSequence to check, may be null
      * @param sub the substring to count, may be null
+     *
      * @return the number of occurrences, 0 if either CharSequence is {@code null}
      */
     public static int countMatches(String str, String sub) {
@@ -1035,6 +1093,7 @@ public class $ {
      * Sqids 编码
      *
      * @param numbers 数字
+     *
      * @return {@code String }
      */
     public String sqidsEncode(List<Long> numbers) {
@@ -1045,6 +1104,7 @@ public class $ {
      * Sqids 解码
      *
      * @param sqids SQIDS
+     *
      * @return {@code List<Long> }
      */
     public List<Long> sqidsDecode(String sqids) {
@@ -1055,6 +1115,7 @@ public class $ {
      * 随机数生成
      *
      * @param count 字符长度
+     *
      * @return 随机数
      */
     public String random(int count) {
@@ -1076,6 +1137,7 @@ public class $ {
      *
      * @param iterator the Iterator to check
      * @param element  the element to look for
+     *
      * @return {@code true} if found, {@code false} otherwise
      */
     public boolean contains(Iterator<?> iterator, Object element) {
@@ -1096,6 +1158,7 @@ public class $ {
      *
      * @param enumeration the Enumeration to check
      * @param element     the element to look for
+     *
      * @return {@code true} if found, {@code false} otherwise
      */
     public boolean contains(Enumeration<?> enumeration, Object element) {
@@ -1116,6 +1179,7 @@ public class $ {
      *
      * @param one   数组 1
      * @param other 数组 2
+     *
      * @return 新数组
      */
     public String[] concat(String[] one, String[] other) {
@@ -1128,6 +1192,7 @@ public class $ {
      * @param one   数组 1
      * @param other 数组 2
      * @param clazz 数组类
+     *
      * @return 新数组
      */
     @SuppressWarnings("unchecked")
@@ -1143,6 +1208,7 @@ public class $ {
      *
      * @param es  对象
      * @param <E> 泛型
+     *
      * @return 集合
      */
     @SafeVarargs
@@ -1155,6 +1221,7 @@ public class $ {
      *
      * @param es  对象
      * @param <E> 泛型
+     *
      * @return 集合
      */
     @SafeVarargs
@@ -1167,6 +1234,7 @@ public class $ {
      *
      * @param elements Iterable
      * @param <E>      泛型
+     *
      * @return 集合
      */
     public <E> List<E> toList(Iterable<E> elements) {
@@ -1188,6 +1256,7 @@ public class $ {
      * @param keysValues key value 数组
      * @param <K>        key
      * @param <V>        value
+     *
      * @return map 集合
      */
     @SuppressWarnings("unchecked")
@@ -1211,6 +1280,7 @@ public class $ {
      * @param list List
      * @param size 分片大小
      * @param <T>  泛型
+     *
      * @return List 分片
      */
     public <T> List<List<T>> partition(List<T> list, int size) {
@@ -1227,6 +1297,7 @@ public class $ {
      * 强转 string
      *
      * @param object Object
+     *
      * @return String
      */
     public String toStr(Object object) {
@@ -1238,6 +1309,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return String
      */
     public String toStr(Object object, String defaultValue) {
@@ -1254,6 +1326,7 @@ public class $ {
      * 对象转为 int（支持 String 和 Number），默认：0
      *
      * @param object Object
+     *
      * @return int
      */
     public int toInt(Object object) {
@@ -1265,6 +1338,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return int
      */
     public int toInt(Object object, int defaultValue) {
@@ -1286,6 +1360,7 @@ public class $ {
      * 对象转为 long（支持 String 和 Number），默认：0L
      *
      * @param object Object
+     *
      * @return long
      */
     public long toLong(Object object) {
@@ -1296,6 +1371,7 @@ public class $ {
      * 对象转为 long（支持 String 和 Number），默认：0L
      *
      * @param object Object
+     *
      * @return long
      */
     public long toLong(Object object, long defaultValue) {
@@ -1317,6 +1393,7 @@ public class $ {
      * 对象转为 Float
      *
      * @param object Object
+     *
      * @return 结果
      */
     public float toFloat(Object object) {
@@ -1328,6 +1405,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue float
+     *
      * @return 结果
      */
     public float toFloat(Object object, float defaultValue) {
@@ -1349,6 +1427,7 @@ public class $ {
      * 对象转为 Double
      *
      * @param object Object
+     *
      * @return 结果
      */
     public double toDouble(Object object) {
@@ -1360,6 +1439,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue double
+     *
      * @return 结果
      */
     public double toDouble(Object object, double defaultValue) {
@@ -1381,6 +1461,7 @@ public class $ {
      * 对象转为 Byte
      *
      * @param object Object
+     *
      * @return 结果
      */
     public byte toByte(Object object) {
@@ -1392,6 +1473,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue byte
+     *
      * @return 结果
      */
     public byte toByte(Object object, byte defaultValue) {
@@ -1413,6 +1495,7 @@ public class $ {
      * 对象转为 Short
      *
      * @param object Object
+     *
      * @return 结果
      */
     public short toShort(Object object) {
@@ -1424,6 +1507,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue short
+     *
      * @return 结果
      */
     public short toShort(Object object, short defaultValue) {
@@ -1445,6 +1529,7 @@ public class $ {
      * 对象转为 BigDecimal
      *
      * @param object Object
+     *
      * @return 结果
      */
 
@@ -1457,6 +1542,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return 结果
      */
     public BigDecimal toBigDecimal(Object object, Boolean defaultValue) {
@@ -1474,6 +1560,7 @@ public class $ {
      * 对象转为 Boolean
      *
      * @param object Object
+     *
      * @return 结果
      */
 
@@ -1486,6 +1573,7 @@ public class $ {
      *
      * @param object       Object
      * @param defaultValue 默认值
+     *
      * @return 结果
      */
 
@@ -1507,6 +1595,7 @@ public class $ {
      * 将 long 转短字符串 为 62 进制
      *
      * @param num 数字
+     *
      * @return 短字符串
      */
     public String to62Str(long num) {
@@ -1529,7 +1618,9 @@ public class $ {
      * @param source     the source object
      * @param targetType the target type
      * @param <T>        泛型标记
+     *
      * @return the converted value
+     *
      * @throws IllegalArgumentException if targetType is {@code null}, or sourceType is
      *                                  {@code null} but source is not {@code null}
      */
@@ -1548,6 +1639,7 @@ public class $ {
      * Calculates the MD5 digest.
      *
      * @param data Data to digest
+     *
      * @return MD5 digest as a hex array
      */
     public byte[] md5(final byte[] data) {
@@ -1558,6 +1650,7 @@ public class $ {
      * Calculates the MD5 digest.
      *
      * @param data Data to digest
+     *
      * @return MD5 digest as a hex array
      */
     public byte[] md5(final String data) {
@@ -1568,6 +1661,7 @@ public class $ {
      * Calculates the MD5 digest and returns the value as a 32 character hex string.
      *
      * @param data Data to digest
+     *
      * @return MD5 digest as a hex string
      */
     public String md5Hex(final String data) {
@@ -1578,6 +1672,7 @@ public class $ {
      * Return a hexadecimal string representation of the MD5 digest of the given bytes.
      *
      * @param bytes the bytes to calculate the digest over
+     *
      * @return a hexadecimal digest string
      */
     public String md5Hex(final byte[] bytes) {
@@ -1588,6 +1683,7 @@ public class $ {
      * sha1
      *
      * @param data Data to digest
+     *
      * @return digest as a hex array
      */
     public byte[] sha1(String data) {
@@ -1598,6 +1694,7 @@ public class $ {
      * sha1
      *
      * @param bytes Data to digest
+     *
      * @return digest as a hex array
      */
     public byte[] sha1(final byte[] bytes) {
@@ -1608,6 +1705,7 @@ public class $ {
      * sha1Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha1Hex(String data) {
@@ -1618,6 +1716,7 @@ public class $ {
      * sha1Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha1Hex(final byte[] bytes) {
@@ -1628,6 +1727,7 @@ public class $ {
      * sha256Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha256(String data) {
@@ -1638,6 +1738,7 @@ public class $ {
      * sha256Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha256(final byte[] bytes) {
@@ -1648,6 +1749,7 @@ public class $ {
      * sha256Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha256Hex(String data) {
@@ -1658,6 +1760,7 @@ public class $ {
      * sha256Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha256Hex(final byte[] bytes) {
@@ -1668,6 +1771,7 @@ public class $ {
      * sha384
      *
      * @param data Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha384(String data) {
@@ -1678,6 +1782,7 @@ public class $ {
      * sha384
      *
      * @param bytes Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha384(final byte[] bytes) {
@@ -1688,6 +1793,7 @@ public class $ {
      * sha384Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha384Hex(String data) {
@@ -1698,6 +1804,7 @@ public class $ {
      * sha384Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha384Hex(final byte[] bytes) {
@@ -1708,6 +1815,7 @@ public class $ {
      * sha512Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha512(String data) {
@@ -1718,6 +1826,7 @@ public class $ {
      * sha512Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a byte array
      */
     public byte[] sha512(final byte[] bytes) {
@@ -1728,6 +1837,7 @@ public class $ {
      * sha512Hex
      *
      * @param data Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha512Hex(String data) {
@@ -1738,6 +1848,7 @@ public class $ {
      * sha512Hex
      *
      * @param bytes Data to digest
+     *
      * @return digest as a hex string
      */
     public String sha512Hex(final byte[] bytes) {
@@ -1749,6 +1860,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacMd5(String data, String key) {
@@ -1760,6 +1872,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacMd5(final byte[] bytes, String key) {
@@ -1771,6 +1884,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a hex string
      */
     public String hmacMd5Hex(String data, String key) {
@@ -1782,6 +1896,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a hex string
      */
     public String hmacMd5Hex(final byte[] bytes, String key) {
@@ -1793,6 +1908,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacSha1(String data, String key) {
@@ -1804,6 +1920,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacSha1(final byte[] bytes, String key) {
@@ -1815,6 +1932,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a hex string
      */
     public String hmacSha1Hex(String data, String key) {
@@ -1826,6 +1944,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a hex string
      */
     public String hmacSha1Hex(final byte[] bytes, String key) {
@@ -1837,6 +1956,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a hex string
      */
     public byte[] hmacSha256(String data, String key) {
@@ -1848,6 +1968,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacSha256(final byte[] bytes, String key) {
@@ -1859,6 +1980,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a byte array
      */
     public String hmacSha256Hex(String data, String key) {
@@ -1870,6 +1992,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a hex string
      */
     public String hmacSha256Hex(final byte[] bytes, String key) {
@@ -1881,6 +2004,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacSha512(String data, String key) {
@@ -1892,6 +2016,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a byte array
      */
     public byte[] hmacSha512(final byte[] bytes, String key) {
@@ -1903,6 +2028,7 @@ public class $ {
      *
      * @param data Data to digest
      * @param key  key
+     *
      * @return digest as a hex string
      */
     public String hmacSha512Hex(String data, String key) {
@@ -1914,6 +2040,7 @@ public class $ {
      *
      * @param bytes Data to digest
      * @param key   key
+     *
      * @return digest as a hex string
      */
     public String hmacSha512Hex(final byte[] bytes, String key) {
@@ -1924,6 +2051,7 @@ public class $ {
      * byte 数组序列化成 hex
      *
      * @param bytes bytes to encode
+     *
      * @return MD5 digest as a hex string
      */
     public String encodeHex(byte[] bytes) {
@@ -1935,6 +2063,7 @@ public class $ {
      * 字符串反序列化成 hex
      *
      * @param hexString String to decode
+     *
      * @return MD5 digest as a hex string
      */
     public byte[] decodeHex(final String hexString) {
@@ -1946,6 +2075,7 @@ public class $ {
      * Base64 编码
      *
      * @param value 字符串
+     *
      * @return {String}
      */
     public String encodeBase64(String value) {
@@ -1957,6 +2087,7 @@ public class $ {
      *
      * @param value   字符串
      * @param charset 字符集
+     *
      * @return {String}
      */
     public String encodeBase64(String value, Charset charset) {
@@ -1967,6 +2098,7 @@ public class $ {
      * Base64 编码为 URL 安全
      *
      * @param value 字符串
+     *
      * @return {String}
      */
     public String encodeBase64UrlSafe(String value) {
@@ -1978,6 +2110,7 @@ public class $ {
      *
      * @param value   字符串
      * @param charset 字符集
+     *
      * @return {String}
      */
     public String encodeBase64UrlSafe(String value, Charset charset) {
@@ -1988,6 +2121,7 @@ public class $ {
      * Base64 解码
      *
      * @param value 字符串
+     *
      * @return {String}
      */
     public String decodeBase64(String value) {
@@ -1999,6 +2133,7 @@ public class $ {
      *
      * @param value   字符串
      * @param charset 字符集
+     *
      * @return {String}
      */
     public String decodeBase64(String value, Charset charset) {
@@ -2009,6 +2144,7 @@ public class $ {
      * Base64URL 安全解码
      *
      * @param value 字符串
+     *
      * @return {String}
      */
     public String decodeBase64UrlSafe(String value) {
@@ -2020,6 +2156,7 @@ public class $ {
      *
      * @param value   字符串
      * @param charset 字符集
+     *
      * @return {String}
      */
     public String decodeBase64UrlSafe(String value, Charset charset) {
@@ -2030,6 +2167,7 @@ public class $ {
      * url 编码
      *
      * @param source the String to be encoded
+     *
      * @return the encoded String
      */
     public String urlEncode(String source) {
@@ -2041,6 +2179,7 @@ public class $ {
      *
      * @param source  the String to be encoded
      * @param charset the character encoding to encode to
+     *
      * @return the encoded String
      */
     public String urlEncode(String source, Charset charset) {
@@ -2051,7 +2190,9 @@ public class $ {
      * url 解码
      *
      * @param source the encoded String
+     *
      * @return the decoded value
+     *
      * @throws IllegalArgumentException when the given source contains invalid encoded
      *                                  sequences
      * @see java.net.URLDecoder#decode(String, String)
@@ -2065,7 +2206,9 @@ public class $ {
      *
      * @param source  the encoded String
      * @param charset the character encoding to use
+     *
      * @return the decoded value
+     *
      * @throws IllegalArgumentException when the given source contains invalid encoded
      *                                  sequences
      * @see java.net.URLDecoder#decode(String, String)
@@ -2105,7 +2248,9 @@ public class $ {
      * InputStream to String utf-8
      *
      * @param input the <code>InputStream</code> to read from
+     *
      * @return the requested String
+     *
      * @throws NullPointerException if the input is null
      */
     public String readToString(InputStream input) {
@@ -2121,7 +2266,9 @@ public class $ {
      *
      * @param input   the <code>InputStream</code> to read from
      * @param charset the <code>Charset</code>
+     *
      * @return the requested String
+     *
      * @throws NullPointerException if the input is null
      */
     public String readToString(InputStream input, Charset charset) {
@@ -2136,6 +2283,7 @@ public class $ {
      * InputStream to bytes 数组
      *
      * @param input InputStream
+     *
      * @return the requested byte array
      */
     public byte[] readToByteArray(InputStream input) {
@@ -2150,11 +2298,12 @@ public class $ {
      * 读取文件为字符串
      *
      * @param file the file to read, must not be {@code null}
+     *
      * @return the file contents, never {@code null}
      */
     public String readToString(final File file) {
         try {
-            return new String(Files.toByteArray(file), Charsets.UTF_8);
+            return new String(Files.toByteArray(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw Exceptions.unchecked(e);
         }
@@ -2165,6 +2314,7 @@ public class $ {
      *
      * @param file     the file to read, must not be {@code null}
      * @param encoding the encoding to use, {@code null} means platform default
+     *
      * @return the file contents, never {@code null}
      */
     public String readToString(File file, Charset encoding) {
@@ -2179,6 +2329,7 @@ public class $ {
      * 读取文件为 byte 数组
      *
      * @param file the file to read, must not be {@code null}
+     *
      * @return the file contents, never {@code null}
      */
     public byte[] readToByteArray(File file) {
@@ -2231,7 +2382,9 @@ public class $ {
      *
      * @param in  InputStream
      * @param out OutputStream
+     *
      * @return the number of bytes copied
+     *
      * @throws IOException in case of I/O errors
      */
     public static int copy(InputStream in, OutputStream out) throws IOException {
@@ -2258,6 +2411,7 @@ public class $ {
      *
      * @param in  the byte array
      * @param out OutputStream
+     *
      * @throws IOException in case of I/O errors
      */
     public static void copy(byte[] in, OutputStream out) throws IOException {
@@ -2291,6 +2445,7 @@ public class $ {
      * 日期时间格式化
      *
      * @param temporal 时间
+     *
      * @return 格式化后的时间
      */
 
@@ -2302,6 +2457,7 @@ public class $ {
      * 日期格式化
      *
      * @param temporal 时间
+     *
      * @return 格式化后的时间
      */
 
@@ -2313,6 +2469,7 @@ public class $ {
      * 时间格式化
      *
      * @param temporal 时间
+     *
      * @return 格式化后的时间
      */
 
@@ -2325,6 +2482,7 @@ public class $ {
      *
      * @param object  格式化对象
      * @param pattern 表达式
+     *
      * @return 格式化后的字符串
      */
     public String format(Object object, String pattern) {
@@ -2347,6 +2505,7 @@ public class $ {
      *
      * @param dateStr 时间字符串
      * @param pattern 表达式
+     *
      * @return 时间
      */
     public LocalDateTime parseDate(String dateStr, String pattern) {
@@ -2358,6 +2517,7 @@ public class $ {
      *
      * @param dateStr   时间字符串
      * @param formatter DateTimeFormatter
+     *
      * @return 时间
      */
     public LocalDateTime parse(String dateStr, DateTimeFormatter formatter) {
@@ -2369,6 +2529,7 @@ public class $ {
      *
      * @param dateStr   时间字符串
      * @param formatter DateTimeFormatter
+     *
      * @return 时间
      */
     public LocalDateTime parseDateTime(String dateStr, DateTimeFormatter formatter) {
@@ -2379,6 +2540,7 @@ public class $ {
      * 将字符串转换为时间
      *
      * @param dateStr 时间字符串
+     *
      * @return 时间
      */
     public LocalDateTime parseDateTime(String dateStr) {
@@ -2390,6 +2552,7 @@ public class $ {
      *
      * @param dateStr   时间字符串
      * @param formatter DateTimeFormatter
+     *
      * @return 时间
      */
     public LocalDate parseDate(String dateStr, DateTimeFormatter formatter) {
@@ -2400,6 +2563,7 @@ public class $ {
      * 将字符串转换为日期
      *
      * @param dateStr 时间字符串
+     *
      * @return 时间
      */
     public LocalDate parseDate(String dateStr) {
@@ -2411,6 +2575,7 @@ public class $ {
      *
      * @param dateStr   时间字符串
      * @param formatter DateTimeFormatter
+     *
      * @return 时间
      */
     public LocalTime parseTime(String dateStr, DateTimeFormatter formatter) {
@@ -2421,6 +2586,7 @@ public class $ {
      * 将字符串转换为时间
      *
      * @param dateStr 时间字符串
+     *
      * @return 时间
      */
     public LocalTime parseTime(String dateStr) {
@@ -2432,6 +2598,7 @@ public class $ {
      *
      * @param startInclusive the start instant, inclusive, not null
      * @param endExclusive   the end instant, exclusive, not null
+     *
      * @return a {@code Duration}, not null
      */
     public Duration between(Temporal startInclusive, Temporal endExclusive) {
@@ -2443,6 +2610,7 @@ public class $ {
      *
      * @param startDate 开始时间
      * @param endDate   结束时间
+     *
      * @return 时间间隔
      */
     public Duration between(Date startDate, Date endDate) {
@@ -2458,6 +2626,7 @@ public class $ {
      *
      * @param constructor    构造器
      * @param parameterIndex 参数序号
+     *
      * @return {MethodParameter}
      */
     public Parameter getMethod(Constructor<?> constructor, int parameterIndex) {
@@ -2469,6 +2638,7 @@ public class $ {
      *
      * @param method         方法
      * @param parameterIndex 参数序号
+     *
      * @return {MethodParameter}
      */
     public Parameter getMethodParameter(Method method, int parameterIndex) {
@@ -2481,6 +2651,7 @@ public class $ {
      * @param annotatedElement AnnotatedElement
      * @param annotationType   注解类
      * @param <A>              泛型标记
+     *
      * @return {Annotation}
      */
 
@@ -2494,6 +2665,7 @@ public class $ {
      * @param method         Method
      * @param annotationType 注解类
      * @param <A>            泛型标记
+     *
      * @return {Annotation}
      */
 
@@ -2506,6 +2678,7 @@ public class $ {
      *
      * @param clazz 类
      * @param <T>   泛型标记
+     *
      * @return 对象
      */
     @SuppressWarnings("unchecked")
@@ -2523,6 +2696,7 @@ public class $ {
      *
      * @param clazzStr 类名
      * @param <T>      泛型标记
+     *
      * @return 对象
      */
     public <T> T newInstance(String clazzStr) {
@@ -2538,6 +2712,7 @@ public class $ {
      *
      * @param bean         bean
      * @param propertyName 属性名
+     *
      * @return 属性值
      */
 
@@ -2577,6 +2752,7 @@ public class $ {
      *
      * @param source 源对象
      * @param <T>    泛型标记
+     *
      * @return T
      */
 
@@ -2648,6 +2824,7 @@ public class $ {
      * 将对象装成 map 形式，使用反射实现，性能不好
      *
      * @param bean 源对象
+     *
      * @return {Map}
      */
     public Map<String, Object> toMap(Object bean) {
@@ -2673,6 +2850,7 @@ public class $ {
      * @param beanMap   map
      * @param valueType 对象类型
      * @param <T>       泛型标记
+     *
      * @return {T}
      */
     public <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {

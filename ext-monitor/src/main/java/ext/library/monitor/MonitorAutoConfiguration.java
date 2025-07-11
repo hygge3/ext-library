@@ -11,6 +11,11 @@ import oshi.SystemInfo;
 @AutoConfiguration
 public class MonitorAutoConfiguration {
 
+    /**
+     * 创建并返回一个 OshiMonitor 实例，用于系统监控。
+     *
+     * @return OshiMonitor 实例
+     */
     @Bean
     @ConditionalOnMissingBean
     public OshiMonitor oshiMonitor() {

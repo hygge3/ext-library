@@ -1,5 +1,5 @@
-ext.library.web.config.UndertowAutoConfiguration
-ext.library.web.config.WebMvcAutoConfiguration
+ext.library.web.config.UndertowAutoConfig
+ext.library.web.config.WebMvcAutoConfig
 ext.library.web.filter.TraceFilter
 ext.library.web.handler.GlobalExceptionHandler
 ext.library.web.handler.GlobalResponseHandler

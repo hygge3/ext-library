@@ -1,17 +1,11 @@
 package ext.library.web.handler;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-
 import ext.library.core.exception.BizCode;
 import ext.library.core.exception.BizException;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StreamUtil;
 import ext.library.web.response.R;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -37,6 +31,12 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import java.util.Set;
+
 /**
  * 全局异常处理器
  */
@@ -46,6 +46,52 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * 打印日志
+     *
+     * @param request 请求
+     * @param message 消息
+     * @param e       e
+     */
+    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
+        log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
+    }
+
+    /**
+     * 处理 BindingResult
+     *
+     * @param result BindingResult
+     *
+     * @return R
+     */
+    private static R<Void> handleBindingResult(@Nonnull BindingResult result) {
+        FieldError error = result.getFieldError();
+        String message = Symbol.EMPTY;
+        if (error != null) {
+            message = $.format("{}:{}", error.getField(), error.getDefaultMessage());
+        } else {
+            ObjectError globalError = result.getGlobalError();
+            if (globalError != null) {
+                message = globalError.getDefaultMessage();
+            }
+        }
+        return R.failed(BizCode.BAD_REQUEST, message);
+    }
+
+    /**
+     * 处理 ConstraintViolation
+     *
+     * @param violations 校验结果
+     *
+     * @return R
+     */
+    private static R<Void> handleConstraintViolation(@Nonnull Set<ConstraintViolation<?>> violations) {
+        ConstraintViolation<?> violation = violations.iterator().next();
+        String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
+        String message = $.format("{}:{}", path, violation.getMessage());
+        return R.failed(BizCode.BAD_REQUEST, message);
+    }
 
     /**
      * 业务异常
@@ -70,9 +116,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public R<Void> illegalArgumentException(@Nonnull IllegalArgumentException e, HttpServletRequest request) {
-        String message = $.format("不适当的参数:{}", e.getMessage());
-        printLog(request, message, e);
-        return R.failed(BizCode.ILLEGAL_ARGUMENT, message);
+        printLog(request, e.getMessage(), e);
+        return R.failed(BizCode.ILLEGAL_ARGUMENT, "参数异常");
     }
 
     /**
@@ -112,6 +157,7 @@ public class GlobalExceptionHandler {
      * 参数效验未通过统一处理。
      *
      * @param e 参数校验未通过异常
+     *
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -125,6 +171,7 @@ public class GlobalExceptionHandler {
      * 433 参数效验未通过统一处理。
      *
      * @param e 参数校验未通过异常
+     *
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -146,6 +193,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -159,6 +207,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -172,6 +221,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageConversionException.class)
@@ -185,6 +235,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(MethodArgumentConversionNotSupportedException.class)
@@ -195,23 +246,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Path 参数类型不匹配异常
-     *
-     * @param e       e
-     * @param request 请求
-     * @return {@code R<Object> }
-     */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public R<Object> methodArgumentTypeMismatchExceptionHandler(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(BizCode.BAD_REQUEST, e.getMessage());
-    }
-
-    /**
      * 处理不支持 HTTP 媒体类型异常
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -225,6 +264,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
@@ -239,6 +279,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(BindException.class)
@@ -254,6 +295,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(ConstraintViolationException.class)
@@ -269,6 +311,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -282,6 +325,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       参数校验未通过异常
      * @param request 请求
+     *
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -289,50 +333,6 @@ public class GlobalExceptionHandler {
         long maxUploadSize = e.getMaxUploadSize();
         String message = $.format("超出最大上传大小，最大：{}", maxUploadSize);
         printLog(request, message, e);
-        return R.failed(BizCode.BAD_REQUEST, message);
-    }
-
-    /**
-     * 打印日志
-     *
-     * @param request 请求
-     * @param message 消息
-     * @param e       e
-     */
-    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
-        log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
-    }
-
-    /**
-     * 处理 BindingResult
-     *
-     * @param result BindingResult
-     * @return R
-     */
-    private static R<Void> handleBindingResult(@Nonnull BindingResult result) {
-        FieldError error = result.getFieldError();
-        String message = Symbol.EMPTY;
-        if (error != null) {
-            message = $.format("{}:{}", error.getField(), error.getDefaultMessage());
-        } else {
-            ObjectError globalError = result.getGlobalError();
-            if (globalError != null) {
-                message = globalError.getDefaultMessage();
-            }
-        }
-        return R.failed(BizCode.BAD_REQUEST, message);
-    }
-
-    /**
-     * 处理 ConstraintViolation
-     *
-     * @param violations 校验结果
-     * @return R
-     */
-    private static R<Void> handleConstraintViolation(@Nonnull Set<ConstraintViolation<?>> violations) {
-        ConstraintViolation<?> violation = violations.iterator().next();
-        String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
-        String message = $.format("{}:{}", path, violation.getMessage());
         return R.failed(BizCode.BAD_REQUEST, message);
     }
 

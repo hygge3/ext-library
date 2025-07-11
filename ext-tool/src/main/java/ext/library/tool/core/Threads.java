@@ -1,14 +1,14 @@
 package ext.library.tool.core;
 
-import jakarta.validation.constraints.Positive;
+
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 线程相关工具类。
@@ -17,10 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class Threads {
 
+    static final int ORIGIN_STACK_INDEX = 2;
+
     /**
      * sleep 等待，单位为毫秒
      */
-    public void sleep(@Positive long milliseconds) {
+    public void sleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
@@ -70,8 +72,6 @@ public class Threads {
             log.error(t.getMessage(), t);
         }
     }
-
-    static final int ORIGIN_STACK_INDEX = 2;
 
     public String getFileName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getFileName();

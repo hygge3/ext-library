@@ -1,7 +1,5 @@
 package ext.library.json.config;
 
-import jakarta.annotation.Nonnull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -10,11 +8,6 @@ import ext.library.json.module.CustomJavaTimeModule;
 import ext.library.json.serializer.BigNumberSerializer;
 import ext.library.json.util.CustomizeMapper;
 import ext.library.tool.util.DateUtil;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -28,6 +21,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.annotation.Nonnull;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 自定义 Jackson 自动配置
@@ -64,7 +64,7 @@ public class CustomJacksonAutoConfiguration {
     public Converter<String, LocalDate> localDateConvert() {
         return new Converter<String, LocalDate>() {
             @Override
-            public LocalDate convert(@Nonnull  String source) {
+            public LocalDate convert(@Nonnull String source) {
                 return LocalDate.parse(source, DateUtil.FORMATTER_YMD);
             }
         };
@@ -79,7 +79,7 @@ public class CustomJacksonAutoConfiguration {
     public Converter<String, LocalTime> localTimeConvert() {
         return new Converter<String, LocalTime>() {
             @Override
-            public LocalTime convert(@Nonnull  String source) {
+            public LocalTime convert(@Nonnull String source) {
                 return LocalTime.parse(source, DateUtil.FORMATTER_HMS);
             }
         };
@@ -126,7 +126,7 @@ public class CustomJacksonAutoConfiguration {
         // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致
-       CustomizeMapper.setMAPPER(objectMapper);
+        CustomizeMapper.setMAPPER(objectMapper);
         return objectMapper;
     }
 

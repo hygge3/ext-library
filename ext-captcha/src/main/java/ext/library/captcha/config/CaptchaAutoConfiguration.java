@@ -1,7 +1,5 @@
 package ext.library.captcha.config;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.captcha.cache.ICaptchaCache;
 import ext.library.captcha.cache.SpringCacheCaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
@@ -12,8 +10,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * 验证码自动配置
@@ -38,8 +37,8 @@ public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaCache captchaCache(CaptchaProperties properties, CacheManager cacheManager) {
-        return new SpringCacheCaptchaCache(properties, cacheManager);
+    public ICaptchaCache captchaCache(CaptchaProperties properties) {
+        return new SpringCacheCaptchaCache(properties);
     }
 
 }

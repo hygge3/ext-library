@@ -1,13 +1,10 @@
 package ext.library.web.config;
 
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -27,6 +24,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import jakarta.annotation.Nonnull;
+import java.util.List;
+
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
 /**
@@ -37,9 +37,21 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @RequiredArgsConstructor
 @EnableConfigurationProperties({WebMvcProperties.class})
 @ConditionalOnWebApplication(type = SERVLET)
-public class WebMvcAutoConfiguration implements WebMvcConfigurer {
+public class WebMvcAutoConfig implements WebMvcConfigurer {
 
     final WebMvcProperties webMvcProperties;
+
+    private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
+        corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());
+        corsConfiguration.setAllowedMethods(corsConfig.getAllowedMethods());
+        corsConfiguration.setAllowedHeaders(corsConfig.getAllowedHeaders());
+        corsConfiguration.setExposedHeaders(corsConfig.getExposedHeaders());
+        corsConfiguration.setAllowCredentials(corsConfig.getAllowCredentials());
+        corsConfiguration.setMaxAge(corsConfig.getMaxAge());
+        return corsConfiguration;
+    }
 
     /**
      * 注册自定义的 Body 参数解析器
@@ -118,18 +130,6 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1000);
 
         return bean;
-    }
-
-    private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
-        corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());
-        corsConfiguration.setAllowedMethods(corsConfig.getAllowedMethods());
-        corsConfiguration.setAllowedHeaders(corsConfig.getAllowedHeaders());
-        corsConfiguration.setExposedHeaders(corsConfig.getExposedHeaders());
-        corsConfiguration.setAllowCredentials(corsConfig.getAllowCredentials());
-        corsConfiguration.setMaxAge(corsConfig.getMaxAge());
-        return corsConfiguration;
     }
 
 }

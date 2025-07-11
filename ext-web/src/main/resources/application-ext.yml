@@ -84,6 +84,9 @@ server:
     session:
       persistent: true
       timeout: 120s
+    encoding:
+      charset: UTF-8
+      force: true
   compression:
     # 开启响应内容压缩
     enabled: true

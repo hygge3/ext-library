@@ -13,16 +13,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(CaptchaProperties.PREFIX)
 public class CaptchaProperties {
 
-	public static final String PREFIX = "ext.captcha";
+    public static final String PREFIX = "ext.captcha";
 
-	/**
-	 * 验证码类型，默认：随机数
-	 */
-	 CaptchaType captchaType = CaptchaType.RANDOM;
+    /**
+     * 验证码类型，默认：随机数
+     */
+    CaptchaType captchaType = CaptchaType.RANDOM;
+    /**
+     * 验证码 cache 名，默认：captcha:cache
+     */
+    String cacheName = "captcha:cache#5m";
 
-	/**
-	 * 验证码 cache 名，默认：captcha:cache#5m，配合 mica-redis 5 分钟缓存
-	 */
-	 String cacheName = "captcha:cache#5m";
-
+    /**
+     * 默认缓存的超时时间 (s),默认 5min
+     */
+    int expireTime = 300;
 }
