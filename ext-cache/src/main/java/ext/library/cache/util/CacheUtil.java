@@ -1,14 +1,16 @@
 package ext.library.cache.util;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.tool.$;
-import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存操作工具类
@@ -17,8 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CacheUtil {
 
-    static final Cache<String, Object> CACHE = SpringUtil.getBean(Cache.class);
+    static final Cache<String, Object> CACHE;
     static final CacheProperties CACHE_PROPERTIES = SpringUtil.getBean(CacheProperties.class);
+
+    static {
+        CACHE = Caffeine.newBuilder()
+                // 多久过期
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                // 初始的缓存空间大小
+                .initialCapacity(10)
+                // 缓存的最大条数
+                .maximumSize(1000)
+                .build();
+    }
 
     /**
      * 获取缓存值
@@ -108,6 +121,7 @@ public class CacheUtil {
      * 生成 key
      *
      * @param key key
+     *
      * @return {@code String }
      */
     public String genKey(String key) {

@@ -1,7 +1,6 @@
 package ext.library.captcha.config;
 
-import ext.library.captcha.cache.ICaptchaCache;
-import ext.library.captcha.cache.SpringCacheCaptchaCache;
+import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
 import ext.library.captcha.service.CaptchaServiceImpl;
@@ -30,15 +29,15 @@ public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaService imageCaptchaService(CaptchaProperties properties, ICaptchaCache captchaCache,
+    public ICaptchaService imageCaptchaService(CaptchaProperties properties, CaptchaCache captchaCache,
                                                Captcha captcha) {
         return new CaptchaServiceImpl(properties, captchaCache, captcha);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaCache captchaCache(CaptchaProperties properties) {
-        return new SpringCacheCaptchaCache(properties);
+    public CaptchaCache captchaCache(CaptchaProperties properties) {
+        return new CaptchaCache(properties);
     }
 
 }

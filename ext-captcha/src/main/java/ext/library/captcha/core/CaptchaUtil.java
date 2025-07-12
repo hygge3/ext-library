@@ -1,34 +1,16 @@
 package ext.library.captcha.core;
 
-import jakarta.annotation.Nonnull;
-
-import java.awt.*;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Random;
 import lombok.experimental.UtilityClass;
-import org.springframework.boot.convert.DurationStyle;
+
+import jakarta.annotation.Nonnull;
+import java.awt.*;
+import java.util.Random;
 
 /**
  * 验证码工具类
  */
 @UtilityClass
 public class CaptchaUtil {
-
-    /**
-     * 从 cache name 中解析 ttl，例如：user:test#300ms，不带单位默认为 s 秒
-     *
-     * @param cacheName 缓存名
-     * @return 超时时间
-     */
-    public long getTTLFormCacheName(@Nonnull String cacheName) {
-        String[] cacheArray = cacheName.split("#");
-        if (cacheArray.length < 2) {
-            return -1L;
-        }
-        Duration duration = DurationStyle.detectAndParse(cacheArray[1], ChronoUnit.SECONDS);
-        return duration.toMillis();
-    }
 
     /**
      * 生成指定范围的随机数

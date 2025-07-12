@@ -61,6 +61,7 @@
         <swagger.version>2.2.34</swagger.version>
         <mybatis-flex.version>1.10.9</mybatis-flex.version>
         <sa-token.version>1.44.0</sa-token.version>
+        <bcprov.version>1.81</bcprov.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
         <oshi.version>6.8.2</oshi.version>
         <springdoc.version>2.8.9</springdoc.version>
@@ -230,6 +231,11 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
+            </dependency>
             <!-- swagger-annotations -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -391,13 +397,5 @@
             </plugins>
         </pluginManagement>
     </build>
-
-    <repositories>
-        <repository>
-            <id>repo1</id>
-            <name>central</name>
-            <url>https://repo1.maven.org/maven2/</url>
-        </repository>
-    </repositories>
 
 </project>

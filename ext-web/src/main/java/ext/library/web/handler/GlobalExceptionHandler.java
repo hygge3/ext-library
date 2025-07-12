@@ -116,8 +116,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public R<Void> illegalArgumentException(@Nonnull IllegalArgumentException e, HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(BizCode.ILLEGAL_ARGUMENT, "参数异常");
+        String message = $.format("参数异常:{}", e.getMessage());
+        printLog(request, message, e);
+        return R.failed(BizCode.ILLEGAL_ARGUMENT, e.getMessage());
     }
 
     /**

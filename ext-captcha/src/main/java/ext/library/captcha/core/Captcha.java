@@ -1,9 +1,5 @@
 package ext.library.captcha.core;
 
-import javax.imageio.ImageIO;
-
-import jakarta.annotation.Nonnull;
-
 import ext.library.captcha.draw.BackgroundDraw;
 import ext.library.captcha.draw.CaptchaDraw;
 import ext.library.captcha.draw.CurveInterferenceDraw;
@@ -13,6 +9,12 @@ import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+
+import jakarta.annotation.Nonnull;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -22,33 +24,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
-import lombok.SneakyThrows;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * 验证码
  */
+@Slf4j
 public class Captcha implements ICaptcha {
 
     /**
      * 默认的验证码大小，暂时不支持外部设置，因为字体大小是写死的，后期会加自动计算
      */
-     static final int WIDTH = 130;
+    static final int WIDTH = 130;
 
-     static final int HEIGHT = 48;
+    static final int HEIGHT = 48;
 
-     static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf",
-     "JetBrainsMonoNL.ttf"};
-
-     BackgroundDraw backgroundDraw;
-
-     CaptchaDraw captchaDraw;
-
-     InterferenceDraw interferenceDraw;
-
-     Random random;
-
-     final Font[] fonts;
+    static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf", "JetBrainsMonoNL.ttf"};
+    final Font[] fonts;
+    BackgroundDraw backgroundDraw;
+    CaptchaDraw captchaDraw;
+    InterferenceDraw interferenceDraw;
+    Random random;
 
     public Captcha() {
         this(new RandomCaptchaDraw());
@@ -62,13 +57,42 @@ public class Captcha implements ICaptcha {
         this(SmallCharsBackgroundDraw.INSTANCE, captchaDraw, CurveInterferenceDraw.INSTANCE, Holder.SECURE_RANDOM);
     }
 
-    public Captcha(BackgroundDraw backgroundDraw, CaptchaDraw captchaDraw, InterferenceDraw interferenceDraw,
-                   Random random) {
+    public Captcha(BackgroundDraw backgroundDraw, CaptchaDraw captchaDraw, InterferenceDraw interferenceDraw, Random random) {
         this.backgroundDraw = backgroundDraw;
         this.captchaDraw = captchaDraw;
         this.interferenceDraw = interferenceDraw;
         this.random = random;
         this.fonts = loadAndRegisterFont();
+    }
+
+    private static Graphics2D initGraphics(@Nonnull BufferedImage image) {
+        // 获取图形上下文
+        Graphics2D graphics = image.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        // 图形抗锯齿
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // 字体抗锯齿
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        return graphics;
+    }
+
+    private static Font[] loadAndRegisterFont() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        List<Font> fontList = new ArrayList<>();
+        for (String fontName : FONT_NAMES) {
+            String path = "fonts/" + fontName;
+            // 加载字体
+            Font font = loadFont(new ClassPathResource(path));
+            // 注册字体
+            ge.registerFont(font);
+            fontList.add(font);
+        }
+        return fontList.toArray(new Font[0]);
+    }
+
+    @SneakyThrows
+    private static Font loadFont(@Nonnull ClassPathResource resource) {
+        return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
     }
 
     public void setBackgroundDraw(BackgroundDraw backgroundDraw) {
@@ -111,37 +135,6 @@ public class Captcha implements ICaptcha {
     @Override
     public boolean validate(String code, String userInputCaptcha) {
         return captchaDraw.validate(code, userInputCaptcha);
-    }
-
-    private static Graphics2D initGraphics(@Nonnull BufferedImage image) {
-        // 获取图形上下文
-        Graphics2D graphics = image.createGraphics();
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        // 图形抗锯齿
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        // 字体抗锯齿
-        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        return graphics;
-    }
-
-    private static Font[] loadAndRegisterFont() {
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        List<Font> fontList = new ArrayList<>();
-        for (String fontName : FONT_NAMES) {
-            String path = "fonts/" + fontName;
-            // 加载字体
-            Font font = loadFont(new ClassPathResource(path));
-            // 注册字体
-            ge.registerFont(font);
-            fontList.add(font);
-        }
-        return fontList.toArray(new Font[0]);
-    }
-
-    @SneakyThrows
-    private static Font loadFont(@Nonnull ClassPathResource resource) {
-        return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
     }
 
 }

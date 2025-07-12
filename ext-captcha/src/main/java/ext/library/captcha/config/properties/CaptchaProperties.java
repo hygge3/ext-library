@@ -20,9 +20,9 @@ public class CaptchaProperties {
      */
     CaptchaType captchaType = CaptchaType.RANDOM;
     /**
-     * 验证码 cache 名，默认：captcha:cache
+     * 验证码 cache 名，默认：captcha
      */
-    String cacheName = "captcha:cache#5m";
+    String cacheName = "captcha";
 
     /**
      * 默认缓存的超时时间 (s),默认 5min
