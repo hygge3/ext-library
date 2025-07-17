@@ -59,7 +59,7 @@
         <spring-boot.version>3.5.3</spring-boot.version>
         <mapstruct-plus.version>1.4.8</mapstruct-plus.version>
         <swagger.version>2.2.34</swagger.version>
-        <mybatis-flex.version>1.10.9</mybatis-flex.version>
+        <mybatis-flex.version>1.11.0</mybatis-flex.version>
         <sa-token.version>1.44.0</sa-token.version>
         <bcprov.version>1.81</bcprov.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
