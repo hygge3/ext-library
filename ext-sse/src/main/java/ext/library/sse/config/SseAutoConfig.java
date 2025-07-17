@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @ConditionalOnProperty(value = SseProperties.PREFIX + ".enabled", havingValue = "true")
 @EnableConfigurationProperties(SseProperties.class)
-public class SseAutoConfiguration {
+public class SseAutoConfig {
 
     @Bean
     public SseEmitterManager sseEmitterManager() {

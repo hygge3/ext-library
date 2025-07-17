@@ -1,21 +1,23 @@
 package ext.library.websocket.util;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.tool.$;
+import ext.library.tool.core.ThreadPools;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.SessionLimitExceededException;
+
+import jakarta.annotation.Nonnull;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static ext.library.websocket.constant.WebSocketConstants.WEB_SOCKET_TOPIC;
 
@@ -66,8 +68,7 @@ public class WebSocketUtil {
             WebSocketMessage broadcastMessage = new WebSocketMessage();
             broadcastMessage.setMessage(webSocketMessage.getMessage());
             broadcastMessage.setSessionKeys(unsentSessionKeys);
-            log.info("[⛓️] WebSocket 发送主题订阅消息，topic:{},session keys:{},message:{}", WEB_SOCKET_TOPIC, unsentSessionKeys,
-                    webSocketMessage.getMessage());
+            log.info("[⛓️] WebSocket 发送主题订阅消息，topic:{},session keys:{},message:{}", WEB_SOCKET_TOPIC, unsentSessionKeys, webSocketMessage.getMessage());
             RedisUtil.publish(WEB_SOCKET_TOPIC, JsonUtil.toJson(broadcastMessage));
         }
     }
@@ -109,17 +110,26 @@ public class WebSocketUtil {
      * @param session WebSocket 会话
      * @param message 要发送的 WebSocket 消息对象
      */
-    private synchronized void sendMessage(WebSocketSession session,
-                                          org.springframework.web.socket.WebSocketMessage<?> message) {
-        if (session == null || !session.isOpen()) {
-            log.warn("[⛓️][send] session 会话已经关闭");
-        } else {
-            try {
-                session.sendMessage(message);
-            } catch (IOException e) {
-                log.error("[⛓️][send] session({}) 发送消息异常，message:{}", session, message, e);
+    private synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
+        ThreadPools.execute(() -> {
+            if (session == null || !session.isOpen()) {
+                log.warn("[⛓️][send] session 会话已经关闭");
+            } else {
+                try {
+                    session.sendMessage(message);
+                } catch (IOException e) {
+                    log.error("[⛓️][send] session({}) 发送消息异常，message:{}", session, message, e);
+                } catch (SessionLimitExceededException ex) {
+                    // 一旦有一条消息发送超时，或者发送数据大于限制，limitExceeded 标志位就会被设置成 true，标志这这个 session 被关闭
+                    // 后面的发送调用都是直接返回不处理，但只是被标记为关闭连接本身可能实际上并没有关闭，这是一个坑需要注意。
+                    try {
+                        session.close();
+                    } catch (IOException e) {
+                        log.error("[⛓️][close] 主动关闭 session ({}) 连接失败", session.getId());
+                    }
+                    log.error("[⛓️][error] session ({}) 发送消息失败", session.getId());
+                }
             }
-        }
+        });
     }
-
 }

@@ -1,8 +1,6 @@
 package ext.library.web.handler;
 
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
@@ -19,6 +17,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * 响应结果处理器。
@@ -70,6 +70,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * @param selectedConverterType 选定转换器类型
      * @param request               要求
      * @param response              回答
+     *
      * @return {@link Object }
      */
     @Override

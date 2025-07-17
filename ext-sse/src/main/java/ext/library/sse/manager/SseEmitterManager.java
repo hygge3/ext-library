@@ -1,19 +1,20 @@
 package ext.library.sse.manager;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
 import ext.library.tool.$;
+import ext.library.tool.core.ThreadPools;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * 管理 Server-Sent Events (SSE) 连接
@@ -24,15 +25,16 @@ public class SseEmitterManager {
     /**
      * 订阅的频道
      */
-     final static String SSE_TOPIC = "global:sse";
+    final static String SSE_TOPIC = "global:sse";
 
-     final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
+    final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
 
     /**
      * 建立与指定用户的 SSE 连接
      *
      * @param userId 用户的唯一标识符，用于区分不同用户的连接
      * @param token  用户的唯一令牌，用于识别具体的连接
+     *
      * @return 返回一个 SseEmitter 实例，客户端可以通过该实例接收 SSE 事件
      */
     public SseEmitter connect(String userId, String token) {
@@ -95,16 +97,18 @@ public class SseEmitterManager {
      * @param message 要发送的消息内容
      */
     public void sendMessage(String userId, String message) {
-        Map<String, SseEmitter> emitters = USER_TOKEN_EMITTERS.get(userId);
-        if (emitters != null) {
-            for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
-                try {
-                    entry.getValue().send(SseEmitter.event().name("message").data(message));
-                } catch (Exception e) {
-                    emitters.remove(entry.getKey());
+        ThreadPools.execute(() -> {
+            Map<String, SseEmitter> emitters = USER_TOKEN_EMITTERS.get(userId);
+            if (emitters != null) {
+                for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
+                    try {
+                        entry.getValue().send(SseEmitter.event().name("message").data(message));
+                    } catch (Exception e) {
+                        emitters.remove(entry.getKey());
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
