@@ -38,7 +38,7 @@ public class WebSocketAutoConfig {
         if ($.isBlank(webSocketProperties.getAllowedOrigins())) {
             webSocketProperties.setAllowedOrigins("*");
         }
-        log.info("注册 WebSocketHandler, 连接路径:{}", webSocketProperties.getPath());
+        log.info("[⛓️] 注册 WebSocketHandler, 连接路径:{}", webSocketProperties.getPath());
 
         // 返回一个 WebSocketConfigurer 对象，用于配置 WebSocket
         return registry -> registry

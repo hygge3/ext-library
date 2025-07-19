@@ -1,11 +1,12 @@
 package ext.library.redis.util;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
+
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 分布式锁业务接口
@@ -14,10 +15,18 @@ import org.springframework.data.redis.core.script.RedisScript;
 @UtilityClass
 public class DistributedLockUtil {
 
+    /** 分布式锁休眠 至 再次尝试获取 的等待时间 ms 可以根据业务自己调节 */
+    public static final Long LOCK_REDIS_WAIT = 500L;
+    /** 分布式锁休眠 至 再次尝试获取 的等待时间 ms 可以根据业务自己调节 */
+    public static final String LOCK_VALUE = "lock";
+    /** 分布式锁过期时间 s 可以根据业务自己调节 */
+    private static final Long LOCK_REDIS_TIMEOUT = 10L;
+
     /**
      * 获取锁，默认 30 秒失效，失败一直等待直到获取锁
      *
      * @param key 锁的 key
+     *
      * @return 锁对象
      */
     public Boolean lock(String key) {
@@ -30,6 +39,7 @@ public class DistributedLockUtil {
      * @param key      锁的 key
      * @param lockTime 加锁的时间，超过这个时间后锁便自动解锁；如果 lockTime 为 -1，则保持锁定直到显式解锁
      * @param unit     {@code lockTime} 参数的时间单位
+     *
      * @return 锁对象
      */
     public Boolean lock(String key, long lockTime, TimeUnit unit) {
@@ -45,15 +55,6 @@ public class DistributedLockUtil {
         releaseLock(key, LOCK_VALUE);
     }
 
-    /** 分布式锁过期时间 s 可以根据业务自己调节 */
-    private static final Long LOCK_REDIS_TIMEOUT = 10L;
-
-    /** 分布式锁休眠 至 再次尝试获取 的等待时间 ms 可以根据业务自己调节 */
-    public static final Long LOCK_REDIS_WAIT = 500L;
-
-    /** 分布式锁休眠 至 再次尝试获取 的等待时间 ms 可以根据业务自己调节 */
-    public static final String LOCK_VALUE = "lock";
-
     /**
      * 加锁
      **/
@@ -65,6 +66,7 @@ public class DistributedLockUtil {
      * 释放锁
      **/
     public void releaseLock(String key, String value) {
+        // language=redis
         String luaScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
         RedisUtil.execute(redisScript, Collections.singletonList(key), value);

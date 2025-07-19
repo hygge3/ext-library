@@ -5,9 +5,6 @@ import ext.library.cache.util.CacheUtil;
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,6 +13,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -54,7 +55,7 @@ public class CacheAspect {
             return cache;
         }
 
-        log.debug("get data from database");
+        log.debug("[💾] get data from database");
         Object object = point.proceed();
         if (Objects.nonNull(object)) {
             CacheUtil.put(realKey, object, annotation.timeOut(), TimeUnit.SECONDS);

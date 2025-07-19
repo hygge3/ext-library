@@ -1,8 +1,5 @@
 package ext.library.encrypt.handler;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-
 import ext.library.encrypt.annotation.ResponseEncrypt;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.encrypt.util.AESUtil;
@@ -19,6 +16,9 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 响应加密处理器
@@ -49,10 +49,8 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
         String json = JsonUtil.toJson(body);
         try {
             return switch (cryptoProperties.getAlgo()) {
-                case AES:
-                    yield new String(AESUtil.ecbEncrypt(json.getBytes(), cryptoProperties.getPublicKey().getBytes()));
-                case RSA:
-                    yield RSAUtil.encryptByPublicKey(json, cryptoProperties.getPublicKey());
+                case AES -> new String(AESUtil.ecbEncrypt(json.getBytes(), cryptoProperties.getPublicKey().getBytes()));
+                case RSA -> RSAUtil.encryptByPublicKey(json, cryptoProperties.getPublicKey());
             };
         } catch (Exception e) {
             throw Exceptions.throwOut("响应加密异常，uri:{}", request.getURI().toString());

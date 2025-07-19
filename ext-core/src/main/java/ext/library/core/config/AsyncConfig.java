@@ -3,13 +3,14 @@ package ext.library.core.config;
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
-import java.util.Arrays;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+
+import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 /**
  * 异步配置
@@ -20,34 +21,30 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 @AutoConfiguration
 public class AsyncConfig implements AsyncConfigurer {
 
-	/**
-	 * 自定义 @Async 注解使用系统线程池
-	 */
-	@Override
-	public Executor getAsyncExecutor() {
-		if (SpringUtil.isVirtual()) {
-			return new VirtualThreadTaskExecutor("async-");
-		}
-		return SpringUtil.getBean("scheduledExecutorService");
-	}
+    /**
+     * 自定义 @Async 注解使用系统线程池
+     */
+    @Override
+    public Executor getAsyncExecutor() {
+        if (SpringUtil.isVirtual()) {
+            return new VirtualThreadTaskExecutor("async-");
+        }
+        return SpringUtil.getBean("scheduledExecutorService");
+    }
 
-	/**
-	 * 异步执行异常处理
-	 */
-	@Override
-	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-		return (throwable, method, objects) -> {
-			Exceptions.print(throwable);
-			StringBuilder sb = new StringBuilder();
-			sb.append("Exception message - ")
-				.append(throwable.getMessage())
-				.append(", Method name - ")
-				.append(method.getName());
-			if ($.isNotEmpty(objects)) {
-				sb.append(", Parameter value - ").append(Arrays.toString(objects));
-			}
-			throw new RuntimeException(sb.toString());
-		};
-	}
+    /**
+     * 异步执行异常处理
+     */
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return (throwable, method, objects) -> {
+            Exceptions.print(throwable);
+            String str = $.format("Exception message:{}, Method name:{}", throwable.getMessage(), method.getName());
+            if ($.isNotEmpty(objects)) {
+                str = str.concat(", Parameter value:[").concat(Arrays.toString(objects)).concat("]");
+            }
+            throw new RuntimeException(str);
+        };
+    }
 
 }

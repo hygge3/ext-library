@@ -44,14 +44,14 @@ public class CacheUtil {
         Object caffeineCache = CACHE.getIfPresent(cachekey);
 
         if ($.isNotNull(caffeineCache)) {
-            log.debug("get data from caffeine");
+            log.debug("[💾] get data from caffeine");
             return clazz.cast(caffeineCache);
         }
 
         // 查询 Redis
         T redisCache = RedisUtil.get(cachekey, clazz);
         if ($.isNotNull(redisCache)) {
-            log.debug("get data from redis");
+            log.debug("[💾] get data from redis");
             CACHE.put(cachekey, redisCache);
             return redisCache;
         }
@@ -69,14 +69,14 @@ public class CacheUtil {
         Object caffeineCache = CACHE.getIfPresent(cachekey);
 
         if ($.isNotNull(caffeineCache)) {
-            log.debug("get data from caffeine");
+            log.debug("[💾] get data from caffeine");
             return caffeineCache;
         }
 
         // 查询 Redis
         Object redisCache = RedisUtil.get(cachekey);
         if ($.isNotNull(redisCache)) {
-            log.debug("get data from redis");
+            log.debug("[💾] get data from redis");
             CACHE.put(cachekey, redisCache);
             return redisCache;
         }

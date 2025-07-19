@@ -21,6 +21,7 @@ public class ThreadPoolProperties {
 
     /** 最大线程数 */
     int maxPoolSize = corePoolSize * 2;
+
     /**
      * 队列最大长度
      */

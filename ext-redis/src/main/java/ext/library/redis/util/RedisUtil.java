@@ -2,20 +2,6 @@ package ext.library.redis.util;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +38,21 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Redis 操作的辅助类
@@ -107,6 +108,7 @@ public class RedisUtil {
     public StreamOperations<String, String, String> streamOps() {
         return getRedisTemplate().opsForStream();
     }
+
     public GeoOperations<String, String> getGeoOps() {
         return getRedisTemplate().opsForGeo();
     }
@@ -125,9 +127,11 @@ public class RedisUtil {
      * @param key      限流 key
      * @param count    限定阈值，时间间隔 interval 范围内超过该数量会触发锁
      * @param interval 时间间隔，例如 5s 五秒，6m 六分钟，7h 七小时，8d 八天
+     *
      * @return false 表示失败
      */
     public boolean rateLimiter(String key, long count, String interval) {
+        // language=redis
         RedisScript<Long> REDIS_SCRIPT_RATE_LIMIT = RedisScript.of("""
                 local key = KEYS[1];
                 local count = tonumber(ARGV[1]);
@@ -164,7 +168,9 @@ public class RedisUtil {
      * 删除指定的 key
      *
      * @param key 要删除的 key
+     *
      * @return 删除成功返回 true, 如果 key 不存在则返回 false
+     *
      * @see <a href="http://redis.io/commands/del">Del Command</a>
      */
     public boolean del(String key) {
@@ -175,6 +181,7 @@ public class RedisUtil {
      * 删除指定的 keys
      *
      * @param keys 要删除的 key 数组
+     *
      * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
      */
     public long del(String... keys) {
@@ -190,7 +197,9 @@ public class RedisUtil {
      * 判断 key 是否存在
      *
      * @param key 待判断的 key
+     *
      * @return 如果 key 存在 {@code true} , 否则返回 {@code false}
+     *
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
     public boolean exists(String key) {
@@ -201,7 +210,9 @@ public class RedisUtil {
      * 判断指定的 key 是否存在。
      *
      * @param keys 待判断的数组
+     *
      * @return 指定的 keys 在 redis 中存在的的数量
+     *
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
     public long exists(String... keys) {
@@ -218,6 +229,7 @@ public class RedisUtil {
      *
      * @param key     待修改过期时间的 key
      * @param timeout 过期时长，单位 秒
+     *
      * @see <a href="http://redis.io/commands/expire">Expire Command</a>
      */
     public boolean expire(String key, long timeout) {
@@ -240,7 +252,9 @@ public class RedisUtil {
      *
      * @param key  待修改过期时间的 key
      * @param date 过期时间
+     *
      * @return 修改成功返回 true
+     *
      * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
      */
     public boolean expireAt(String key, Date date) {
@@ -255,7 +269,9 @@ public class RedisUtil {
      * 获取所有符合指定表达式的 key
      *
      * @param pattern 表达式
+     *
      * @return java.util.Set<java.lang.String>
+     *
      * @see <a href="http://redis.io/commands/keys">Keys Command</a>
      */
     public Set<String> keys(String pattern) {
@@ -268,7 +284,9 @@ public class RedisUtil {
      * 时间复杂度：O(1)
      *
      * @param key 待查询的 key
+     *
      * @return TTL 以秒为单位，或负值以指示错误
+     *
      * @see <a href="http://redis.io/commands/ttl">TTL Command</a>
      */
     public Long ttl(String key) {
@@ -279,7 +297,9 @@ public class RedisUtil {
      * 使用 Cursor 遍历指定规则的 keys
      *
      * @param scanOptions scan 的配置
+     *
      * @return Cursor，一个可迭代对象
+     *
      * @see <a href="https://redis.io/commands/scan/">Scan Command</a>
      */
     public Cursor<String> scan(ScanOptions scanOptions) {
@@ -290,6 +310,7 @@ public class RedisUtil {
      * 使用 Cursor 遍历指定规则的 keys
      *
      * @param patten key 的规则
+     *
      * @return Cursor，一个可迭代对象
      */
     public Cursor<String> scan(String patten) {
@@ -302,7 +323,9 @@ public class RedisUtil {
      *
      * @param patten key 的规则
      * @param count  一次扫描获取的 key 数量，默认为 10
+     *
      * @return Cursor，一个可迭代对象
+     *
      * @see <a href="https://redis.io/commands/scan/">Scan Command</a>
      */
     public Cursor<String> scan(String patten, long count) {
@@ -317,7 +340,9 @@ public class RedisUtil {
      * 当 key 存在时，对其值进行自减操作（自减步长为 1），当 key 不存在时，则先赋值为 0 再进行自减
      *
      * @param key key
+     *
      * @return 自减之后的 value 值
+     *
      * @see #decrBy(String, long)
      */
     public long decr(String key) {
@@ -329,7 +354,9 @@ public class RedisUtil {
      *
      * @param key   key
      * @param delta 自减步长
+     *
      * @return 自减之后的 value 值
+     *
      * @see <a href="http://redis.io/commands/decrby">DecrBy Command</a>
      */
     public long decrBy(String key, long delta) {
@@ -340,7 +367,9 @@ public class RedisUtil {
      * 获取指定 key 的 value 值
      *
      * @param key 指定的 key
+     *
      * @return 当 key 不存在时返回 null
+     *
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
     public String get(String key) {
@@ -351,7 +380,9 @@ public class RedisUtil {
      * 获取指定 key 的 value 值
      *
      * @param key 指定的 key
+     *
      * @return 当 key 不存在时返回 null
+     *
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
     public <T> T get(String key, Class<T> clazz) {
@@ -366,7 +397,9 @@ public class RedisUtil {
      * 获取指定 key 的 value 值，并将指定的 key 进行删除
      *
      * @param key 指定的 key
+     *
      * @return 当 key 不存在时返回 null
+     *
      * @see <a href="http://redis.io/commands/getdel/">GetDel Command</a>
      */
     public String getDel(String key) {
@@ -378,7 +411,9 @@ public class RedisUtil {
      *
      * @param key     指定的 key
      * @param timeout 过期时间，单位时间秒
+     *
      * @return 当 key 不存在时返回 null
+     *
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
     public String getEx(String key, long timeout) {
@@ -391,7 +426,9 @@ public class RedisUtil {
      * @param key      指定的 key
      * @param timeout  过期时间，单位时间秒
      * @param timeUnit 时间单位
+     *
      * @return 当 key 不存在时返回 null
+     *
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
     public String getEx(String key, long timeout, TimeUnit timeUnit) {
@@ -403,7 +440,9 @@ public class RedisUtil {
      *
      * @param key   指定的 key
      * @param value 新的 value 值
+     *
      * @return 当 key 存在时返回其 value 值，否则返回 null
+     *
      * @see <a href="http://redis.io/commands/getset">GetSet Command</a>
      */
     public String getSet(String key, String value) {
@@ -414,7 +453,9 @@ public class RedisUtil {
      * 对 key 进行自增，自增步长为 1
      *
      * @param key 需要自增的 key
+     *
      * @return 自增后的 value 值
+     *
      * @see #incrBy(String, long)
      */
     public long incr(String key) {
@@ -435,7 +476,9 @@ public class RedisUtil {
      *
      * @param key   需要自增的 key
      * @param delta 自增的步长
+     *
      * @return 自增后的 value 值
+     *
      * @see <a href="http://redis.io/commands/incrby">IncrBy Command</a>
      */
     public long incrBy(String key, long delta) {
@@ -448,6 +491,7 @@ public class RedisUtil {
      * @param key     需要自增的 key
      * @param delta   自增的步长
      * @param timeout 过期时间（单位：秒）
+     *
      * @return 自增后的 value 值
      */
     public long incrByAndExpire(String key, long delta, long timeout) {
@@ -466,7 +510,9 @@ public class RedisUtil {
      * 从指定的 keys 批量获取 values
      *
      * @param keys keys
+     *
      * @return values list，当值为空时，该 key 对应的 value 为 null
+     *
      * @see <a href="http://redis.io/commands/mget">MGet Command</a>
      */
     public List<String> mGet(Collection<String> keys) {
@@ -484,6 +530,7 @@ public class RedisUtil {
      * 批量获取 keys 的值，并返回一个 map
      *
      * @param keys keys
+     *
      * @return map，key 和 value 的键值对集合，当 value 获取为 null 时，不存入此 map
      */
     public Map<String, String> mGetToMap(Collection<String> keys) {
@@ -517,6 +564,7 @@ public class RedisUtil {
      *
      * @param key   指定的 key
      * @param value 值
+     *
      * @see <a href="https://redis.io/commands/set">Set Command</a>
      */
     public void set(String key, String value) {
@@ -529,6 +577,7 @@ public class RedisUtil {
      * @param key     key
      * @param value   value
      * @param timeout 过期时间 单位：秒
+     *
      * @see #setEx(String, String, long)
      */
     public void set(String key, String value, long timeout) {
@@ -542,6 +591,7 @@ public class RedisUtil {
      * @param value    value
      * @param timeout  过期时间 单位：秒
      * @param timeUnit 过期时间单位
+     *
      * @see #setEx(String, String, long, TimeUnit)
      */
     public void set(String key, String value, long timeout, TimeUnit timeUnit) {
@@ -554,6 +604,7 @@ public class RedisUtil {
      * @param key     指定的 key
      * @param value   值
      * @param timeout 过期时间
+     *
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
     public void setEx(String key, String value, long timeout) {
@@ -567,6 +618,7 @@ public class RedisUtil {
      * @param value    值
      * @param timeout  过期时间
      * @param timeUnit 时间单位
+     *
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
     public void setEx(String key, String value, long timeout, TimeUnit timeUnit) {
@@ -601,7 +653,9 @@ public class RedisUtil {
      *
      * @param key   key
      * @param value value
+     *
      * @return boolean
+     *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
     public boolean setNx(String key, String value) {
@@ -614,7 +668,9 @@ public class RedisUtil {
      * @param key     key
      * @param value   value
      * @param timeout 过期时间
+     *
      * @return boolean 操作是否成功
+     *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
     public boolean setNxEx(String key, String value, long timeout) {
@@ -628,7 +684,9 @@ public class RedisUtil {
      * @param value    value
      * @param timeout  过期时间
      * @param timeUnit 时间单位
+     *
      * @return boolean 操作是否成功
+     *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
     public boolean setNxEx(String key, String value, long timeout, TimeUnit timeUnit) {
@@ -643,7 +701,9 @@ public class RedisUtil {
      *
      * @param key    hash 的 key
      * @param fields hash 元素的 field 集合
+     *
      * @return 删除的 field 数量
+     *
      * @see <a href="https://redis.io/commands/hdel/">HDel Command</a>
      */
     public long hDel(String key, String... fields) {
@@ -655,7 +715,9 @@ public class RedisUtil {
      *
      * @param key   hash 的 key
      * @param field 元素的 field
+     *
      * @return 存在返回 {@code true}, 否则返回 {@code false}
+     *
      * @see <a href="https://redis.io/commands/hexists/">HExists Command</a>
      */
     public boolean hExists(String key, String field) {
@@ -667,6 +729,7 @@ public class RedisUtil {
      *
      * @param key   hash 的 key
      * @param field 元素的 field
+     *
      * @see <a href="https://redis.io/commands/hget/">HGet Command</a>
      */
     public String hGet(String key, String field) {
@@ -677,6 +740,7 @@ public class RedisUtil {
      * 获取 hash 中所有的 fields 和 values, 并已键值对的方式返回
      *
      * @param key hash 的 key
+     *
      * @see <a href="https://redis.io/commands/hgetall/">HGetAll Command</a>
      */
     public Map<String, String> hGetAll(String key) {
@@ -691,7 +755,9 @@ public class RedisUtil {
      * @param key   key
      * @param field field
      * @param delta 自增步长
+     *
      * @return 自增后的 value 值
+     *
      * @see <a href="https://redis.io/commands/hincrby/">HIncrBy Command</a>
      */
     public long hIncrBy(String key, String field, long delta) {
@@ -715,7 +781,9 @@ public class RedisUtil {
      * @param key   key
      * @param field field
      * @param delta 自增步长
+     *
      * @return 自增后的 value 值
+     *
      * @see <a href="https://redis.io/commands/hincrbyfloat/">HIncrByFloat Command</a>
      */
     public double hIncrByFloat(String key, String field, double delta) {
@@ -726,7 +794,9 @@ public class RedisUtil {
      * 返回 hash 中的所有 fields
      *
      * @param key hash 的 key
+     *
      * @return Set of fields in hash
+     *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
     public Set<String> hKeys(String key) {
@@ -737,7 +807,9 @@ public class RedisUtil {
      * 返回 hash 中 fields 的数量
      *
      * @param key hash 的 key
+     *
      * @return fields size
+     *
      * @see <a href="https://redis.io/commands/hlen/">HLen Command</a>
      */
     public long hLen(String key) {
@@ -748,7 +820,9 @@ public class RedisUtil {
      * 返回 hash 中指定 fields 的值集合
      *
      * @param key hash 的 key
+     *
      * @return fields value list, 按传入的 fields 顺序排列
+     *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
     public List<String> hMGet(String key, Collection<String> fields) {
@@ -759,7 +833,9 @@ public class RedisUtil {
      * 返回 hash 中指定 fields 的值集合
      *
      * @param key hash 的 key
+     *
      * @return fields value list, 按传入的 fields 顺序排列
+     *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
     public List<String> hMGet(String key, String... fields) {
@@ -772,6 +848,7 @@ public class RedisUtil {
      * @param key   hash 的 key
      * @param field field
      * @param value value
+     *
      * @see <a href="https://redis.io/commands/hset/">HSet Command</a>
      */
     public void hSet(String key, String field, String value) {
@@ -784,6 +861,7 @@ public class RedisUtil {
      * @param key   hash 的 key
      * @param field field
      * @param value value
+     *
      * @see <a href="https://redis.io/commands/hsetnx/">HSetNx Command</a>
      */
     public void hSetNx(String key, String field, String value) {
@@ -794,7 +872,9 @@ public class RedisUtil {
      * 返回 hash 中的所有 values
      *
      * @param key hash 的 key
+     *
      * @return List of fields in hash
+     *
      * @see <a href="https://redis.io/commands/hvals/">HVals Command</a>
      */
     public List<String> hVals(String key) {
@@ -809,7 +889,9 @@ public class RedisUtil {
      *
      * @param key   list 的 key
      * @param index 索引位置，0 表示第一个元素，负数索引用于指定从尾部开始计数，-1 表示最后一个元素，-2 倒数第二个
+     *
      * @return 返回对应索引位置的元素，不存在时为 null
+     *
      * @see <a href="https://redis.io/commands/lindex/">LIndex Command</a>
      */
     public String lIndex(String key, long index) {
@@ -820,7 +902,9 @@ public class RedisUtil {
      * 获取指定 list 的元素个数即长度
      *
      * @param key list 的 key
+     *
      * @return 返回 list 的长度，当 list 不存在时返回 0
+     *
      * @see <a href="https://redis.io/commands/llen/">LLen Command</a>
      */
     public long lLen(String key) {
@@ -831,7 +915,9 @@ public class RedisUtil {
      * 以原子方式返回并删除列表的第一个元素，例如列表包含元素 "a", "b", "c" LPOP 操作将返回”a“并将其删除，list 中元素变为”b“, "c"
      *
      * @param key list 的 key
+     *
      * @return 返回弹出的元素
+     *
      * @see <a href="https://redis.io/commands/lpop/">LPop Command</a>
      */
     public String lPop(String key) {
@@ -843,7 +929,9 @@ public class RedisUtil {
      *
      * @param key   list 的 key
      * @param count 弹出的个数
+     *
      * @return 返回弹出的元素列表，key 不存在时为 null
+     *
      * @see <a href="https://redis.io/commands/lpop/">LPop Command</a>
      * @since Redis 版本大于等于 6.2.0
      */
@@ -856,7 +944,9 @@ public class RedisUtil {
      *
      * @param key     list 的 key
      * @param element 查找的元素
+     *
      * @return 指定元素正向第一个匹配项的索引，如果找不到，返回 null
+     *
      * @see <a href="https://redis.io/commands/lpos/">LPos Command</a>
      * @since Redis 版本大于等于 6.0.6
      */
@@ -869,7 +959,9 @@ public class RedisUtil {
      *
      * @param key      list 的 key
      * @param elements 插入的元素
+     *
      * @return 插入后的 list 长度
+     *
      * @see <a href="https://redis.io/commands/lpush/">LPush Command</a>
      */
     public long lPush(String key, String... elements) {
@@ -881,7 +973,9 @@ public class RedisUtil {
      *
      * @param key      list 的 key
      * @param elements 插入的元素
+     *
      * @return 插入后的 list 长度
+     *
      * @see <a href="https://redis.io/commands/lpush/">LPush Command</a>
      */
     public long lPush(String key, List<String> elements) {
@@ -895,7 +989,9 @@ public class RedisUtil {
      * @param start begin offset, 从 0 开始，0 表示列表第一个元素，也可以为负数，表示从 list 末尾开始的偏移量， -1
      *              是列表最后第一个元素
      * @param end   end offset，值规则 同 start
+     *
      * @return 元素集合
+     *
      * @see <a href="https://redis.io/commands/lrange/">LRange Command</a>
      */
     public List<String> lRange(String key, long start, long end) {
@@ -913,7 +1009,9 @@ public class RedisUtil {
      * @param key   list 的 key
      * @param count 删除的数量以及规则
      * @param value 待删除的元素值
+     *
      * @return 移除元素的数量
+     *
      * @see <a href="https://redis.io/commands/lrem/">LRem Command</a>
      */
     public long lRem(String key, long count, String value) {
@@ -926,6 +1024,7 @@ public class RedisUtil {
      * @param key   list 的 key
      * @param index 索引位置，0 表示第一个元素，负数索引用于指定从尾部开始计数，-1 表示最后一个元素，-2 倒数第二个
      * @param value 值
+     *
      * @see <a href="https://redis.io/commands/lset/">LSet Command</a>
      */
     public void lSet(String key, long index, String value) {
@@ -938,6 +1037,7 @@ public class RedisUtil {
      * @param key   list 的 key
      * @param start 开始索引位置，0 表示第一个元素，负数索引用于指定从尾部开始计数，-1 表示最后一个元素，-2 倒数第二个
      * @param end   结束的索引位置
+     *
      * @see <a href="https://redis.io/commands/ltrim/">LTrim Command</a>
      */
     public void lTrim(String key, long start, long end) {
@@ -950,7 +1050,9 @@ public class RedisUtil {
      * 例如 list 包含元素 "a"、"b"、"c", RPOP 操作将返回”c“并将其删除，list 中元素变为”a“, "b"
      *
      * @param key list 的 key
+     *
      * @return 弹出的元素
+     *
      * @see <a href="https://redis.io/commands/rpop/">RPOP Command</a>
      */
     public String rPop(String key) {
@@ -962,7 +1064,9 @@ public class RedisUtil {
      *
      * @param key   list 的 key
      * @param count 待弹出的元素数量
+     *
      * @return 弹出的元素集合
+     *
      * @see <a href="https://redis.io/commands/rpop/">RPOP Command</a>
      * @since Redis 6.2.0
      */
@@ -975,7 +1079,9 @@ public class RedisUtil {
      *
      * @param key    list 的 key
      * @param values 插入的元素
+     *
      * @return 插入后的 list 长度
+     *
      * @see <a href="https://redis.io/commands/rpush/">RPush Command</a>
      */
     public long rPush(String key, String... values) {
@@ -987,7 +1093,9 @@ public class RedisUtil {
      *
      * @param key    list 的 key
      * @param values 插入的元素
+     *
      * @return 插入后的 list 长度
+     *
      * @see <a href="https://redis.io/commands/rpush/">RPush Command</a>
      */
     public long rPush(String key, List<String> values) {
@@ -1004,7 +1112,9 @@ public class RedisUtil {
      *
      * @param key     Set 的 key
      * @param members 添加的成员
+     *
      * @return 添加到集合中的元素数量，不包括集合中已经存在的所有元素
+     *
      * @see <a href="https://redis.io/commands/sadd/">SAdd Command</a>
      */
     public long sAdd(String key, String... members) {
@@ -1018,7 +1128,9 @@ public class RedisUtil {
      *
      * @param key     Set 的 key
      * @param members 添加的成员
+     *
      * @return 添加到集合中的元素数量，不包括集合中已经存在的所有元素
+     *
      * @see <a href="https://redis.io/commands/sadd/">SAdd Command</a>
      */
     public long sAdd(String key, List<String> members) {
@@ -1029,7 +1141,9 @@ public class RedisUtil {
      * 返回 Set 中的元素数，如果 set 不存在则返回 0
      *
      * @param key Set 的 key
+     *
      * @return The cardinality (number of elements) of the set
+     *
      * @see <a href="https://redis.io/commands/scard/">SCard Command</a>
      */
     public long sCard(String key) {
@@ -1043,7 +1157,9 @@ public class RedisUtil {
      *
      * @param key   Set 的 key
      * @param value 待判断的值
+     *
      * @return 如果是 Set 中的元素返回{@code true}, 否则返回{@code false}
+     *
      * @see <a href="https://redis.io/commands/sismember/">SIsMember Command</a>
      */
     public boolean sIsMember(String key, String value) {
@@ -1056,7 +1172,9 @@ public class RedisUtil {
      * Time complexity O(N)
      *
      * @param key Set 的 key
+     *
      * @return Set 中的所有元素
+     *
      * @see <a href="https://redis.io/commands/smembers/">SMembers Command</a>
      */
     public Set<String> sMembers(String key) {
@@ -1070,7 +1188,9 @@ public class RedisUtil {
      *
      * @param key    Set 的 key
      * @param values 待判断的值集合
+     *
      * @return 一个 Map, key 为待判断的值，value 为结果
+     *
      * @see <a href="https://redis.io/commands/smismember/">SMIsMember Command</a>
      * @since Redis 6.2.0
      */
@@ -1084,7 +1204,9 @@ public class RedisUtil {
      * Time complexity O(1)
      *
      * @param key Set 的 key
+     *
      * @return 弹出的元素，或者 null
+     *
      * @see <a href="https://redis.io/commands/spop/">SPop Command</a>
      */
     public String sPop(String key) {
@@ -1097,7 +1219,9 @@ public class RedisUtil {
      * Time complexity O(1)
      *
      * @param key Set 的 key
+     *
      * @return 随机选中的元素或者 null
+     *
      * @see <a href="https://redis.io/commands/srandmember/">SRandMember Command</a>
      */
     public String sRandMember(String key) {
@@ -1111,7 +1235,9 @@ public class RedisUtil {
      *
      * @param key   Set 的 key
      * @param count 随机返回的元素数量
+     *
      * @return 随机选中的元素或者 null
+     *
      * @see <a href="https://redis.io/commands/srandmember/">SRandMember Command</a>
      */
     public Set<String> sRandMember(String key, long count) {
@@ -1125,8 +1251,10 @@ public class RedisUtil {
      *
      * @param key     Set 的 key
      * @param members 待删除的成员
+     *
      * @return The number of members that were removed from the set, not including
      * non-existing members
+     *
      * @see <a href="https://redis.io/commands/srem/">SRem Command</a>
      */
     public long sRem(String key, String... members) {
@@ -1137,7 +1265,9 @@ public class RedisUtil {
      * 使用 Cursor 遍历指定 Set 中的所有元素
      *
      * @param scanOptions scan 的配置
+     *
      * @return Cursor，一个可迭代对象
+     *
      * @see <a href="https://redis.io/commands/sscan/">SScan Command</a>
      */
     public Cursor<String> sScan(String key, ScanOptions scanOptions) {
@@ -1156,7 +1286,9 @@ public class RedisUtil {
      * @param key    Sorted Set 的 key
      * @param score  分数
      * @param member 成员
+     *
      * @return 当元素被成功添加时返回 true，当元素存在时返回 false（分数会更新）
+     *
      * @see <a href="https://redis.io/commands/zadd/">ZAdd Command</>
      */
     public boolean zAdd(String key, double score, String member) {
@@ -1171,7 +1303,9 @@ public class RedisUtil {
      *
      * @param key          Sorted Set 的 key
      * @param scoreMembers 成员和分数的键值对
+     *
      * @return 返回被成功添加的成员数
+     *
      * @see <a href="https://redis.io/commands/zadd/">ZAdd Command</a>
      */
     public long zAdd(String key, Map<String, Double> scoreMembers) {
@@ -1188,7 +1322,9 @@ public class RedisUtil {
      * Time complexity O(1)
      *
      * @param key Sorted Set 的 key
+     *
      * @return Sorted Set 中的元素数量
+     *
      * @see <a href="https://redis.io/commands/zcard/">ZCard Command</a>
      */
     public long zCard(String key) {
@@ -1205,7 +1341,9 @@ public class RedisUtil {
      * @param key       Sorted Set 的 key
      * @param increment 增长步长，可以为负数
      * @param member    成员
+     *
      * @return The new score
+     *
      * @see <a href="https://redis.io/commands/zincrby/">ZIncrBy Command</a>
      */
     public double zIncrBy(String key, double increment, String member) {
@@ -1218,7 +1356,9 @@ public class RedisUtil {
      * Time complexity O(log(N)) with N being the number of elements in the sorted set
      *
      * @param key Sorted Set 的 key
+     *
      * @return 弹出的 member 和 score
+     *
      * @see <a href="https://redis.io/commands/zpopmax/">ZPopMax Command</a>
      * @since Redis 5.0.0
      */
@@ -1233,7 +1373,9 @@ public class RedisUtil {
      *
      * @param key   Sorted Set 的 key
      * @param count 弹出的个数
+     *
      * @return 弹出的 member 和 score
+     *
      * @see <a href="https://redis.io/commands/zpopmax/">ZPopMax Command</a>
      * @since Redis 5.0.0
      */
@@ -1247,7 +1389,9 @@ public class RedisUtil {
      * Time complexity O(log(N)) with N being the number of elements in the sorted set
      *
      * @param key Sorted Set 的 key
+     *
      * @return 弹出的 member 和 score
+     *
      * @see <a href="https://redis.io/commands/zpopmin/">ZPopMin Command</a>
      * @since Redis 5.0.0
      */
@@ -1262,7 +1406,9 @@ public class RedisUtil {
      *
      * @param key   Sorted Set 的 key
      * @param count 弹出的个数
+     *
      * @return 弹出的 member 和 score
+     *
      * @see <a href="https://redis.io/commands/zpopmin/">ZPopMin Command</a>
      * @since Redis 5.0.0
      */
@@ -1276,7 +1422,9 @@ public class RedisUtil {
      * Time complexity O(N) where N is the number of elements returned
      *
      * @param key Sorted Set 的 Key
+     *
      * @return Random String from the set
+     *
      * @see <a href="https://redis.io/commands/zrandmember/">ZRandMember Command</a>
      * @since Redis 6.2.0
      */
@@ -1293,7 +1441,9 @@ public class RedisUtil {
      * @param key   the key to query
      * @param start the minimum index
      * @param end   the maximum index
+     *
      * @return A Set of Strings in the specified range
+     *
      * @see <a href="https://redis.io/commands/zrange/">ZRange Command</a>
      */
     public Set<String> zRange(String key, long start, long end) {
@@ -1309,7 +1459,9 @@ public class RedisUtil {
      * @param key the key to query
      * @param min minimum score
      * @param max maximum score
+     *
      * @return A List of elements in the specified score range
+     *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
     public Set<String> zRangeByScore(String key, double min, double max) {
@@ -1324,7 +1476,9 @@ public class RedisUtil {
      * @param max    maximum score
      * @param offset 偏移量
      * @param count  获取的元素数
+     *
      * @return A List of elements in the specified score range
+     *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
     public Set<String> zRangeByScore(String key, double min, double max, long offset, long count) {
@@ -1337,7 +1491,9 @@ public class RedisUtil {
      * @param key the key to query
      * @param min minimum score
      * @param max maximum score
+     *
      * @return A List of elements in the specified score range
+     *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
     public Set<ZSetOperations.TypedTuple<String>> zRangeByScoreWithScores(String key, double min, double max) {
@@ -1351,7 +1507,9 @@ public class RedisUtil {
      *
      * @param key    Sorted Set 的 key
      * @param member 成员
+     *
      * @return 如果 member 存在的话返回其排名，否则返回 null
+     *
      * @see <a href="https://redis.io/commands/zrank/">ZRank Command</a>
      */
     public Long zRank(String key, String member) {
@@ -1365,7 +1523,9 @@ public class RedisUtil {
      *
      * @param key     Sorted Set 的 key
      * @param members 待删除的成员
+     *
      * @return 从排序集中删除的 member 数，不包括不存在的 member 数
+     *
      * @see <a href="https://redis.io/commands/zrem/">ZRem Command</a>
      */
     public long zRem(String key, String... members) {
@@ -1383,7 +1543,9 @@ public class RedisUtil {
      * @param key   the key to query
      * @param start the minimum index
      * @param end   the maximum index
+     *
      * @return A List of Strings in the specified range
+     *
      * @see <a href="https://redis.io/commands/zrevrange/">ZRevRange Commad</a>
      */
     public Set<String> zRevRange(String key, long start, long end) {
@@ -1403,7 +1565,9 @@ public class RedisUtil {
      * @param key the key to query
      * @param min minimum score
      * @param max maximum score
+     *
      * @return A List of elements in the specified score range
+     *
      * @see <a href="https://redis.io/commands/zrevrangebyscore/">ZRevRangeByScore
      * Commad</a>
      */
@@ -1418,7 +1582,9 @@ public class RedisUtil {
      *
      * @param key    Sorted Set Key
      * @param member Sorted Set Member
+     *
      * @return the score
+     *
      * @see <a href="https://redis.io/commands/zscore/">ZSCORE Commad</a>
      */
     public Double zScore(String key, String member) {
@@ -1432,6 +1598,7 @@ public class RedisUtil {
      * 执行 lua 脚本
      *
      * @param action redis 操作
+     *
      * @return T
      */
     public <T> T execute(RedisCallback<T> action) {
@@ -1535,6 +1702,7 @@ public class RedisUtil {
      * @param key   key of stream
      * @param group consume group
      * @param ids   record ids
+     *
      * @see <a href="https://redis.io/commands/xack/">XACK Command</a>
      * @since Redis 5.0.0
      */
@@ -1551,7 +1719,9 @@ public class RedisUtil {
      *
      * @param key     key of stream
      * @param content record content
+     *
      * @return the ID of the added entry
+     *
      * @see <a href="https://redis.io/commands/xadd/">XADD Command</a>
      * @since Redis 5.0.0
      */
@@ -1586,6 +1756,7 @@ public class RedisUtil {
      *
      * @param key key of stream
      * @param ids record ids
+     *
      * @see <a href="https://redis.io/commands/xdel/">XDEL Command</a>
      * @since Redis 5.0.0
      */
@@ -1602,6 +1773,7 @@ public class RedisUtil {
      *
      * @param key       key of stream
      * @param groupName group name
+     *
      * @see <a href="https://redis.io/commands/xgroup-create/">XGROUP CREATE Command</a>
      * @since Redis 5.0.0
      */
@@ -1621,7 +1793,9 @@ public class RedisUtil {
      * XLEN key
      *
      * @param key key of stream
+     *
      * @return length of stream
+     *
      * @see <a href="https://redis.io/commands/xlen/">XLEN Command</a>
      * @since Redis 5.0.0
      */
@@ -1634,7 +1808,9 @@ public class RedisUtil {
      *
      * @param key   key of stream
      * @param range start and end
+     *
      * @return The entries with IDs matching the specified range.
+     *
      * @see <a href="https://redis.io/commands/xrange/">XRANGE Command</a>
      * @since Redis 5.0.0
      */

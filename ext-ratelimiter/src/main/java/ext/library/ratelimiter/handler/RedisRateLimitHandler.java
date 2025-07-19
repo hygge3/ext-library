@@ -1,15 +1,15 @@
 package ext.library.ratelimiter.handler;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.ratelimiter.annotation.RateLimiter;
-import java.util.Collections;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
+
+import jakarta.annotation.Nonnull;
+import java.util.Collections;
 
 /**
  * Redis 速率限制处理器
@@ -37,7 +37,7 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
         long interval = DurationStyle.detectAndParse(rateLimiter.interval()).getSeconds();
         final String key = getCombineKey(rateLimiter, point);
         if (log.isDebugEnabled()) {
-            log.debug("rate.limit.key = {}", key);
+            log.debug("[🚥] rate.limit.key = {}", key);
         }
 
         Long currentCount = redisTemplate.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key),
