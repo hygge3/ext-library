@@ -16,8 +16,8 @@ import ext.library.tool.constant.Holder;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.domain.ObjectId;
+import ext.library.tool.util.BasicConverter;
 import ext.library.tool.util.BoolUtil;
-import ext.library.tool.util.Converter;
 import ext.library.tool.util.DateUtil;
 import lombok.experimental.UtilityClass;
 
@@ -1628,7 +1628,7 @@ public class $ {
         if (source.getClass().isAssignableFrom(targetType)) {
             return (T) source;
         }
-        return Converter.cast(source, targetType);
+        return BasicConverter.cast(source, targetType);
     }
 
     // endregion

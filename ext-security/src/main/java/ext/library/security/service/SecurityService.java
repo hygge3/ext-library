@@ -1,7 +1,5 @@
 package ext.library.security.service;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.security.config.properties.SecurityProperties;
@@ -11,17 +9,17 @@ import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.exception.UnauthorizedException;
-import ext.library.security.function.IdentitySwitchFunction;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+
+import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 认证接口
@@ -31,6 +29,27 @@ public interface SecurityService {
     SecurityRepository REPOSITORY = SpringUtil.getBean(SecurityRepository.class);
 
     SecurityProperties PROPERTIES = SpringUtil.getBean(SecurityProperties.class);
+
+    /**
+     * 裁剪 token 前缀
+     *
+     * @param token 令牌
+     *
+     * @return {@link String }
+     */
+    private static String cutPrefixToken(String token) {
+        if ($.isEmpty(token)) {
+            return null;
+        }
+        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, "");
+    }
+
+    /**
+     * 拼接 token 前缀
+     */
+    private static String appendTokenPrefix(String token) {
+        return SecurityConstant.AUTHORIZATION_PREFIX + token;
+    }
 
     /**
      * 登录方法
@@ -58,6 +77,7 @@ public interface SecurityService {
      *
      * @param loginId    登录 Id
      * @param loginModel 登录参数
+     *
      * @return token
      */
     default String createLoginByLoginId(String loginId, SecurityLoginParams loginModel) {
@@ -78,6 +98,7 @@ public interface SecurityService {
      * 根据 token 获取 SecuritySession 信息
      *
      * @param token 用户 token
+     *
      * @return SecuritySession
      */
     default SecuritySession getSecuritySessionByToken(String token) {
@@ -98,6 +119,7 @@ public interface SecurityService {
      * 根据 loginId 获取 SecuritySession 信息
      *
      * @param loginId 用户登录 Id
+     *
      * @return SecuritySession
      */
     default SecuritySession getSecuritySessionByLoginId(String loginId) {
@@ -140,19 +162,6 @@ public interface SecurityService {
             throw new UnauthorizedException("无效的认证信息");
         }
         return securitySession;
-    }
-
-    /**
-     * 裁剪 token 前缀
-     *
-     * @param token 令牌
-     * @return {@link String }
-     */
-    private static String cutPrefixToken(String token) {
-        if ($.isEmpty(token)) {
-            return null;
-        }
-        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, "");
     }
 
     /**
@@ -294,7 +303,7 @@ public interface SecurityService {
         Long autoRenewalIntervalTime = PROPERTIES.getAutoRenewalIntervalTime();
         LocalDateTime activityTime = this.tokenLastActivityTime(securityToken.getToken());
         if (Objects.nonNull(activityTime)
-            && activityTime.plusSeconds(autoRenewalIntervalTime).isBefore(LocalDateTime.now())) {
+                && activityTime.plusSeconds(autoRenewalIntervalTime).isBefore(LocalDateTime.now())) {
             session.renewalToken(securityToken.getToken());
             // 续约成功通知
             SecurityEventPublishManager.doRenewal(session.getLoginId(), securityToken.getToken(),
@@ -417,6 +426,7 @@ public interface SecurityService {
      *
      * @param tokenValue token 值，支持模糊匹配
      * @param sortedDesc 是否降序
+     *
      * @return SecurityPagination
      */
     default List<SecuritySession> querySecuritySessionList(String tokenValue, Boolean sortedDesc) {
@@ -445,6 +455,7 @@ public interface SecurityService {
      *
      * @param tokenValue token 值
      * @param sortedDesc 是否降序
+     *
      * @return List<String>
      */
     default List<String> queryTokenValueList(String tokenValue, Boolean sortedDesc) {
@@ -455,6 +466,7 @@ public interface SecurityService {
      * 获取 session 超时时间
      *
      * @param loginId 登录 Id
+     *
      * @return 时长秒 -1 表示永久有效
      */
     default Long sessionTimeout(String loginId) {
@@ -465,6 +477,7 @@ public interface SecurityService {
      * 获取 token 超时时间
      *
      * @param token tokenValue
+     *
      * @return 时长秒 -1 表示永久有效
      */
     default Long tokenTimeout(String token) {
@@ -475,6 +488,7 @@ public interface SecurityService {
      * 获取 token 临时超时时间
      *
      * @param token tokenValue
+     *
      * @return 时长秒 -1 表示永久有效
      */
     default Long tokenActivityTimeout(String token) {
@@ -485,6 +499,7 @@ public interface SecurityService {
      * 获取 token 的最新续约时间
      *
      * @param token tokenValue
+     *
      * @return 续约时间
      */
     default LocalDateTime tokenLastActivityTime(String token) {
@@ -499,6 +514,7 @@ public interface SecurityService {
      * 当前用户是否有指定角色
      *
      * @param roleCode 角色码
+     *
      * @return true 有 false 没有
      */
     default boolean hasRole(String roleCode) {
@@ -510,6 +526,7 @@ public interface SecurityService {
      *
      * @param roleCode 角色码
      * @param logical  条件
+     *
      * @return true 有 false 没有
      */
     default Boolean hasRole(String[] roleCode, Logical logical) {
@@ -520,6 +537,7 @@ public interface SecurityService {
      * 当前用户是否有指定权限码
      *
      * @param permissionCode 权限码
+     *
      * @return true 有 false 没有
      */
     default Boolean hasPermission(String permissionCode) {
@@ -531,6 +549,7 @@ public interface SecurityService {
      *
      * @param permissionCode 权限码
      * @param logical        条件
+     *
      * @return true 有 false 没有
      */
     default Boolean hasPermission(String[] permissionCode, Logical logical) {
@@ -549,36 +568,6 @@ public interface SecurityService {
             return false;
         }
         return true;
-    }
-
-    /**
-     * 身份临时切换
-     *
-     * @param loginId            登录 Id
-     * @param identitySwitchFunc 执行函数
-     */
-    default void identityTempSwitching(String loginId, IdentitySwitchFunction identitySwitchFunc) {
-        // 根据登录 Id 查询
-        SecuritySession session = getSecuritySessionByLoginId(loginId);
-        String token = null;
-        if (Objects.nonNull(session)) {
-            Optional<SecurityToken> optional = session.getTokenInfoList()
-                    .stream()
-                    .filter(item -> item.getState().equals(SecurityConstant.TOKEN_STATE_NORMAL))
-                    .findFirst();
-            if (optional.isPresent()) {
-                token = optional.get().getToken();
-            }
-        }
-        if ($.isEmpty(token)) {
-            token = this.createLoginByLoginId(loginId, new SecurityLoginParams());
-        }
-        try {
-            ServletUtil.setRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN, token);
-            identitySwitchFunc.run();
-        } finally {
-            ServletUtil.removeRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN);
-        }
     }
 
     /**
@@ -605,13 +594,6 @@ public interface SecurityService {
         // 将 token 设置到请求参数中
         ServletUtil.setRequestAttribute(PROPERTIES.getSecurityName(),
                 appendTokenPrefix(securitySession.getCurrentSecurityToken().getToken()));
-    }
-
-    /**
-     * 拼接 token 前缀
-     */
-    private static String appendTokenPrefix(String token) {
-        return SecurityConstant.AUTHORIZATION_PREFIX + token;
     }
 
     /**
@@ -643,6 +625,7 @@ public interface SecurityService {
      *
      * @param loginId 登录 id
      * @param model   登录参数
+     *
      * @return SecuritySession {@link SecuritySession}
      */
     private SecuritySession checkAndSetSecuritySession(String loginId, SecurityLoginParams model) {
@@ -675,10 +658,10 @@ public interface SecurityService {
             SecurityToken earliestToken = availableTokenInfoList.getFirst();
             // 验证登录设备类型数量
             if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.getMaxLoginDeviceTypeLimit())
-                && availableTokenInfoList.stream()
-                           .map(SecurityToken::getDeviceType)
-                           .distinct()
-                           .count() >= PROPERTIES.getMaxLoginDeviceTypeLimit()) {
+                    && availableTokenInfoList.stream()
+                    .map(SecurityToken::getDeviceType)
+                    .distinct()
+                    .count() >= PROPERTIES.getMaxLoginDeviceTypeLimit()) {
 
                 availableTokenInfoList.stream()
                         .filter(item -> item.getDeviceType().equals(earliestToken.getDeviceType()))
@@ -693,7 +676,7 @@ public interface SecurityService {
             if (Boolean.TRUE.equals(PROPERTIES.getIsConcurrentLogin())) {
                 // 允许并发，验证登录设备数量
                 if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.getMaxLoginLimit())
-                    && availableTokenInfoList.size() >= PROPERTIES.getMaxLoginLimit()) {
+                        && availableTokenInfoList.size() >= PROPERTIES.getMaxLoginLimit()) {
                     // 已达到登录上限，顶掉最先登录的设备
                     securitySession.updateTokenInfoState(earliestToken.getToken(),
                             SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);

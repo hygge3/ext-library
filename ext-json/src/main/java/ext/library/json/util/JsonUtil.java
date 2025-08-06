@@ -9,14 +9,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
 import ext.library.tool.$;
+import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
 
 /**
  * JSON 工具类
@@ -30,6 +31,7 @@ public class JsonUtil {
      * clazz 获取 JavaType
      *
      * @param clazz Class
+     *
      * @return MapType
      */
     public JavaType getType(Class<?> clazz) {
@@ -40,6 +42,7 @@ public class JsonUtil {
      * 封装 map type，keyClass String
      *
      * @param valueClass value 类型
+     *
      * @return MapType
      */
     public MapType getMapType(Class<?> valueClass) {
@@ -51,6 +54,7 @@ public class JsonUtil {
      *
      * @param keyClass   key 类型
      * @param valueClass value 类型
+     *
      * @return MapType
      */
     public MapType getMapType(Class<?> keyClass, Class<?> valueClass) {
@@ -61,6 +65,7 @@ public class JsonUtil {
      * 封装 map type
      *
      * @param elementClass 集合值类型
+     *
      * @return CollectionLikeType
      */
     public CollectionLikeType getListType(Class<?> elementClass) {
@@ -76,6 +81,7 @@ public class JsonUtil {
      *
      * @param parametrized     泛型参数化
      * @param parameterClasses 泛型参数类型
+     *
      * @return JavaType
      */
     public JavaType getParametricType(Class<?> parametrized, Class<?>... parameterClasses) {
@@ -91,6 +97,7 @@ public class JsonUtil {
      *
      * @param parametrized   泛型参数化
      * @param parameterTypes 泛型参数类型
+     *
      * @return JavaType
      */
     public JavaType getParametricType(Class<?> parametrized, JavaType... parameterTypes) {
@@ -105,6 +112,7 @@ public class JsonUtil {
      * 将对象序列化成 json 字符串
      *
      * @param obj javaBean
+     *
      * @return {@code String } json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
@@ -125,6 +133,7 @@ public class JsonUtil {
      * 将对象序列化成 json 字符串，格式美化
      *
      * @param obj javaBean
+     *
      * @return jsonString json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
@@ -145,6 +154,7 @@ public class JsonUtil {
      * 将对象序列化成 json byte 数组
      *
      * @param obj javaBean
+     *
      * @return jsonString json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
@@ -171,6 +181,7 @@ public class JsonUtil {
      * @param json      jsonString
      * @param valueType class
      * @param <T>       T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
@@ -184,6 +195,7 @@ public class JsonUtil {
      * @param content   json bytes
      * @param valueType class
      * @param <T>       T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({IOException.class})
@@ -197,6 +209,7 @@ public class JsonUtil {
      * @param in        InputStream
      * @param valueType class
      * @param <T>       T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({IOException.class})
@@ -210,6 +223,7 @@ public class JsonUtil {
      * @param reader    java.io.Reader
      * @param valueType class
      * @param <T>       T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({IOException.class})
@@ -223,6 +237,7 @@ public class JsonUtil {
      * @param json     jsonString
      * @param javaType JavaType
      * @param <T>      T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
@@ -236,6 +251,7 @@ public class JsonUtil {
      * @param content  bytes
      * @param javaType JavaType
      * @param <T>      T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows(IOException.class)
@@ -249,6 +265,7 @@ public class JsonUtil {
      * @param in       InputStream
      * @param javaType JavaType
      * @param <T>      T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows(IOException.class)
@@ -262,6 +279,7 @@ public class JsonUtil {
      * @param reader   java.io.Reader
      * @param javaType JavaType
      * @param <T>      T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows(IOException.class)
@@ -275,6 +293,7 @@ public class JsonUtil {
      * @param json          jsonString
      * @param typeReference 泛型类型
      * @param <T>           T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
@@ -288,6 +307,7 @@ public class JsonUtil {
      * @param content       bytes
      * @param typeReference 泛型类型
      * @param <T>           T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows({IOException.class})
@@ -301,6 +321,7 @@ public class JsonUtil {
      * @param in            InputStream
      * @param typeReference 泛型类型
      * @param <T>           T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows(IOException.class)
@@ -314,6 +335,7 @@ public class JsonUtil {
      * @param reader        java.io.Reader
      * @param typeReference 泛型类型
      * @param <T>           T 泛型标记
+     *
      * @return Bean
      */
     @SneakyThrows(IOException.class)
@@ -331,6 +353,7 @@ public class JsonUtil {
      * @param json         jsonString
      * @param elementClass 集合中的元素类型
      * @param <T>          泛型
+     *
      * @return {@link List}<{@link T}>
      */
     public <T> List<T> readList(String json, Class<T> elementClass) {
@@ -343,6 +366,7 @@ public class JsonUtil {
      * @param content      bytes
      * @param elementClass elementClass
      * @param <T>          泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -356,6 +380,7 @@ public class JsonUtil {
      * @param content      InputStream
      * @param elementClass elementClass
      * @param <T>          泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -369,6 +394,7 @@ public class JsonUtil {
      * @param reader       java.io.Reader
      * @param elementClass elementClass
      * @param <T>          泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -384,6 +410,7 @@ public class JsonUtil {
      * 将 json 反序列化成 Map 集合
      *
      * @param json jsonString
+     *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     public Map<String, Object> readMap(String json) {
@@ -394,6 +421,7 @@ public class JsonUtil {
      * 读取集合
      *
      * @param content bytes
+     *
      * @return 集合
      */
     public Map<String, Object> readMap(byte[] content) {
@@ -404,6 +432,7 @@ public class JsonUtil {
      * 读取集合
      *
      * @param content InputStream
+     *
      * @return 集合
      */
     public Map<String, Object> readMap(InputStream content) {
@@ -414,6 +443,7 @@ public class JsonUtil {
      * 读取集合
      *
      * @param reader java.io.Reader
+     *
      * @return 集合
      */
     public Map<String, Object> readMap(Reader reader) {
@@ -426,6 +456,7 @@ public class JsonUtil {
      * @param json       jsonString
      * @param valueClass 值类型
      * @param <V>        泛型
+     *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     public <V> Map<String, V> readMap(String json, Class<?> valueClass) {
@@ -438,6 +469,7 @@ public class JsonUtil {
      * @param content    bytes
      * @param valueClass 值类型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     public <V> Map<String, V> readMap(byte[] content, Class<?> valueClass) {
@@ -450,6 +482,7 @@ public class JsonUtil {
      * @param content    InputStream
      * @param valueClass 值类型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     public <V> Map<String, V> readMap(InputStream content, Class<?> valueClass) {
@@ -462,6 +495,7 @@ public class JsonUtil {
      * @param reader     java.io.Reader
      * @param valueClass 值类型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     public <V> Map<String, V> readMap(Reader reader, Class<?> valueClass) {
@@ -476,6 +510,7 @@ public class JsonUtil {
      * @param valueClass 值类型
      * @param <K>        泛型
      * @param <V>        泛型
+     *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     public <K, V> Map<K, V> readMap(String json, Class<?> keyClass, Class<?> valueClass) {
@@ -490,6 +525,7 @@ public class JsonUtil {
      * @param valueClass 值类型
      * @param <K>        泛型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -505,6 +541,7 @@ public class JsonUtil {
      * @param valueClass 值类型
      * @param <K>        泛型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -520,6 +557,7 @@ public class JsonUtil {
      * @param valueClass 值类型
      * @param <K>        泛型
      * @param <V>        泛型
+     *
      * @return 集合
      */
     @SneakyThrows(IOException.class)
@@ -537,6 +575,7 @@ public class JsonUtil {
      * @param fromValue   来源对象
      * @param toValueType 转换的类型
      * @param <T>         泛型标记
+     *
      * @return 转换结果
      */
     public <T> T convert(Object fromValue, Class<T> toValueType) {
@@ -549,6 +588,7 @@ public class JsonUtil {
      * @param fromValue   来源对象
      * @param toValueType 转换的类型
      * @param <T>         泛型标记
+     *
      * @return 转换结果
      */
     public <T> T convert(Object fromValue, JavaType toValueType) {
@@ -561,6 +601,7 @@ public class JsonUtil {
      * @param fromValue      来源对象
      * @param toValueTypeRef 泛型类型
      * @param <T>            泛型标记
+     *
      * @return 转换结果
      */
     public <T> T convert(Object fromValue, TypeReference<T> toValueTypeRef) {
@@ -575,6 +616,7 @@ public class JsonUtil {
      * 检验 json 格式
      *
      * @param json json 字符串
+     *
      * @return 是否成功
      */
     public boolean isValidJson(String json) {

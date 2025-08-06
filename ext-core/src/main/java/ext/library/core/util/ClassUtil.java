@@ -1,10 +1,6 @@
 package ext.library.core.util;
 
-import jakarta.annotation.Nonnull;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import ext.library.tool.holder.Lazy;
 import lombok.experimental.UtilityClass;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -15,24 +11,30 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
 
+import jakarta.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 /**
  * 类工具类
  */
 @UtilityClass
 public class ClassUtil extends org.springframework.util.ClassUtils {
 
-     final ParameterNameDiscoverer PARAMETERNAMEDISCOVERER = new DefaultParameterNameDiscoverer();
+    final Lazy<ParameterNameDiscoverer> PARAMETERNAMEDISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
     /**
      * 获取方法参数信息
      *
      * @param constructor    构造器
      * @param parameterIndex 参数序号
+     *
      * @return {MethodParameter}
      */
     public MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(constructor, parameterIndex);
-        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER);
+        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER.get());
         return methodParameter;
     }
 
@@ -41,11 +43,12 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      *
      * @param method         方法
      * @param parameterIndex 参数序号
+     *
      * @return {MethodParameter}
      */
     public MethodParameter getMethodParameter(Method method, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(method, parameterIndex);
-        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER);
+        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER.get());
         return methodParameter;
     }
 
@@ -55,6 +58,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      * @param method         Method
      * @param annotationType 注解类
      * @param <A>            泛型标记
+     *
      * @return {Annotation}
      */
     public <A extends Annotation> A getAnnotation(@Nonnull Method method, Class<A> annotationType) {
@@ -81,6 +85,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      * @param handlerMethod  HandlerMethod
      * @param annotationType 注解类
      * @param <A>            泛型标记
+     *
      * @return {Annotation}
      */
     public <A extends Annotation> A getAnnotation(@Nonnull HandlerMethod handlerMethod, Class<A> annotationType) {

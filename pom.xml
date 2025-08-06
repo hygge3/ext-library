@@ -19,8 +19,9 @@
         <module>ext-cache</module>
         <module>ext-security</module>
         <module>ext-captcha</module>
+        <module>ext-crypto</module>
         <module>ext-desensitize</module>
-        <module>ext-encrypt</module>
+        <module>ext-interface-crypto</module>
         <module>ext-holidays</module>
         <module>ext-http</module>
         <module>ext-idempotent</module>
@@ -56,10 +57,10 @@
         <!-- dependencies.version -->
         <revision>3.0.0</revision>
         <lombok.version>1.18.38</lombok.version>
-        <spring-boot.version>3.5.3</spring-boot.version>
-        <mapstruct-plus.version>1.4.8</mapstruct-plus.version>
-        <swagger.version>2.2.34</swagger.version>
-        <mybatis-flex.version>1.11.0</mybatis-flex.version>
+        <spring-boot.version>3.5.4</spring-boot.version>
+        <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
+        <swagger.version>2.2.35</swagger.version>
+        <mybatis-flex.version>1.11.1</mybatis-flex.version>
         <sa-token.version>1.44.0</sa-token.version>
         <bcprov.version>1.81</bcprov.version>
         <jetbrains-annotations.version>26.0.2</jetbrains-annotations.version>
@@ -71,7 +72,7 @@
         <!-- plugins.version -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <flatten-maven-plugin.version>1.7.1</flatten-maven-plugin.version>
+        <flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -102,6 +103,48 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            <!-- ======================= 第三方依赖 ===================== -->
+            <!-- mapstruct-plus -->
+            <dependency>
+                <groupId>io.github.linpeilie</groupId>
+                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
+                <version>${mapstruct-plus.version}</version>
+            </dependency>
+            <!-- guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
+            </dependency>
+            <!-- swagger-annotations -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <!-- oshi -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core-java11</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+            <!-- springdoc -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <!-- google zxing -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing-core.version}</version>
+            </dependency>
             <!-- ======================= Ext 依赖 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
@@ -115,12 +158,17 @@
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
+                <artifactId>ext-crypto</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
                 <artifactId>ext-desensitize</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-encrypt</artifactId>
+                <artifactId>ext-interface-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -217,48 +265,6 @@
                 <groupId>ext.library</groupId>
                 <artifactId>ext-websocket</artifactId>
                 <version>${revision}</version>
-            </dependency>
-            <!-- ======================= 第三方依赖 ===================== -->
-            <!-- mapstruct-plus -->
-            <dependency>
-                <groupId>io.github.linpeilie</groupId>
-                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
-                <version>${mapstruct-plus.version}</version>
-            </dependency>
-            <!-- guava -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk18on</artifactId>
-                <version>${bcprov.version}</version>
-            </dependency>
-            <!-- swagger-annotations -->
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <!-- oshi -->
-            <dependency>
-                <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java11</artifactId>
-                <version>${oshi.version}</version>
-            </dependency>
-            <!-- springdoc -->
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>${springdoc.version}</version>
-            </dependency>
-            <!-- google zxing -->
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>javase</artifactId>
-                <version>${zxing-core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

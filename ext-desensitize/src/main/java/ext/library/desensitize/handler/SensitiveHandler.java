@@ -1,6 +1,5 @@
 package ext.library.desensitize.handler;
 
-import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -10,10 +9,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
-import java.io.IOException;
-import java.util.Objects;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import jakarta.annotation.Nonnull;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * 数据脱敏 json 序列化工具
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SensitiveHandler extends JsonSerializer<String> implements ContextualSerializer {
 
-     IDesensitizeRule strategy;
+    IDesensitizeRule strategy;
 
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
      * @param e       e
      */
     private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
-        log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
+        log.error("[🌐] URI:{},{}", request.getRequestURI(), message, e);
     }
 
     /**

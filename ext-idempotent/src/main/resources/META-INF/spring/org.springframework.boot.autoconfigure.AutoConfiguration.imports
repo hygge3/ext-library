@@ -1,2 +1,2 @@
 ext.library.idempotent.aspect.IdempotentAspect
-ext.library.idempotent.config.IdempotentAutoConfiguration
+ext.library.idempotent.config.IdempotentAutoConfig

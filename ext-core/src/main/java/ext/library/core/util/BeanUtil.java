@@ -1,11 +1,19 @@
 package ext.library.core.util;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.common.collect.Maps;
 import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.holder.Lazy;
 import io.github.linpeilie.Converter;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.ObjectUtils;
+
+import jakarta.annotation.Nonnull;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -21,13 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.cglib.beans.BeanCopier;
-import org.springframework.util.FastByteArrayOutputStream;
-import org.springframework.util.ObjectUtils;
 
 /**
  * bean 工具类
@@ -36,14 +37,15 @@ import org.springframework.util.ObjectUtils;
 @UtilityClass
 public class BeanUtil {
 
-     static final Converter CONVERTER = SpringUtil.getBean(Converter.class);
+    static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
 
-     static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
+    static final Lazy<Map<String, BeanCopier>> BEAN_COPIER_CACHE = Lazy.of(ConcurrentHashMap::new);
 
     /**
      * 对象转 Map
      *
      * @param obj 对象
+     *
      * @return {@code Map<String, Object> }
      */
     public Map<String, Object> beanToMap(@Nonnull Object obj) {
@@ -71,6 +73,7 @@ public class BeanUtil {
      *
      * @param map         map
      * @param targetClass 目标类别
+     *
      * @return {@code T }
      */
     public <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
@@ -95,6 +98,7 @@ public class BeanUtil {
      *
      * @param bean         bean
      * @param propertyName 属性名
+     *
      * @return 属性值
      */
     public Object getProperty(Object bean, String propertyName) {
@@ -113,8 +117,7 @@ public class BeanUtil {
      * @param value        属性值
      */
     public void setProperty(Object bean, String propertyName, Object value) {
-        BeanWrapper beanWrapper = PropertyAccessorFactory
-                .forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean could not null"));
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean could not null"));
         beanWrapper.setPropertyValue(propertyName, value);
     }
 
@@ -122,6 +125,7 @@ public class BeanUtil {
      * 深度拷贝
      *
      * @param source 待拷贝的对象
+     *
      * @return 拷贝之后的对象
      */
 
@@ -149,6 +153,7 @@ public class BeanUtil {
      *
      * @param source     数据来源实体
      * @param targetType 转换后的对象
+     *
      * @return targetType
      */
     @SuppressWarnings("unchecked")
@@ -160,7 +165,7 @@ public class BeanUtil {
             return (T) source;
         }
         try {
-            return CONVERTER.convert(source, targetType);
+            return CONVERTER.get().convert(source, targetType);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -179,7 +184,7 @@ public class BeanUtil {
             target = (T) source;
         }
         try {
-            target = CONVERTER.convert(source, target);
+            target = CONVERTER.get().convert(source, target);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -191,6 +196,7 @@ public class BeanUtil {
      *
      * @param sourceList 数据来源实体列表
      * @param targetType 描述对象 转换后的对象
+     *
      * @return targetType
      */
 
@@ -203,7 +209,7 @@ public class BeanUtil {
             return (List<T>) sourceList;
         }
         try {
-            return CONVERTER.convert(sourceList, targetType);
+            return CONVERTER.get().convert(sourceList, targetType);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -215,6 +221,7 @@ public class BeanUtil {
      *
      * @param map        数据来源
      * @param targetType bean 类
+     *
      * @return bean 对象
      */
     public <T> T convert(Map<String, Object> map, Class<T> targetType) {
@@ -222,7 +229,7 @@ public class BeanUtil {
             return $.newInstance(targetType);
         }
         try {
-            return CONVERTER.convert(map, targetType);
+            return CONVERTER.get().convert(map, targetType);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -234,11 +241,11 @@ public class BeanUtil {
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
         BeanCopier copier;
-        if (!BEAN_COPIER_CACHE.containsKey(beanKey)) {
+        if (!BEAN_COPIER_CACHE.get().containsKey(beanKey)) {
             copier = BeanCopier.create(sourceType, targetType, false);
-            BEAN_COPIER_CACHE.put(beanKey, copier);
+            BEAN_COPIER_CACHE.get().put(beanKey, copier);
         } else {
-            copier = BEAN_COPIER_CACHE.get(beanKey);
+            copier = BEAN_COPIER_CACHE.get().get(beanKey);
         }
         try {
             copier.copy(source, target, null);
@@ -259,7 +266,8 @@ public class BeanUtil {
         return t;
     }
 
-    @Nonnull private <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
+    @Nonnull
+    private <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
         List<T> resultList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
             T target;

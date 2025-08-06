@@ -8,11 +8,11 @@ import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
-import ext.library.security.function.IdentitySwitchFunction;
 import ext.library.security.service.SecurityService;
+import lombok.experimental.UtilityClass;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
 /**
  * 认证便捷操作工具
@@ -73,6 +73,7 @@ public class SecurityUtil {
      * 创建指定账号的登录信息
      *
      * @param loginId 登录 Id
+     *
      * @return token
      */
     public String createLoginByLoginId(String loginId) {
@@ -84,6 +85,7 @@ public class SecurityUtil {
      *
      * @param loginId    登录 Id
      * @param loginModel 登录参数
+     *
      * @return token
      */
     public String createLoginByLoginId(String loginId, SecurityLoginParams loginModel) {
@@ -165,16 +167,6 @@ public class SecurityUtil {
         SERVICE.removeToken(token);
     }
 
-    /**
-     * 身份临时切换
-     *
-     * @param loginId            登录 Id
-     * @param identitySwitchFunc 执行函数
-     */
-    public void identityTempSwitching(String loginId, IdentitySwitchFunction identitySwitchFunc) {
-        SERVICE.identityTempSwitching(loginId, identitySwitchFunc);
-    }
-
     /*
      * ***************************************查询相关方法**************************************
      * *
@@ -220,6 +212,7 @@ public class SecurityUtil {
      * 获取 session 超时时间
      *
      * @param token token
+     *
      * @return 时长秒 -1 表示永久有效
      */
     public Long getSessionTimeout(String token) {
@@ -230,6 +223,7 @@ public class SecurityUtil {
      * 获取 token 超时时间
      *
      * @param token token
+     *
      * @return 时长秒 -1 表示永久有效
      */
     public Long getTokenTimeout(String token) {
@@ -240,6 +234,7 @@ public class SecurityUtil {
      * 获取指定 token 活跃超时时间
      *
      * @param token token 值
+     *
      * @return 时长秒 -1 表示永久有效
      */
     public Long getTokenActivityTimeout(String token) {
@@ -250,6 +245,7 @@ public class SecurityUtil {
      * 获取指定 token 最新续约时间
      *
      * @param token token 值
+     *
      * @return 续约时间
      */
     public LocalDateTime getTokenLastActivityTime(String token) {
@@ -269,6 +265,7 @@ public class SecurityUtil {
      * 当前用户是否有指定角色
      *
      * @param roleCode 角色码
+     *
      * @return true 有 false 没有
      */
     public Boolean hasRole(String roleCode) {
@@ -280,6 +277,7 @@ public class SecurityUtil {
      *
      * @param roleCode 角色码
      * @param logical  条件
+     *
      * @return true 有 false 没有
      */
     public Boolean hasRole(String[] roleCode, Logical logical) {
@@ -290,6 +288,7 @@ public class SecurityUtil {
      * 当前用户是否有指定权限码
      *
      * @param permissionCode 权限码
+     *
      * @return true 有 false 没有
      */
     public Boolean hasPermission(String permissionCode) {
@@ -301,6 +300,7 @@ public class SecurityUtil {
      *
      * @param permissionCode 权限码
      * @param logical        条件
+     *
      * @return true 有 false 没有
      */
     public Boolean hasPermission(String[] permissionCode, Logical logical) {
@@ -312,6 +312,7 @@ public class SecurityUtil {
      *
      * @param tokenValue token
      * @param sortedDesc 是否降序
+     *
      * @return List<SecuritySession>
      */
     public List<SecuritySession> querySecuritySessionList(String tokenValue, boolean sortedDesc) {

@@ -1,15 +1,16 @@
 package ext.library.holidays;
 
-import ext.library.holidays.config.HolidaysAutoConfiguration;
+import ext.library.holidays.config.HolidaysAutoConfig;
 import ext.library.holidays.config.HolidaysProperties;
 import ext.library.holidays.core.DaysType;
 import ext.library.holidays.core.HolidaysApi;
 import ext.library.holidays.core.HolidaysApiImpl;
-import java.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import java.time.LocalDate;
 
 class HolidaysTest {
 
@@ -18,7 +19,7 @@ class HolidaysTest {
     @BeforeEach
     public void setup() throws Exception {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        HolidaysAutoConfiguration configuration = new HolidaysAutoConfiguration();
+        HolidaysAutoConfig configuration = new HolidaysAutoConfig();
         holidaysApi = configuration.holidaysApi(new HolidaysProperties());
         ((HolidaysApiImpl) holidaysApi).afterPropertiesSet();
     }

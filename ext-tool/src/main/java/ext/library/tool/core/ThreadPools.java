@@ -1,10 +1,13 @@
 package ext.library.tool.core;
 
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.tool.$;
 import ext.library.tool.constant.Holder;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+
+import jakarta.annotation.Nonnull;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -13,9 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 
 /**
  * 公共线程池
@@ -42,7 +42,7 @@ public class ThreadPools {
             // 等待任务存放队列 - 队列最大值
             // 这样配置。当积压任务数量为 队列最大值 时。会创建新线程来执行任务。直到线程总数达到 最大线程数
             new LinkedBlockingQueue<>(QUEUE_MAX),
-            // 新线程创建工厂 - LinkedBlockingQueue 不支持线程优先级。所以直接新增线程就可以了
+            // 新线程创建工厂 - 虚拟线程池
             Thread.ofVirtual().factory(),
             // 拒绝策略 - 在主线程继续执行。
             new ThreadPoolExecutor.CallerRunsPolicy());

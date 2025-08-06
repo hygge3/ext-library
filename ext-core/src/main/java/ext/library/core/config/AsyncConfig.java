@@ -27,7 +27,7 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         if (SpringUtil.isVirtual()) {
-            return new VirtualThreadTaskExecutor("async-");
+            return new VirtualThreadTaskExecutor("async-task-");
         }
         return SpringUtil.getBean("scheduledExecutorService");
     }
