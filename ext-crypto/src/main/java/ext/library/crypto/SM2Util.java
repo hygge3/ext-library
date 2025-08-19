@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.holder.Lazy;
+import ext.library.tool.util.Base64Util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
@@ -35,7 +36,6 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 
@@ -86,7 +86,7 @@ public class SM2Util {
         // 把私钥放入 map 中
         BCECPrivateKey privateKeyParameters = (BCECPrivateKey) asymmetricCipherKeyPair.getPrivate();
         BigInteger intPrivateKey = privateKeyParameters.getD();
-        return Maps.immutableEntry(Base64.getEncoder().encodeToString(publicKey), Base64.getEncoder().encodeToString(intPrivateKey.toByteArray()));
+        return Maps.immutableEntry(Base64Util.encodeToStr(publicKey), Base64Util.encodeToStr(intPrivateKey.toByteArray()));
     }
 
     /**
@@ -97,7 +97,7 @@ public class SM2Util {
      * @return {@link byte[] } 公钥
      */
     private byte[] castPublicKey(String publicKey) {
-        return Base64.getDecoder().decode(publicKey);
+        return Base64Util.decode(publicKey);
     }
 
     /**
@@ -108,7 +108,7 @@ public class SM2Util {
      * @return {@link BigInteger } 私钥
      */
     private BigInteger castPrivateKey(String privateKey) {
-        return new BigInteger(Base64.getDecoder().decode(privateKey));
+        return new BigInteger(Base64Util.decodeToStr(privateKey));
     }
 
     /**
@@ -139,7 +139,7 @@ public class SM2Util {
             log.error("[🔐] SM2 加密失败", e);
             throw Exceptions.throwOut("SM2 加密失败");
         }
-        return Base64.getEncoder().encodeToString(encrypt);
+        return Base64Util.encodeToStr(encrypt);
     }
 
 
@@ -153,7 +153,7 @@ public class SM2Util {
      *
      */
     public String decrypt(String privateKey, String cipherText) {
-        byte[] cipherBytes = Base64.getDecoder().decode(cipherText);
+        byte[] cipherBytes = Base64Util.decode(cipherText);
         // 获取一条 SM2 曲线参数
         X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
         // 构造 ECC 算法参数，曲线方程、椭圆曲线 G 点、大整数 N
@@ -202,7 +202,7 @@ public class SM2Util {
             // 传入签名字节
             signature.update(plainText.getBytes(StandardCharsets.UTF_8));
             // 签名
-            return Base64.getEncoder().encodeToString(signature.sign());
+            return Base64Util.encodeToStr(signature.sign());
         } catch (Exception e) {
             log.error("[🔐] SM2 签名失败", e);
             throw Exceptions.throwOut("SM2 签名失败");
@@ -230,7 +230,7 @@ public class SM2Util {
             // 初始化为验签状态
             signature.initVerify(bcecPublicKey);
             signature.update(plainText.getBytes(StandardCharsets.UTF_8));
-            return signature.verify(Base64.getDecoder().decode(sign));
+            return signature.verify(Base64Util.decode(sign));
         } catch (Exception e) {
             log.error("[🔐] SM2 验签失败", e);
             throw Exceptions.throwOut("SM2 验签失败");
@@ -251,12 +251,12 @@ public class SM2Util {
         try {
             // 解析证书
             CertificateFactory factory = new CertificateFactory();
-            X509Certificate certificate = (X509Certificate) factory.engineGenerateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(certText)));
+            X509Certificate certificate = (X509Certificate) factory.engineGenerateCertificate(new ByteArrayInputStream(Base64Util.decode(certText)));
             // 验证签名
             Signature signature = Signature.getInstance(certificate.getSigAlgName(), PROVIDER.get());
             signature.initVerify(certificate);
             signature.update(plainText.getBytes(StandardCharsets.UTF_8));
-            return signature.verify(Base64.getDecoder().decode(signText));
+            return signature.verify(Base64Util.decode(signText));
         } catch (Exception e) {
             log.error("[🔐] SM2 证书验签失败", e);
             throw Exceptions.throwOut("SM2 证书验签失败");

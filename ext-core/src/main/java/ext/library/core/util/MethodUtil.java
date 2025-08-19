@@ -17,12 +17,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
- * 类工具类
+ * 方法 工具类
+ *
+ * @since 2025.08.19
  */
 @UtilityClass
-public class ClassUtil extends org.springframework.util.ClassUtils {
+public class MethodUtil extends org.springframework.util.ClassUtils {
 
-    final Lazy<ParameterNameDiscoverer> PARAMETERNAMEDISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
+    final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
     /**
      * 获取方法参数信息
@@ -34,7 +36,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      */
     public MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(constructor, parameterIndex);
-        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER.get());
+        methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
     }
 
@@ -48,7 +50,7 @@ public class ClassUtil extends org.springframework.util.ClassUtils {
      */
     public MethodParameter getMethodParameter(Method method, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(method, parameterIndex);
-        methodParameter.initParameterNameDiscovery(PARAMETERNAMEDISCOVERER.get());
+        methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
     }
 

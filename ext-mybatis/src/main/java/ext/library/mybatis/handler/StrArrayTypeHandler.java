@@ -1,20 +1,20 @@
 package ext.library.mybatis.handler;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.common.base.Splitter;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.StringUtil;
 import io.github.linpeilie.utils.ArrayUtil;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import lombok.SneakyThrows;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
+
+import jakarta.annotation.Nonnull;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Mybatis 字符数组，字符串互转
@@ -53,7 +53,7 @@ public class StrArrayTypeHandler extends BaseTypeHandler<String[]> {
     }
 
     private String[] toStrArray(String str) {
-        if ($.isBlank(str)) {
+        if (StringUtil.isBlank(str)) {
             return new String[0];
         }
         return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).toArray(String[]::new);

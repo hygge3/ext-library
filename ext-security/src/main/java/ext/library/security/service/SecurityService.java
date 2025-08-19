@@ -12,8 +12,9 @@ import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.ObjectUtil;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -38,7 +39,7 @@ public interface SecurityService {
      * @return {@link String }
      */
     private static String cutPrefixToken(String token) {
-        if ($.isEmpty(token)) {
+        if (ObjectUtil.isEmpty(token)) {
             return null;
         }
         return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, "");
@@ -103,7 +104,7 @@ public interface SecurityService {
      */
     default SecuritySession getSecuritySessionByToken(String token) {
         SecurityToken securityToken = REPOSITORY.getSecurityTokenByTokenValue(token);
-        if (Objects.isNull(securityToken) || $.isEmpty(securityToken.getLoginId())) {
+        if (Objects.isNull(securityToken) || ObjectUtil.isEmpty(securityToken.getLoginId())) {
             return null;
         }
         SecuritySession securitySession = getSecuritySessionByLoginId(securityToken.getLoginId());
@@ -135,24 +136,24 @@ public interface SecurityService {
         // 优先内部设置自定义参数获取，仅框架内部传参使用
         String token = (String) ServletUtil.getRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN);
 
-        if ($.isEmpty(token)) {
+        if (ObjectUtil.isEmpty(token)) {
             // 尝试从请求参数中获取
             token = (String) ServletUtil.getRequestAttribute(PROPERTIES.getSecurityName());
         }
 
-        if ($.isEmpty(token)) {
+        if (ObjectUtil.isEmpty(token)) {
             // 尝试从 header 头中获取
             token = ServletUtil.getHeader(PROPERTIES.getSecurityName());
         }
 
-        if ($.isEmpty(token)) {
+        if (ObjectUtil.isEmpty(token)) {
             // 尝试从 cookie 中读取
             SecurityProperties.CookieProperties cookieProperties = PROPERTIES.getCookieConfig();
             token = ServletUtil.getCookieValue(cookieProperties.getCookieName());
         }
 
         // 都没有拿到则认为没有认证登录
-        if ($.isEmpty(token)) {
+        if (ObjectUtil.isEmpty(token)) {
             throw new UnauthorizedException("未登录认证");
         }
 
@@ -246,7 +247,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void kickOut(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被踢下线的 token 无效");
         }
@@ -270,7 +271,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void replaceOut(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被顶下线的 token 无效");
         }
@@ -294,7 +295,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void renewalToken(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             return;
         }
@@ -324,7 +325,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void bannedToken(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被封禁的 token 无效");
         }
@@ -348,7 +349,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void unsealToken(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被解封的 token 无效");
         }
@@ -392,7 +393,7 @@ public interface SecurityService {
      * @param token 用户 token
      */
     default void loginOut(String token) {
-        SecuritySession session = $.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
+        SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被退出的 token 无效");
         }
@@ -504,10 +505,10 @@ public interface SecurityService {
      */
     default LocalDateTime tokenLastActivityTime(String token) {
         String activityTime = REPOSITORY.getActivityTimeByTokenValue(token);
-        if ($.isEmpty(activityTime)) {
+        if (ObjectUtil.isEmpty(activityTime)) {
             return null;
         }
-        return $.parseDateTime(activityTime);
+        return DateUtil.parse(activityTime);
     }
 
     /**
@@ -697,7 +698,7 @@ public interface SecurityService {
             }
         }
 
-        securitySession.setUpdateTime($.formatDateTime(LocalDateTime.now()));
+        securitySession.setUpdateTime(DateUtil.format(LocalDateTime.now()));
         securitySession.addTokenInfo(securitySession.getCurrentSecurityToken());
         return securitySession;
     }

@@ -1,13 +1,14 @@
 package ext.library.tool.core;
 
 import com.google.common.base.Joiner;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.GeneralTypeCastUtil;
+import lombok.experimental.UtilityClass;
+
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
 /**
  * 运行时工具类
@@ -15,9 +16,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Runtimes {
 
-    volatile int pId = -1;
-
     final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+    volatile int pId = -1;
 
     /**
      * 获得当前进程的 PID
@@ -34,7 +34,7 @@ public class Runtimes {
         final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
         final int index = jvmName.indexOf('@');
         if (index > 0) {
-            pId = $.toInt(jvmName.substring(0, index), -1);
+            pId = GeneralTypeCastUtil.getAsInteger(jvmName.substring(0, index), -1);
             return pId;
         }
         return pId;

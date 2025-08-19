@@ -1,8 +1,9 @@
-package ext.library.tool.util;
+package ext.library.tool.domain;
+
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import lombok.Getter;
 
 /**
  * 浮点型数据计算
@@ -23,6 +24,7 @@ public class DecimalNum extends Number {
      * 构造 DecimalNum
      *
      * @param decimal decimal
+     *
      * @return DecimalNum
      */
     public static DecimalNum of(BigDecimal decimal) {
@@ -33,6 +35,7 @@ public class DecimalNum extends Number {
      * 构造 DecimalNum
      *
      * @param decimal decimal
+     *
      * @return DecimalNum
      */
     public static DecimalNum of(String decimal) {
@@ -43,6 +46,7 @@ public class DecimalNum extends Number {
      * 构造 DecimalNum
      *
      * @param decimal decimal
+     *
      * @return DecimalNum
      */
     public static DecimalNum of(double decimal) {
@@ -53,6 +57,7 @@ public class DecimalNum extends Number {
      * 构造 DecimalNum
      *
      * @param decimal decimal
+     *
      * @return DecimalNum
      */
     public static DecimalNum of(long decimal) {
@@ -63,6 +68,7 @@ public class DecimalNum extends Number {
      * 加
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum add(String decimal) {
@@ -73,6 +79,7 @@ public class DecimalNum extends Number {
      * 加
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum add(long decimal) {
@@ -83,6 +90,7 @@ public class DecimalNum extends Number {
      * 加
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum add(double decimal) {
@@ -93,6 +101,7 @@ public class DecimalNum extends Number {
      * 加
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum add(BigDecimal decimal) {
@@ -104,6 +113,7 @@ public class DecimalNum extends Number {
      * 减
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum subtract(String decimal) {
@@ -114,6 +124,7 @@ public class DecimalNum extends Number {
      * 减
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum subtract(long decimal) {
@@ -124,6 +135,7 @@ public class DecimalNum extends Number {
      * 减
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum subtract(double decimal) {
@@ -134,6 +146,7 @@ public class DecimalNum extends Number {
      * 减
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum subtract(BigDecimal decimal) {
@@ -145,6 +158,7 @@ public class DecimalNum extends Number {
      * 乘
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum multiply(String decimal) {
@@ -155,6 +169,7 @@ public class DecimalNum extends Number {
      * 乘
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum multiply(long decimal) {
@@ -165,6 +180,7 @@ public class DecimalNum extends Number {
      * 乘
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum multiply(double decimal) {
@@ -175,6 +191,7 @@ public class DecimalNum extends Number {
      * 乘
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum multiply(BigDecimal decimal) {
@@ -186,6 +203,7 @@ public class DecimalNum extends Number {
      * 除
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(String decimal) {
@@ -197,6 +215,7 @@ public class DecimalNum extends Number {
      *
      * @param decimal      小数
      * @param roundingMode 随机模型
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(String decimal, RoundingMode roundingMode) {
@@ -207,6 +226,7 @@ public class DecimalNum extends Number {
      * 除
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(long decimal) {
@@ -218,6 +238,7 @@ public class DecimalNum extends Number {
      *
      * @param decimal      小数
      * @param roundingMode 随机模型
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(long decimal, RoundingMode roundingMode) {
@@ -228,6 +249,7 @@ public class DecimalNum extends Number {
      * 除
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(double decimal) {
@@ -239,6 +261,7 @@ public class DecimalNum extends Number {
      *
      * @param decimal      小数
      * @param roundingMode 随机模型
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(double decimal, RoundingMode roundingMode) {
@@ -249,6 +272,7 @@ public class DecimalNum extends Number {
      * 除
      *
      * @param decimal 小数
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(BigDecimal decimal) {
@@ -261,6 +285,7 @@ public class DecimalNum extends Number {
      *
      * @param decimal      小数
      * @param roundingMode 随机模型
+     *
      * @return DecimalNum
      */
     public DecimalNum divide(BigDecimal decimal, RoundingMode roundingMode) {
@@ -272,6 +297,7 @@ public class DecimalNum extends Number {
      * 设置小数位数
      *
      * @param scale 小数位数
+     *
      * @return DecimalNum
      */
     public DecimalNum scale(int scale) {
@@ -283,6 +309,7 @@ public class DecimalNum extends Number {
      *
      * @param scale        小数位数
      * @param roundingMode 模式
+     *
      * @return DecimalNum
      */
     public DecimalNum scale(int scale, RoundingMode roundingMode) {

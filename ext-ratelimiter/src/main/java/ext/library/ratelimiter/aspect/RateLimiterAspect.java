@@ -2,8 +2,8 @@ package ext.library.ratelimiter.aspect;
 
 import ext.library.ratelimiter.annotation.RateLimiter;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.ObjectUtil;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -46,7 +46,7 @@ public class RateLimiterAspect {
         if (rateLimitHandler.proceed(rateLimiter, pjp)) {
             return pjp.proceed();
         } else {
-            throw Exceptions.throwOut($.isEmpty(rateLimiter.msg()) ? "触发限流" : rateLimiter.msg());
+            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimiter.msg()) ? "触发限流" : rateLimiter.msg());
         }
     }
 

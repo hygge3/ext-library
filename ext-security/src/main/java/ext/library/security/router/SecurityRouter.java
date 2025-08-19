@@ -7,7 +7,7 @@ import ext.library.security.annotion.SecurityIgnore;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
-import ext.library.tool.$;
+import ext.library.tool.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -50,7 +50,7 @@ public class SecurityRouter {
         SecurityUtil.checkToken();
 
         // 判断是否检查角色
-        RequiresRoles requiresRoles = $.getAnnotation(method, RequiresRoles.class);
+        RequiresRoles requiresRoles = ClassUtil.getAnnotation(method, RequiresRoles.class);
         if (Objects.nonNull(requiresRoles)) {
             if (!PermissionUtil.hasMultiPermValid(List.of(requiresRoles.value()), requiresRoles.logical(), PermissionUtil.getRoles())) {
                 throw new ForbiddenException("无角色权限");
@@ -58,7 +58,7 @@ public class SecurityRouter {
         }
 
         // 判断是否检查权限
-        RequiresPermissions requiresPermissions = $.getAnnotation(method, RequiresPermissions.class);
+        RequiresPermissions requiresPermissions = ClassUtil.getAnnotation(method, RequiresPermissions.class);
         if (Objects.nonNull(requiresPermissions)) {
             if (!PermissionUtil.hasMultiPermValid(List.of(requiresPermissions.value()), requiresPermissions.logical(), PermissionUtil.getPermissions())) {
                 throw new ForbiddenException("无访问权限");
@@ -143,7 +143,7 @@ public class SecurityRouter {
      */
     public boolean run(Method method) {
         // 判断忽略鉴权
-        SecurityIgnore securityIgnore = $.getAnnotation(method, SecurityIgnore.class);
+        SecurityIgnore securityIgnore = ClassUtil.getAnnotation(method, SecurityIgnore.class);
         if (!checkExcludeMatch() && Objects.isNull(securityIgnore)) {
             // 验证方法权限
             checkMethodPermission(method);

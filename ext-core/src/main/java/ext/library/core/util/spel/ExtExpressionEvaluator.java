@@ -1,8 +1,5 @@
 package ext.library.core.util.spel;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.expression.AnnotatedElementKey;
@@ -12,14 +9,20 @@ import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 缓存 spEl 提高性能
  */
 public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
 
-     final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
+    /** 表达式缓存 */
+    final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
 
-     final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
+    /** 方法缓存 */
+    final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
 
     /**
      * Create an {@link EvaluationContext}.
@@ -28,6 +31,7 @@ public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
      * @param args        the method arguments
      * @param target      the target object
      * @param targetClass the target class
+     *
      * @return the evaluation context
      */
     public EvaluationContext createContext(Method method, Object[] args, Object target, Class<?> targetClass, BeanFactory beanFactory) {
@@ -49,6 +53,7 @@ public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
      * @param args        the method arguments
      * @param rootObject  rootObject
      * @param targetClass the target class
+     *
      * @return the evaluation context
      */
     public EvaluationContext createContext(Method method, Object[] args, Class<?> targetClass, Object rootObject,

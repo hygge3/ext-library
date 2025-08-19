@@ -5,15 +5,16 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
-import ext.library.tool.$;
 import ext.library.tool.constant.Holder;
+import ext.library.tool.util.DateUtil;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * <p>
@@ -26,31 +27,26 @@ public class SecurityLoginParams implements Serializable {
 
     @Serial
     static final long serialVersionUID = 1L;
-
-    /**
-     * 设备类型
-     */
-    String deviceType;
-
-    /**
-     * 超时时间
-     */
-    Long timeout;
-
-    /**
-     * 活跃超时时间
-     */
-    Long activityTimeout;
-
     /**
      * session 挂载数据
      */
     final Map<String, Object> mountData = Maps.newHashMap();
-
     /**
      * token 挂载数据
      */
     final Map<String, Object> tokenMountData = Maps.newHashMap();
+    /**
+     * 设备类型
+     */
+    String deviceType;
+    /**
+     * 超时时间
+     */
+    Long timeout;
+    /**
+     * 活跃超时时间
+     */
+    Long activityTimeout;
 
     /**
      * 获取设备类型
@@ -68,6 +64,7 @@ public class SecurityLoginParams implements Serializable {
      * 设置设备类型
      *
      * @param deviceType 设备类型
+     *
      * @return SecurityLoginParams
      */
     public SecurityLoginParams setDeviceType(String deviceType) {
@@ -79,6 +76,7 @@ public class SecurityLoginParams implements Serializable {
      * 设置超时时间
      *
      * @param timeout 超时时间
+     *
      * @return SecurityLoginParams
      */
     public SecurityLoginParams setTimeout(Long timeout) {
@@ -90,6 +88,7 @@ public class SecurityLoginParams implements Serializable {
      * 设置活跃超时时间
      *
      * @param activityTimeout 活跃超时时间
+     *
      * @return SecurityLoginParams
      */
     public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
@@ -102,6 +101,7 @@ public class SecurityLoginParams implements Serializable {
      *
      * @param key   key 值
      * @param value value 值
+     *
      * @return SecuritySession
      */
     public SecurityLoginParams setAttribute(String key, Object value) {
@@ -113,6 +113,7 @@ public class SecurityLoginParams implements Serializable {
      * 设置存储信息
      *
      * @param data 数据
+     *
      * @return SecuritySession
      */
     public SecurityLoginParams setAttributes(Map<String, Object> data) {
@@ -124,6 +125,7 @@ public class SecurityLoginParams implements Serializable {
      * 设置存储信息
      *
      * @param data 数据
+     *
      * @return SecuritySession
      */
     public SecurityLoginParams setAttributes(Object data) {
@@ -136,6 +138,7 @@ public class SecurityLoginParams implements Serializable {
      * 获取存储信息
      *
      * @param key key 值
+     *
      * @return Object
      */
     public Object getAttribute(String key) {
@@ -147,6 +150,7 @@ public class SecurityLoginParams implements Serializable {
      *
      * @param key   key 值
      * @param value value 值
+     *
      * @return SecuritySession
      */
     public SecurityLoginParams setTokenAttribute(String key, Object value) {
@@ -158,6 +162,7 @@ public class SecurityLoginParams implements Serializable {
      * 获取 token 存储信息
      *
      * @param key key 值
+     *
      * @return Object
      */
     public Object getTokenAttribute(String key) {
@@ -171,11 +176,11 @@ public class SecurityLoginParams implements Serializable {
                 .loginId(loginId)
                 .deviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN))
                 .timeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout())
-                .activityTime($.formatDateTime(LocalDateTime.now()))
+                .activityTime(DateUtil.format(LocalDateTime.now()))
                 .activityTimeout(Objects.isNull(this.getActivityTimeout()) ? properties.getActivityTimeout()
                         : this.getActivityTimeout())
                 .state(SecurityConstant.TOKEN_STATE_NORMAL)
-                .createTime($.formatDateTime(LocalDateTime.now()))
+                .createTime(DateUtil.format(LocalDateTime.now()))
                 .build();
         // 设置 token 挂载数据
         securityToken.getTokenMountData().putAll(this.getTokenMountData());

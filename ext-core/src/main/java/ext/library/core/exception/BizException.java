@@ -2,7 +2,7 @@ package ext.library.core.exception;
 
 
 import ext.library.core.response.ResponseCode;
-import ext.library.tool.$;
+import ext.library.tool.util.StringUtil;
 import lombok.Getter;
 
 /**
@@ -41,7 +41,7 @@ public class BizException extends RuntimeException {
      * @param message    消息
      */
     public BizException(ResponseCode resultCode, String message, Object... args) {
-        super($.format(message, args));
+        super(StringUtil.format(message, args));
         this.code = resultCode.getCode();
     }
 
@@ -52,7 +52,7 @@ public class BizException extends RuntimeException {
      * @param args    参数
      */
     public BizException(String message, Object... args) {
-        super($.format(message, args));
+        super(StringUtil.format(message, args));
         this.code = BizCode.WARN.getCode();
     }
 

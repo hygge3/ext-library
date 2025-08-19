@@ -2,10 +2,10 @@ package ext.library.captcha.cache;
 
 import ext.library.cache.util.CacheUtil;
 import ext.library.captcha.config.properties.CaptchaProperties;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,7 +41,7 @@ public class CaptchaCache {
     public String getAndRemove(String cacheName, String uuid) {
         String cacheKey = cacheName + Symbol.COLON + uuid;
         String value = CacheUtil.get(cacheKey, String.class);
-        if ($.isNull(value)) {
+        if (Objects.isNull(value)) {
             return null;
         }
         CacheUtil.evict(cacheKey);

@@ -1,6 +1,6 @@
 package ext.library.http.useragent;
 
-import ext.library.tool.$;
+import ext.library.tool.util.ObjectUtil;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -13,10 +13,11 @@ public class UserAgentParser {
      * 解析 User-Agent
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return {@link UserAgent}
      */
     public UserAgent parse(String userAgentString) {
-        if ($.isEmpty(userAgentString)) {
+        if (ObjectUtil.isEmpty(userAgentString)) {
             return null;
         }
         final UserAgent userAgent = new UserAgent();
@@ -54,6 +55,7 @@ public class UserAgentParser {
      * 解析浏览器类型
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return 浏览器类型
      */
     private Browser parseBrowser(String userAgentString) {
@@ -69,6 +71,7 @@ public class UserAgentParser {
      * 解析引擎类型
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return 引擎类型
      */
     private Engine parseEngine(String userAgentString) {
@@ -84,6 +87,7 @@ public class UserAgentParser {
      * 解析系统类型
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return 系统类型
      */
     private OS parseOS(String userAgentString) {
@@ -99,6 +103,7 @@ public class UserAgentParser {
      * 解析平台类型
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return 平台类型
      */
     private Platform parsePlatform(String userAgentString) {

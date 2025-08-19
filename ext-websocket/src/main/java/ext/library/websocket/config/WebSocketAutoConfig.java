@@ -1,6 +1,6 @@
 package ext.library.websocket.config;
 
-import ext.library.tool.$;
+import ext.library.tool.util.StringUtil;
 import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.handler.ExtWebSocketHandler;
 import ext.library.websocket.interceptor.ExtWebSocketInterceptor;
@@ -30,12 +30,12 @@ public class WebSocketAutoConfig {
     @Bean
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor handshakeInterceptor, WebSocketHandler webSocketHandler, @Nonnull WebSocketProperties webSocketProperties) {
         // 如果 WebSocket 的路径为空，则设置默认路径为 "/websocket"
-        if ($.isBlank(webSocketProperties.getPath())) {
+        if (StringUtil.isBlank(webSocketProperties.getPath())) {
             webSocketProperties.setPath("/websocket");
         }
 
         // 如果允许跨域访问的地址为空，则设置为 "*"，表示允许所有来源的跨域请求
-        if ($.isBlank(webSocketProperties.getAllowedOrigins())) {
+        if (StringUtil.isBlank(webSocketProperties.getAllowedOrigins())) {
             webSocketProperties.setAllowedOrigins("*");
         }
         log.info("[⛓️] 注册 WebSocketHandler, 连接路径:{}", webSocketProperties.getPath());

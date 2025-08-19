@@ -2,8 +2,8 @@ package ext.library.websocket.util;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
-import ext.library.tool.$;
 import ext.library.tool.core.ThreadPools;
+import ext.library.tool.util.ObjectUtil;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
 import lombok.experimental.UtilityClass;
@@ -64,7 +64,7 @@ public class WebSocketUtil {
             unsentSessionKeys.add(sessionKey);
         }
         // 不在当前服务内 session，发布订阅消息
-        if ($.isNotEmpty(unsentSessionKeys)) {
+        if (ObjectUtil.isNotEmpty(unsentSessionKeys)) {
             WebSocketMessage broadcastMessage = new WebSocketMessage();
             broadcastMessage.setMessage(webSocketMessage.getMessage());
             broadcastMessage.setSessionKeys(unsentSessionKeys);

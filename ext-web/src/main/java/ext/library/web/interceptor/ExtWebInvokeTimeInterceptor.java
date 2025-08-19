@@ -1,19 +1,19 @@
 package ext.library.web.interceptor;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import ext.library.json.util.JsonUtil;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
-import java.util.Map;
+import ext.library.tool.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * web 的调用时间统计拦截器
@@ -34,13 +34,13 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
             ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
             // 处理请求数据
             byte[] body = requestWrapper.getContentAsByteArray();
-            if ($.isNotEmpty(body)) {
+            if (ObjectUtil.isNotEmpty(body)) {
                 jsonParam = new String(body);
             }
             log.info("[🌐] {}:{},body:[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
         } else {
             Map<String, String[]> parameterMap = request.getParameterMap();
-            if ($.isNotEmpty(parameterMap)) {
+            if (ObjectUtil.isNotEmpty(parameterMap)) {
                 String parameters = JsonUtil.toJson(parameterMap);
                 log.info("[🌐] {}:{},query:[{}]", request.getMethod(), request.getRequestURI(), parameters);
             } else {
@@ -67,6 +67,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
      * 判断本次请求的数据类型是否为 json
      *
      * @param request request
+     *
      * @return boolean
      */
     private boolean isJsonRequest(@Nonnull HttpServletRequest request) {

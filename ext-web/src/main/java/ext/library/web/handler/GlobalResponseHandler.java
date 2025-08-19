@@ -2,8 +2,8 @@ package ext.library.web.handler;
 
 
 import ext.library.json.util.JsonUtil;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.ObjectUtil;
 import ext.library.web.annotation.RestWrapper;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.response.R;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import jakarta.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * 响应结果处理器。
@@ -54,8 +55,8 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
             }
         }
         RestWrapper wrapper = returnType.getMethodAnnotation(RestWrapper.class);
-        wrapper = $.defaultIfNull(wrapper, returnType.getContainingClass().getAnnotation(RestWrapper.class));
-        if ($.isNull(wrapper)) {
+        wrapper = ObjectUtil.defaultIfNull(wrapper, returnType.getContainingClass().getAnnotation(RestWrapper.class));
+        if (Objects.isNull(wrapper)) {
             return false;
         }
         return wrapper.wrap() && wrapper.value();
@@ -75,7 +76,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      */
     @Override
     public Object beforeBodyWrite(Object body, @Nonnull MethodParameter returnType, @Nonnull MediaType selectedContentType, @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
-        if ($.isNull(body)) {
+        if (Objects.isNull(body)) {
             return R.ok();
         }
         if (body instanceof R<?>) {

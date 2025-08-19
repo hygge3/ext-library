@@ -1,20 +1,21 @@
 package ext.library.mybatis.handler;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.common.base.Splitter;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.GeneralTypeCastUtil;
+import ext.library.tool.util.StringUtil;
 import io.github.linpeilie.utils.ArrayUtil;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import lombok.SneakyThrows;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
+
+import jakarta.annotation.Nonnull;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Mybatis Integer 数组，字符串互转
@@ -32,7 +33,7 @@ public class IntArrayTypeHandler extends BaseTypeHandler<Integer[]> {
     }
 
     @Override
-    public Integer[] getNullableResult(@Nonnull ResultSet rs, String columnName) throws SQLException{
+    public Integer[] getNullableResult(@Nonnull ResultSet rs, String columnName) throws SQLException {
         String reString = rs.getString(columnName);
         return toIntArray(reString);
     }
@@ -52,11 +53,11 @@ public class IntArrayTypeHandler extends BaseTypeHandler<Integer[]> {
     }
 
     private Integer[] toIntArray(String str) {
-        if ($.isBlank(str)) {
+        if (StringUtil.isBlank(str)) {
             return new Integer[0];
         }
         return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).stream().map(
-                $::toInt
+                GeneralTypeCastUtil::getAsInteger
         ).toArray(Integer[]::new);
     }
 

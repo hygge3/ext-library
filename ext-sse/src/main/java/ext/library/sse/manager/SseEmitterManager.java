@@ -3,8 +3,8 @@ package ext.library.sse.manager;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
-import ext.library.tool.$;
 import ext.library.tool.core.ThreadPools;
+import ext.library.tool.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -138,7 +138,7 @@ public class SseEmitterManager {
             unsentUserIds.add(userId);
         }
         // 不在当前服务内用户，发布订阅消息
-        if ($.isNotEmpty(unsentUserIds)) {
+        if (ObjectUtil.isNotEmpty(unsentUserIds)) {
             SseMessage broadcastMessage = new SseMessage();
             broadcastMessage.setMessage(sseMessage.getMessage());
             broadcastMessage.setUserIds(unsentUserIds);

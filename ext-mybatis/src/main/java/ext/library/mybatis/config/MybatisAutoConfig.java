@@ -7,8 +7,8 @@ import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import ext.library.mybatis.config.properties.MybatisProperties;
 import ext.library.mybatis.util.TenantUtil;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -29,7 +29,7 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
 
     static {
         // 使用内置规则自动忽略 null、空白字符串、空集合
-        QueryColumnBehavior.setIgnoreFunction($::isEmpty);
+        QueryColumnBehavior.setIgnoreFunction(ObjectUtil::isEmpty);
         // 如果传入的值是集合或数组，则使用 in 逻辑，否则使用 =（等于）逻辑
         QueryColumnBehavior.setSmartConvertInToEquals(true);
     }

@@ -1,12 +1,14 @@
 package ext.library.security.repository;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
+import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -16,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -29,19 +30,19 @@ public class SecurityRamRepository implements SecurityRepository {
     /**
      * SecuritySession 存储
      */
-     static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
+    static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * SecurityToken 存储
      */
-     static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
+    static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * 记录数据版本信息
      */
-     static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
+    static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     @Override
@@ -54,7 +55,7 @@ public class SecurityRamRepository implements SecurityRepository {
         if (!SecurityConstant.NON_EXPIRING.equals(timeout)) {
             // 判断是否超时
             String createTime = securitySession.getCreateTime();
-            if ($.parseDateTime(createTime).plusSeconds(timeout).isBefore(LocalDateTime.now())) {
+            if (DateUtil.parse(createTime).plusSeconds(timeout).isBefore(LocalDateTime.now())) {
                 // 已超时，销毁 security session
                 securitySession.destroySecuritySession();
                 return null;
@@ -75,8 +76,8 @@ public class SecurityRamRepository implements SecurityRepository {
         if (!SecurityConstant.NON_EXPIRING.equals(timeout)) {
             // 计算剩余时间
             String createTime = securitySession.getCreateTime();
-            long second = $.parseDateTime(createTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
-                          - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
+            long second = DateUtil.parse(createTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
+                    - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
             return second > 0 ? second : 0L;
         }
         return timeout;
@@ -129,8 +130,8 @@ public class SecurityRamRepository implements SecurityRepository {
             return SecurityConstant.NON_EXPIRING;
         }
         // 计算剩余时间
-        long second = $.parseDateTime(createTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
-                      - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
+        long second = DateUtil.parse(createTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
+                - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
         return second > 0 ? second : 0L;
     }
 
@@ -147,8 +148,8 @@ public class SecurityRamRepository implements SecurityRepository {
             return SecurityConstant.NON_EXPIRING;
         }
         // 计算剩余时间
-        long second = $.parseDateTime(activityTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
-                      - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
+        long second = DateUtil.parse(activityTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
+                - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
         return second > 0 ? second : 0L;
     }
 
@@ -167,7 +168,7 @@ public class SecurityRamRepository implements SecurityRepository {
     @Override
     public boolean renewalTokenByTokenValue(String tokenValue) {
         SecurityToken securityToken = tokenMap.get().remove(tokenValue);
-        securityToken.setActivityTime($.formatDateTime(LocalDateTime.now()));
+        securityToken.setActivityTime(DateUtil.format(LocalDateTime.now()));
         return true;
     }
 
@@ -175,7 +176,7 @@ public class SecurityRamRepository implements SecurityRepository {
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
         List<String> list = new ArrayList<>();
         for (String key : tokenMap.get().keySet()) {
-            if ($.isNotBlank(tokenValue) && !key.contains(tokenValue)) {
+            if (StringUtil.isNotBlank(tokenValue) && !key.contains(tokenValue)) {
                 continue;
             }
             list.add(key);

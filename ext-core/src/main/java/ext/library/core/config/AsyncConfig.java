@@ -1,8 +1,9 @@
 package ext.library.core.config;
 
 import ext.library.core.util.SpringUtil;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -38,9 +39,9 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> {
-            Exceptions.print(throwable);
-            String str = $.format("Exception message:{}, Method name:{}", throwable.getMessage(), method.getName());
-            if ($.isNotEmpty(objects)) {
+            Exceptions.log(throwable);
+            String str = StringUtil.format("Exception message:{}, Method name:{}", throwable.getMessage(), method.getName());
+            if (ObjectUtil.isNotEmpty(objects)) {
                 str = str.concat(", Parameter value:[").concat(Arrays.toString(objects)).concat("]");
             }
             throw new RuntimeException(str);

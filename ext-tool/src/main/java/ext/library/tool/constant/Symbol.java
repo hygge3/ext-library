@@ -236,6 +236,9 @@ public interface Symbol {
     /** HTML 大于号 */
     String HTML_GT = "&gt;";
 
+    /** null */
+    String NULL = "null";
+
     /** 空 JSON */
     String EMPTY_JSON = "{}";
 

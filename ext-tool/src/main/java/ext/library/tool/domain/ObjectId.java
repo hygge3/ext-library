@@ -1,94 +1,163 @@
 package ext.library.tool.domain;
 
+import org.springframework.util.Assert;
+
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.Getter;
+
 
 /**
- * <p>
- * A globally unique identifier for objects.
- * </p>
+ * <p>A globally unique identifier for objects.</p>
  *
- * <p>
- * Consists of 12 bytes, divided as follows:
- * </p>
+ * <p>Consists of 12 bytes, divided as follows:</p>
  * <table border="1">
  * <caption>ObjectID layout</caption>
  * <tr>
- * <td>0</td>
- * <td>1</td>
- * <td>2</td>
- * <td>3</td>
- * <td>4</td>
- * <td>5</td>
- * <td>6</td>
- * <td>7</td>
- * <td>8</td>
- * <td>9</td>
- * <td>10</td>
- * <td>11</td>
+ * <td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td>
  * </tr>
  * <tr>
- * <td colspan="4">time</td>
- * <td colspan="5">random value</td>
- * <td colspan="3">inc</td>
+ * <td colspan="4">time</td><td colspan="5">random value</td><td colspan="3">inc</td>
  * </tr>
  * </table>
  *
- * <p>
- * Instances of this class are immutable.
- * </p>
+ * <p>Instances of this class are immutable.</p>
  *
  * @mongodb.driver.manual core/object-id ObjectId
- * @see <a href=
- * "https://github.com/mongodb/mongo-java-driver/blob/master/bson/src/main/org/bson/types/ObjectId.java">origin</a>
+ * @see <a href="https://github.com/mongodb/mongo-java-driver/blob/main/bson/src/main/org/bson/types/ObjectId.java">origin</a>
  */
 public final class ObjectId implements Comparable<ObjectId>, Serializable {
 
-    /** unused, as this class uses a proxy for serialization */
-    @Serial
-    static final long serialVersionUID = 1L;
+    // unused, as this class uses a proxy for serialization
+    private static final long serialVersionUID = 1L;
 
-    static final int OBJECT_ID_LENGTH = 12;
+    private static final int OBJECT_ID_LENGTH = 12;
+    private static final int LOW_ORDER_THREE_BYTES = 0x00ffffff;
 
-    static final int LOW_ORDER_THREE_BYTES = 0x00ffffff;
+    // Use upper bytes of a long to represent the 5-byte random value.
+    private static final long RANDOM_VALUE;
 
-    /** Use primitives to represent the 5-byte random value. */
-    static final int RANDOM_VALUE1;
+    private static final AtomicInteger NEXT_COUNTER;
 
-    static final short RANDOM_VALUE2;
+    private static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    static final AtomicInteger NEXT_COUNTER = new AtomicInteger(new SecureRandom().nextInt());
-
-    static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-            'f'};
-
-    /**
-     * The timestamp (number of seconds since the Unix
-     */
-    @Getter
-    final int timestamp;
-
-    /**
-     * The counter.
-     */
-    final int counter;
+    static {
+        try {
+            SecureRandom secureRandom = new SecureRandom();
+            RANDOM_VALUE = secureRandom.nextLong() & ~LOW_ORDER_THREE_BYTES;
+            NEXT_COUNTER = new AtomicInteger(secureRandom.nextInt());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
-     * the first four bits of randomness.
+     * The timestamp
      */
-    final int randomValue1;
+    private final int timestamp;
+    /**
+     * The final 8 bytes of the ObjectID are 5 bytes probabilistically unique to the machine and
+     * process, followed by a 3 byte incrementing counter initialized to a random value.
+     */
+    private final long nonce;
 
     /**
-     * The last two bits of randomness.
+     * Create a new object id.
      */
-    final short randomValue2;
+    public ObjectId() {
+        this(new Date());
+    }
+
+    /**
+     * Constructs a new instance using the given date.
+     *
+     * @param date the date
+     */
+    public ObjectId(final Date date) {
+        this(dateToTimestampSeconds(date), RANDOM_VALUE | (NEXT_COUNTER.getAndIncrement() & LOW_ORDER_THREE_BYTES));
+    }
+
+    /**
+     * Constructs a new instances using the given date and counter.
+     *
+     * @param date    the date
+     * @param counter the counter
+     *
+     * @throws IllegalArgumentException if the high order byte of counter is not zero
+     */
+    public ObjectId(final Date date, final int counter) {
+        this(dateToTimestampSeconds(date), getNonceFromUntrustedCounter(counter));
+    }
+
+    /**
+     * Creates an ObjectId using the given time and counter.
+     *
+     * @param timestamp the time in seconds
+     * @param counter   the counter
+     *
+     * @throws IllegalArgumentException if the high order byte of counter is not zero
+     */
+    public ObjectId(final int timestamp, final int counter) {
+        this(timestamp, getNonceFromUntrustedCounter(counter));
+    }
+
+    private ObjectId(final int timestamp, final long nonce) {
+        this.timestamp = timestamp;
+        this.nonce = nonce;
+    }
+
+    /**
+     * Constructs a new instance from a 24-byte hexadecimal string representation.
+     *
+     * @param hexString the string to convert
+     *
+     * @throws IllegalArgumentException if the string is not a valid hex string representation of an ObjectId
+     */
+    public ObjectId(final String hexString) {
+        this(parseHexString(hexString));
+    }
+
+    /**
+     * Constructs a new instance from the given byte array
+     *
+     * @param bytes the byte array
+     *
+     * @throws IllegalArgumentException if array is null or not of length 12
+     */
+    public ObjectId(final byte[] bytes) {
+        this(ByteBuffer.wrap(Objects.requireNonNullElseGet(bytes, () -> {
+            Assert.isTrue(bytes.length == 12, "bytes has length of 12");
+            return bytes;
+        })));
+    }
+
+    /**
+     * Constructs a new instance from the given ByteBuffer
+     *
+     * @param buffer the ByteBuffer
+     *
+     * @throws IllegalArgumentException if the buffer is null or does not have at least 12 bytes remaining
+     * @since 3.4
+     */
+    public ObjectId(final ByteBuffer buffer) {
+        Assert.isTrue(buffer.remaining() >= 12, "buffer.remaining() >=12");
+
+        ByteOrder originalOrder = buffer.order();
+        try {
+            buffer.order(ByteOrder.BIG_ENDIAN);
+            this.timestamp = buffer.getInt();
+            this.nonce = buffer.getLong();
+        } finally {
+            buffer.order(originalOrder);
+        }
+    }
 
     /**
      * Gets a new object id.
@@ -102,23 +171,27 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
     /**
      * Gets a new object id with the given date value and all other bits zeroed.
      * <p>
-     * The returned object id will compare as less than or equal to any other object id
-     * within the same second as the given date, and less than any later date.
+     * The returned object id will compare as less than or equal to any other object id within the same second as the given date, and
+     * less than any later date.
      * </p>
      *
      * @param date the date
+     *
      * @return the ObjectId
+     *
      * @since 4.1
      */
     public static ObjectId getSmallestWithDate(final Date date) {
-        return new ObjectId(dateToTimestampSeconds(date), 0, (short) 0, 0, false);
+        return new ObjectId(dateToTimestampSeconds(date), 0L);
     }
 
     /**
      * Checks if a string could be an {@code ObjectId}.
      *
      * @param hexString a potential ObjectId as a String.
+     *
      * @return whether the string could be an object id
+     *
      * @throws IllegalArgumentException if hexString is null
      */
     public static boolean isValid(final String hexString) {
@@ -149,151 +222,80 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
         return true;
     }
 
-    /**
-     * Create a new object id.
-     */
-    public ObjectId() {
-        this(new Date());
-    }
-
-    /**
-     * Constructs a new instance using the given date.
-     *
-     * @param date the date
-     */
-    public ObjectId(final Date date) {
-        this(dateToTimestampSeconds(date), NEXT_COUNTER.getAndIncrement() & LOW_ORDER_THREE_BYTES, false);
-    }
-
-    /**
-     * Constructs a new instances using the given date and counter.
-     *
-     * @param date    the date
-     * @param counter the counter
-     * @throws IllegalArgumentException if the high order byte of counter is not zero
-     */
-    public ObjectId(final Date date, final int counter) {
-        this(dateToTimestampSeconds(date), counter, true);
-    }
-
-    /**
-     * Creates an ObjectId using the given time and counter.
-     *
-     * @param timestamp the time in seconds
-     * @param counter   the counter
-     * @throws IllegalArgumentException if the high order byte of counter is not zero
-     */
-    public ObjectId(final int timestamp, final int counter) {
-        this(timestamp, counter, true);
-    }
-
-    private ObjectId(final int timestamp, final int counter, final boolean checkCounter) {
-        this(timestamp, RANDOM_VALUE1, RANDOM_VALUE2, counter, checkCounter);
-    }
-
-    private ObjectId(final int timestamp, final int randomValue1, final short randomValue2, final int counter,
-                     final boolean checkCounter) {
-        if ((randomValue1 & 0xff000000) != 0) {
-            throw new IllegalArgumentException(
-                    "The random value must be between 0 and 16777215 (it must fit in three bytes).");
+    private static long getNonceFromUntrustedCounter(final int counter) {
+        if ((counter & 0xff000000) != 0) {
+            throw new IllegalArgumentException("The counter must be between 0 and 16777215 (it must fit in three bytes).");
         }
-        if (checkCounter && ((counter & 0xff000000) != 0)) {
-            throw new IllegalArgumentException(
-                    "The counter must be between 0 and 16777215 (it must fit in three bytes).");
+        return RANDOM_VALUE | counter;
+    }
+
+    private static byte[] parseHexString(final String s) {
+        Assert.isTrue(s.length() == 24, "hexString has 24 characters");
+
+        byte[] b = new byte[OBJECT_ID_LENGTH];
+        for (int i = 0; i < b.length; i++) {
+            int pos = i << 1;
+            char c1 = s.charAt(pos);
+            char c2 = s.charAt(pos + 1);
+            b[i] = (byte) ((hexCharToInt(c1) << 4) + hexCharToInt(c2));
         }
-        this.timestamp = timestamp;
-        this.counter = counter & LOW_ORDER_THREE_BYTES;
-        this.randomValue1 = randomValue1;
-        this.randomValue2 = randomValue2;
+        return b;
     }
 
-    /**
-     * Constructs a new instance from a 24-byte hexadecimal string representation.
-     *
-     * @param hexString the string to convert
-     * @throws IllegalArgumentException if the string is not a valid hex string
-     *                                  representation of an ObjectId
-     */
-    public ObjectId(final String hexString) {
-        this(parseHexString(hexString));
-    }
-
-    /**
-     * Constructs a new instance from the given byte array
-     *
-     * @param bytes the byte array
-     * @throws IllegalArgumentException if array is null or not of length 12
-     */
-    public ObjectId(final byte[] bytes) {
-        this(ByteBuffer.wrap(bytes));
-    }
-
-    /**
-     * Constructs a new instance from the given ByteBuffer
-     *
-     * @param buffer the ByteBuffer
-     * @throws IllegalArgumentException if the buffer is null or does not have at least 12
-     *                                  bytes remaining
-     * @since 3.4
-     */
-    public ObjectId(final ByteBuffer buffer) {
-        if (buffer == null) {
-            throw new IllegalArgumentException("buffer can not be null");
+    private static int hexCharToInt(final char c) {
+        if (c >= '0' && c <= '9') {
+            return c - 48;
+        } else if (c >= 'a' && c <= 'f') {
+            return c - 87;
+        } else if (c >= 'A' && c <= 'F') {
+            return c - 55;
         }
-        if (buffer.remaining() < OBJECT_ID_LENGTH) {
-            throw new IllegalArgumentException("state should be: buffer.remaining() >=12");
-        }
+        throw new IllegalArgumentException("invalid hexadecimal character: [" + c + "]");
+    }
 
-        // Note: Cannot use ByteBuffer.getInt because it depends on tbe buffer's byte
-        // order
-        // and ObjectId's are always in big-endian order.
-        this.timestamp = makeInt(buffer.get(), buffer.get(), buffer.get(), buffer.get());
-        this.randomValue1 = makeInt((byte) 0, buffer.get(), buffer.get(), buffer.get());
-        this.randomValue2 = makeShort(buffer.get(), buffer.get());
-        this.counter = makeInt((byte) 0, buffer.get(), buffer.get(), buffer.get());
+    private static int dateToTimestampSeconds(final Date time) {
+        return (int) (time.getTime() / 1000);
     }
 
     /**
-     * Convert to a byte array. Note that the numbers are stored in big-endian order.
+     * Convert to a byte array.  Note that the numbers are stored in big-endian order.
      *
      * @return the byte array
      */
     public byte[] toByteArray() {
-        ByteBuffer buffer = ByteBuffer.allocate(OBJECT_ID_LENGTH);
-        putToByteBuffer(buffer);
-        return buffer.array(); // using .allocate ensures there is a backing array that
-        // can be returned
+        // using .allocate ensures there is a backing array that can be returned
+        return ByteBuffer.allocate(OBJECT_ID_LENGTH).putInt(this.timestamp).putLong(this.nonce).array();
     }
 
     /**
-     * Convert to bytes and put those bytes to the provided ByteBuffer. Note that the
-     * numbers are stored in big-endian order.
+     * Convert to bytes and put those bytes to the provided ByteBuffer.
+     * Note that the numbers are stored in big-endian order.
      *
      * @param buffer the ByteBuffer
-     * @throws IllegalArgumentException if the buffer is null or does not have at least 12
-     *                                  bytes remaining
+     *
+     * @throws IllegalArgumentException if the buffer is null or does not have at least 12 bytes remaining
      * @since 3.4
      */
     public void putToByteBuffer(final ByteBuffer buffer) {
-        if (buffer == null) {
-            throw new IllegalArgumentException("buffer can not be null");
-        }
-        if (buffer.remaining() < OBJECT_ID_LENGTH) {
-            throw new IllegalArgumentException("state should be: buffer.remaining() >=12");
-        }
+        Assert.isTrue(buffer.remaining() >= OBJECT_ID_LENGTH, "buffer.remaining() >=12");
 
-        buffer.put(int3(this.timestamp));
-        buffer.put(int2(this.timestamp));
-        buffer.put(int1(this.timestamp));
-        buffer.put(int0(this.timestamp));
-        buffer.put(int2(this.randomValue1));
-        buffer.put(int1(this.randomValue1));
-        buffer.put(int0(this.randomValue1));
-        buffer.put(short1(this.randomValue2));
-        buffer.put(short0(this.randomValue2));
-        buffer.put(int2(this.counter));
-        buffer.put(int1(this.counter));
-        buffer.put(int0(this.counter));
+        ByteOrder originalOrder = buffer.order();
+        try {
+            buffer.order(ByteOrder.BIG_ENDIAN);
+            buffer.putInt(this.timestamp);
+            buffer.putLong(this.nonce);
+        } finally {
+            buffer.order(originalOrder);
+        }
+    }
+
+    /**
+     * Gets the timestamp (number of seconds since the Unix epoch).
+     *
+     * @return the timestamp
+     */
+    public int getTimestamp() {
+        return timestamp;
     }
 
     /**
@@ -302,7 +304,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * @return the Date
      */
     public Date getDate() {
-        return new Date((this.timestamp & 0xFFFFFFFFL) * 1000L);
+        return new Date((timestamp & 0xFFFFFFFFL) * 1000L);
     }
 
     /**
@@ -329,41 +331,26 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
             return false;
         }
 
-        ObjectId objectId = (ObjectId) o;
-
-        if (this.counter != objectId.counter) {
+        ObjectId other = (ObjectId) o;
+        if (timestamp != other.timestamp) {
             return false;
         }
-        if (this.timestamp != objectId.timestamp) {
-            return false;
-        }
-
-        if (this.randomValue1 != objectId.randomValue1) {
-            return false;
-        }
-
-        return this.randomValue2 == objectId.randomValue2;
+        return nonce == other.nonce;
     }
 
     @Override
     public int hashCode() {
-        int result = this.timestamp;
-        result = 31 * result + this.counter;
-        result = 31 * result + this.randomValue1;
-        result = 31 * result + this.randomValue2;
-        return result;
+        return 31 * timestamp + Long.hashCode(nonce);
     }
 
     @Override
-    public int compareTo(ObjectId other) {
-        byte[] byteArray = toByteArray();
-        byte[] otherByteArray = other.toByteArray();
-        for (int i = 0; i < OBJECT_ID_LENGTH; i++) {
-            if (byteArray[i] != otherByteArray[i]) {
-                return ((byteArray[i] & 0xff) < (otherByteArray[i] & 0xff)) ? -1 : 1;
-            }
+    public int compareTo(final ObjectId other) {
+        int cmp = Integer.compareUnsigned(this.timestamp, other.timestamp);
+        if (cmp != 0) {
+            return cmp;
         }
-        return 0;
+
+        return Long.compareUnsigned(nonce, other.nonce);
     }
 
     @Override
@@ -375,14 +362,11 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * Write the replacement object.
      *
      * <p>
-     * See <a href=
-     * "https://docs.oracle.com/javase/6/docs/platform/serialization/spec/output.html">Object
-     * Output Classes</a>
+     * See https://docs.oracle.com/javase/6/docs/platform/serialization/spec/output.html
      * </p>
      *
      * @return a proxy for the document
      */
-    @Serial
     private Object writeReplace() {
         return new SerializationProxy(this);
     }
@@ -391,115 +375,27 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      * Prevent normal deserialization.
      *
      * <p>
-     * See <a href=
-     * "https://docs.oracle.com/javase/6/docs/platform/serialization/spec/input.html">Object
-     * Input Classes</a>
+     * See https://docs.oracle.com/javase/6/docs/platform/serialization/spec/input.html
      * </p>
      *
      * @param stream the stream
+     *
      * @throws InvalidObjectException in all cases
      */
-    @Serial
     private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException("Proxy required");
     }
 
-    private static class SerializationProxy implements Serializable {
-
-        @Serial
+    private record SerializationProxy(byte[] bytes) implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        private final byte[] bytes;
-
-        SerializationProxy(final ObjectId objectId) {
-            this.bytes = objectId.toByteArray();
+        private SerializationProxy(final ObjectId bytes) {
+            this(bytes.toByteArray());
         }
 
         @Serial
         private Object readResolve() {
-            return new ObjectId(this.bytes);
-        }
-
-    }
-
-    static {
-        try {
-            SecureRandom secureRandom = new SecureRandom();
-            RANDOM_VALUE1 = secureRandom.nextInt(0x01000000);
-            RANDOM_VALUE2 = (short) secureRandom.nextInt(0x00008000);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new ObjectId(bytes);
         }
     }
-
-    private static byte[] parseHexString(final String s) {
-        if (s == null) {
-            throw new IllegalArgumentException("hexString can not be null");
-        }
-        if (s.length() != 24) {
-            throw new IllegalArgumentException("state should be: hexString has 24 characters");
-        }
-        byte[] b = new byte[OBJECT_ID_LENGTH];
-        for (int i = 0; i < b.length; i++) {
-            int pos = i << 1;
-            char c1 = s.charAt(pos);
-            char c2 = s.charAt(pos + 1);
-            b[i] = (byte) ((hexCharToInt(c1) << 4) + hexCharToInt(c2));
-        }
-        return b;
-    }
-
-    private static int hexCharToInt(final char c) {
-        if (c >= '0' && c <= '9') {
-            return c - 48;
-        } else if (c >= 'a' && c <= 'f') {
-            return c - 87;
-        } else if (c >= 'A' && c <= 'F') {
-            return c - 55;
-        }
-        throw new IllegalArgumentException("invalid hexadecimal character: [" + c + "]");
-    }
-
-    private static int dateToTimestampSeconds(final Date time) {
-        return (int) (time.getTime() / 1000);
-    }
-
-    // Big-Endian helpers, in this class because all other BSON numbers are little-endian
-
-    private static int makeInt(final byte b3, final byte b2, final byte b1, final byte b0) {
-        // CHECKSTYLE:OFF
-        return (((b3) << 24) | ((b2 & 0xff) << 16) | ((b1 & 0xff) << 8) | ((b0 & 0xff)));
-        // CHECKSTYLE:ON
-    }
-
-    private static short makeShort(final byte b1, final byte b0) {
-        // CHECKSTYLE:OFF
-        return (short) (((b1 & 0xff) << 8) | ((b0 & 0xff)));
-        // CHECKSTYLE:ON
-    }
-
-    private static byte int3(final int x) {
-        return (byte) (x >> 24);
-    }
-
-    private static byte int2(final int x) {
-        return (byte) (x >> 16);
-    }
-
-    private static byte int1(final int x) {
-        return (byte) (x >> 8);
-    }
-
-    private static byte int0(final int x) {
-        return (byte) (x);
-    }
-
-    private static byte short1(final short x) {
-        return (byte) (x >> 8);
-    }
-
-    private static byte short0(final short x) {
-        return (byte) (x);
-    }
-
 }

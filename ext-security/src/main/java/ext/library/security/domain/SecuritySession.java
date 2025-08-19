@@ -5,8 +5,9 @@ import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -88,7 +89,7 @@ public class SecuritySession implements Serializable {
      */
     public void createdSecuritySession() {
         this.securitySessionId = UUID.randomUUID().toString();
-        this.createTime = $.formatDateTime(LocalDateTime.now());
+        this.createTime = DateUtil.format(LocalDateTime.now());
         // 创建通知
         SecurityEventPublishManager.doCreatedSecuritySession(this.securitySessionId);
     }
@@ -119,7 +120,7 @@ public class SecuritySession implements Serializable {
     public SecuritySession updateTokenInfo(SecurityToken tokenInfo) {
         for (SecurityToken info : this.tokenInfoList) {
             if (info.getToken().equals(tokenInfo.getToken())) {
-                if ($.isNotBlank(tokenInfo.getState())) {
+                if (StringUtil.isNotBlank(tokenInfo.getState())) {
                     info.setState(tokenInfo.getState());
                 }
                 if (null != tokenInfo.getDeviceType()) {
@@ -131,7 +132,7 @@ public class SecuritySession implements Serializable {
                 if (null != tokenInfo.getActivityTimeout()) {
                     info.setActivityTimeout(tokenInfo.getActivityTimeout());
                 }
-                info.setUpdateTime($.formatDateTime(LocalDateTime.now()));
+                info.setUpdateTime(DateUtil.format(LocalDateTime.now()));
                 break;
             }
         }
@@ -276,9 +277,9 @@ public class SecuritySession implements Serializable {
         if (!this.getTokenInfoList().isEmpty()) {
             this.getTokenInfoList().forEach(securityToken -> {
                 // 非可用状态的，且时间超过 48 小时，视为无效 token，进行清理
-                if ($.isNotBlank(securityToken.getUpdateTime())
+                if (StringUtil.isNotBlank(securityToken.getUpdateTime())
                         && (!SecurityConstant.TOKEN_STATE_NORMAL.equals(securityToken.getState())
-                        && $.parseDateTime(securityToken.getUpdateTime())
+                        && DateUtil.parse(securityToken.getUpdateTime())
                         .plusHours(maxTimeoutHour)
                         .isBefore(LocalDateTime.now()))) {
                     invalidTokenInfoList.add(securityToken);

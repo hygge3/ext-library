@@ -1,14 +1,21 @@
 package ext.library.tool.util;
 
-import ext.library.tool.$;
+import com.google.common.collect.Maps;
+import ext.library.tool.core.Exceptions;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,8 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Map 工具
@@ -33,7 +38,9 @@ public class MapUtil {
      * @param <V>  Value 类型
      * @param map  Map
      * @param keys 键列表
+     *
      * @return 修改后的 key
+     *
      * @since 5.0.5
      */
     @SuppressWarnings("unchecked")
@@ -50,6 +57,7 @@ public class MapUtil {
      * @param paramMap        参数
      * @param mustContainKeys 必须包含的 key（必传）
      * @param canContainKeys  可包含的 key（非必传）
+     *
      * @return 是否满足条件
      */
     public <K> boolean isKeys(Map<K, ?> paramMap, K[] mustContainKeys, K... canContainKeys) {
@@ -61,7 +69,7 @@ public class MapUtil {
         }
 
         // 2. 无可选参数
-        if ($.isEmpty(canContainKeys)) {
+        if (ObjectUtil.isEmpty(canContainKeys)) {
             return true;
         }
 
@@ -90,6 +98,7 @@ public class MapUtil {
      *
      * @param paramMap 需要确认的 Map
      * @param keys     条件
+     *
      * @return 匹配所有的 key 且大小一致（true）
      */
     public <K> boolean isKeysEqual(Map<K, ?> paramMap, K[] keys) {
@@ -109,6 +118,7 @@ public class MapUtil {
      *
      * @param paramMap 需要确认的 Map
      * @param keys     条件
+     *
      * @return 只要包含一个 key（true）
      */
     public <K> boolean isContainsOneOfKey(Map<K, ?> paramMap, K[] keys) {
@@ -128,6 +138,7 @@ public class MapUtil {
      *
      * @param paramMaps 需要确认的 Map 数组
      * @param keys      条件数组
+     *
      * @return Map 数组元素 0 包含所有的 key（true）
      */
     public <K> boolean isMapsKeys(Map<K, ?>[] paramMaps, K[] keys) {
@@ -141,6 +152,7 @@ public class MapUtil {
      * </p>
      *
      * @param paramMaps 要判断的 Map[] 数组
+     *
      * @return Map 数组==null 或长度==0 或第一个元素为空（true）
      */
     public boolean isEmptys(Map<?, ?>[] paramMaps) {
@@ -151,6 +163,7 @@ public class MapUtil {
      * 判断 Map 是否为空，或者 Map 中 String 类型的 value 值是否为空<br>
      *
      * @param paramMap 要判断的 Map
+     *
      * @return value 值是否为空
      */
     public boolean isStringValueEmpty(Map<?, ?> paramMap) {
@@ -158,7 +171,7 @@ public class MapUtil {
             return true;
         }
         for (Object value : paramMap.values()) {
-            if (value == null || (value instanceof String str && $.isEmpty(str))) {
+            if (value == null || (value instanceof String str && ObjectUtil.isEmpty(str))) {
                 return true;
             }
         }
@@ -223,7 +236,7 @@ public class MapUtil {
         while (iter.hasNext()) {
             Map.Entry<?, ?> entry = iter.next();
             Object value = entry.getValue();
-            if (value == null || (value instanceof String str && $.isEmpty(str))) {
+            if (value == null || (value instanceof String str && ObjectUtil.isEmpty(str))) {
                 iter.remove();
             }
         }
@@ -246,6 +259,7 @@ public class MapUtil {
      * 获取所有的 key
      *
      * @param paramMap 需要获取 keys 的 map
+     *
      * @return keyList
      */
     public <K> List<K> keyList(Map<K, ?> paramMap) {
@@ -259,13 +273,14 @@ public class MapUtil {
      * @param paramMap 参数 map
      * @param key      key
      * @param clazz    泛型类型
+     *
      * @return 结果
      */
-    public <K,T> T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
+    public <K, T> T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
         if (paramMap != null) {
             Object answer = paramMap.get(key);
             if (answer != null) {
-                return $.convert(answer, clazz);
+                return GeneralTypeCastUtil.cast(answer, clazz);
             }
         }
         return null;
@@ -292,11 +307,12 @@ public class MapUtil {
      *
      * @param objectList    对象 list
      * @param keyClassifier 需要提取的 key
+     *
      * @return key 为 map key 的键值对
      */
-    public <K,T> Map<K, List<T>> listPOJOExtractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
+    public <K, T> Map<K, List<T>> extractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
         // 如果需要转换的值是空的，直接返回一个空的集合
-        if ($.isEmpty(objectList)) {
+        if (ObjectUtil.isEmpty(objectList)) {
             return Collections.emptyMap();
         }
         return objectList.stream().collect(Collectors.groupingBy(keyClassifier));
@@ -325,13 +341,14 @@ public class MapUtil {
      * @param objectList      list 数据
      * @param keyClassifier   需要提取的 key
      * @param valueClassifier 需要提取的 value
+     *
      * @return Map&lt;String, T&gt;
      */
-    public <K, T, V> Map<K, V> listPOJOExtractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
+    public <K, T, V> Map<K, V> extractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
         // 声明一个返回的 map 集合
         Map<K, V> map = new LinkedHashMap<>();
         // 如果需要转换的值是空的，直接返回一个空的集合
-        if ($.isEmpty(objectList)) {
+        if (ObjectUtil.isEmpty(objectList)) {
             return map;
         }
         for (T t : objectList) {
@@ -362,13 +379,14 @@ public class MapUtil {
      *
      * @param objectList    list 数据
      * @param keyClassifier 需要提取的 key
+     *
      * @return Map&lt;String, T&gt;
      */
-    public <K, T> Map<K, T> listPOJOExtractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
+    public <K, T> Map<K, T> extractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
         // 声明一个返回的 map 集合
         Map<K, T> map = new LinkedHashMap<>();
         // 如果需要转换的值是空的，直接返回一个空的集合
-        if ($.isEmpty(objectList)) {
+        if (ObjectUtil.isEmpty(objectList)) {
             return map;
         }
         for (T t : objectList) {
@@ -382,7 +400,7 @@ public class MapUtil {
      */
     private <T> T getValue(Object obj, String name, Class<T> calzz) {
         if (obj instanceof Map<?, ?> map) {
-            return $.convert(map.get(name), calzz);
+            return GeneralTypeCastUtil.cast(map.get(name), calzz);
         }
         BeanInfo beanInfo;
         try {
@@ -402,13 +420,68 @@ public class MapUtil {
             }
             try {
                 // 执行 get 方法拿到值
-                return $.convert(readMethod.invoke(obj), calzz);
+                return GeneralTypeCastUtil.cast(readMethod.invoke(obj), calzz);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 log.warn("[🛠️] An error occurred to get the value", e);
                 return null;
             }
         }
         return null;
+    }
+
+    /**
+     * 将对象装成 map 形式，使用反射实现，性能不好
+     *
+     * @param bean 源对象
+     *
+     * @return {Map}
+     */
+    public Map<String, Object> toMap(Object bean) {
+        if (bean == null) {
+            return Maps.newHashMap();
+        }
+        Map<String, Object> map = new HashMap<>();
+        Field[] declaredFields = bean.getClass().getDeclaredFields();
+        for (Field field : declaredFields) {
+            field.setAccessible(true);
+            try {
+                map.put(field.getName(), field.get(bean));
+            } catch (IllegalAccessException e) {
+                throw Exceptions.unchecked(e);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 将 map 转为 bean，使用反射实现，性能不好
+     *
+     * @param beanMap   map
+     * @param valueType 对象类型
+     * @param <T>       泛型标记
+     *
+     * @return {T}
+     */
+    public <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
+        if (beanMap == null) {
+            return null;
+        }
+        try {
+            T object = valueType.getDeclaredConstructor().newInstance();
+            Field[] fields = valueType.getDeclaredFields();
+            for (Field field : fields) {
+                int mod = field.getModifiers();
+                if (Modifier.isFinal(mod) || Modifier.isStatic(mod)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                field.set(object, beanMap.get(field.getName()));
+            }
+            return object;
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+                 IllegalAccessException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
 }

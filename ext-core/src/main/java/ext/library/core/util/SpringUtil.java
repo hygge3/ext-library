@@ -1,10 +1,7 @@
 package ext.library.core.util;
 
-import jakarta.annotation.Nonnull;
-
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
-import java.util.Map;
+import ext.library.tool.util.ObjectUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +20,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import jakarta.annotation.Nonnull;
+import java.util.Map;
 
 /**
  * Spring 工具类
@@ -44,16 +44,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     static ConfigurableListableBeanFactory beanFactory;
 
-    @Override
-    public void setApplicationContext(@Nonnull ApplicationContext context) throws BeansException {
-        setContext(context);
-    }
-
-    @Override
-    public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        SpringUtil.beanFactory = beanFactory;
-    }
-
     /**
      * 获取{@link ListableBeanFactory}，可能为{@link ConfigurableListableBeanFactory} 或
      * {@link ApplicationContextAware}
@@ -61,7 +51,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @return {@link ListableBeanFactory}
      */
     public static ListableBeanFactory getBeanFactory() {
-        final ListableBeanFactory factory = $.defaultIfNull(beanFactory, context);
+        final ListableBeanFactory factory = ObjectUtil.defaultIfNull(beanFactory, context);
         if (null == factory) {
             throw Exceptions.throwOut(
                     "没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
@@ -91,6 +81,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @param <T>  Bean 类型
      * @param name Bean 名称
+     *
      * @return Bean
      */
     @SuppressWarnings("unchecked")
@@ -103,6 +94,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @param name Bean 名称
      * @param args 创建 bean 需要的参数属性
+     *
      * @return Bean 对象
      */
     public static Object getBean(String name, Object... args) {
@@ -114,6 +106,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @param <T>   Bean 类型
      * @param clazz Bean 类
+     *
      * @return Bean 对象
      */
     public static <T> T getBean(Class<T> clazz) {
@@ -126,6 +119,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param <T>   Bean 类型
      * @param clazz Bean 类
      * @param args  创建 bean 需要的参数属性
+     *
      * @return Bean 对象
      */
     public static <T> T getBean(Class<T> clazz, Object... args) {
@@ -138,6 +132,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param <T>   bean 类型
      * @param name  Bean 名称
      * @param clazz bean 类型
+     *
      * @return Bean 对象
      */
     public static <T> T getBean(String name, Class<T> clazz) {
@@ -149,6 +144,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @param <T>  Bean 类型
      * @param type 类、接口，null 表示获取所有 bean
+     *
      * @return 类型对应的 bean，key 是 bean 注册的 name，value 是 Bean
      */
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
@@ -159,6 +155,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * 获取指定类型对应的 Bean 名称，包括子类
      *
      * @param type 类、接口，null 表示获取所有 bean 名称
+     *
      * @return bean 名称
      */
     public static String[] getBeanNamesForType(Class<?> type) {
@@ -169,6 +166,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * 获取指定类型对应的 Bean 名称，包括子类
      *
      * @param type 类、接口，null 表示获取所有 bean 名称
+     *
      * @return bean 名称
      */
     public static String[] getBeanNamesForType(ResolvableType type) {
@@ -179,6 +177,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * 获取配置文件配置项的值
      *
      * @param key 配置项 key
+     *
      * @return 属性值
      */
     public static String getProperty(String key) {
@@ -190,6 +189,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @param key          配置项 key
      * @param defaultValue 默认值
+     *
      * @return 属性值
      */
     public static String getProperty(String key, String defaultValue) {
@@ -203,6 +203,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param key          配置项 key
      * @param targetType   配置项类型
      * @param defaultValue 默认值
+     *
      * @return 属性值
      */
     public static <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
@@ -244,6 +245,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * @param <T>      Bean 类型
      * @param beanName 名称
      * @param bean     bean
+     *
      * @author shadow
      * @since 5.4.2
      */
@@ -259,6 +261,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * 将 Spring 中的 bean 注销，请谨慎使用
      *
      * @param beanName bean 名称
+     *
      * @author shadow
      * @since 5.7.7
      */
@@ -292,6 +295,16 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
 
     public static boolean isVirtual() {
         return Threading.VIRTUAL.isActive(getBean(Environment.class));
+    }
+
+    @Override
+    public void setApplicationContext(@Nonnull ApplicationContext context) throws BeansException {
+        setContext(context);
+    }
+
+    @Override
+    public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        SpringUtil.beanFactory = beanFactory;
     }
 
 }

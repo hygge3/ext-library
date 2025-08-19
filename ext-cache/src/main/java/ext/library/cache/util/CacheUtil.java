@@ -6,10 +6,10 @@ import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
-import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,14 +43,14 @@ public class CacheUtil {
         // 读写，查询 Caffeine
         Object caffeineCache = CACHE.getIfPresent(cachekey);
 
-        if ($.isNotNull(caffeineCache)) {
+        if (Objects.nonNull(caffeineCache)) {
             log.debug("[💾] get data from caffeine");
             return clazz.cast(caffeineCache);
         }
 
         // 查询 Redis
         T redisCache = RedisUtil.get(cachekey, clazz);
-        if ($.isNotNull(redisCache)) {
+        if (Objects.nonNull(redisCache)) {
             log.debug("[💾] get data from redis");
             CACHE.put(cachekey, redisCache);
             return redisCache;
@@ -68,14 +68,14 @@ public class CacheUtil {
         // 读写，查询 Caffeine
         Object caffeineCache = CACHE.getIfPresent(cachekey);
 
-        if ($.isNotNull(caffeineCache)) {
+        if (Objects.nonNull(caffeineCache)) {
             log.debug("[💾] get data from caffeine");
             return caffeineCache;
         }
 
         // 查询 Redis
         Object redisCache = RedisUtil.get(cachekey);
-        if ($.isNotNull(redisCache)) {
+        if (Objects.nonNull(redisCache)) {
             log.debug("[💾] get data from redis");
             CACHE.put(cachekey, redisCache);
             return redisCache;

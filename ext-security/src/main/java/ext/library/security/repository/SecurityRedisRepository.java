@@ -1,14 +1,16 @@
 package ext.library.security.repository;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.constants.SecurityRedisConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
-import ext.library.tool.$;
+import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+
+import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -19,7 +21,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -33,11 +34,12 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据登录 Id 查询 SecuritySession
      *
      * @param loginId 登录 Id
+     *
      * @return SecuritySession
      */
     @Override
     public SecuritySession getSecuritySessionByLoginId(String loginId) {
-        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = StringUtil.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         SecuritySession session = RedisUtil.get(redisKey, SecuritySession.class);
         return Objects.isNull(session) ? null : session;
     }
@@ -46,17 +48,18 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据登录 Id 查询 SecuritySession 的过期时间
      *
      * @param loginId 登录 Id
+     *
      * @return Long
      */
     @Override
     public Long getSessionTimeoutByLoginId(String loginId) {
-        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = StringUtil.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         return RedisUtil.ttl(redisKey);
     }
 
     @Override
     public boolean saveSecuritySession(@Nonnull SecuritySession session) {
-        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
+        String redisKey = StringUtil.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
         String sessionJson = JsonUtil.toJson(session);
         if (null == session.getTimeout() || SecurityConstant.NON_EXPIRING.equals(session.getTimeout())) {
             RedisUtil.set(redisKey, sessionJson);
@@ -71,12 +74,13 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据登录 Id 删除 SecuritySession
      *
      * @param loginId 登录 Id
+     *
      * @return boolean
      */
     @Override
     public boolean removeSecuritySessionByLoginId(String loginId) {
         // 删除 session 信息
-        String redisKey = $.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
+        String redisKey = StringUtil.format(SecurityRedisConstant.SESSION_INFO_KEY, loginId);
         return RedisUtil.del(redisKey);
     }
 
@@ -84,11 +88,12 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 tokenValue 获取 SecurityToken
      *
      * @param tokenValue token
+     *
      * @return SecurityToken
      */
     @Override
     public SecurityToken getSecurityTokenByTokenValue(String tokenValue) {
-        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         SecurityToken token = RedisUtil.get(redisKey, SecurityToken.class);
         return Objects.isNull(token) ? null : token;
     }
@@ -97,6 +102,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 tokenValue 获取活跃时间
      *
      * @param tokenValue token
+     *
      * @return String
      */
     @Override
@@ -112,11 +118,12 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 tokenValue 获取 token 活跃超时时间
      *
      * @param tokenValue token
+     *
      * @return Long
      */
     @Override
     public Long getTokenTimeOutByTokenValue(String tokenValue) {
-        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         return RedisUtil.ttl(redisKey);
     }
 
@@ -124,6 +131,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 tokenValue 获取 token 活跃超时时间
      *
      * @param tokenValue token
+     *
      * @return Long
      */
     @Override
@@ -140,8 +148,8 @@ public class SecurityRedisRepository implements SecurityRepository {
         }
         // 计算剩余时间
 
-        long second = $.parseDateTime(activityTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
-                      - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
+        long second = DateUtil.parse(activityTime).plusSeconds(timeout).toEpochSecond(ZoneOffset.ofHours(8))
+                - LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8));
         return second > 0 ? second : 0L;
     }
 
@@ -149,11 +157,12 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 保存 token 信息
      *
      * @param token token 信息
+     *
      * @return boolean
      */
     @Override
     public boolean saveToken(@Nonnull SecurityToken token) {
-        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
+        String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
         String tokenJson = JsonUtil.toJson(token);
         if (null == token.getTimeout() || SecurityConstant.NON_EXPIRING.equals(token.getTimeout())) {
             RedisUtil.set(redisKey, tokenJson);
@@ -173,11 +182,12 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 tokenValue 删除 token 信息
      *
      * @param tokenValue token
+     *
      * @return boolean
      */
     @Override
     public boolean removeTokenByTokenValue(String tokenValue) {
-        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
+        String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, tokenValue);
         return RedisUtil.del(redisKey);
     }
 
@@ -185,6 +195,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      * 根据 token 值续约
      *
      * @param tokenValue token 值
+     *
      * @return boolean
      */
     @Override
@@ -193,7 +204,7 @@ public class SecurityRedisRepository implements SecurityRepository {
         if (Objects.isNull(securityToken)) {
             return false;
         }
-        securityToken.setActivityTime($.formatDateTime(LocalDateTime.now()));
+        securityToken.setActivityTime(DateUtil.format(LocalDateTime.now()));
         return saveToken(securityToken);
     }
 
@@ -202,12 +213,13 @@ public class SecurityRedisRepository implements SecurityRepository {
      *
      * @param tokenValue token 值，支持模糊匹配
      * @param sortedDesc 是否降序
+     *
      * @return List<String>
      */
     @Override
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
-        String redisKey = $.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
-                $.isNotBlank(tokenValue) ? tokenValue + "*" : "*");
+        String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
+                StringUtil.isNotBlank(tokenValue) ? tokenValue + "*" : "*");
         Set<String> setList = RedisUtil.keys(redisKey);
         List<String> list = null == setList ? new ArrayList<>()
                 : setList.stream()

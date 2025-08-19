@@ -1,5 +1,14 @@
 package ext.library.json.util;
 
+import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import jakarta.annotation.Nullable;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -8,18 +17,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import jakarta.annotation.Nullable;
-
-import ext.library.tool.$;
-import ext.library.tool.core.Exceptions;
 import java.io.InputStream;
 import java.io.StringReader;
-import lombok.extern.slf4j.Slf4j;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 /**
  * xpath 解析 xml
@@ -61,6 +60,7 @@ public class XmlUtil {
      * 构造 XmlHelper，安全模式
      *
      * @param is InputStream
+     *
      * @return XmlHelper
      */
     public static XmlUtil safe(InputStream is) {
@@ -72,6 +72,7 @@ public class XmlUtil {
      * 构造 XmlHelper，安全模式
      *
      * @param xmlStr xml 字符串
+     *
      * @return XmlHelper
      */
     public static XmlUtil safe(String xmlStr) {
@@ -85,6 +86,7 @@ public class XmlUtil {
      * 构造 XmlHelper，非安全模式
      *
      * @param is InputStream
+     *
      * @return XmlHelper
      */
     public static XmlUtil unsafe(InputStream is) {
@@ -96,6 +98,7 @@ public class XmlUtil {
      * 构造 XmlHelper，非安全模式
      *
      * @param xmlStr xml 字符串
+     *
      * @return XmlHelper
      */
     public static XmlUtil unsafe(String xmlStr) {
@@ -128,10 +131,11 @@ public class XmlUtil {
      * @param expression xpath 语法
      * @param item       子节点
      * @param returnType 返回的类型
+     *
      * @return {Object}
      */
     public Object evalXPath(String expression, @Nullable Object item, QName returnType) {
-        item = $.defaultIfNull(item, doc);
+        item = ObjectUtil.defaultIfNull(item, doc);
         try {
             return path.evaluate(expression, item, returnType);
         } catch (XPathExpressionException e) {
@@ -143,6 +147,7 @@ public class XmlUtil {
      * 获取 String
      *
      * @param expression 路径
+     *
      * @return String
      */
     public String getString(String expression) {
@@ -153,6 +158,7 @@ public class XmlUtil {
      * 获取 Boolean
      *
      * @param expression 路径
+     *
      * @return String
      */
     public Boolean getBoolean(String expression) {
@@ -163,6 +169,7 @@ public class XmlUtil {
      * 获取 Number
      *
      * @param expression 路径
+     *
      * @return {Number}
      */
     public Number getNumber(String expression) {
@@ -173,6 +180,7 @@ public class XmlUtil {
      * 获取某个节点
      *
      * @param expression 路径
+     *
      * @return {Node}
      */
     public Node getNode(String expression) {
@@ -183,6 +191,7 @@ public class XmlUtil {
      * 获取子节点
      *
      * @param expression 路径
+     *
      * @return NodeList
      */
     public NodeList getNodeList(String expression) {
@@ -194,6 +203,7 @@ public class XmlUtil {
      *
      * @param node       节点
      * @param expression 相对于 node 的路径
+     *
      * @return String
      */
     public String getString(Object node, String expression) {
@@ -205,6 +215,7 @@ public class XmlUtil {
      *
      * @param node       节点
      * @param expression 相对于 node 的路径
+     *
      * @return String
      */
     public Boolean getBoolean(Object node, String expression) {
@@ -216,6 +227,7 @@ public class XmlUtil {
      *
      * @param node       节点
      * @param expression 相对于 node 的路径
+     *
      * @return {Number}
      */
     public Number getNumber(Object node, String expression) {
@@ -227,6 +239,7 @@ public class XmlUtil {
      *
      * @param node       节点
      * @param expression 路径
+     *
      * @return {Node}
      */
     public Node getNode(Object node, String expression) {
@@ -238,6 +251,7 @@ public class XmlUtil {
      *
      * @param node       节点
      * @param expression 相对于 node 的路径
+     *
      * @return NodeList
      */
     public NodeList getNodeList(Object node, String expression) {

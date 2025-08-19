@@ -1,7 +1,7 @@
 package ext.library.core.util.spel;
 
-import ext.library.tool.$;
 import ext.library.tool.holder.Lazy;
+import ext.library.tool.util.ObjectUtil;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -59,7 +59,7 @@ public class SpelUtil {
         // 方法参数名数组
         String[] parameterNames = PARAMETER_NAME_DISCOVERER.get().getParameterNames(method);
         // 把方法参数放入 spel 上下文中
-        if ($.isNotEmpty(parameterNames)) {
+        if (ObjectUtil.isNotEmpty(parameterNames)) {
             for (int i = 0; i < parameterNames.length; i++) {
                 context.setVariable(parameterNames[i], args[i]);
             }

@@ -1,6 +1,7 @@
 package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.Base64Util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.encrypt.Encryptors;
@@ -9,7 +10,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Objects;
 
 @Slf4j
@@ -39,7 +39,7 @@ public class AESUtil {
         SecretKey secretKey = keyGenerator.generateKey();
         // 获取密钥内容
         byte[] key = secretKey.getEncoded();
-        return Base64.getEncoder().encodeToString(key);
+        return Base64Util.encodeToStr(key);
     }
 
     /**
@@ -56,7 +56,7 @@ public class AESUtil {
         byte[] byteArray = plainText.getBytes();
         // 加密，设置密钥和随机数
         byte[] cipherArrayTemp = Encryptors.standard(secretKey, salt).encrypt(byteArray);
-        byte[] cipherArray = Base64.getEncoder().encode(cipherArrayTemp);
+        byte[] cipherArray = Base64Util.encode(cipherArrayTemp);
         return new String(cipherArray);
     }
 
@@ -72,7 +72,7 @@ public class AESUtil {
     public String decrypt(String secretKey, String cipherText, String salt) {
         // 密文
         byte[] byteArray = cipherText.getBytes();
-        byte[] plainArrayTemp = Base64.getDecoder().decode(byteArray);
+        byte[] plainArrayTemp = Base64Util.decode(byteArray);
         // 解密
         byte[] plainArray = Encryptors.standard(secretKey, salt).decrypt(plainArrayTemp);
         return new String(plainArray);

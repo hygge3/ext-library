@@ -1,17 +1,24 @@
 package ext.library.core.util;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
+import com.google.common.net.HttpHeaders;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.GeneralTypeCastUtil;
+import ext.library.tool.util.ObjectUtil;
+import lombok.experimental.UtilityClass;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Maps;
-import com.google.common.net.HttpHeaders;
-import ext.library.tool.$;
-import ext.library.tool.constant.Symbol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -20,18 +27,21 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.experimental.UtilityClass;
-import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 客户端工具类
  */
 @UtilityClass
 public class ServletUtil {
+
+    /**
+     * 如果在前端和服务端中间还有一层 Node 服务 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息 便于获取真实 IP
+     */
+    public final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
+    private final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
+            "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
+
+    // region 请求
 
     /**
      * 获取 request
@@ -47,8 +57,6 @@ public class ServletUtil {
         return getRequestAttributes().getResponse();
     }
 
-    // region 请求
-
     /**
      * 获取 String 参数
      */
@@ -60,41 +68,42 @@ public class ServletUtil {
      * 获取 String 参数
      */
     public String getParameter(String name, String defaultValue) {
-        return $.toStr(getParameter(name), defaultValue);
+        return GeneralTypeCastUtil.getAsString(getParameter(name), defaultValue);
     }
 
     /**
      * 获取 Integer 参数
      */
     public Integer getParameterToInt(String name) {
-        return $.toInt(getParameter(name));
+        return GeneralTypeCastUtil.getAsInteger(getParameter(name));
     }
 
     /**
      * 获取 Integer 参数
      */
     public Integer getParameterToInt(String name, Integer defaultValue) {
-        return $.toInt(getParameter(name), defaultValue);
+        return GeneralTypeCastUtil.getAsInteger(getParameter(name), defaultValue);
     }
 
     /**
      * 获取 Boolean 参数
      */
     public Boolean getParameterToBool(String name) {
-        return $.toBoolean(getParameter(name));
+        return GeneralTypeCastUtil.getAsBoolean(getParameter(name));
     }
 
     /**
      * 获取 Boolean 参数
      */
     public Boolean getParameterToBool(String name, Boolean defaultValue) {
-        return $.toBoolean(getParameter(name), defaultValue);
+        return GeneralTypeCastUtil.getAsBoolean(getParameter(name), defaultValue);
     }
 
     /**
      * 获得所有请求参数
      *
      * @param request 请求对象{@link ServletRequest}
+     *
      * @return Map
      */
     public Map<String, String[]> getParams(ServletRequest request) {
@@ -106,6 +115,7 @@ public class ServletUtil {
      * 获得所有请求参数
      *
      * @param request 请求对象{@link ServletRequest}
+     *
      * @return Map
      */
     public Map<String, String> getParamMap(ServletRequest request) {
@@ -137,6 +147,7 @@ public class ServletUtil {
      * 获取请求属性 如果指定的属性不存在，则返回 null。
      *
      * @param name 属性的名称
+     *
      * @return 属性的值，如果属性不存在，则返回 null
      */
     public Object getRequestAttribute(String name) {
@@ -153,7 +164,7 @@ public class ServletUtil {
     }
 
     public String getHeader(@Nonnull HttpServletRequest request, String name) {
-        return $.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
+        return ObjectUtil.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
     }
 
     public String getHeader(String name) {
@@ -194,7 +205,7 @@ public class ServletUtil {
      */
     public Map<String, Cookie> readCookieMap() {
         final Cookie[] cookies = getRequest().getCookies();
-        if ($.isEmpty(cookies)) {
+        if (ObjectUtil.isEmpty(cookies)) {
             return new HashMap<>(0);
         }
         return Arrays.stream(cookies)
@@ -219,6 +230,8 @@ public class ServletUtil {
         addCookie(key, null, 0);
     }
 
+    // region ip 获取
+
     public void addCookie(String name, String value, Integer maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(Symbol.SLASH);
@@ -235,16 +248,6 @@ public class ServletUtil {
     public String getUA() {
         return getHeader(HttpHeaders.USER_AGENT);
     }
-
-    // region ip 获取
-
-    private final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
-            "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
-
-    /**
-     * 如果在前端和服务端中间还有一层 Node 服务 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息 便于获取真实 IP
-     */
-    public final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
 
     /**
      * 获取客户端 IP
@@ -279,7 +282,9 @@ public class ServletUtil {
      *
      * @param request     请求对象{@link HttpServletRequest}
      * @param headerNames 自定义头，通常在 Http 服务器（例如 Nginx）中配置
+     *
      * @return IP 地址
+     *
      * @since 4.4.1
      */
     public String getClientIpByHeader(HttpServletRequest request, @Nonnull String... headerNames) {
@@ -305,6 +310,7 @@ public class ServletUtil {
      * 多次反向代理后会有多个 ip 值，第一个 ip 才是真实 ip
      *
      * @param ip ip
+     *
      * @return 真实 ip
      */
     private String getMultistageReverseProxyIp(String ip) {

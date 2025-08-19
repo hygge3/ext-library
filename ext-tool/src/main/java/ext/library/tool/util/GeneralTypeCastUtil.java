@@ -1,6 +1,5 @@
 package ext.library.tool.util;
 
-import ext.library.tool.$;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
@@ -12,7 +11,7 @@ import java.text.ParseException;
  * 一个简单的数据类型转换工具类
  */
 @UtilityClass
-public class BasicConverter {
+public class GeneralTypeCastUtil {
 
     /**
      * Gets a String from an Object in a null-safe manner.
@@ -43,7 +42,7 @@ public class BasicConverter {
      */
     public String getAsString(final Object obj, final String defaultValue) {
         String answer = getAsString(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -93,7 +92,7 @@ public class BasicConverter {
     @SuppressWarnings("unchecked")
     public <R extends Number> R getAsNumber(final Object obj, R defaultValue) {
         Number answer = getAsNumber(obj);
-        return (R) $.defaultIfNull(answer, defaultValue);
+        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -139,7 +138,7 @@ public class BasicConverter {
      */
     public Boolean getAsBoolean(final Object obj, final Boolean defaultValue) {
         Boolean answer = getAsBoolean(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -158,7 +157,7 @@ public class BasicConverter {
      */
     public boolean getAsBooleanValue(final Object obj) {
         final Boolean booleanObject = getAsBoolean(obj);
-        return $.defaultIfNull(booleanObject, false);
+        return ObjectUtil.defaultIfNull(booleanObject, false);
     }
 
     /**
@@ -178,7 +177,7 @@ public class BasicConverter {
      */
     public boolean getAsBooleanValue(final Object obj, final boolean defaultValue) {
         final Boolean booleanObject = getAsBoolean(obj);
-        return $.defaultIfNull(booleanObject, defaultValue);
+        return ObjectUtil.defaultIfNull(booleanObject, defaultValue);
     }
 
     /**
@@ -215,7 +214,7 @@ public class BasicConverter {
      */
     public Byte getAsByte(final Object obj, final Byte defaultValue) {
         Byte answer = getAsByte(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -229,7 +228,7 @@ public class BasicConverter {
      */
     public byte getAsByteValue(final Object obj) {
         final Byte byteObject = getAsByte(obj);
-        return $.defaultIfNull(byteObject, (byte) 0);
+        return ObjectUtil.defaultIfNull(byteObject, (byte) 0);
     }
 
     /**
@@ -245,7 +244,7 @@ public class BasicConverter {
      */
     public byte getAsByteValue(final Object obj, final byte defaultValue) {
         final Byte byteObject = getAsByte(obj);
-        return $.defaultIfNull(byteObject, defaultValue);
+        return ObjectUtil.defaultIfNull(byteObject, defaultValue);
     }
 
     /**
@@ -281,7 +280,7 @@ public class BasicConverter {
      */
     public Short getAsShort(final Object obj, final Short defaultValue) {
         Short answer = getAsShort(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -295,7 +294,7 @@ public class BasicConverter {
      */
     public short getAsShortValue(final Object obj) {
         final Short shortObject = getAsShort(obj);
-        return $.defaultIfNull(shortObject, (short) 0);
+        return ObjectUtil.defaultIfNull(shortObject, (short) 0);
     }
 
     /**
@@ -311,7 +310,7 @@ public class BasicConverter {
      */
     public short getAsShortValue(final Object obj, final short defaultValue) {
         final Short shortObject = getAsShort(obj);
-        return $.defaultIfNull(shortObject, defaultValue);
+        return ObjectUtil.defaultIfNull(shortObject, defaultValue);
     }
 
     /**
@@ -348,7 +347,7 @@ public class BasicConverter {
      */
     public Integer getAsInteger(final Object obj, final Integer defaultValue) {
         Integer answer = getAsInteger(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -362,7 +361,7 @@ public class BasicConverter {
      */
     public int getAsIntValue(final Object obj) {
         final Integer integerObject = getAsInteger(obj);
-        return $.defaultIfNull(integerObject, 0);
+        return ObjectUtil.defaultIfNull(integerObject, 0);
     }
 
     /**
@@ -378,7 +377,7 @@ public class BasicConverter {
      */
     public int getAsIntValue(final Object obj, final int defaultValue) {
         final Integer integerObject = getAsInteger(obj);
-        return $.defaultIfNull(integerObject, defaultValue);
+        return ObjectUtil.defaultIfNull(integerObject, defaultValue);
     }
 
     /**
@@ -414,7 +413,7 @@ public class BasicConverter {
      */
     public Long getAsLong(final Object obj, final Long defaultValue) {
         Long answer = getAsLong(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -428,7 +427,7 @@ public class BasicConverter {
      */
     public long getAsLongValue(final Object obj) {
         final Long longObject = getAsLong(obj);
-        return $.defaultIfNull(longObject, 0L);
+        return ObjectUtil.defaultIfNull(longObject, 0L);
     }
 
     /**
@@ -445,7 +444,7 @@ public class BasicConverter {
      */
     public long getAsLongValue(final Object obj, final long defaultValue) {
         final Long longObject = getAsLong(obj);
-        return $.defaultIfNull(longObject, defaultValue);
+        return ObjectUtil.defaultIfNull(longObject, defaultValue);
     }
 
     /**
@@ -481,7 +480,7 @@ public class BasicConverter {
      */
     public Float getAsFloat(final Object obj, final Float defaultValue) {
         Float answer = getAsFloat(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -495,7 +494,7 @@ public class BasicConverter {
      */
     public float getAsFloatValue(final Object obj) {
         final Float floatObject = getAsFloat(obj);
-        return $.defaultIfNull(floatObject, 0F);
+        return ObjectUtil.defaultIfNull(floatObject, 0F);
     }
 
     /**
@@ -512,7 +511,7 @@ public class BasicConverter {
      */
     public float getAsFloatValue(final Object obj, final float defaultValue) {
         final Float floatObject = getAsFloat(obj);
-        return $.defaultIfNull(floatObject, defaultValue);
+        return ObjectUtil.defaultIfNull(floatObject, defaultValue);
     }
 
     /**
@@ -548,7 +547,7 @@ public class BasicConverter {
      */
     public Double getAsDouble(final Object obj, final Double defaultValue) {
         Double answer = getAsDouble(obj);
-        return $.defaultIfNull(answer, defaultValue);
+        return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -562,7 +561,7 @@ public class BasicConverter {
      */
     public double getAsDoubleValue(final Object obj) {
         final Double doubleObject = getAsDouble(obj);
-        return $.defaultIfNull(doubleObject, 0D);
+        return ObjectUtil.defaultIfNull(doubleObject, 0D);
     }
 
     /**
@@ -579,7 +578,7 @@ public class BasicConverter {
      */
     public double getAsDoubleValue(final Object obj, final double defaultValue) {
         final Double doubleObject = getAsDouble(obj);
-        return $.defaultIfNull(doubleObject, defaultValue);
+        return ObjectUtil.defaultIfNull(doubleObject, defaultValue);
     }
 
     /**
@@ -624,7 +623,7 @@ public class BasicConverter {
     @SuppressWarnings("unchecked")
     public <R extends BigInteger> R getAsBigInteger(final Object obj, final R defaultValue) {
         BigInteger answer = getAsBigInteger(obj);
-        return (R) $.defaultIfNull(answer, defaultValue);
+        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -669,7 +668,7 @@ public class BasicConverter {
     @SuppressWarnings("unchecked")
     public <R extends BigDecimal> R getAsBigDecimal(final Object obj, final R defaultValue) {
         BigDecimal answer = getAsBigDecimal(obj);
-        return (R) $.defaultIfNull(answer, defaultValue);
+        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
 
     /**
@@ -689,7 +688,9 @@ public class BasicConverter {
             throw new IllegalArgumentException("'clz' must not be null");
         }
         R result;
-        if (Boolean.class.equals(clz) || boolean.class.equals(clz)) {
+        if (obj.getClass().isAssignableFrom(clz)) {
+            result = (R) obj;
+        } else if (Boolean.class.equals(clz) || boolean.class.equals(clz)) {
             result = (R) getAsBoolean(obj);
         } else if (Byte.class.equals(clz) || byte.class.equals(clz)) {
             result = (R) getAsByte(obj);

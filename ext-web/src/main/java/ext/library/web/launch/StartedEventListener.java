@@ -1,6 +1,6 @@
 package ext.library.web.launch;
 
-import ext.library.tool.$;
+import ext.library.tool.util.ObjectUtil;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.context.WebServerApplicationContext;
@@ -31,9 +31,9 @@ public class StartedEventListener {
     public void afterStart(@Nonnull WebServerInitializedEvent event) {
         WebServerApplicationContext context = event.getApplicationContext();
         Environment environment = context.getEnvironment();
-        String appName = $.defaultIfEmpty(environment.getProperty("spring.application.name"), "APP");
-        String env = $.defaultIfEmpty(environment.getProperty("spring.profiles.active"), "default");
-        String contextPath = $.defaultIfEmpty(environment.getProperty("server.servlet.context-path"), "/");
+        String appName = ObjectUtil.defaultIfEmpty(environment.getProperty("spring.application.name"), "APP");
+        String env = ObjectUtil.defaultIfEmpty(environment.getProperty("spring.profiles.active"), "default");
+        String contextPath = ObjectUtil.defaultIfEmpty(environment.getProperty("server.servlet.context-path"), "/");
         int localPort = event.getWebServer().getPort();
         ApplicationHome home = new ApplicationHome();
         String content = """
@@ -43,7 +43,7 @@ public class StartedEventListener {
                 """;
         boolean hasOpenApi = hasOpenApi();
         // 如果有 swagger，打印开发阶段的 swagger ui 地址
-        String swaggerPath = $.defaultIfEmpty(environment.getProperty("springdoc.swagger-ui.path"), hasOpenApi ? "/swagger-ui.html" : null);
+        String swaggerPath = ObjectUtil.defaultIfEmpty(environment.getProperty("springdoc.swagger-ui.path"), hasOpenApi ? "/swagger-ui.html" : null);
         System.err.printf(content, appName, localPort, contextPath, env, home.getDir(), home.getSource(), hasOpenApi(), swaggerPath);
     }
 

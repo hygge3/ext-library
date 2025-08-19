@@ -1,19 +1,19 @@
 package ext.library.web.filter;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import ext.library.tool.$;
+import ext.library.tool.util.IDUtil;
 import ext.library.web.config.properties.WebMvcProperties;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 跟踪过滤器
@@ -23,16 +23,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @AutoConfiguration
 public class TraceFilter extends OncePerRequestFilter {
 
-    final WebMvcProperties properties;
-
     static final ThreadLocal<String> TRACE_ID = new InheritableThreadLocal<>();
+    final WebMvcProperties properties;
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String traceIdHeaderName = properties.getTraceIdHeaderName();
         try {
             // 生成并设置 TraceID
-            String traceId = $.getObjectId();
+            String traceId = IDUtil.getObjectId();
             TRACE_ID.set(traceId);
             MDC.put(traceIdHeaderName, traceId);
             // 透传 TraceID 到下游（可选）

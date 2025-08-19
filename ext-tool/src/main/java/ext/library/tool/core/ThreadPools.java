@@ -1,8 +1,9 @@
 package ext.library.tool.core;
 
 
-import ext.library.tool.$;
 import ext.library.tool.constant.Holder;
+import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -120,11 +121,11 @@ public class ThreadPools {
         INSTANCE.execute(() -> {
             Thread thread = Thread.currentThread();
             String oldName = thread.getName();
-            if ($.isNotBlank(name)) {
+            if (StringUtil.isNotBlank(name)) {
                 thread.setName(name);
             }
             // 存在则填充
-            if ($.isNotEmpty(map)) {
+            if (ObjectUtil.isNotEmpty(map)) {
                 MDC.setContextMap(map);
             }
             try {

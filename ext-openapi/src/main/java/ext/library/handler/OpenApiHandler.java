@@ -1,10 +1,8 @@
 package ext.library.handler;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.common.io.CharStreams;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.ObjectUtil;
 import io.swagger.v3.core.jackson.TypeNameResolver;
 import io.swagger.v3.core.util.AnnotationsUtils;
 import io.swagger.v3.oas.annotations.tags.Tags;
@@ -13,6 +11,20 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
+import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.providers.JavadocProvider;
+import org.springdoc.core.service.OpenAPIService;
+import org.springdoc.core.service.SecurityService;
+import org.springdoc.core.utils.PropertyResolverUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.web.method.HandlerMethod;
+
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
@@ -27,18 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
-import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
-import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springdoc.core.providers.JavadocProvider;
-import org.springdoc.core.service.OpenAPIService;
-import org.springdoc.core.service.SecurityService;
-import org.springdoc.core.utils.PropertyResolverUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.web.method.HandlerMethod;
 
 /**
  * 自定义 openapi 处理器 对源码功能进行修改 增强使用
@@ -143,7 +143,7 @@ public class OpenApiHandler extends OpenAPIService {
             if (this.openAPI.getPaths() == null) {
                 this.openAPI.setPaths(new Paths());
             }
-            if ($.isNotEmpty(this.openAPI.getServers())) {
+            if (ObjectUtil.isNotEmpty(this.openAPI.getServers())) {
                 this.isServersPresent = true;
             }
         }
@@ -167,7 +167,7 @@ public class OpenApiHandler extends OpenAPIService {
         buildTagsFromMethod(handlerMethod.getMethod(), tags, tagsStr, locale);
         buildTagsFromClass(handlerMethod.getBeanType(), tags, tagsStr, locale);
 
-        if ($.isNotEmpty(tagsStr)) {
+        if (ObjectUtil.isNotEmpty(tagsStr)) {
             tagsStr = tagsStr.stream()
                     .map(str -> propertyResolverUtils.resolve(str, locale))
                     .collect(Collectors.toSet());
@@ -181,8 +181,8 @@ public class OpenApiHandler extends OpenAPIService {
             }
         }
 
-        if ($.isNotEmpty(tagsStr)) {
-            if ($.isEmpty(operation.getTags())) {
+        if (ObjectUtil.isNotEmpty(tagsStr)) {
+            if (ObjectUtil.isEmpty(operation.getTags())) {
                 operation.setTags(new ArrayList<>(tagsStr));
             } else {
                 Set<String> operationTagsSet = new HashSet<>(operation.getTags());
@@ -221,10 +221,10 @@ public class OpenApiHandler extends OpenAPIService {
             }
         }
 
-        if ($.isNotEmpty(tags)) {
+        if (ObjectUtil.isNotEmpty(tags)) {
             // Existing tags
             List<io.swagger.v3.oas.models.tags.Tag> openApiTags = openAPI.getTags();
-            if ($.isNotEmpty(openApiTags)) {
+            if (ObjectUtil.isNotEmpty(openApiTags)) {
                 tags.addAll(openApiTags);
             }
             openAPI.setTags(new ArrayList<>(tags));
@@ -253,7 +253,7 @@ public class OpenApiHandler extends OpenAPIService {
                 .collect(Collectors.toSet());
         methodTags.addAll(
                 AnnotatedElementUtils.findAllMergedAnnotations(method, io.swagger.v3.oas.annotations.tags.Tag.class));
-        if ($.isNotEmpty(methodTags)) {
+        if (ObjectUtil.isNotEmpty(methodTags)) {
             tagsStr.addAll(methodTags.stream()
                     .map(tag -> propertyResolverUtils.resolve(tag.name(), locale))
                     .collect(Collectors.toSet()));

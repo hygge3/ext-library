@@ -1,14 +1,15 @@
 package ext.library.http;
 
+import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+
+import jakarta.annotation.Nonnull;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import jakarta.annotation.Nonnull;
-
-import ext.library.tool.$;
-import ext.library.tool.core.Exceptions;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +36,6 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * JDK 的 HttpClient 工具类
@@ -95,7 +94,9 @@ public class HttpUtil {
      * 同步 GET 请求，返回值解析为字符串
      *
      * @param url 网址
+     *
      * @return {@code String }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -108,6 +109,7 @@ public class HttpUtil {
      *
      * @param url       访问 URL
      * @param headerMap header 键值对
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -121,6 +123,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -135,6 +138,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -150,7 +154,9 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return {@code HttpResponse<T> }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -165,6 +171,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<byte[]>> getByteResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -178,6 +185,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<String>> getStringResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -191,6 +199,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<InputStream>> getInputStreamResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -206,7 +215,9 @@ public class HttpUtil {
      *
      * @param url         访问 URL
      * @param requestBody 请求体
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -219,7 +230,9 @@ public class HttpUtil {
      *
      * @param url  访问 URL
      * @param form form 表单
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -233,7 +246,9 @@ public class HttpUtil {
      * @param url         访问 URL
      * @param headerMap   header 键值对
      * @param requestBody 请求体
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -247,7 +262,9 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param form      表单
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -262,7 +279,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -277,7 +296,9 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -293,7 +314,9 @@ public class HttpUtil {
      * @param requestBody 请求体
      * @param timeout     超时时间
      * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -310,7 +333,9 @@ public class HttpUtil {
      * @param form      form 表单
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -326,7 +351,9 @@ public class HttpUtil {
      * @param requestBody 请求体
      * @param timeout     超时时间
      * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -342,7 +369,9 @@ public class HttpUtil {
      * @param form      表单
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -364,7 +393,9 @@ public class HttpUtil {
      * @param bodyPublisher 请求体
      * @param timeout       超时时间
      * @param resClass      返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -380,6 +411,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<byte[]>> postByteResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -394,6 +426,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<InputStream>> postInputStreamResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -408,6 +441,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<String>> postStringResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -422,7 +456,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -438,7 +474,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -454,7 +492,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -475,7 +515,9 @@ public class HttpUtil {
      *
      * @param httpRequest 请求
      * @param filePath    文件路径
+     *
      * @return {@code Path }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -493,7 +535,9 @@ public class HttpUtil {
      *
      * @param httpRequest 请求
      * @param filePath    文件路径
+     *
      * @return {@code HttpResponse<Path> }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -509,7 +553,9 @@ public class HttpUtil {
      *
      * @param url         访问 URL
      * @param requestBody 请求体
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -522,7 +568,9 @@ public class HttpUtil {
      *
      * @param url  访问 URL
      * @param form form 表单
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -536,7 +584,9 @@ public class HttpUtil {
      * @param url         访问 URL
      * @param headerMap   header 键值对
      * @param requestBody 请求体
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -550,7 +600,9 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param form      表单
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -565,7 +617,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -580,7 +634,9 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -596,7 +652,9 @@ public class HttpUtil {
      * @param requestBody 请求体
      * @param timeout     超时时间
      * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -613,7 +671,9 @@ public class HttpUtil {
      * @param form      form 表单
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -629,7 +689,9 @@ public class HttpUtil {
      * @param requestBody 请求体
      * @param timeout     超时时间
      * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -645,7 +707,9 @@ public class HttpUtil {
      * @param form      表单
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -667,7 +731,9 @@ public class HttpUtil {
      * @param bodyPublisher 请求体
      * @param timeout       超时时间
      * @param resClass      返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -683,6 +749,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<byte[]>> putByteResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -697,6 +764,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<InputStream>> putInputStreamResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -711,6 +779,7 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param form      表单
      * @param timeout   超时时间
+     *
      * @return java.net.http.HttpResponse<T>
      */
     public static CompletableFuture<HttpResponse<String>> putStringResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -725,7 +794,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -741,7 +812,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -757,7 +830,9 @@ public class HttpUtil {
      * @param headerMap   header 键值对
      * @param requestBody 请求体
      * @param timeout     超时时间
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -773,7 +848,9 @@ public class HttpUtil {
      * 删除
      *
      * @param url 访问 URL
+     *
      * @return {@code String }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -786,7 +863,9 @@ public class HttpUtil {
      *
      * @param url       访问 URL
      * @param headerMap header 键值对
+     *
      * @return {@code String }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -800,7 +879,9 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return {@code String }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -815,7 +896,9 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return {@code T }
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -831,7 +914,9 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
+     *
      * @return java.net.http.HttpResponse<T>
+     *
      * @throws IOException          IO 异常
      * @throws InterruptedException 中断异常
      */
@@ -846,6 +931,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<byte[]>> deleteByteResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -859,6 +945,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<String>> deleteStringResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -872,6 +959,7 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      * @param timeout   超时时间
+     *
      * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
      */
     public static CompletableFuture<HttpResponse<InputStream>> deleteInputStreamResponseAsync(String url, Map<String, String> headerMap, long timeout) {
@@ -892,7 +980,7 @@ public class HttpUtil {
         } else if (InputStream.class == resClass) {
             t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).body();
         } else {
-            throw new UnsupportedOperationException($.format("不支持的返回类型:[{}]", resClass));
+            throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
         }
         return t;
     }
@@ -907,7 +995,7 @@ public class HttpUtil {
         } else if (InputStream.class == resClass) {
             response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         } else {
-            throw new UnsupportedOperationException($.format("不支持的返回类型:[{}]", resClass));
+            throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
         }
         return response;
     }
@@ -1073,7 +1161,7 @@ public class HttpUtil {
                 System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");// 取消主机名验证
                 sslContext.init(null, trustAllCertificates, new SecureRandom());
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                Exceptions.print(e);
+                Exceptions.log(e);
             }
         }
     }

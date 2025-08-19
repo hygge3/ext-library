@@ -3,7 +3,7 @@ package ext.library.captcha.service;
 import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
-import ext.library.tool.$;
+import ext.library.tool.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +33,7 @@ public class CaptchaServiceImpl implements ICaptchaService {
     public boolean validate(String uuid, String userInputCaptcha) {
         log.debug("[🔢] validate captcha uuid is {}, input captcha is {}", uuid, userInputCaptcha);
         String code = captchaCache.getAndRemove(properties.getCacheName(), uuid);
-        if ($.isEmpty(code)) {
+        if (ObjectUtil.isEmpty(code)) {
             return false;
         }
         return captcha.validate(code, userInputCaptcha);

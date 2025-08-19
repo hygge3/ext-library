@@ -1,9 +1,11 @@
 package ext.library.redis.prefix;
 
-import ext.library.tool.$;
-import java.nio.charset.StandardCharsets;
+import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * redis key 前缀生成器
@@ -30,14 +32,15 @@ public interface IRedisPrefixConverter {
      * 去除 key 前缀
      *
      * @param bytes key 字节数组
+     *
      * @return 原始 key
      */
     default byte[] unwrap(byte[] bytes) {
-        if (!match() || $.isEmpty(bytes)) {
+        if (!match() || ObjectUtil.isEmpty(bytes)) {
             return bytes;
         }
         String prefix = prefix();
-        if ($.isBlank(prefix)) {
+        if (StringUtil.isBlank(prefix)) {
             LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }
@@ -54,6 +57,7 @@ public interface IRedisPrefixConverter {
      * 给 key 加上固定前缀
      *
      * @param bytes 原始 key 字节数组
+     *
      * @return 加前缀之后的 key
      */
     default byte[] wrap(byte[] bytes) {
@@ -61,7 +65,7 @@ public interface IRedisPrefixConverter {
             return bytes;
         }
         String prefix = prefix();
-        if ($.isBlank(prefix)) {
+        if (StringUtil.isBlank(prefix)) {
             LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }

@@ -2,8 +2,8 @@ package ext.library.config;
 
 import ext.library.config.properties.OpenApiProperties;
 import ext.library.handler.OpenApiHandler;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.ObjectUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
@@ -97,7 +97,7 @@ public class OpenApiAutoConfig {
     public OpenApiCustomizer openApiCustomizer() {
         String contextPath = serverProperties.getServlet().getContextPath();
         String finalContextPath;
-        if ($.isEmpty(contextPath) || "/".equals(contextPath)) {
+        if (ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath)) {
             finalContextPath = Symbol.EMPTY;
         } else {
             finalContextPath = contextPath;

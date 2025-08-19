@@ -1,10 +1,10 @@
 package ext.library.tool.util;
 
 import com.google.common.base.Preconditions;
-import ext.library.tool.$;
+import lombok.experimental.UtilityClass;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import lombok.experimental.UtilityClass;
 
 /**
  * <b>数学计算</b>
@@ -24,12 +24,13 @@ public class CalcUtil {
      *
      * @param augend  被加数
      * @param addends 加数
+     *
      * @return 参数的和
      */
     public BigDecimal add(Object augend, Object... addends) {
-        BigDecimal bdAugend = $.toBigDecimal(augend);
+        BigDecimal bdAugend = GeneralTypeCastUtil.getAsBigDecimal(augend);
         for (Object addend : addends) {
-            BigDecimal bdAddend = $.toBigDecimal(addend);
+            BigDecimal bdAddend = GeneralTypeCastUtil.getAsBigDecimal(addend);
             bdAugend = bdAugend.add(bdAddend);
         }
         return bdAugend;
@@ -40,12 +41,13 @@ public class CalcUtil {
      *
      * @param minuend     被减数
      * @param subtrahends 减数
+     *
      * @return 参数的差
      */
     public BigDecimal sub(Object minuend, Object... subtrahends) {
-        BigDecimal bdMinuend = $.toBigDecimal(minuend);
+        BigDecimal bdMinuend = GeneralTypeCastUtil.getAsBigDecimal(minuend);
         for (Object subtrahend : subtrahends) {
-            BigDecimal bdSubtrahend = $.toBigDecimal(subtrahend);
+            BigDecimal bdSubtrahend = GeneralTypeCastUtil.getAsBigDecimal(subtrahend);
             bdMinuend = bdMinuend.subtract(bdSubtrahend);
         }
         return bdMinuend;
@@ -56,11 +58,12 @@ public class CalcUtil {
      *
      * @param v1 被乘数
      * @param v2 乘数
+     *
      * @return 两个参数的积
      */
     public BigDecimal mul(Object v1, Object v2) {
-        BigDecimal b1 = $.toBigDecimal(v1);
-        BigDecimal b2 = $.toBigDecimal(v2);
+        BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
+        BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
         return b1.multiply(b2);
     }
 
@@ -69,6 +72,7 @@ public class CalcUtil {
      *
      * @param v1 被除数
      * @param v2 除数
+     *
      * @return 两个参数的商
      */
     public BigDecimal div(Object v1, Object v2) {
@@ -81,6 +85,7 @@ public class CalcUtil {
      * @param v1    被除数
      * @param v2    除数（除数不能为零）
      * @param scale 表示表示需要精确到小数点以后几位（如果精确范围小于 0，将抛出异常信息）
+     *
      * @return 两个参数的商
      */
     public BigDecimal div(Object v1, Object v2, int scale) {
@@ -93,12 +98,13 @@ public class CalcUtil {
      * @param v1    被除数
      * @param v2    除数（除数不能为零）
      * @param scale 表示表示需要精确到小数点以后几位（如果精确范围小于 0，将抛出异常信息）
+     *
      * @return 两个参数的商
      */
     public BigDecimal div(Object v1, Object v2, int scale, RoundingMode roundingMode) {
         Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
-        BigDecimal b1 = $.toBigDecimal(v1);
-        BigDecimal b2 = $.toBigDecimal(v2);
+        BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
+        BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
         return b1.divide(b2, scale, roundingMode);
     }
 
@@ -107,6 +113,7 @@ public class CalcUtil {
      *
      * @param v     需要四舍五入的数字
      * @param scale 小数点后保留几位
+     *
      * @return 四舍五入后的结果
      */
     public static BigDecimal round(Object v, int scale) {
@@ -119,12 +126,13 @@ public class CalcUtil {
      * @param v            需要舍入的数字
      * @param scale        小数点后保留几位
      * @param roundingMode 舍入模式
+     *
      * @return 舍入后的结果
      */
     public static BigDecimal roundingMode(Object v, int scale, RoundingMode roundingMode) {
         Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
-        BigDecimal b = $.toBigDecimal(v);
-        BigDecimal one = $.toBigDecimal("1");
+        BigDecimal b = GeneralTypeCastUtil.getAsBigDecimal(v);
+        BigDecimal one = GeneralTypeCastUtil.getAsBigDecimal("1");
         return b.divide(one, scale, roundingMode);
     }
 
@@ -133,19 +141,21 @@ public class CalcUtil {
      *
      * @param dividend 股利
      * @param scale    规模
+     *
      * @return {@code BigDecimal }
      */
     public BigDecimal percentage(Object dividend, int scale) {
         if (dividend == null) {
             return null;
         }
-        return $.toBigDecimal(dividend).multiply(new BigDecimal(100)).setScale(scale, RoundingMode.HALF_UP);
+        return GeneralTypeCastUtil.getAsBigDecimal(dividend).multiply(new BigDecimal(100)).setScale(scale, RoundingMode.HALF_UP);
     }
 
     /**
      * 分转元
      *
      * @param moneySumCent 金额（单位：分）
+     *
      * @return 金额（单位：元）
      */
     public static BigDecimal centToYuan(int moneySumCent) {
@@ -156,6 +166,7 @@ public class CalcUtil {
      * 元转分
      *
      * @param moneySum 金额（单位：元）
+     *
      * @return 金额（单位：分）
      */
     public static int yuanToCent(double moneySum) {

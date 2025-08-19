@@ -1,6 +1,7 @@
 package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.Base64Util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 
 /**
@@ -72,7 +72,7 @@ public class RSAUtil {
     private PublicKey castPublicKey(String publicKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
-            byte[] decodedKey = Base64.getDecoder().decode(publicKey.getBytes());
+            byte[] decodedKey = Base64Util.decode(publicKey.getBytes());
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class RSAUtil {
     private PrivateKey castPrivateKey(String privateKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
-            byte[] decodedKey = Base64.getDecoder().decode(privateKey.getBytes());
+            byte[] decodedKey = Base64Util.decode(privateKey.getBytes());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class RSAUtil {
             out.close();
             // 获取加密内容使用 base64 进行编码，并以 UTF-8 为标准转化成字符串
             // 加密后的字符串
-            return new String(Base64.getEncoder().encode(encryptedData));
+            return Base64Util.encodeToStr(encryptedData);
         } catch (Exception e) {
             log.error("[🔐] RSA 加密失败", e);
             throw Exceptions.throwOut("RSA 加密失败");
@@ -153,7 +153,7 @@ public class RSAUtil {
         try {
             Cipher cipher = Cipher.getInstance(ALGO);
             cipher.init(Cipher.DECRYPT_MODE, castPrivateKey(privateKey));
-            byte[] dataBytes = Base64.getDecoder().decode(cipherText);
+            byte[] dataBytes = Base64Util.decode(cipherText);
             int inputLen = dataBytes.length;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             int offset = 0;
@@ -197,7 +197,7 @@ public class RSAUtil {
             Signature signature = Signature.getInstance(SIGN_ALGO);
             signature.initSign(key);
             signature.update(plainText.getBytes());
-            return new String(Base64.getEncoder().encode(signature.sign()));
+            return Base64Util.encodeToStr(signature.sign());
         } catch (Exception e) {
             log.error("[🔐] RSA 加签失败", e);
             throw Exceptions.throwOut("RSA 加签失败");
@@ -222,7 +222,7 @@ public class RSAUtil {
             Signature signature = Signature.getInstance(SIGN_ALGO);
             signature.initVerify(key);
             signature.update(plainText.getBytes());
-            return signature.verify(Base64.getDecoder().decode(sign.getBytes()));
+            return signature.verify(Base64Util.decode(sign.getBytes()));
         } catch (Exception e) {
             log.error("[🔐] RSA 验签失败", e);
             throw Exceptions.throwOut("RSA 验签失败");

@@ -1,15 +1,11 @@
 package ext.library.ratelimiter.handler;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.ratelimiter.annotation.RateLimiter;
 import ext.library.redis.constant.RedisKey;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
-import java.lang.reflect.Method;
+import ext.library.tool.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.BeanFactoryResolver;
@@ -21,6 +17,10 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 
 /**
  * Redis 速率限制处理器
@@ -49,11 +49,12 @@ public interface IRateLimitHandler {
      *
      * @param rateLimiter 速率限制器
      * @param point       观点
+     *
      * @return {@code String }
      */
     default String getCombineKey(@Nonnull RateLimiter rateLimiter, JoinPoint point) {
         String key = rateLimiter.key();
-        if ($.isNotBlank(key)) {
+        if (StringUtil.isNotBlank(key)) {
             MethodSignature signature = (MethodSignature) point.getSignature();
             Method targetMethod = signature.getMethod();
             Object[] args = point.getArgs();
@@ -62,7 +63,7 @@ public interface IRateLimitHandler {
             context.setBeanResolver(new BeanFactoryResolver(SpringUtil.getBeanFactory()));
             Expression expression;
             if (key.startsWith(PARSER_CONTEXT.getExpressionPrefix())
-                && key.endsWith(PARSER_CONTEXT.getExpressionSuffix())) {
+                    && key.endsWith(PARSER_CONTEXT.getExpressionSuffix())) {
                 expression = PARSER.parseExpression(key, PARSER_CONTEXT);
             } else {
                 expression = PARSER.parseExpression(key);
@@ -71,7 +72,7 @@ public interface IRateLimitHandler {
         }
         HttpServletRequest request = ServletUtil.getRequest();
         return RedisKey.RATE_LIMIT_KEY + request.getRequestURI() + Symbol.COLON + ServletUtil.getIpAddr(request) + Symbol.COLON
-               + key;
+                + key;
     }
 
 }

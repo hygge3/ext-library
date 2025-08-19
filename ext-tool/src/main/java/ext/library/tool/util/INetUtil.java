@@ -1,13 +1,13 @@
 package ext.library.tool.util;
 
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
+import lombok.experimental.UtilityClass;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import lombok.experimental.UtilityClass;
 
 
 /**
@@ -29,7 +29,7 @@ public class INetUtil {
             InetAddress address = InetAddress.getLocalHost();
             // force a best effort reverse DNS lookup
             hostname = address.getHostName();
-            if ($.isBlank(hostname)) {
+            if (StringUtil.isBlank(hostname)) {
                 hostname = address.toString();
             }
         } catch (UnknownHostException ignore) {
@@ -49,7 +49,7 @@ public class INetUtil {
             InetAddress address = INetUtil.getLocalHostLanAddress();
             // force a best effort reverse DNS lookup
             hostAddress = address.getHostAddress();
-            if ($.isBlank(hostAddress)) {
+            if (StringUtil.isBlank(hostAddress)) {
                 hostAddress = address.toString();
             }
         } catch (UnknownHostException ignore) {
@@ -146,6 +146,7 @@ public class INetUtil {
      * 尝试端口时候被占用
      *
      * @param port 端口号
+     *
      * @return 没有被占用：true，被占用：false
      */
     public static boolean tryPort(int port) {
@@ -160,6 +161,7 @@ public class INetUtil {
      * 将 ip 转成 InetAddress
      *
      * @param ip ip
+     *
      * @return InetAddress
      */
     public static InetAddress getInetAddress(String ip) {
@@ -174,6 +176,7 @@ public class INetUtil {
      * 判断是否内网 ip
      *
      * @param ip ip
+     *
      * @return boolean
      */
     public static boolean isInternalIp(String ip) {
@@ -184,6 +187,7 @@ public class INetUtil {
      * 判断是否内网 ip
      *
      * @param address InetAddress
+     *
      * @return boolean
      */
     public static boolean isInternalIp(InetAddress address) {
@@ -197,6 +201,7 @@ public class INetUtil {
      * 判断是否本地 ip
      *
      * @param address InetAddress
+     *
      * @return boolean
      */
     public static boolean isLocalIp(InetAddress address) {
@@ -207,6 +212,7 @@ public class INetUtil {
      * 判断是否内网 ip
      *
      * @param addr ip
+     *
      * @return boolean
      */
     public static boolean isInternalIp(byte[] addr) {

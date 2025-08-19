@@ -1,4 +1,4 @@
-package ext.library.core.util.dict;
+package ext.library.tool.util.dict;
 
 /**
  * 字典接口

@@ -1,14 +1,15 @@
 package ext.library.satoken.util;
 
-import jakarta.annotation.Nonnull;
-
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import ext.library.satoken.domain.SecurityUser;
-import ext.library.tool.$;
-import java.util.Objects;
+import ext.library.tool.util.GeneralTypeCastUtil;
+import ext.library.tool.util.ObjectUtil;
 import lombok.experimental.UtilityClass;
+
+import jakarta.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * 登录鉴权助手
@@ -44,7 +45,7 @@ public class LoginUtil {
      * @param param     配置参数
      */
     public static void login(@Nonnull SecurityUser loginUser, SaLoginParameter param) {
-        param = $.defaultIfNull(param, new SaLoginParameter());
+        param = ObjectUtil.defaultIfNull(param, new SaLoginParameter());
         StpUtil.login(loginUser.loginId(), param.setExtra(TENANT_KEY, loginUser.tenantId()).setExtra(USER_KEY, loginUser.loginId()).setExtra(USER_NAME_KEY, loginUser.username()));
         StpUtil.getTokenSession().set(LOGIN_USER_KEY, loginUser);
     }
@@ -75,41 +76,42 @@ public class LoginUtil {
      * 获取用户 id
      */
     public static Long getUserId() {
-        return $.toLong(getExtra(USER_KEY));
+        return GeneralTypeCastUtil.getAsLong(getExtra(USER_KEY));
     }
 
     /**
      * 获取租户 ID
      */
     public static String getTenantId() {
-        return $.toStr(getExtra(TENANT_KEY));
+        return GeneralTypeCastUtil.getAsString(getExtra(TENANT_KEY));
     }
 
     /**
      * 获取部门 ID
      */
     public static Long getDeptId() {
-        return $.toLong(getExtra(DEPT_KEY));
+        return GeneralTypeCastUtil.getAsLong(getExtra(DEPT_KEY));
     }
 
     /**
      * 获取部门名
      */
     public static String getDeptName() {
-        return $.toStr(getExtra(DEPT_NAME_KEY));
+        return GeneralTypeCastUtil.getAsString(getExtra(DEPT_NAME_KEY));
     }
 
     /**
      * 获取部门类别编码
      */
     public static String getDeptCategory() {
-        return $.toStr(getExtra(DEPT_CATEGORY_KEY));
+        return GeneralTypeCastUtil.getAsString(getExtra(DEPT_CATEGORY_KEY));
     }
 
     /**
      * 获取当前 Token 的扩展信息
      *
      * @param key 键值
+     *
      * @return 对应的扩展数据
      */
     private static Object getExtra(String key) {

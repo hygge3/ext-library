@@ -4,10 +4,12 @@ import ext.library.core.util.SpringUtil;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.enums.Logical;
-import ext.library.tool.$;
+import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
+import lombok.experimental.UtilityClass;
+
 import java.util.List;
 import java.util.regex.Pattern;
-import lombok.experimental.UtilityClass;
 
 /**
  * 权限校验工具
@@ -15,7 +17,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class PermissionUtil {
 
-     static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
+    static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
 
     /**
      * 当前用户是否有角色
@@ -57,11 +59,12 @@ public class PermissionUtil {
      * @param requires 需要权限
      * @param logical  条件类型
      * @param has      已有权限
+     *
      * @return true 条件成立 false 条件不成立
      */
     public boolean hasMultiPermValid(List<String> requires, Logical logical, List<String> has) {
         // 如果没有指定要校验的角色，那么直接跳过
-        if ($.isEmpty(requires)) {
+        if (ObjectUtil.isEmpty(requires)) {
             return true;
         }
 
@@ -87,11 +90,12 @@ public class PermissionUtil {
      *
      * @param list    列表
      * @param element 元素
+     *
      * @return boolean
      */
     public boolean hasElement(List<String> list, String element) {
         // 空集合直接返回 false
-        if ($.isEmpty(list)) {
+        if (ObjectUtil.isEmpty(list)) {
             return false;
         }
         // 先尝试一下简单匹配，如果可以匹配成功则无需继续模糊匹配
@@ -117,12 +121,12 @@ public class PermissionUtil {
             return true;
         }
         // 两者其一为 null 时，直接返回 false
-        if ($.isAnyBlank(s1, s2)) {
+        if (StringUtil.isAnyBlank(s1, s2)) {
             return false;
         }
         // 如果表达式不带有*号，则只需简单 equals 即可 (这样可以使速度提升 200 倍左右)
         if (!s2.contains("*")) {
-            return $.equalsSafe(s1, s2);
+            return ObjectUtil.equalsSafe(s1, s2);
         }
         return Pattern.matches(s2.replace("*", ".*"), s1);
     }

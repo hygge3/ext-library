@@ -1,16 +1,16 @@
-package ext.library.core.util.dict;
+package ext.library.tool.util.dict;
+
+import ext.library.tool.util.ReflectionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import jakarta.annotation.Nonnull;
-
-import ext.library.core.util.ReflectUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 
 /**
  * 字典工具
@@ -23,6 +23,7 @@ public class DictUtil {
      *
      * @param clazz   枚举类
      * @param lambdas 获取属性方法
+     *
      * @return {@code @NotNull List<Map<String, Object>> }
      */
     @SafeVarargs
@@ -35,7 +36,7 @@ public class DictUtil {
             Arrays.stream(lambdas).forEach(lambda -> {
                 try {
                     // String prop = 从 lambda 表达式中取出属性名 并取消首字母的大写
-                    String prop = StringUtils.uncapitalize(ReflectUtil.getLambdaFunctionName(lambda));
+                    String prop = StringUtils.uncapitalize(ReflectionUtil.getLambdaFunctionName(lambda));
                     item.put(prop, lambda.apply(enumItem));
                 } catch (Exception exception) {
                     log.error(exception.getMessage(), exception);

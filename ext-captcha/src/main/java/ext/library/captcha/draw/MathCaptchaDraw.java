@@ -1,9 +1,9 @@
 package ext.library.captcha.draw;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.captcha.core.CaptchaUtil;
-import ext.library.tool.$;
+import ext.library.tool.util.StringUtil;
+
+import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.util.Random;
 
@@ -44,7 +44,7 @@ public class MathCaptchaDraw implements CaptchaDraw {
 
     @Override
     public boolean validate(String code, String userInputCaptcha) {
-        if (!$.isNumeric(userInputCaptcha)) {
+        if (!StringUtil.isNumeric(userInputCaptcha)) {
             return false;
         }
         int captchaNum = Integer.parseInt(userInputCaptcha);

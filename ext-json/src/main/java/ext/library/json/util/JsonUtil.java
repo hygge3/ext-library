@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
-import ext.library.tool.$;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
@@ -18,6 +17,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * JSON 工具类
@@ -117,7 +117,7 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public String toJson(Object obj) {
-        if ($.isNull(obj)) {
+        if (Objects.isNull(obj)) {
             return "";
         }
         if (obj instanceof String str) {
@@ -138,7 +138,7 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public String toPrettyJson(Object obj) {
-        if ($.isNull(obj)) {
+        if (Objects.isNull(obj)) {
             return "";
         }
         if (obj instanceof String str) {
@@ -159,7 +159,7 @@ public class JsonUtil {
      */
     @SneakyThrows(JsonProcessingException.class)
     public byte[] toJsonAsBytes(Object obj) {
-        if ($.isNull(obj)) {
+        if (Objects.isNull(obj)) {
             return "".getBytes();
         }
         if (obj instanceof String str) {

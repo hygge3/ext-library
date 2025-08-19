@@ -3,7 +3,6 @@ package ext.library.cache.core;
 import ext.library.cache.annotion.L2Cache;
 import ext.library.cache.util.CacheUtil;
 import ext.library.core.util.spel.SpelUtil;
-import ext.library.tool.$;
 import ext.library.tool.constant.Symbol;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +50,7 @@ public class CacheAspect {
             return point.proceed();
         }
         Object cache = CacheUtil.get(realKey, signature.getReturnType());
-        if ($.isNotNull(cache)) {
+        if (Objects.nonNull(cache)) {
             return cache;
         }
 

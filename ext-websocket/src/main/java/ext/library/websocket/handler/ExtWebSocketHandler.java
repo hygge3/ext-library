@@ -2,7 +2,6 @@ package ext.library.websocket.handler;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.security.domain.SecuritySession;
-import ext.library.tool.$;
 import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
@@ -19,6 +18,7 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
 
@@ -40,7 +40,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
                 properties.getSendTimeLimit(),
                 properties.getBufferSizeLimit());
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
-        if ($.isNull(loginUser)) {
+        if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
             log.info("[⛓️][connect] 无效的 token. sessionId: {}", session.getId());
             return;
@@ -117,7 +117,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(@Nonnull WebSocketSession session, @Nonnull CloseStatus status) {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
-        if ($.isNull(loginUser)) {
+        if (Objects.isNull(loginUser)) {
             log.info("[⛓️][disconnect] 无效的 token. sessionId: {}", session.getId());
             return;
         }

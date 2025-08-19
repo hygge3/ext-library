@@ -1,9 +1,10 @@
 package ext.library.core.util;
 
 import com.google.common.collect.Maps;
-import ext.library.tool.$;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.holder.Lazy;
+import ext.library.tool.util.ClassUtil;
+import ext.library.tool.util.ObjectUtil;
 import io.github.linpeilie.Converter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -159,7 +160,7 @@ public class BeanUtil {
     @SuppressWarnings("unchecked")
     public <S, T> T convert(S source, Class<T> targetType) {
         if (ObjectUtils.isEmpty(source)) {
-            return $.newInstance(targetType);
+            return ClassUtil.newInstance(targetType);
         }
         if (targetType.equals(source.getClass())) {
             return (T) source;
@@ -202,7 +203,7 @@ public class BeanUtil {
 
     @SuppressWarnings("unchecked")
     public <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
-        if ($.isEmpty(sourceList)) {
+        if (ObjectUtil.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
         if (targetType.equals(sourceList.getFirst().getClass())) {
@@ -225,8 +226,8 @@ public class BeanUtil {
      * @return bean 对象
      */
     public <T> T convert(Map<String, Object> map, Class<T> targetType) {
-        if ($.isEmpty(map)) {
-            return $.newInstance(targetType);
+        if (ObjectUtil.isEmpty(map)) {
+            return ClassUtil.newInstance(targetType);
         }
         try {
             return CONVERTER.get().convert(map, targetType);

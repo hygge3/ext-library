@@ -1,13 +1,16 @@
 package ext.library.tool.core;
 
 
-import jakarta.annotation.Nonnull;
-
-import ext.library.tool.$;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
+import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+
+import jakarta.annotation.Nonnull;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * 异常处理工具类
@@ -20,6 +23,7 @@ public class Exceptions {
      * 将 CheckedException 转换为 UncheckedException.
      *
      * @param e Throwable
+     *
      * @return {RuntimeException}
      */
     public RuntimeException unchecked(Throwable e) {
@@ -42,13 +46,14 @@ public class Exceptions {
      *
      * @param message 错误消息模板
      * @param args    参数
+     *
      * @return {RuntimeException}
      */
     public RuntimeException throwOut(@Nonnull String message, Object... args) {
-        if ($.isEmpty(args)) {
+        if (ObjectUtil.isEmpty(args)) {
             return new RuntimeException(message);
         }
-        return new RuntimeException($.format(message, args));
+        return new RuntimeException(StringUtil.format(message, args));
     }
 
     /**
@@ -56,13 +61,14 @@ public class Exceptions {
      *
      * @param message the pattern string
      * @param args    object(s) to format
+     *
      * @return {RuntimeException}
      */
     public RuntimeException throwOut(Exception e, @Nonnull String message, Object... args) {
-        if ($.isEmpty(args)) {
+        if (ObjectUtil.isEmpty(args)) {
             return new RuntimeException(message);
         }
-        return new RuntimeException($.format(message, args), e);
+        return new RuntimeException(StringUtil.format(message, args), e);
     }
 
     /**
@@ -70,7 +76,9 @@ public class Exceptions {
      *
      * @param throwable Throwable
      * @param <T>       泛型标记
+     *
      * @return Throwable
+     *
      * @throws T 泛型
      */
     @SuppressWarnings("unchecked")
@@ -82,6 +90,7 @@ public class Exceptions {
      * 代理异常解包
      *
      * @param wrapped 包装过得异常
+     *
      * @return 解包后的异常
      */
     public Throwable unwrap(Throwable wrapped) {
@@ -103,9 +112,23 @@ public class Exceptions {
      *
      * @param e 异常
      */
-    public void print(@Nonnull Throwable e) {
+    public void log(@Nonnull Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
         log.error(e.getCause().getMessage());
     }
+
+    /**
+     * parse error to string
+     *
+     * @param e 异常
+     *
+     * @return 要打印的异常栈信息
+     */
+    public static String print(Throwable e) {
+        StringWriter stringWriter = new StringWriter();
+        e.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
+    }
+
 
 }
