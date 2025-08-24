@@ -1,7 +1,8 @@
 package ext.library.tool.util;
 
-import java.util.List;
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * Boolean 工具类
@@ -22,9 +23,13 @@ public class BoolUtil {
      * 其他类型的对象默认返回 false
      *
      * @param obj 要检查的对象
+     *
      * @return 如果对象表示“真”值，则返回 true；否则返回 false
      */
     public boolean isTrue(Object obj) {
+        if (obj == null) {
+            return false;
+        }
         // 根据对象类型判断其是否表示“真”值
         return switch (obj) {
             // 如果是字符串，检查是否在表示真的字符串集合中
@@ -44,9 +49,13 @@ public class BoolUtil {
      * 它通过检查对象的类型和值来确定这一点
      *
      * @param obj 要进行检查的对象，可以是任何类型
+     *
      * @return 如果对象表示“假”或无效状态，则返回 true；否则返回 false
      */
     public boolean isFalse(Object obj) {
+        if (obj == null) {
+            return false;
+        }
         // 根据对象类型，判断其是否表示“假”或无效状态
         return switch (obj) {
             // 当对象为字符串时，检查其是否包含在预定义的表示“假”的字符串集合中

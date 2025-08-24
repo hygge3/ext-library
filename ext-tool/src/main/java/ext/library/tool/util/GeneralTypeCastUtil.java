@@ -639,12 +639,12 @@ public class GeneralTypeCastUtil {
         if (obj != null) {
             if (obj instanceof BigDecimal) {
                 return (BigDecimal) obj;
-            } else if (obj instanceof String) {
-                return new BigDecimal((String) obj);
+            } else if (obj instanceof String str) {
+                return new BigDecimal(str);
             } else if (obj instanceof Number || obj instanceof Boolean) {
                 final Number answer = getAsNumber(obj);
                 if (answer != null) {
-                    return BigDecimal.valueOf(answer.doubleValue());
+                    return new BigDecimal(String.valueOf(answer));
                 }
             } else {
                 throw new UnsupportedOperationException();

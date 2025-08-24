@@ -57,7 +57,7 @@
         <!-- dependencies.version -->
         <revision>3.0.0</revision>
         <lombok.version>1.18.38</lombok.version>
-        <spring-boot.version>3.5.4</spring-boot.version>
+        <spring-boot.version>3.5.5</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.35</swagger.version>
         <mybatis-flex.version>1.11.1</mybatis-flex.version>
@@ -287,6 +287,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
         <dependency>

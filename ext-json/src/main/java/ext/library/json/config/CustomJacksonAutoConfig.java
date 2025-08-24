@@ -3,8 +3,6 @@ package ext.library.json.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import ext.library.json.module.CustomJavaTimeModule;
 import ext.library.json.serializer.BigNumberSerializer;
 import ext.library.json.util.CustomizeMapper;
 import ext.library.tool.util.DateUtil;
@@ -23,8 +21,6 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import jakarta.annotation.Nonnull;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,6 +35,7 @@ import java.time.LocalTime;
 public class CustomJacksonAutoConfig {
 
     // 没有使用 {@link RequestBody} 反序列化时生效
+
 
     /**
      * 日期参数接收转换器，将 json 字符串转为日期类型
@@ -86,32 +83,13 @@ public class CustomJacksonAutoConfig {
     }
 
     /**
-     * 注册自定义 的 jackson 时间格式，高优先级，用于覆盖默认的时间格式
-     *
-     * @return CustomJavaTimeModule
-     */
-    @Bean
-    @ConditionalOnMissingBean(CustomJavaTimeModule.class)
-    public CustomJavaTimeModule customJavaTimeModule() {
-        return new CustomJavaTimeModule();
-    }
-
-    /**
      * 关于日期时间反序列化，只有在使用 {@link RequestBody} 时有效。
      *
      * @return 自定义序列化器
      */
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        CustomJavaTimeModule javaTimeModule = new CustomJavaTimeModule();
-        javaTimeModule.addSerializer(Long.class, BigNumberSerializer.INSTANCE);
-        javaTimeModule.addSerializer(Long.TYPE, BigNumberSerializer.INSTANCE);
-        javaTimeModule.addSerializer(BigInteger.class, BigNumberSerializer.INSTANCE);
-        javaTimeModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
-
-        return builder -> builder.serializationInclusion(JsonInclude.Include.NON_NULL)
-                .featuresToEnable(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS)
-                .modules(javaTimeModule);
+        return builder -> builder.serializationInclusion(JsonInclude.Include.NON_NULL).featuresToEnable(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS).serializers(BigNumberSerializer.INSTANCE).modules(CustomizeMapper.getModule());
     }
 
     /**
@@ -125,9 +103,12 @@ public class CustomJacksonAutoConfig {
     public ObjectMapper objectMapper(@Nonnull Jackson2ObjectMapperBuilder builder) {
         // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
+        objectMapper.registerModule(CustomizeMapper.getModule());
+        // 避免将 LocalDateTime 转为时间戳
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.enable(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS);
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致
         CustomizeMapper.setMAPPER(objectMapper);
         return objectMapper;
     }
-
 }

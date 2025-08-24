@@ -1,8 +1,9 @@
 package ext.library.tool.core;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.File;
 import java.nio.charset.Charset;
-import lombok.experimental.UtilityClass;
 
 /**
  * 系统工具类
@@ -14,7 +15,6 @@ public class Systems {
      * 当前系统是否为 Windows 系统，参考以下系统 API
      *
      * @return boolean
-     * @see sun.awt.OSInfo#getOSType()
      */
     public boolean isWindows() {
         return osName().contains("Windows");

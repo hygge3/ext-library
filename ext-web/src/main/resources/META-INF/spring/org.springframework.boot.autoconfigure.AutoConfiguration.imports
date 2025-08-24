@@ -3,5 +3,5 @@ ext.library.web.config.WebMvcAutoConfig
 ext.library.web.filter.TraceFilter
 ext.library.web.handler.GlobalExceptionHandler
 ext.library.web.handler.GlobalResponseHandler
-ext.library.web.launch.StartedEventListener
+ext.library.web.launch.StartupListener
 ext.library.web.validation.ValidationAutoConfiguration

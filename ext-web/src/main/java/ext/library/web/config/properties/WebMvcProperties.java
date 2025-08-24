@@ -1,12 +1,12 @@
 package ext.library.web.config.properties;
 
-import jakarta.validation.constraints.Pattern;
-
-import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.cors.CorsConfiguration;
+
+import jakarta.validation.constraints.Pattern;
+import java.util.List;
 
 /**
  * web 属性
@@ -27,6 +27,10 @@ public class WebMvcProperties {
      * 是否启用调用时间统计拦截器
      */
     Boolean invokeTimeEnabled = false;
+
+
+    /** 是否打印启动信息 */
+    Boolean printStartupInfo = true;
 
     /** 需要 REST 包装软件包 */
     @Pattern(regexp = "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*(\\.\\*)?$")

@@ -46,7 +46,7 @@ public class INetUtil {
     public static String getHostIp() {
         String hostAddress;
         try {
-            InetAddress address = INetUtil.getLocalHostLanAddress();
+            InetAddress address = getLocalHostLanAddress();
             // force a best effort reverse DNS lookup
             hostAddress = address.getHostAddress();
             if (StringUtil.isBlank(hostAddress)) {

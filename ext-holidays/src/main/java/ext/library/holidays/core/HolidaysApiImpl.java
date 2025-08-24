@@ -1,19 +1,20 @@
 package ext.library.holidays.core;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.common.collect.Maps;
 import ext.library.holidays.config.HolidaysProperties;
 import ext.library.json.util.JsonUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ResourceUtils;
+
+import jakarta.annotation.Nonnull;
 import java.io.FileInputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ResourceUtils;
 
 /**
  * 节假日实现
@@ -25,9 +26,21 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
     /**
      * 存储节假日
      */
-     static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = Maps.newHashMap();
+    static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = Maps.newHashMap();
 
-     final HolidaysProperties properties;
+    final HolidaysProperties properties;
+
+    /**
+     * 判断是否工作日
+     *
+     * @param localDate LocalDate
+     *
+     * @return DaysType
+     */
+    private static DaysType isWeekDay(@Nonnull LocalDate localDate) {
+        int week = localDate.getDayOfWeek().getValue();
+        return week == DayOfWeek.SATURDAY.getValue() || week == DayOfWeek.SUNDAY.getValue() ? DaysType.REST_DAYS : DaysType.WEEKDAYS;
+    }
 
     @Override
     public DaysType getDaysType(@Nonnull LocalDate localDate) {
@@ -55,7 +68,7 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         int[] years = new int[]{2019, 2020, 2021, 2022, 2023, 2024, 2025};
         for (int year : years) {
-            Map<String, Byte> dataMap = JsonUtil.readMap(new FileInputStream(ResourceUtils.getFile("classpath:data/" + year + "_data.json")), Byte.class);
+            Map<String, Byte> dataMap = JsonUtil.readMap(new ClassPathResource("data/" + year + "_data.json").getInputStream(), Byte.class);
             YEAR_DATA_MAP.put(year, dataMap);
         }
         List<HolidaysProperties.ExtData> extDataList = properties.getExtData();
@@ -63,17 +76,6 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
             Map<String, Byte> dataMap = JsonUtil.readMap(new FileInputStream(ResourceUtils.getFile(extData.getDataPath())), Byte.class);
             YEAR_DATA_MAP.put(extData.getYear(), dataMap);
         }
-    }
-
-    /**
-     * 判断是否工作日
-     *
-     * @param localDate LocalDate
-     * @return DaysType
-     */
-    private static DaysType isWeekDay(@Nonnull LocalDate localDate) {
-        int week = localDate.getDayOfWeek().getValue();
-        return week == DayOfWeek.SATURDAY.getValue() || week == DayOfWeek.SUNDAY.getValue() ? DaysType.REST_DAYS : DaysType.WEEKDAYS;
     }
 
 }
