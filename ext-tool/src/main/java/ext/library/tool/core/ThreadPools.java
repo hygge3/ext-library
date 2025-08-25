@@ -26,12 +26,12 @@ import java.util.function.Supplier;
 @Slf4j
 public class ThreadPools {
 
-    static final Integer QUEUE_MAX = 10;
+    private static final Integer QUEUE_MAX = 10;
 
     /**
      * Singleton instance to use.
      */
-    public static ThreadPoolExecutor INSTANCE = new ThreadPoolExecutor(
+    private static ThreadPoolExecutor INSTANCE = new ThreadPoolExecutor(
             // 核心线程数大小。不论是否空闲都存在的线程
             Holder.CPU_CORE_NUM,
             // 最大线程数 - 100 个
