@@ -51,8 +51,12 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         }
         if (mybatisProperties.getTenant()) {
             TenantManager.setTenantFactory(() -> {
-                // 通过这里返回当前租户 ID
-                return new Object[]{TenantUtil.get()};
+                try {
+                    // 通过这里返回当前租户 ID
+                    return new Object[]{TenantUtil.get()};
+                } finally {
+                    TenantUtil.clear();
+                }
             });
         }
     }
