@@ -1,6 +1,7 @@
 package ext.library.tool.core;
 
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
@@ -44,13 +45,33 @@ public class ThreadPools {
             // 这样配置。当积压任务数量为 队列最大值 时。会创建新线程来执行任务。直到线程总数达到 最大线程数
             new LinkedBlockingQueue<>(QUEUE_MAX),
             // 新线程创建工厂 - 虚拟线程池
-            Thread.ofVirtual().factory(),
+            new ThreadFactoryBuilder().setNameFormat("ThreadPools-%d").setDaemon(true).build(),
             // 拒绝策略 - 在主线程继续执行。
             new ThreadPoolExecutor.CallerRunsPolicy());
 
 
     public void update(@Nonnull ThreadPoolExecutor executor) {
         INSTANCE = executor;
+    }
+
+    public void update(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, int queueSize) {
+        INSTANCE = new ThreadPoolExecutor(
+                // 核心线程数大小。不论是否空闲都存在的线程
+                corePoolSize,
+                // 最大线程数 - 100 个
+                maximumPoolSize,
+                // 存活时间。非核心线程数如果空闲指定时间。就回收
+                // 存活时间不宜过长。避免任务量遇到尖峰情况时。大量空闲线程占用资源
+                keepAliveTime,
+                // 存活时间的单位
+                unit,
+                // 等待任务存放队列 - 队列最大值
+                // 这样配置。当积压任务数量为 队列最大值 时。会创建新线程来执行任务。直到线程总数达到 最大线程数
+                new LinkedBlockingQueue<>(queueSize),
+                // 新线程创建工厂 - 虚拟线程池
+                new ThreadFactoryBuilder().setNameFormat("ThreadPools-%d").setDaemon(true).build(),
+                // 拒绝策略 - 在主线程继续执行。
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -147,4 +168,7 @@ public class ThreadPools {
         return INSTANCE.submit(callable);
     }
 
+    public void shutdown() {
+        Threads.shutdownAndAwaitTermination(INSTANCE);
+    }
 }
