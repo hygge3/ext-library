@@ -2,7 +2,7 @@ spring:
   config:
     activate:
       # 当前配置名称
-      on-profile: mybatis
+      on-profile: ext-mybatis
   datasource:
     hikari:
       # 设置最小空闲连接数，默认值：与 maximumPoolSize 相同

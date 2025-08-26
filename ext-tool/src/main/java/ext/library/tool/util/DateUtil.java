@@ -214,6 +214,40 @@ public final class DateUtil {
     // region Helper
 
     /**
+     * 格式化 Duration 为天时分秒毫秒
+     *
+     * @param duration 持续时间
+     *
+     * @return 格式化后的字符串
+     */
+    public String format(Duration duration) {
+        long days = duration.toDays();
+        long hours = duration.toHours() % 24;
+        long minutes = duration.toMinutes() % 60;
+        long seconds = duration.getSeconds() % 60;
+        long millis = duration.toMillis() % 1000;
+
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) {
+            sb.append(days).append("天");
+        }
+        if (hours > 0) {
+            sb.append(hours).append("小时");
+        }
+        if (minutes > 0) {
+            sb.append(minutes).append("分钟");
+        }
+        if (seconds > 0) {
+            sb.append(seconds).append("秒");
+        }
+        if (millis > 0) {
+            sb.append(millis).append("毫秒");
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * 计算相差天数
      *
      * @param start 开始时间

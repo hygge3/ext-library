@@ -2,16 +2,7 @@ spring:
   config:
     activate:
       # 当前配置名称
-      on-profile: ext
-  banner:
-    charset: UTF-8
-  mvc:
-    # 404 抛异常
-    # 解决传日期参数报 400 转换错误问题
-    format:
-      date: yyyy-MM-dd
-      date-time: yyyy-MM-dd HH:mm:ss
-    static-path-pattern: /static/**
+      on-profile: ext-json
   jackson:
     # 常规默认，枚举类 SerializationFeature 中的枚举属性为 key，值为 boolean 设置 jackson 序列化特性，具体 key 请看 SerializationFeature 源码
     serialization:
@@ -66,29 +57,3 @@ spring:
       quote-field-names: true
       # 按 BigDecimal 的 toPlainString() 输出
       write-bigdecimal-as-plain: false
-  main:
-    allow-bean-definition-overriding: true
-    banner-mode: console
-  threads:
-    virtual:
-      enabled: true
-logging:
-  charset:
-    console: UTF-8
-    file: UTF-8
-  pattern:
-    dateformat: yyyy-MM-dd HH:mm:ss
-server:
-  shutdown: graceful
-  servlet:
-    session:
-      persistent: true
-      timeout: 120s
-    encoding:
-      charset: UTF-8
-      force: true
-  compression:
-    # 开启响应内容压缩
-    enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json
-    min-response-size: 1024

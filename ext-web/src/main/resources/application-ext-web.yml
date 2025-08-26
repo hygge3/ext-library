@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      # 当前配置名称
+      on-profile: ext-web
+  banner:
+    charset: UTF-8
+  mvc:
+    # 404 抛异常
+    # 解决传日期参数报 400 转换错误问题
+    format:
+      date: yyyy-MM-dd
+      date-time: yyyy-MM-dd HH:mm:ss
+    static-path-pattern: /static/**
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: console
+  threads:
+    virtual:
+      enabled: true
+logging:
+  charset:
+    console: UTF-8
+    file: UTF-8
+  pattern:
+    console: "%yellow(%date{HH:mm:ss.SSS}) %highlight(%-4level) %green([%thread]) %boldMagenta(%logger{26}) %gray(-) %msg%n"
+    file: "%date{HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p}${PID:- } --- [%t] %-40.40logger{39}: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+server:
+  shutdown: graceful
+  servlet:
+    session:
+      persistent: true
+      timeout: 120s
+    encoding:
+      charset: UTF-8
+      force: true
+  compression:
+    # 开启响应内容压缩
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json
+    min-response-size: 1024

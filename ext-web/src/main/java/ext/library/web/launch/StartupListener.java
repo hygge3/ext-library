@@ -3,10 +3,10 @@ package ext.library.web.launch;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.INetUtil;
 import ext.library.tool.util.ObjectUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
 
 import java.time.LocalDateTime;
@@ -17,17 +17,15 @@ import java.util.stream.Stream;
  * 项目启动监听打印项目信息
  */
 @AutoConfiguration
-@RequiredArgsConstructor
-public class StartupListener implements CommandLineRunner {
-
-    private final Environment environment;
+public class StartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private static boolean hasOpenApi() {
         return Stream.of("springfox.documentation.spring.web.plugins.Docket", "io.swagger.v3.oas.models.OpenAPI").anyMatch(clazz -> ClassUtils.isPresent(clazz, null));
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         String appName = environment.getProperty("spring.application.name", "Application");
         String print = environment.getProperty("ext.web.print-startup-info", "true");
         if (ObjectUtil.isFalse(print)) {
@@ -47,17 +45,17 @@ public class StartupListener implements CommandLineRunner {
         String scheme = ObjectUtil.isTrue(sslEnable) ? "https" : "http";
         String url = "%s://%s:%s%s".formatted(scheme, ip, serverPort, contextPath);
         String content = """
-                %s
-                        ✅ %s 启动完成！
-                %s
-                🎉 启动时间\t:\t%s
-                📌 应用名称\t:\t%s
-                🌐 访问地址\t:\t%s
-                🏠 本机主机名\t:\t%s
-                📍 本机 IP \t:\t%s
-                💻 操作系统\t:\t%s (%s)
-                %s
-                """.formatted("=".repeat(60), appName, "=".repeat(60), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch, "=".repeat(60));
+                ============================================================
+                         ✅ %s 启动完成！耗时:%s
+                ============================================================
+                 🎉\t启动时间\t:\t%s
+                 📌\t应用名称\t:\t%s
+                 🌐\t访问地址\t:\t%s
+                 🏠\t本机主机\t:\t%s
+                 📍\t本机 IP\t:\t%s
+                 💻\t操作系统\t:\t%s (%s)
+                ============================================================
+                """.formatted(appName, DateUtil.format(event.getTimeTaken()), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch);
         boolean hasOpenApi = hasOpenApi();
         if (hasOpenApi) {
             // 如果有 swagger，打印开发阶段的 swagger ui 地址
@@ -68,5 +66,4 @@ public class StartupListener implements CommandLineRunner {
         }
         System.out.println(content);
     }
-
 }
