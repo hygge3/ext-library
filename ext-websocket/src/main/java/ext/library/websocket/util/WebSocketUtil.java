@@ -2,7 +2,7 @@ package ext.library.websocket.util;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
-import ext.library.tool.core.ThreadPools;
+import ext.library.tool.core.VirtualThreadPools;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
@@ -111,7 +111,7 @@ public class WebSocketUtil {
      * @param message 要发送的 WebSocket 消息对象
      */
     private synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
-        ThreadPools.execute(() -> {
+        VirtualThreadPools.execute("WebSocket Send", () -> {
             if (session == null || !session.isOpen()) {
                 log.warn("[⛓️][send] session 会话已经关闭");
             } else {

@@ -3,7 +3,7 @@ package ext.library.sse.manager;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
-import ext.library.tool.core.ThreadPools;
+import ext.library.tool.core.VirtualThreadPools;
 import ext.library.tool.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -97,7 +97,7 @@ public class SseEmitterManager {
      * @param message 要发送的消息内容
      */
     public void sendMessage(String userId, String message) {
-        ThreadPools.execute(() -> {
+        VirtualThreadPools.execute("SSE Send", () -> {
             Map<String, SseEmitter> emitters = USER_TOKEN_EMITTERS.get(userId);
             if (emitters != null) {
                 for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {

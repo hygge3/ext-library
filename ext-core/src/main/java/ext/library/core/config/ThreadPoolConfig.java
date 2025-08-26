@@ -27,20 +27,22 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
-    final int core = Holder.CPU_CORE_NUM + 1;
+    private final int core = Holder.CPU_CORE_NUM + 1;
 
-    ScheduledExecutorService scheduledExecutorService;
+    private ScheduledExecutorService scheduledExecutorService;
 
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
     @Bean(name = "threadPoolTaskExecutor")
     public ThreadPoolTaskExecutor threadPoolTaskExecutor(ThreadPoolProperties threadPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("thread-pool-");
+        executor.setThreadNamePrefix("ThreadPool-");
         executor.setCorePoolSize(threadPoolProperties.getCorePoolSize());
         executor.setMaxPoolSize(threadPoolProperties.getMaxPoolSize());
         executor.setQueueCapacity(threadPoolProperties.getQueueCapacity());
         executor.setKeepAliveSeconds(threadPoolProperties.getKeepAliveSeconds());
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.initialize();
         return executor;
     }
 
@@ -50,7 +52,7 @@ public class ThreadPoolConfig {
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
         ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core,
-                new ThreadFactoryBuilder().setNameFormat("scheduling-%d").setDaemon(true).build(),
+                new ThreadFactoryBuilder().setNameFormat("Scheduling-%d").setDaemon(true).build(),
                 new ThreadPoolExecutor.CallerRunsPolicy()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {

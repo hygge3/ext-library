@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * <p/>
  * 2.执行并等待：当并行任务都提交完毕后，只需调用一次 LatchUtils.waitFor()。该方法会立即触发所有已注册任务执行，并阻塞等待所有任务执行完成或超时。
  */
-public class LatchUtils {
+public class LatchUtil {
     // 使用 ThreadLocal 存储每个线程的任务信息列表，避免线程间的数据共享问题
     private static final ThreadLocal<List<TaskInfo>> THREADLOCAL = ThreadLocal.withInitial(LinkedList::new);
 
