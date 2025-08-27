@@ -66,9 +66,7 @@ public class RedisUtil {
      * 自增并设置过期时间的 lua 脚本
      */
     // language=redis
-    private static final DefaultRedisScript<Long> INCR_BY_EXPIRE_LUA_SCRIPT = new DefaultRedisScript<>(
-            "local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r",
-            Long.class);
+    private static final DefaultRedisScript<Long> INCR_BY_EXPIRE_LUA_SCRIPT = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
 
     @Getter
     private final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
@@ -131,6 +129,7 @@ public class RedisUtil {
      * @return false 表示失败
      */
     public boolean rateLimiter(String key, long count, String interval) {
+        /* Redis 中的 Lua 脚本，用于实现限流功能。它通过指定的键（key）来记录访问次数，如果访问次数超过设定的阈值（count），则拒绝访问；否则增加访问计数并设置过期时间 */
         // language=redis
         RedisScript<Long> REDIS_SCRIPT_RATE_LIMIT = RedisScript.of("""
                 local key = KEYS[1];
@@ -495,8 +494,7 @@ public class RedisUtil {
      * @return 自增后的 value 值
      */
     public long incrByAndExpire(String key, long delta, long timeout) {
-        return getRedisTemplate().execute(INCR_BY_EXPIRE_LUA_SCRIPT, Collections.singletonList(key),
-                String.valueOf(delta), String.valueOf(timeout));
+        return getRedisTemplate().execute(INCR_BY_EXPIRE_LUA_SCRIPT, Collections.singletonList(key), String.valueOf(delta), String.valueOf(timeout));
     }
 
     /**
@@ -1309,10 +1307,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zadd/">ZAdd Command</a>
      */
     public long zAdd(String key, Map<String, Double> scoreMembers) {
-        Set<ZSetOperations.TypedTuple<String>> tuples = scoreMembers.entrySet()
-                .stream()
-                .map(x -> ZSetOperations.TypedTuple.of(x.getKey(), x.getValue()))
-                .collect(Collectors.toSet());
+        Set<ZSetOperations.TypedTuple<String>> tuples = scoreMembers.entrySet().stream().map(x -> ZSetOperations.TypedTuple.of(x.getKey(), x.getValue())).collect(Collectors.toSet());
         return zSetOps().add(key, tuples);
     }
 
@@ -1621,8 +1616,7 @@ public class RedisUtil {
         return getRedisTemplate().execute(script, keys, args);
     }
 
-    public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer,
-                         RedisSerializer<T> resultSerializer, List<String> keys, Object... args) {
+    public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<String> keys, Object... args) {
         return getRedisTemplate().execute(script, argsSerializer, resultSerializer, keys, args);
     }
 
@@ -1633,8 +1627,7 @@ public class RedisUtil {
         return getRedisTemplate().executePipelined(session);
     }
 
-    public List<Object> executePipelined(SessionCallback<?> session,
-                                         RedisSerializer<?> resultSerializer) {
+    public List<Object> executePipelined(SessionCallback<?> session, RedisSerializer<?> resultSerializer) {
         return getRedisTemplate().executePipelined(session, resultSerializer);
     }
 
@@ -1642,8 +1635,7 @@ public class RedisUtil {
         return getRedisTemplate().executePipelined(action);
     }
 
-    public List<Object> executePipelined(RedisCallback<?> action,
-                                         RedisSerializer<?> resultSerializer) {
+    public List<Object> executePipelined(RedisCallback<?> action, RedisSerializer<?> resultSerializer) {
         return getRedisTemplate().executePipelined(action, resultSerializer);
     }
 
@@ -1679,8 +1671,7 @@ public class RedisUtil {
      */
     public <T> void subscribe(String channelKey, Class<T> clazz, java.util.function.Consumer<T> consumer) {
         MessageListener listener = (message, pattern) -> consumer.accept(JsonUtil.readObj(message.getBody(), clazz));
-        SpringUtil.getBean(RedisMessageListenerContainer.class)
-                .addMessageListener(listener, new ChannelTopic(channelKey));
+        SpringUtil.getBean(RedisMessageListenerContainer.class).addMessageListener(listener, new ChannelTopic(channelKey));
     }
 
     /**
@@ -1689,8 +1680,7 @@ public class RedisUtil {
      * @param listener 消息监听器
      */
     public void subscribe(String channelKey, MessageListener listener) {
-        SpringUtil.getBean(RedisMessageListenerContainer.class)
-                .addMessageListener(listener, new ChannelTopic(channelKey));
+        SpringUtil.getBean(RedisMessageListenerContainer.class).addMessageListener(listener, new ChannelTopic(channelKey));
     }
 
     // endregion
@@ -1733,8 +1723,7 @@ public class RedisUtil {
         return xAdd(Record.of(content).withStreamKey(key), xAddOptions);
     }
 
-    public RecordId xAdd(MapRecord<String, String, String> mapRecord,
-                         RedisStreamCommands.XAddOptions xAddOptions) {
+    public RecordId xAdd(MapRecord<String, String, String> mapRecord, RedisStreamCommands.XAddOptions xAddOptions) {
         RedisSerializer<String> keySerializer = getKeySerializer();
         RedisSerializer<String> valueSerializer = getValueSerializer();
 
@@ -1747,8 +1736,7 @@ public class RedisUtil {
             rawContent.put(keySerializer.serialize(entry.getKey()), valueSerializer.serialize(entry.getValue()));
         }
 
-        return getRedisTemplate().execute((RedisConnection conn) -> conn.streamCommands()
-                .xAdd(Record.of(rawContent).withStreamKey(rawKey), xAddOptions));
+        return getRedisTemplate().execute((RedisConnection conn) -> conn.streamCommands().xAdd(Record.of(rawContent).withStreamKey(rawKey), xAddOptions));
     }
 
     /**
@@ -1781,8 +1769,7 @@ public class RedisUtil {
         RedisSerializer<String> keySerializer = getKeySerializer();
         byte[] rawKey = keySerializer.serialize(key);
 
-        return getRedisTemplate().execute((RedisConnection conn) -> conn.streamCommands()
-                .xGroupCreate(rawKey, groupName, readOffset, makeStream));
+        return getRedisTemplate().execute((RedisConnection conn) -> conn.streamCommands().xGroupCreate(rawKey, groupName, readOffset, makeStream));
     }
 
     public String xGroupCreate(String key, String groupName) {
@@ -1834,8 +1821,7 @@ public class RedisUtil {
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xRead(StreamReadOptions streamReadOptions,
-                                                         StreamOffset<String>... streams) {
+    public List<MapRecord<String, String, String>> xRead(StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(streamReadOptions, streams);
     }
 
@@ -1847,26 +1833,22 @@ public class RedisUtil {
      * @since Redis 5.0.0
      */
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer,
-                                                              StreamOffset<String>... streams) {
+    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamOffset<String>... streams) {
         return streamOps().read(consumer, streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer,
-                                                              StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
+    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(consumer, streamReadOptions, streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer,
-                                                              StreamOffset<String>... streams) {
+    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamOffset<String>... streams) {
         return streamOps().read(Consumer.from(group, consumer), streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer,
-                                                              StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
+    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(Consumer.from(group, consumer), streamReadOptions, streams);
     }
     // endregion

@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CacheUtil {
 
-    static final Cache<String, Object> CACHE;
-    static final CacheProperties CACHE_PROPERTIES = SpringUtil.getBean(CacheProperties.class);
+    private static final Cache<String, Object> CACHE;
+    private static final CacheProperties CACHE_PROPERTIES = SpringUtil.getBean(CacheProperties.class);
 
     static {
         CACHE = Caffeine.newBuilder()
@@ -29,8 +29,7 @@ public class CacheUtil {
                 // 初始的缓存空间大小
                 .initialCapacity(10)
                 // 缓存的最大条数
-                .maximumSize(1000)
-                .build();
+                .maximumSize(1000).build();
     }
 
     /**
