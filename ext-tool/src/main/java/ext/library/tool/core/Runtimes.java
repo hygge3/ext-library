@@ -1,6 +1,7 @@
 package ext.library.tool.core;
 
 import com.google.common.base.Joiner;
+import ext.library.tool.constant.Holder;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.GeneralTypeCastUtil;
 import lombok.experimental.UtilityClass;
@@ -16,8 +17,7 @@ import java.util.List;
 @UtilityClass
 public class Runtimes {
 
-    final int CPU_NUM = Runtime.getRuntime().availableProcessors();
-    volatile int pId = -1;
+    private volatile int pId = -1;
 
     /**
      * 获得当前进程的 PID
@@ -74,7 +74,7 @@ public class Runtimes {
      * @return cpu count
      */
     public int getCpuNum() {
-        return CPU_NUM;
+        return Holder.CPU_CORE_NUM;
     }
 
 }

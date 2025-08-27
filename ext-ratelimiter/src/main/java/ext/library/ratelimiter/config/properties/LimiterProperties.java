@@ -20,6 +20,6 @@ public class LimiterProperties {
     /**
      * 开启限流
      */
-    boolean enable;
+    private boolean enable = true;
 
 }

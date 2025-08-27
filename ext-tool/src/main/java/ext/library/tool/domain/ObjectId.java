@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ObjectId implements Comparable<ObjectId>, Serializable {
 
     // unused, as this class uses a proxy for serialization
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static final int OBJECT_ID_LENGTH = 12;

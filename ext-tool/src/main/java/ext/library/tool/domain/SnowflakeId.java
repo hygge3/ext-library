@@ -16,46 +16,43 @@ public class SnowflakeId {
 
     // ==============================Fields===========================================
     /** 开始时间截 (2025-01-01) */
-    final long twepoch = 1420041600000L;
+    private final long twepoch = 1420041600000L;
 
     /** 机器 id 所占的位数 */
-    final long workerIdBits = 5L;
+    private final long workerIdBits = 5L;
 
     /** 数据标识 id 所占的位数 */
-    final long datacenterIdBits = 5L;
-
-    /** 支持的最大机器 id，结果是 31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数) */
-    final long maxWorkerId = ~(-1L << workerIdBits);
+    private final long datacenterIdBits = 5L;
 
     /** 支持的最大数据标识 id，结果是 31 */
-    final long maxDatacenterId = ~(-1L << datacenterIdBits);
+    private final long maxDatacenterId = ~(-1L << datacenterIdBits);
 
     /** 序列在 id 中占的位数 */
-    final long sequenceBits = 12L;
+    private final long sequenceBits = 12L;
 
     /** 机器 ID 向左移 12 位 */
-    final long workerIdShift = sequenceBits;
+    private final long workerIdShift = sequenceBits;
 
     /** 数据标识 id 向左移 17 位 (12+5) */
-    final long datacenterIdShift = sequenceBits + workerIdBits;
+    private final long datacenterIdShift = sequenceBits + workerIdBits;
 
     /** 时间截向左移 22 位 (5+5+12) */
-    final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+    private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
 
     /** 生成序列的掩码，这里为 4095 (0b111111111111=0xfff=4095) */
-    final long sequenceMask = ~(-1L << sequenceBits);
+    private final long sequenceMask = ~(-1L << sequenceBits);
 
     /** 工作机器 ID(0~31) */
-    final long workerId;
+    private final long workerId;
 
     /** 数据中心 ID(0~31) */
-    final long datacenterId;
+    private final long datacenterId;
 
     /** 毫秒内序列 (0~4095) */
-    long sequence = 0L;
+    private long sequence = 0L;
 
     /** 上次生成 ID 的时间截 */
-    long lastTimestamp = -1L;
+    private long lastTimestamp = -1L;
 
     //==============================Constructors=====================================
 
@@ -66,6 +63,8 @@ public class SnowflakeId {
      * @param datacenterId 数据中心 ID (0~31)
      */
     public SnowflakeId(long workerId, long datacenterId) {
+        /* 支持的最大机器 id，结果是 31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数) */
+        long maxWorkerId = ~(-1L << workerIdBits);
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }
@@ -88,8 +87,7 @@ public class SnowflakeId {
 
         // 如果当前时间小于上一次 ID 生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException(
-                    String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+            throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
         // 如果是同一时间生成的，则进行毫秒内序列
@@ -111,15 +109,16 @@ public class SnowflakeId {
 
         // 移位并通过或运算拼到一起组成 64 位的 ID
         return ((timestamp - twepoch) << timestampLeftShift) //
-               | (datacenterId << datacenterIdShift) //
-               | (workerId << workerIdShift) //
-               | sequence;
+                | (datacenterId << datacenterIdShift) //
+                | (workerId << workerIdShift) //
+                | sequence;
     }
 
     /**
      * 阻塞到下一个毫秒，直到获得新的时间戳
      *
      * @param lastTimestamp 上次生成 ID 的时间截
+     *
      * @return 当前时间戳
      */
     protected long tilNextMillis(long lastTimestamp) {

@@ -1,19 +1,18 @@
 package ext.library.tool.domain;
 
 import ext.library.tool.constant.Holder;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("PMD.ShortClassName")
 public class ULID {
 
-    static final char[] ENCODING_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+    private static final char[] ENCODING_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
             'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z',};
 
-    static final byte[] DECODING_CHARS = {
+    private static final byte[] DECODING_CHARS = {
             // 0
             -1, -1, -1, -1, -1, -1, -1, -1,
             // 8
@@ -47,17 +46,17 @@ public class ULID {
             // 120
             29, 30, 31,};
 
-    static final int MASK = 0x1F;
+    private static final int MASK = 0x1F;
 
-    static final int MASK_BITS = 5;
+    private static final int MASK_BITS = 5;
 
-    static final long TIMESTAMP_OVERFLOW_MASK = 0xFFFF_0000_0000_0000L;
+    private static final long TIMESTAMP_OVERFLOW_MASK = 0xFFFF_0000_0000_0000L;
 
-    static final long TIMESTAMP_MSB_MASK = 0xFFFF_FFFF_FFFF_0000L;
+    private static final long TIMESTAMP_MSB_MASK = 0xFFFF_FFFF_FFFF_0000L;
 
-    static final long RANDOM_MSB_MASK = 0xFFFFL;
+    private static final long RANDOM_MSB_MASK = 0xFFFFL;
 
-    final Random random;
+    private final Random random;
 
     public ULID() {
         this(Holder.SECURE_RANDOM);
@@ -66,51 +65,6 @@ public class ULID {
     public ULID(Random random) {
         Objects.requireNonNull(random, "random must not be null!");
         this.random = random;
-    }
-
-    public void appendULID(StringBuilder stringBuilder) {
-        Objects.requireNonNull(stringBuilder, "stringBuilder must not be null!");
-        internalAppendULID(stringBuilder, System.currentTimeMillis(), random);
-    }
-
-    public String nextULID() {
-        return nextULID(System.currentTimeMillis());
-    }
-
-    public String nextULID(long timestamp) {
-        return internalUIDString(timestamp, random);
-    }
-
-    public Value nextValue() {
-        return nextValue(System.currentTimeMillis());
-    }
-
-    public Value nextValue(long timestamp) {
-        return internalNextValue(timestamp, random);
-    }
-
-    public Value nextMonotonicValue(Value previousUlid) {
-        return nextMonotonicValue(previousUlid, System.currentTimeMillis());
-    }
-
-    public Value nextMonotonicValue(Value previousUlid, long timestamp) {
-        Objects.requireNonNull(previousUlid, "previousUlid must not be null!");
-        if (previousUlid.timestamp() == timestamp) {
-            return previousUlid.increment();
-        }
-        return nextValue(timestamp);
-    }
-
-    public Optional<Value> nextStrictlyMonotonicValue(Value previousUlid) {
-        return nextStrictlyMonotonicValue(previousUlid, System.currentTimeMillis());
-    }
-
-    public Optional<Value> nextStrictlyMonotonicValue(Value previousUlid, long timestamp) {
-        Value result = nextMonotonicValue(previousUlid, timestamp);
-        if (result.compareTo(previousUlid) < 1) {
-            return Optional.empty();
-        }
-        return Optional.of(result);
     }
 
     public static Value parseULID(String ulidString) {
@@ -148,73 +102,6 @@ public class ULID {
             leastSignificantBits = (leastSignificantBits << 8) | (data[i] & 0xff);
         }
         return new Value(mostSignificantBits, leastSignificantBits);
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class Value implements Comparable<Value> {
-
-        /** The most significant 64 bits of this ULID. */
-        private final long mostSignificantBits;
-
-        /** The least significant 64 bits of this ULID. */
-        private final long leastSignificantBits;
-
-        public long timestamp() {
-            return mostSignificantBits >>> 16;
-        }
-
-        public byte[] toBytes() {
-            byte[] result = new byte[16];
-            for (int i = 0; i < 8; i++) {
-                result[i] = (byte) ((mostSignificantBits >> ((7 - i) * 8)) & 0xFF);
-            }
-            for (int i = 8; i < 16; i++) {
-                result[i] = (byte) ((leastSignificantBits >> ((15 - i) * 8)) & 0xFF);
-            }
-
-            return result;
-        }
-
-        public Value increment() {
-            long lsb = leastSignificantBits;
-            if (lsb != 0xFFFF_FFFF_FFFF_FFFFL) {
-                return new Value(mostSignificantBits, lsb + 1);
-            }
-            long msb = mostSignificantBits;
-            if ((msb & RANDOM_MSB_MASK) != RANDOM_MSB_MASK) {
-                return new Value(msb + 1, 0);
-            }
-            return new Value(msb & TIMESTAMP_MSB_MASK, 0);
-        }
-
-        @Override
-        public int hashCode() {
-            long hilo = mostSignificantBits ^ leastSignificantBits;
-            return ((int) (hilo >> 32)) ^ (int) hilo;
-        }
-
-        @Override
-        public int compareTo(Value val) {
-            return (this.mostSignificantBits < val.mostSignificantBits ? -1
-                    : (this.mostSignificantBits > val.mostSignificantBits ? 1
-                    : (Long.compare(this.leastSignificantBits, val.leastSignificantBits))));
-        }
-
-        @Override
-        public String toString() {
-            char[] buffer = new char[26];
-
-            internalWriteCrockford(buffer, timestamp(), 10, 0);
-            long value = ((mostSignificantBits & 0xFFFFL) << 24);
-            long interim = (leastSignificantBits >>> 40);
-            value = value | interim;
-            internalWriteCrockford(buffer, value, 8, 10);
-            internalWriteCrockford(buffer, leastSignificantBits, 8, 18);
-
-            return new String(buffer);
-        }
-
     }
 
     /*
@@ -292,6 +179,114 @@ public class ULID {
         if ((timestamp & TIMESTAMP_OVERFLOW_MASK) != 0) {
             throw new IllegalArgumentException("ULID does not support timestamps after +10889-08-02T05:31:50.655Z!");
         }
+    }
+
+    public void appendULID(StringBuilder stringBuilder) {
+        Objects.requireNonNull(stringBuilder, "stringBuilder must not be null!");
+        internalAppendULID(stringBuilder, System.currentTimeMillis(), random);
+    }
+
+    public String nextULID() {
+        return nextULID(System.currentTimeMillis());
+    }
+
+    public String nextULID(long timestamp) {
+        return internalUIDString(timestamp, random);
+    }
+
+    public Value nextValue() {
+        return nextValue(System.currentTimeMillis());
+    }
+
+    public Value nextValue(long timestamp) {
+        return internalNextValue(timestamp, random);
+    }
+
+    public Value nextMonotonicValue(Value previousUlid) {
+        return nextMonotonicValue(previousUlid, System.currentTimeMillis());
+    }
+
+    public Value nextMonotonicValue(Value previousUlid, long timestamp) {
+        Objects.requireNonNull(previousUlid, "previousUlid must not be null!");
+        if (previousUlid.timestamp() == timestamp) {
+            return previousUlid.increment();
+        }
+        return nextValue(timestamp);
+    }
+
+    public Optional<Value> nextStrictlyMonotonicValue(Value previousUlid) {
+        return nextStrictlyMonotonicValue(previousUlid, System.currentTimeMillis());
+    }
+
+    public Optional<Value> nextStrictlyMonotonicValue(Value previousUlid, long timestamp) {
+        Value result = nextMonotonicValue(previousUlid, timestamp);
+        if (result.compareTo(previousUlid) < 1) {
+            return Optional.empty();
+        }
+        return Optional.of(result);
+    }
+
+    /**
+     * @param mostSignificantBits  The most significant 64 bits of this ULID.
+     * @param leastSignificantBits The least significant 64 bits of this ULID.
+     */
+    public record Value(long mostSignificantBits, long leastSignificantBits) implements Comparable<Value> {
+
+        public long timestamp() {
+            return mostSignificantBits >>> 16;
+        }
+
+        public byte[] toBytes() {
+            byte[] result = new byte[16];
+            for (int i = 0; i < 8; i++) {
+                result[i] = (byte) ((mostSignificantBits >> ((7 - i) * 8)) & 0xFF);
+            }
+            for (int i = 8; i < 16; i++) {
+                result[i] = (byte) ((leastSignificantBits >> ((15 - i) * 8)) & 0xFF);
+            }
+
+            return result;
+        }
+
+        public Value increment() {
+            long lsb = leastSignificantBits;
+            if (lsb != 0xFFFF_FFFF_FFFF_FFFFL) {
+                return new Value(mostSignificantBits, lsb + 1);
+            }
+            long msb = mostSignificantBits;
+            if ((msb & RANDOM_MSB_MASK) != RANDOM_MSB_MASK) {
+                return new Value(msb + 1, 0);
+            }
+            return new Value(msb & TIMESTAMP_MSB_MASK, 0);
+        }
+
+        @Override
+        public int hashCode() {
+            long hilo = mostSignificantBits ^ leastSignificantBits;
+            return ((int) (hilo >> 32)) ^ (int) hilo;
+        }
+
+        @Override
+        public int compareTo(Value val) {
+            return (this.mostSignificantBits < val.mostSignificantBits ? -1
+                    : (this.mostSignificantBits > val.mostSignificantBits ? 1
+                    : (Long.compare(this.leastSignificantBits, val.leastSignificantBits))));
+        }
+
+        @Override
+        public String toString() {
+            char[] buffer = new char[26];
+
+            internalWriteCrockford(buffer, timestamp(), 10, 0);
+            long value = ((mostSignificantBits & 0xFFFFL) << 24);
+            long interim = (leastSignificantBits >>> 40);
+            value = value | interim;
+            internalWriteCrockford(buffer, value, 8, 10);
+            internalWriteCrockford(buffer, leastSignificantBits, 8, 18);
+
+            return new String(buffer);
+        }
+
     }
 
 }

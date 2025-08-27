@@ -2,6 +2,7 @@ package ext.library.tool.domain;
 
 
 import ext.library.tool.constant.Symbol;
+
 import java.util.Objects;
 
 /**
@@ -15,17 +16,17 @@ import java.util.Objects;
  */
 public class Version {
 
-    static final String DELIMITER = "\\.";
+    private static final String DELIMITER = "\\.";
 
     /**
      * 版本号
      */
-    String version;
+    private String version;
 
     /**
      * 是否完整模式，默认使用完整模式
      */
-    boolean complete = true;
+    private boolean complete = true;
 
     /**
      * 私有实例化构造方法
@@ -38,97 +39,14 @@ public class Version {
     }
 
     /**
-     * 不完整模式
-     *
-     * @return {Version}
-     */
-    public Version incomplete() {
-        this.complete = false;
-        return this;
-    }
-
-    /**
      * 构造器
      *
      * @param version 版本
+     *
      * @return {Version}
      */
     public static Version of(String version) {
         return new Version(version);
-    }
-
-    /**
-     * 比较版本号是否相同
-     * <p>
-     * example: * Version.of("v0.3").eq("v0.4")
-     *
-     * @param version 字符串版本号
-     * @return {boolean}
-     */
-    public boolean eq(String version) {
-        return compare(version) == 0;
-    }
-
-    /**
-     * 不相同
-     * <p>
-     * example: * Version.of("v0.3").ne("v0.4")
-     *
-     * @param version 字符串版本号
-     * @return {boolean}
-     */
-    public boolean ne(String version) {
-        return compare(version) != 0;
-    }
-
-    /**
-     * 大于
-     *
-     * @param version 版本号
-     * @return 是否大于
-     */
-    public boolean gt(String version) {
-        return compare(version) > 0;
-    }
-
-    /**
-     * 大于和等于
-     *
-     * @param version 版本号
-     * @return 是否大于和等于
-     */
-    public boolean gte(String version) {
-        return compare(version) >= 0;
-    }
-
-    /**
-     * 小于
-     *
-     * @param version 版本号
-     * @return 是否小于
-     */
-    public boolean lt(String version) {
-        return compare(version) < 0;
-    }
-
-    /**
-     * 小于和等于
-     *
-     * @param version 版本号
-     * @return 是否小于和等于
-     */
-    public boolean lte(String version) {
-        return compare(version) <= 0;
-    }
-
-    /**
-     * 和另外一个版本号比较
-     *
-     * @param version 版本号
-     * @return {int}
-     */
-    private int compare(String version) {
-        return Version.compare(this.version, version, complete);
     }
 
     /**
@@ -137,6 +55,7 @@ public class Version {
      * @param v1       v1
      * @param v2       v2
      * @param complete 是否完整的比较两个版本
+     *
      * @return (v1 < v2) ? -1 : ((v1 == v2) ? 0 : 1)
      */
     private static int compare(String v1, String v2, boolean complete) {
@@ -171,6 +90,97 @@ public class Version {
         }
 
         return 0;
+    }
+
+    /**
+     * 不完整模式
+     *
+     * @return {Version}
+     */
+    public Version incomplete() {
+        this.complete = false;
+        return this;
+    }
+
+    /**
+     * 比较版本号是否相同
+     * <p>
+     * example: * Version.of("v0.3").eq("v0.4")
+     *
+     * @param version 字符串版本号
+     *
+     * @return {boolean}
+     */
+    public boolean eq(String version) {
+        return compare(version) == 0;
+    }
+
+    /**
+     * 不相同
+     * <p>
+     * example: * Version.of("v0.3").ne("v0.4")
+     *
+     * @param version 字符串版本号
+     *
+     * @return {boolean}
+     */
+    public boolean ne(String version) {
+        return compare(version) != 0;
+    }
+
+    /**
+     * 大于
+     *
+     * @param version 版本号
+     *
+     * @return 是否大于
+     */
+    public boolean gt(String version) {
+        return compare(version) > 0;
+    }
+
+    /**
+     * 大于和等于
+     *
+     * @param version 版本号
+     *
+     * @return 是否大于和等于
+     */
+    public boolean gte(String version) {
+        return compare(version) >= 0;
+    }
+
+    /**
+     * 小于
+     *
+     * @param version 版本号
+     *
+     * @return 是否小于
+     */
+    public boolean lt(String version) {
+        return compare(version) < 0;
+    }
+
+    /**
+     * 小于和等于
+     *
+     * @param version 版本号
+     *
+     * @return 是否小于和等于
+     */
+    public boolean lte(String version) {
+        return compare(version) <= 0;
+    }
+
+    /**
+     * 和另外一个版本号比较
+     *
+     * @param version 版本号
+     *
+     * @return {int}
+     */
+    private int compare(String version) {
+        return Version.compare(this.version, version, complete);
     }
 
 }

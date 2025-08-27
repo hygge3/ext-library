@@ -25,9 +25,9 @@ public class RateLimiterAspect {
     /**
      * 缓存方法上的源注解信息。减少反射的开销
      */
-    static final Map<String, RateLimiter> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, RateLimiter> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
 
-    final IRateLimitHandler rateLimitHandler;
+    private final IRateLimitHandler rateLimitHandler;
 
     /**
      * 限流注解切面

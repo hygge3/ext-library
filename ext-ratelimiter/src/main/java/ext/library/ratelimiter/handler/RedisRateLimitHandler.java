@@ -17,15 +17,17 @@ import java.util.Collections;
 @Slf4j
 public class RedisRateLimitHandler implements IRateLimitHandler {
 
-    /** Redis Lua 脚本 */
+    /** Redis 中的 Lua 脚本，用于实现限流功能。它通过指定的键（key）来记录访问次数，如果访问次数超过设定的阈值（count），则拒绝访问；否则增加访问计数并设置过期时间。 */
     // language=redis
     static final RedisScript<Long> REDIS_SCRIPT_RATE_LIMIT = RedisScript.of("""
+            -- 获取 key
             local key = KEYS[1];
             local count = tonumber(ARGV[1]);
             local interval = tonumber(ARGV[2]);
             local current = tonumber(redis.call('get', key) or "0")
+            -- 超过限流次数直接返回 0
             if current + 1 > count then return 0
-            else redis.call("INCRBY", key, "1") redis.call("expire", key, interval) return current + 1 end
+            else redis.call("INCRBY", key, "1") redis.call("EXPIRE", key, interval) return current + 1 end
             """, Long.class);
 
     @Setter
@@ -40,8 +42,7 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
             log.debug("[🚥] rate.limit.key = {}", key);
         }
 
-        Long currentCount = redisTemplate.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key),
-                String.valueOf(rateLimiter.count()), String.valueOf(interval));
+        Long currentCount = redisTemplate.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key), String.valueOf(rateLimiter.count()), String.valueOf(interval));
         if (currentCount > 0 && currentCount <= rateLimiter.count()) {
             if (log.isDebugEnabled()) {
                 log.debug("[🚥] 限制期内的第 {} 次访问", currentCount);
