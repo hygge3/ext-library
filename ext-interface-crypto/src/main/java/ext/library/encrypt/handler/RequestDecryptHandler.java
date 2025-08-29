@@ -1,14 +1,10 @@
 package ext.library.encrypt.handler;
 
-import ext.library.crypto.AESUtil;
-import ext.library.crypto.DESUtil;
-import ext.library.crypto.RSAUtil;
-import ext.library.crypto.SM2Util;
-import ext.library.crypto.SM4Util;
 import ext.library.encrypt.annotation.RequestDecrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -29,7 +25,6 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * 请求解密处理器
@@ -54,15 +49,9 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
         String decryptStr = StreamUtils.copyToString(inputMessage.getBody(), Charset.defaultCharset());
 
         try {
+            String secretKey = StringUtil.isBlank(cryptoProperties.getPrivateKey()) ? cryptoProperties.getSecretKey() : cryptoProperties.getPrivateKey();
             Algorithm algo = cryptoProperties.getAlgo();
-            String decrypt = switch (algo) {
-                case RSA -> RSAUtil.decrypt(cryptoProperties.getPrivateKey(), decryptStr);
-                case SM2 -> SM2Util.decrypt(cryptoProperties.getPrivateKey(), decryptStr);
-                case AES -> AESUtil.decrypt(cryptoProperties.getSecretKey(), decryptStr, cryptoProperties.getSalt());
-                case DES -> DESUtil.decrypt(cryptoProperties.getSecretKey(), decryptStr);
-                case SM4 -> SM4Util.decryptByECB(cryptoProperties.getSecretKey(), decryptStr);
-                case BASE64 -> new String(Base64.getDecoder().decode(decryptStr), StandardCharsets.UTF_8);
-            };
+            String decrypt = algo.getCryptoStrategy().decrypt(secretKey, decryptStr, cryptoProperties.getSalt());
             return new HttpInputMessage() {
                 @Nonnull
                 @Override

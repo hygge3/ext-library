@@ -1,14 +1,11 @@
 package ext.library.encrypt.handler;
 
-import ext.library.crypto.AESUtil;
-import ext.library.crypto.DESUtil;
-import ext.library.crypto.RSAUtil;
-import ext.library.crypto.SM2Util;
-import ext.library.crypto.SM4Util;
 import ext.library.encrypt.annotation.ResponseEncrypt;
+import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -23,8 +20,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * 响应加密处理器
@@ -51,14 +46,9 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
         }
         String json = JsonUtil.toJson(body);
         try {
-            return switch (cryptoProperties.getAlgo()) {
-                case RSA -> RSAUtil.encrypt(cryptoProperties.getPublicKey(), json);
-                case SM2 -> SM2Util.encrypt(cryptoProperties.getPublicKey(), json);
-                case AES -> AESUtil.encrypt(cryptoProperties.getSecretKey(), json, cryptoProperties.getSalt());
-                case DES -> DESUtil.encrypt(cryptoProperties.getSecretKey(), json);
-                case SM4 -> SM4Util.encryptByECB(cryptoProperties.getSecretKey(), json);
-                case BASE64 -> Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-            };
+            String secretKey = StringUtil.isBlank(cryptoProperties.getPublicKey()) ? cryptoProperties.getSecretKey() : cryptoProperties.getPublicKey();
+            Algorithm algo = cryptoProperties.getAlgo();
+            return algo.getCryptoStrategy().decrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
             log.error("响应加密异常", e);
             throw Exceptions.throwOut("响应加密异常，uri:{}", request.getURI().toString());
