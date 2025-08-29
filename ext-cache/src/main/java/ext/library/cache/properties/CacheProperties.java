@@ -15,7 +15,7 @@ public class CacheProperties {
     /**
      * 通用的 key 前缀
      */
-    private String keyPrefix = "ext:cache";
+    private String keyPrefix = "ext";
 
     /**
      * 默认分隔符

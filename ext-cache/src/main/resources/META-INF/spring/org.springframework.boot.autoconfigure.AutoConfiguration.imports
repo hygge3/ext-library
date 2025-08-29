@@ -1,1 +1,2 @@
 ext.library.cache.properties.CacheProperties
+ext.library.cache.core.CacheAspect
