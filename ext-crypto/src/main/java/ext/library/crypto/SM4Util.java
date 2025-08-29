@@ -21,7 +21,9 @@ import java.util.Objects;
 @UtilityClass
 public class SM4Util {
     private static final String ALGORITHM = "SM4";
+    /** 电子密码本模式 */
     private static final String SM4_ECB = "SM4/ECB/PKCS7Padding";
+    /** 密码分组链接模式 */
     private static final String SM4_CBC = "SM4/CBC/PKCS7Padding";
 
     static {
