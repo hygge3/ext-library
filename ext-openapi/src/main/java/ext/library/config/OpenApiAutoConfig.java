@@ -37,9 +37,9 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfig {
 
-    final OpenApiProperties openApiProperties;
+    private final OpenApiProperties openApiProperties;
 
-    final ServerProperties serverProperties;
+    private final ServerProperties serverProperties;
 
     @Bean
     @ConditionalOnMissingBean(OpenAPI.class)

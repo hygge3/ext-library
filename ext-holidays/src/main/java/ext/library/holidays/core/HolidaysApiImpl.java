@@ -26,9 +26,9 @@ public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
     /**
      * 存储节假日
      */
-    static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = Maps.newHashMap();
+    private static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = Maps.newHashMap();
 
-    final HolidaysProperties properties;
+    private final HolidaysProperties properties;
 
     /**
      * 判断是否工作日

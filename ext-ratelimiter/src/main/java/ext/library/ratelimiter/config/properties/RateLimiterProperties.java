@@ -1,5 +1,6 @@
 package ext.library.ratelimiter.config.properties;
 
+import ext.library.ratelimiter.enums.RateLimiterType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,8 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = LimiterProperties.PREFIX)
-public class LimiterProperties {
+@ConfigurationProperties(prefix = RateLimiterProperties.PREFIX)
+public class RateLimiterProperties {
 
     /**
      * 配置前缀
@@ -21,5 +22,7 @@ public class LimiterProperties {
      * 开启限流
      */
     private boolean enable = true;
+
+    private RateLimiterType rateLimiterType;
 
 }

@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 时间工具类
@@ -45,10 +46,29 @@ public final class DateUtil {
     /** 时间格式化 HMS */
     public final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
 
+    /**
+     * 使用指定的格式化器格式化时间对象
+     *
+     * @param temporal  需要格式化的时间对象
+     * @param formatter 时间格式化器
+     *
+     * @return 格式化后的时间字符串
+     */
     public String format(Temporal temporal, DateTimeFormatter formatter) {
         return formatter.format(temporal);
     }
 
+    /**
+     * 将时间间隔和时间单位转换为 Duration 对象
+     *
+     * @param interval 时间间隔
+     * @param timeUnit 时间单位
+     *
+     * @return 转换后的 Duration 对象
+     */
+    public Duration convert(long interval, TimeUnit timeUnit) {
+        return Duration.of(interval, timeUnit.toChronoUnit());
+    }
     // endregion Common
 
     // region LocalDateTime

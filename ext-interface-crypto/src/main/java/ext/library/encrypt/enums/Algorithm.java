@@ -17,5 +17,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Algorithm {
     RSA(new RSAStrategy()), SM2(new SM2Strategy()), AES(new AESStrategy()), DES(new DESStrategy()), SM4(new SM4Strategy()), BASE64(new Base64Strategy());
-    final CryptoStrategy cryptoStrategy;
+    private final CryptoStrategy cryptoStrategy;
 }

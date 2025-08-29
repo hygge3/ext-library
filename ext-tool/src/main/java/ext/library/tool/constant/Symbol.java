@@ -242,6 +242,9 @@ public interface Symbol {
     /** 空 JSON */
     String EMPTY_JSON = "{}";
 
+    /** 全局前缀 */
+    String GLOBAL_PREFIX = "ext";
+
     /** 十六进制字符大写字符串 */
     String HEX_CHAR_STRING_UPPER = "0123456789ABCDEF";
 

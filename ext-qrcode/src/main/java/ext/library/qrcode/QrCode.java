@@ -1,7 +1,5 @@
 package ext.library.qrcode;
 
-import jakarta.annotation.Nonnull;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -20,6 +18,8 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ImageUtil;
+
+import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -43,57 +43,47 @@ public class QrCode {
     /**
      * 二维码内容
      */
-    final String content;
-
-    /**
-     * 图片大小
-     */
-    int size;
-
-    /**
-     * 内容编码格式
-     */
-    Charset encode;
-
-    /**
-     * 错误修正等级 (Error Collection Level)
-     */
-    ErrorCorrectionLevel errorCorrectionLevel;
-
-    /**
-     * 错误修正等级的具体值
-     */
-    double errorCorrectionLevelValue;
-
-    /**
-     * 前景色
-     */
-    Color foreGroundColor;
-
-    /**
-     * 背景色
-     */
-    Color backGroundColor;
-
-    /**
-     * 图片的文件格式
-     */
-    String imageFormat;
-
-    /**
-     * 删除图片的外白边
-     */
-    boolean deleteMargin;
-
+    private final String content;
     /**
      * 提供给编码器额外的参数
      */
-    final Map<EncodeHintType, Object> hints;
-
+    private final Map<EncodeHintType, Object> hints;
+    /**
+     * 图片大小
+     */
+    private int size;
+    /**
+     * 内容编码格式
+     */
+    private Charset encode;
+    /**
+     * 错误修正等级 (Error Collection Level)
+     */
+    private ErrorCorrectionLevel errorCorrectionLevel;
+    /**
+     * 错误修正等级的具体值
+     */
+    private double errorCorrectionLevelValue;
+    /**
+     * 前景色
+     */
+    private Color foreGroundColor;
+    /**
+     * 背景色
+     */
+    private Color backGroundColor;
+    /**
+     * 图片的文件格式
+     */
+    private String imageFormat;
+    /**
+     * 删除图片的外白边
+     */
+    private boolean deleteMargin;
     /**
      * 需要添加的图片
      */
-    BufferedImage logo;
+    private BufferedImage logo;
 
     /**
      * 创建一个带有默认值的 QRCode 生成器的格式。默认值如下
@@ -125,6 +115,7 @@ public class QrCode {
      * 使用带默认值的「QRCode 生成器格式」来创建一个 QRCode 处理器。
      *
      * @param content 所要生成 QRCode 的内容
+     *
      * @return QRCode
      */
     public static QrCode form(final String content) {
@@ -132,308 +123,10 @@ public class QrCode {
     }
 
     /**
-     * 设置图片的大小。图片的大小等于实际内容与外边距的值（建议设置成偶数值）。
-     *
-     * @param size 图片的大小
-     * @return QRCode
-     */
-    public QrCode size(int size) {
-        this.size = size;
-        return this;
-    }
-
-    /**
-     * 设置内容编码格式。
-     *
-     * @param encode 内容编码格式
-     * @return QRCode
-     */
-    public QrCode encode(Charset encode) {
-        if (null != encode) {
-            this.encode = encode;
-        }
-        return this;
-    }
-
-    /**
-     * 设置错误修正等级。其定义如下
-     *
-     * <ul>
-     * <li>L: 有 7% 的内容可被修正</li>
-     * <li>M: 有 15% 的内容可被修正</li>
-     * <li>Q: 有 25% 的内容可被修正</li>
-     * <li>H: 有 30% 的内容可被修正</li>
-     * </ul>
-     *
-     * @param errorCorrectionLevel 错误修正等级
-     * @return QRCode
-     */
-    public QrCode errorCorrectionLevel(ErrorCorrectionLevel errorCorrectionLevel) {
-        switch (errorCorrectionLevel) {
-            case L -> {
-                this.errorCorrectionLevel = errorCorrectionLevel;
-                this.errorCorrectionLevelValue = 0.07;
-            }
-            case M -> {
-                this.errorCorrectionLevel = errorCorrectionLevel;
-                this.errorCorrectionLevelValue = 0.15;
-            }
-            case Q -> {
-                this.errorCorrectionLevel = errorCorrectionLevel;
-                this.errorCorrectionLevelValue = 0.25;
-            }
-            case H -> {
-                this.errorCorrectionLevel = errorCorrectionLevel;
-                this.errorCorrectionLevelValue = 0.3;
-            }
-            default -> {
-                this.errorCorrectionLevel = ErrorCorrectionLevel.M;
-                this.errorCorrectionLevelValue = 0.15;
-            }
-        }
-        return this;
-    }
-
-    /**
-     * 设置前景色。值为十六进制的颜色值（与 CSS 定义颜色的值相同，不支持简写），可以忽略「#」符号。
-     *
-     * @param foreGroundColor 前景色的值
-     * @return QRCode
-     */
-    public QrCode foreGroundColor(String foreGroundColor) {
-        try {
-            this.foreGroundColor = getColor(foreGroundColor);
-        } catch (NumberFormatException e) {
-            this.foreGroundColor = Color.BLACK;
-        }
-        return this;
-    }
-
-    /**
-     * 设置前景色。
-     *
-     * @param foreGroundColor 前景色的值
-     * @return QRCode
-     */
-    public QrCode foreGroundColor(Color foreGroundColor) {
-        this.foreGroundColor = foreGroundColor;
-        return this;
-    }
-
-    /**
-     * 设置背景色。值为十六进制的颜色值（与 CSS 定义颜色的值相同，不支持简写），可以忽略「#」符号。
-     *
-     * @param backGroundColor 前景色的值
-     * @return QRCode
-     */
-    public QrCode backGroundColor(String backGroundColor) {
-        try {
-            this.backGroundColor = getColor(backGroundColor);
-        } catch (NumberFormatException e) {
-            this.backGroundColor = Color.WHITE;
-        }
-        return this;
-    }
-
-    /**
-     * 设置背景色。
-     *
-     * @param backGroundColor 前景色的值
-     * @return QRCode
-     */
-    public QrCode backGroundColor(Color backGroundColor) {
-        this.backGroundColor = backGroundColor;
-        return this;
-    }
-
-    /**
-     * 设置图片的文件格式。
-     *
-     * @param imageFormat 图片的文件格式
-     * @return QRCode
-     */
-    public QrCode imageFormat(String imageFormat) {
-        if (imageFormat != null) {
-            this.imageFormat = imageFormat.toLowerCase();
-        }
-        return this;
-    }
-
-    /**
-     * 删除白边。
-     *
-     * @param deleteMargin 删除白边
-     * @return QRCode
-     */
-    public QrCode deleteMargin(boolean deleteMargin) {
-        this.deleteMargin = deleteMargin;
-        return this;
-    }
-
-    /**
-     * 返回提供给编码器额外的参数。
-     *
-     * @return 提供给编码器额外的参数
-     */
-    public Map<EncodeHintType, ?> getHints() {
-        hints.clear();
-        hints.put(EncodeHintType.ERROR_CORRECTION, this.errorCorrectionLevel);
-        hints.put(EncodeHintType.CHARACTER_SET, this.encode);
-        hints.put(EncodeHintType.MARGIN, 0);
-        return hints;
-    }
-
-    /**
-     * 设置添加的图片。
-     *
-     * @param logo 添加的图片
-     * @return QRCode
-     */
-    public QrCode logo(BufferedImage logo) {
-        this.logo = logo;
-        return this;
-    }
-
-    /**
-     * 设置添加的图片。
-     *
-     * @param logo 添加的图片
-     * @return QRCode
-     */
-    public QrCode logo(File logo) {
-        return logo(ImageUtil.read(logo));
-    }
-
-    /**
-     * 设置添加的图片。
-     *
-     * @param url 添加的图片
-     * @return QRCode
-     */
-    public QrCode logo(URL url) {
-        return logo(ImageUtil.read(url));
-    }
-
-    /**
-     * 设置添加的图片。
-     *
-     * @param iconPath 添加的图片
-     * @return QRCode
-     */
-    public QrCode logo(String iconPath) {
-        return logo(ImageUtil.read(iconPath));
-    }
-
-    /**
-     * 设置添加的图片。
-     *
-     * @param logoStream 添加的图片流
-     * @return QRCode
-     */
-    public QrCode logo(InputStream logoStream) {
-        return logo(ImageUtil.read(logoStream));
-    }
-
-    /**
-     * 写出二维码
-     *
-     * @param output OutputStream
-     * @return 是否成功
-     */
-    public boolean write(OutputStream output) {
-        BufferedImage bufferedImage = this.toImage();
-        return ImageUtil.write(bufferedImage, this.imageFormat, output);
-    }
-
-    /**
-     * 把指定的内容生成为一个 QRCode 的图片，之后保存到指定的文件中。
-     *
-     * @param f 指定的文件
-     * @return 文件
-     */
-    public File toFile(String f) {
-        return toFile(new File(f));
-    }
-
-    /**
-     * 把指定的内容生成为一个 QrCode 的图片，之后保存到指定的文件中。
-     *
-     * @param qrCodeFile 指定的文件
-     * @return 文件
-     */
-    public File toFile(@Nonnull File qrCodeFile) {
-        if (!qrCodeFile.exists()) {
-            qrCodeFile.getParentFile().mkdirs();
-        }
-        BufferedImage bufferedImage = this.toImage();
-        ImageUtil.write(bufferedImage, this.imageFormat, qrCodeFile);
-        return qrCodeFile;
-    }
-
-    /**
-     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的 base64 image。
-     *
-     * @return base64 字符串
-     */
-    public String toBase64() {
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(toBytes());
-    }
-
-    /**
-     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的 byte 数组。
-     *
-     * @return byte array
-     */
-    public byte[] toBytes() {
-        BufferedImage bufferedImage = this.toImage();
-        return ImageUtil.writeAsBytes(bufferedImage, this.imageFormat);
-    }
-
-    /**
-     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的流。
-     *
-     * @return QRCode 的图像流
-     */
-    public ByteArrayInputStream toStream() {
-        BufferedImage bufferedImage = this.toImage();
-        return ImageUtil.writeAsStream(bufferedImage, this.imageFormat);
-    }
-
-    /**
-     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的图像对象。
-     *
-     * @return QRCode 的图像对象
-     */
-    public BufferedImage toImage() {
-        BitMatrix matrix;
-        try {
-            matrix = new QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, this.size, this.size, this.getHints());
-        } catch (WriterException e) {
-            throw Exceptions.unchecked(e);
-        }
-        if (this.deleteMargin) {
-            matrix = deleteWhite(matrix);
-        }
-        int width = matrix.getWidth();
-        int height = matrix.getHeight();
-        int fgColor = this.foreGroundColor.getRGB();
-        int bgColor = this.backGroundColor.getRGB();
-        BufferedImage image = new BufferedImage(width, height, ColorSpace.TYPE_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                image.setRGB(x, y, matrix.get(x, y) ? fgColor : bgColor);
-            }
-        }
-        if (null != this.logo) {
-            addLogo(image, this.logo, this);
-        }
-        return image;
-    }
-
-    /**
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 文件
+     *
      * @return QRCode 中的内容
      */
     public static String read(String qrCodeFile) {
@@ -444,6 +137,7 @@ public class QrCode {
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 图片文件
+     *
      * @return QRCode 中的内容
      */
     public static String read(File qrCodeFile) {
@@ -454,6 +148,7 @@ public class QrCode {
      * 从指定的 QRCode 图片链接中解析出其内容。
      *
      * @param qrCodeUrl QRCode 图片链接
+     *
      * @return QRCode 中的内容
      */
     public static String read(URL qrCodeUrl) {
@@ -464,6 +159,7 @@ public class QrCode {
      * 从指定的 QRCode 图像对象中解析出其内容。
      *
      * @param qrCodeImage QRCode 图像对象
+     *
      * @return QRCode 中的内容
      */
     public static String read(BufferedImage qrCodeImage) {
@@ -474,6 +170,7 @@ public class QrCode {
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 文件
+     *
      * @return QRCode 中的内容
      */
     public static String read(String qrCodeFile, Charset encode) {
@@ -484,6 +181,7 @@ public class QrCode {
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 图片文件
+     *
      * @return QRCode 中的内容
      */
     public static String read(File qrCodeFile, Charset encode) {
@@ -494,6 +192,7 @@ public class QrCode {
      * 从指定的 QRCode 图片链接中解析出其内容。
      *
      * @param qrCodeUrl QRCode 图片链接
+     *
      * @return QRCode 中的内容
      */
     public static String read(URL qrCodeUrl, Charset encode) {
@@ -504,6 +203,7 @@ public class QrCode {
      * 从指定的 QRCode 图像对象中解析出其内容。
      *
      * @param qrCodeImage QRCode 图像对象
+     *
      * @return QRCode 中的内容
      */
     public static String read(BufferedImage qrCodeImage, Charset encode) {
@@ -517,6 +217,7 @@ public class QrCode {
      *
      * @param qrCodeImage QRCode 图像对象
      * @param hints       hints
+     *
      * @return QRCode 中的内容
      */
     public static String read(BufferedImage qrCodeImage, Map<DecodeHintType, ?> hints) {
@@ -536,6 +237,7 @@ public class QrCode {
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 文件
+     *
      * @return QRCode 中的内容
      */
     public static byte[] readRawBytes(String qrCodeFile) {
@@ -546,6 +248,7 @@ public class QrCode {
      * 从指定的 QRCode 图片文件中解析出其内容。
      *
      * @param qrCodeFile QRCode 图片文件
+     *
      * @return QRCode 中的内容
      */
     public static byte[] readRawBytes(File qrCodeFile) {
@@ -556,6 +259,7 @@ public class QrCode {
      * 从指定的 QRCode 图片链接中解析出其内容。
      *
      * @param qrCodeUrl QRCode 图片链接
+     *
      * @return QRCode 中的内容
      */
     public static byte[] readRawBytes(URL qrCodeUrl) {
@@ -566,6 +270,7 @@ public class QrCode {
      * 从指定的 QRCode 图像对象中解析出其内容。
      *
      * @param qrCodeImage QRCode 图像对象
+     *
      * @return QRCode 中的内容
      */
     public static byte[] readRawBytes(BufferedImage qrCodeImage) {
@@ -636,6 +341,322 @@ public class QrCode {
             }
         }
         return resMatrix;
+    }
+
+    /**
+     * 设置图片的大小。图片的大小等于实际内容与外边距的值（建议设置成偶数值）。
+     *
+     * @param size 图片的大小
+     *
+     * @return QRCode
+     */
+    public QrCode size(int size) {
+        this.size = size;
+        return this;
+    }
+
+    /**
+     * 设置内容编码格式。
+     *
+     * @param encode 内容编码格式
+     *
+     * @return QRCode
+     */
+    public QrCode encode(Charset encode) {
+        if (null != encode) {
+            this.encode = encode;
+        }
+        return this;
+    }
+
+    /**
+     * 设置错误修正等级。其定义如下
+     *
+     * <ul>
+     * <li>L: 有 7% 的内容可被修正</li>
+     * <li>M: 有 15% 的内容可被修正</li>
+     * <li>Q: 有 25% 的内容可被修正</li>
+     * <li>H: 有 30% 的内容可被修正</li>
+     * </ul>
+     *
+     * @param errorCorrectionLevel 错误修正等级
+     *
+     * @return QRCode
+     */
+    public QrCode errorCorrectionLevel(ErrorCorrectionLevel errorCorrectionLevel) {
+        switch (errorCorrectionLevel) {
+            case L -> {
+                this.errorCorrectionLevel = errorCorrectionLevel;
+                this.errorCorrectionLevelValue = 0.07;
+            }
+            case M -> {
+                this.errorCorrectionLevel = errorCorrectionLevel;
+                this.errorCorrectionLevelValue = 0.15;
+            }
+            case Q -> {
+                this.errorCorrectionLevel = errorCorrectionLevel;
+                this.errorCorrectionLevelValue = 0.25;
+            }
+            case H -> {
+                this.errorCorrectionLevel = errorCorrectionLevel;
+                this.errorCorrectionLevelValue = 0.3;
+            }
+            default -> {
+                this.errorCorrectionLevel = ErrorCorrectionLevel.M;
+                this.errorCorrectionLevelValue = 0.15;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * 设置前景色。值为十六进制的颜色值（与 CSS 定义颜色的值相同，不支持简写），可以忽略「#」符号。
+     *
+     * @param foreGroundColor 前景色的值
+     *
+     * @return QRCode
+     */
+    public QrCode foreGroundColor(String foreGroundColor) {
+        try {
+            this.foreGroundColor = getColor(foreGroundColor);
+        } catch (NumberFormatException e) {
+            this.foreGroundColor = Color.BLACK;
+        }
+        return this;
+    }
+
+    /**
+     * 设置前景色。
+     *
+     * @param foreGroundColor 前景色的值
+     *
+     * @return QRCode
+     */
+    public QrCode foreGroundColor(Color foreGroundColor) {
+        this.foreGroundColor = foreGroundColor;
+        return this;
+    }
+
+    /**
+     * 设置背景色。值为十六进制的颜色值（与 CSS 定义颜色的值相同，不支持简写），可以忽略「#」符号。
+     *
+     * @param backGroundColor 前景色的值
+     *
+     * @return QRCode
+     */
+    public QrCode backGroundColor(String backGroundColor) {
+        try {
+            this.backGroundColor = getColor(backGroundColor);
+        } catch (NumberFormatException e) {
+            this.backGroundColor = Color.WHITE;
+        }
+        return this;
+    }
+
+    /**
+     * 设置背景色。
+     *
+     * @param backGroundColor 前景色的值
+     *
+     * @return QRCode
+     */
+    public QrCode backGroundColor(Color backGroundColor) {
+        this.backGroundColor = backGroundColor;
+        return this;
+    }
+
+    /**
+     * 设置图片的文件格式。
+     *
+     * @param imageFormat 图片的文件格式
+     *
+     * @return QRCode
+     */
+    public QrCode imageFormat(String imageFormat) {
+        if (imageFormat != null) {
+            this.imageFormat = imageFormat.toLowerCase();
+        }
+        return this;
+    }
+
+    /**
+     * 删除白边。
+     *
+     * @param deleteMargin 删除白边
+     *
+     * @return QRCode
+     */
+    public QrCode deleteMargin(boolean deleteMargin) {
+        this.deleteMargin = deleteMargin;
+        return this;
+    }
+
+    /**
+     * 返回提供给编码器额外的参数。
+     *
+     * @return 提供给编码器额外的参数
+     */
+    public Map<EncodeHintType, ?> getHints() {
+        hints.clear();
+        hints.put(EncodeHintType.ERROR_CORRECTION, this.errorCorrectionLevel);
+        hints.put(EncodeHintType.CHARACTER_SET, this.encode);
+        hints.put(EncodeHintType.MARGIN, 0);
+        return hints;
+    }
+
+    /**
+     * 设置添加的图片。
+     *
+     * @param logo 添加的图片
+     *
+     * @return QRCode
+     */
+    public QrCode logo(BufferedImage logo) {
+        this.logo = logo;
+        return this;
+    }
+
+    /**
+     * 设置添加的图片。
+     *
+     * @param logo 添加的图片
+     *
+     * @return QRCode
+     */
+    public QrCode logo(File logo) {
+        return logo(ImageUtil.read(logo));
+    }
+
+    /**
+     * 设置添加的图片。
+     *
+     * @param url 添加的图片
+     *
+     * @return QRCode
+     */
+    public QrCode logo(URL url) {
+        return logo(ImageUtil.read(url));
+    }
+
+    /**
+     * 设置添加的图片。
+     *
+     * @param iconPath 添加的图片
+     *
+     * @return QRCode
+     */
+    public QrCode logo(String iconPath) {
+        return logo(ImageUtil.read(iconPath));
+    }
+
+    /**
+     * 设置添加的图片。
+     *
+     * @param logoStream 添加的图片流
+     *
+     * @return QRCode
+     */
+    public QrCode logo(InputStream logoStream) {
+        return logo(ImageUtil.read(logoStream));
+    }
+
+    /**
+     * 写出二维码
+     *
+     * @param output OutputStream
+     *
+     * @return 是否成功
+     */
+    public boolean write(OutputStream output) {
+        BufferedImage bufferedImage = this.toImage();
+        return ImageUtil.write(bufferedImage, this.imageFormat, output);
+    }
+
+    /**
+     * 把指定的内容生成为一个 QRCode 的图片，之后保存到指定的文件中。
+     *
+     * @param f 指定的文件
+     *
+     * @return 文件
+     */
+    public File toFile(String f) {
+        return toFile(new File(f));
+    }
+
+    /**
+     * 把指定的内容生成为一个 QrCode 的图片，之后保存到指定的文件中。
+     *
+     * @param qrCodeFile 指定的文件
+     *
+     * @return 文件
+     */
+    public File toFile(@Nonnull File qrCodeFile) {
+        if (!qrCodeFile.exists()) {
+            qrCodeFile.getParentFile().mkdirs();
+        }
+        BufferedImage bufferedImage = this.toImage();
+        ImageUtil.write(bufferedImage, this.imageFormat, qrCodeFile);
+        return qrCodeFile;
+    }
+
+    /**
+     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的 base64 image。
+     *
+     * @return base64 字符串
+     */
+    public String toBase64() {
+        return "data:image/png;base64," + Base64.getEncoder().encodeToString(toBytes());
+    }
+
+    /**
+     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的 byte 数组。
+     *
+     * @return byte array
+     */
+    public byte[] toBytes() {
+        BufferedImage bufferedImage = this.toImage();
+        return ImageUtil.writeAsBytes(bufferedImage, this.imageFormat);
+    }
+
+    /**
+     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的流。
+     *
+     * @return QRCode 的图像流
+     */
+    public ByteArrayInputStream toStream() {
+        BufferedImage bufferedImage = this.toImage();
+        return ImageUtil.writeAsStream(bufferedImage, this.imageFormat);
+    }
+
+    /**
+     * 使用带默认值的「QrCode 生成器格式」，把指定的内容生成为一个 QrCode 的图像对象。
+     *
+     * @return QRCode 的图像对象
+     */
+    public BufferedImage toImage() {
+        BitMatrix matrix;
+        try {
+            matrix = new QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, this.size, this.size, this.getHints());
+        } catch (WriterException e) {
+            throw Exceptions.unchecked(e);
+        }
+        if (this.deleteMargin) {
+            matrix = deleteWhite(matrix);
+        }
+        int width = matrix.getWidth();
+        int height = matrix.getHeight();
+        int fgColor = this.foreGroundColor.getRGB();
+        int bgColor = this.backGroundColor.getRGB();
+        BufferedImage image = new BufferedImage(width, height, ColorSpace.TYPE_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setRGB(x, y, matrix.get(x, y) ? fgColor : bgColor);
+            }
+        }
+        if (null != this.logo) {
+            addLogo(image, this.logo, this);
+        }
+        return image;
     }
 
 }

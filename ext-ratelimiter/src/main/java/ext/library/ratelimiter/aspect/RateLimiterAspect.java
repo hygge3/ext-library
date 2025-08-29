@@ -1,6 +1,6 @@
 package ext.library.ratelimiter.aspect;
 
-import ext.library.ratelimiter.annotation.RateLimiter;
+import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
@@ -25,7 +25,7 @@ public class RateLimiterAspect {
     /**
      * 缓存方法上的源注解信息。减少反射的开销
      */
-    private static final Map<String, RateLimiter> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, RateLimit> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
 
     private final IRateLimitHandler rateLimitHandler;
 
@@ -38,15 +38,15 @@ public class RateLimiterAspect {
      *
      * @throws Throwable 限流异常
      */
-    @Around("@annotation(ext.library.ratelimiter.annotation.RateLimiter)")
+    @Around("@annotation(ext.library.ratelimiter.annotation.RateLimit)")
     public Object interceptor(@Nonnull ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
-        RateLimiter rateLimiter = getRateLimit(signature.getMethod(), method.getName());
-        if (rateLimitHandler.proceed(rateLimiter, pjp)) {
+        RateLimit rateLimit = getRateLimit(signature.getMethod(), method.getName());
+        if (rateLimitHandler.proceed(rateLimit, pjp)) {
             return pjp.proceed();
         } else {
-            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimiter.msg()) ? "触发限流" : rateLimiter.msg());
+            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
         }
     }
 
@@ -58,8 +58,8 @@ public class RateLimiterAspect {
      *
      * @return 方法对应的注解源信息，如果有，直接返回，如果无，获取放入缓存。
      */
-    public RateLimiter getRateLimit(Method method, String classMethodName) {
-        return RATE_LIMIT_MAP.computeIfAbsent(classMethodName, k -> method.getAnnotation(RateLimiter.class));
+    public RateLimit getRateLimit(Method method, String classMethodName) {
+        return RATE_LIMIT_MAP.computeIfAbsent(classMethodName, k -> method.getAnnotation(RateLimit.class));
     }
 
 }

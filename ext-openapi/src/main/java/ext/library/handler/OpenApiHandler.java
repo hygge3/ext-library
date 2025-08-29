@@ -50,72 +50,72 @@ public class OpenApiHandler extends OpenAPIService {
     /**
      * The Basic error controller.
      */
-    static Class<?> basicErrorController;
+    private static Class<?> basicErrorController;
 
     /**
      * The Security parser.
      */
-    final SecurityService securityParser;
+    private final SecurityService securityParser;
 
     /**
      * The Mappings map.
      */
-    final Map<String, Object> mappingsMap = new HashMap<>();
+    private final Map<String, Object> mappingsMap = new HashMap<>();
 
     /**
      * The Springdoc tags.
      */
-    final Map<HandlerMethod, Tag> springdocTags = new HashMap<>();
+    private final Map<HandlerMethod, Tag> springdocTags = new HashMap<>();
 
     /**
      * The Open api builder customisers.
      */
-    final Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomisers;
+    private final Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomisers;
 
     /**
      * The server base URL customisers.
      */
-    final Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers;
+    private final Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers;
 
     /**
      * The Spring doc config properties.
      */
-    final SpringDocConfigProperties springDocConfigProperties;
+    private final SpringDocConfigProperties springDocConfigProperties;
 
     /**
      * The Cached open api map.
      */
-    final Map<String, OpenAPI> cachedOpenAPI = new HashMap<>();
+    private final Map<String, OpenAPI> cachedOpenAPI = new HashMap<>();
 
     /**
      * The Property resolver utils.
      */
-    final PropertyResolverUtils propertyResolverUtils;
+    private final PropertyResolverUtils propertyResolverUtils;
 
     /**
      * The javadoc provider.
      */
-    final Optional<JavadocProvider> javadocProvider;
+    private final Optional<JavadocProvider> javadocProvider;
 
     /**
      * The Context.
      */
-    ApplicationContext context;
+    private ApplicationContext context;
 
     /**
      * The Open api.
      */
-    OpenAPI openAPI;
+    private OpenAPI openAPI;
 
     /**
      * The Is servers present.
      */
-    boolean isServersPresent;
+    private boolean isServersPresent;
 
     /**
      * The Server base url.
      */
-    String serverBaseUrl;
+    private String serverBaseUrl;
 
     /**
      * Instantiates a new Open api builder.
@@ -128,13 +128,8 @@ public class OpenApiHandler extends OpenAPIService {
      * @param serverBaseUrlCustomizers  the server base url customizers
      * @param javadocProvider           the javadoc provider
      */
-    public OpenApiHandler(Optional<OpenAPI> openAPI, SecurityService securityParser,
-                          SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils,
-                          Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers,
-                          Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers,
-                          Optional<JavadocProvider> javadocProvider) {
-        super(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomizers,
-                serverBaseUrlCustomizers, javadocProvider);
+    public OpenApiHandler(Optional<OpenAPI> openAPI, SecurityService securityParser, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils, Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers, Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers, Optional<JavadocProvider> javadocProvider) {
+        super(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
         if (openAPI.isPresent()) {
             this.openAPI = openAPI.get();
             if (this.openAPI.getComponents() == null) {
@@ -168,9 +163,7 @@ public class OpenApiHandler extends OpenAPIService {
         buildTagsFromClass(handlerMethod.getBeanType(), tags, tagsStr, locale);
 
         if (ObjectUtil.isNotEmpty(tagsStr)) {
-            tagsStr = tagsStr.stream()
-                    .map(str -> propertyResolverUtils.resolve(str, locale))
-                    .collect(Collectors.toSet());
+            tagsStr = tagsStr.stream().map(str -> propertyResolverUtils.resolve(str, locale)).collect(Collectors.toSet());
         }
 
         if (springdocTags.containsKey(handlerMethod)) {
@@ -231,8 +224,7 @@ public class OpenApiHandler extends OpenAPIService {
         }
 
         // Handle SecurityRequirement at operation level
-        io.swagger.v3.oas.annotations.security.SecurityRequirement[] securityRequirements = securityParser
-                .getSecurityRequirements(handlerMethod);
+        io.swagger.v3.oas.annotations.security.SecurityRequirement[] securityRequirements = securityParser.getSecurityRequirements(handlerMethod);
         if (securityRequirements != null) {
             if (securityRequirements.length == 0) {
                 operation.setSecurity(Collections.emptyList());
@@ -244,28 +236,20 @@ public class OpenApiHandler extends OpenAPIService {
         return operation;
     }
 
-    private void buildTagsFromMethod(Method method, Set<io.swagger.v3.oas.models.tags.Tag> tags, Set<String> tagsStr,
-                                     Locale locale) {
+    private void buildTagsFromMethod(Method method, Set<io.swagger.v3.oas.models.tags.Tag> tags, Set<String> tagsStr, Locale locale) {
         // method tags
         Set<Tags> tagsSet = AnnotatedElementUtils.findAllMergedAnnotations(method, Tags.class);
-        Set<io.swagger.v3.oas.annotations.tags.Tag> methodTags = tagsSet.stream()
-                .flatMap(x -> Stream.of(x.value()))
-                .collect(Collectors.toSet());
-        methodTags.addAll(
-                AnnotatedElementUtils.findAllMergedAnnotations(method, io.swagger.v3.oas.annotations.tags.Tag.class));
+        Set<io.swagger.v3.oas.annotations.tags.Tag> methodTags = tagsSet.stream().flatMap(x -> Stream.of(x.value())).collect(Collectors.toSet());
+        methodTags.addAll(AnnotatedElementUtils.findAllMergedAnnotations(method, io.swagger.v3.oas.annotations.tags.Tag.class));
         if (ObjectUtil.isNotEmpty(methodTags)) {
-            tagsStr.addAll(methodTags.stream()
-                    .map(tag -> propertyResolverUtils.resolve(tag.name(), locale))
-                    .collect(Collectors.toSet()));
+            tagsStr.addAll(methodTags.stream().map(tag -> propertyResolverUtils.resolve(tag.name(), locale)).collect(Collectors.toSet()));
             List<io.swagger.v3.oas.annotations.tags.Tag> allTags = new ArrayList<>(methodTags);
             addTags(allTags, tags, locale);
         }
     }
 
-    private void addTags(@Nonnull List<io.swagger.v3.oas.annotations.tags.Tag> sourceTags,
-                         Set<io.swagger.v3.oas.models.tags.Tag> tags, Locale locale) {
-        Optional<Set<io.swagger.v3.oas.models.tags.Tag>> optionalTagSet = AnnotationsUtils
-                .getTags(sourceTags.toArray(new io.swagger.v3.oas.annotations.tags.Tag[0]), true);
+    private void addTags(@Nonnull List<io.swagger.v3.oas.annotations.tags.Tag> sourceTags, Set<io.swagger.v3.oas.models.tags.Tag> tags, Locale locale) {
+        Optional<Set<io.swagger.v3.oas.models.tags.Tag>> optionalTagSet = AnnotationsUtils.getTags(sourceTags.toArray(new io.swagger.v3.oas.annotations.tags.Tag[0]), true);
         optionalTagSet.ifPresent(tagsSet -> {
             tagsSet.forEach(tag -> {
                 tag.name(propertyResolverUtils.resolve(tag.getName(), locale));

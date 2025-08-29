@@ -2,12 +2,13 @@ package ext.library.ratelimiter.handler;
 
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
-import ext.library.ratelimiter.annotation.RateLimiter;
-import ext.library.redis.constant.RedisKey;
+import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -25,8 +26,9 @@ import java.lang.reflect.Method;
 /**
  * Redis 速率限制处理器
  */
-public interface IRateLimitHandler {
 
+public interface IRateLimitHandler {
+    Logger log = LoggerFactory.getLogger(IRateLimitHandler.class);
     /**
      * 定义 spel 表达式解析器
      */
@@ -41,19 +43,28 @@ public interface IRateLimitHandler {
      * 方法参数解析器
      */
     ParameterNameDiscoverer PND = new DefaultParameterNameDiscoverer();
+    String RATE_LIMIT_KEY = "rate_limit:";
 
-    boolean proceed(RateLimiter rateLimiter, JoinPoint point);
+    /**
+     * 执行
+     *
+     * @param rateLimit 速率限制
+     * @param point     点
+     *
+     * @return boolean
+     */
+    boolean proceed(RateLimit rateLimit, JoinPoint point);
 
     /**
      * 构建唯一标示 KEY
      *
-     * @param rateLimiter 速率限制器
-     * @param point       观点
+     * @param rateLimit 速率限制器
+     * @param point     观点
      *
      * @return {@code String }
      */
-    default String getCombineKey(@Nonnull RateLimiter rateLimiter, JoinPoint point) {
-        String key = rateLimiter.key();
+    default String getCombineKey(@Nonnull RateLimit rateLimit, JoinPoint point) {
+        String key = rateLimit.key();
         if (StringUtil.isNotBlank(key)) {
             MethodSignature signature = (MethodSignature) point.getSignature();
             Method targetMethod = signature.getMethod();
@@ -62,8 +73,7 @@ public interface IRateLimitHandler {
             MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(null, targetMethod, args, PND);
             context.setBeanResolver(new BeanFactoryResolver(SpringUtil.getBeanFactory()));
             Expression expression;
-            if (key.startsWith(PARSER_CONTEXT.getExpressionPrefix())
-                    && key.endsWith(PARSER_CONTEXT.getExpressionSuffix())) {
+            if (key.startsWith(PARSER_CONTEXT.getExpressionPrefix()) && key.endsWith(PARSER_CONTEXT.getExpressionSuffix())) {
                 expression = PARSER.parseExpression(key, PARSER_CONTEXT);
             } else {
                 expression = PARSER.parseExpression(key);
@@ -71,8 +81,11 @@ public interface IRateLimitHandler {
             key = expression.getValue(context, String.class);
         }
         HttpServletRequest request = ServletUtil.getRequest();
-        return RedisKey.RATE_LIMIT_KEY + request.getRequestURI() + Symbol.COLON + ServletUtil.getIpAddr(request) + Symbol.COLON
-                + key;
+        String finalKey = String.join(Symbol.COLON, Symbol.GLOBAL_PREFIX, request.getRequestURI(), ServletUtil.getIpAddr(request), key);
+        if (log.isDebugEnabled()) {
+            log.debug("[🚥] rate.limit.key:{}", finalKey);
+        }
+        return finalKey;
     }
 
 }
