@@ -13,6 +13,7 @@ import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.ObjectUtil;
 
@@ -27,9 +28,9 @@ import java.util.Objects;
  */
 public interface SecurityService {
 
-    SecurityRepository REPOSITORY = SpringUtil.getBean(SecurityRepository.class);
+    Lazy<SecurityRepository> REPOSITORY = Lazy.of(() -> SpringUtil.getBean(SecurityRepository.class));
 
-    SecurityProperties PROPERTIES = SpringUtil.getBean(SecurityProperties.class);
+    Lazy<SecurityProperties> PROPERTIES = Lazy.of(() -> SpringUtil.getBean(SecurityProperties.class));
 
     /**
      * 裁剪 token 前缀
@@ -103,7 +104,7 @@ public interface SecurityService {
      * @return SecuritySession
      */
     default SecuritySession getSecuritySessionByToken(String token) {
-        SecurityToken securityToken = REPOSITORY.getSecurityTokenByTokenValue(token);
+        SecurityToken securityToken = REPOSITORY.get().getSecurityTokenByTokenValue(token);
         if (Objects.isNull(securityToken) || ObjectUtil.isEmpty(securityToken.getLoginId())) {
             return null;
         }
@@ -124,7 +125,7 @@ public interface SecurityService {
      * @return SecuritySession
      */
     default SecuritySession getSecuritySessionByLoginId(String loginId) {
-        return REPOSITORY.getSecuritySessionByLoginId(loginId);
+        return REPOSITORY.get().getSecuritySessionByLoginId(loginId);
     }
 
     /**
@@ -138,17 +139,17 @@ public interface SecurityService {
 
         if (ObjectUtil.isEmpty(token)) {
             // 尝试从请求参数中获取
-            token = (String) ServletUtil.getRequestAttribute(PROPERTIES.getSecurityName());
+            token = (String) ServletUtil.getRequestAttribute(PROPERTIES.get().getSecurityName());
         }
 
         if (ObjectUtil.isEmpty(token)) {
             // 尝试从 header 头中获取
-            token = ServletUtil.getHeader(PROPERTIES.getSecurityName());
+            token = ServletUtil.getHeader(PROPERTIES.get().getSecurityName());
         }
 
         if (ObjectUtil.isEmpty(token)) {
             // 尝试从 cookie 中读取
-            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.getCookieConfig();
+            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.get().getCookieConfig();
             token = ServletUtil.getCookieValue(cookieProperties.getCookieName());
         }
 
@@ -195,7 +196,7 @@ public interface SecurityService {
                 throw new UnauthorizedException("当前 token 已超时");
             }
 
-            if (PROPERTIES.getAutoRenewal()) {
+            if (PROPERTIES.get().getAutoRenewal()) {
                 // 续约操作
                 renewalToken(securityToken.getToken());
             }
@@ -301,7 +302,7 @@ public interface SecurityService {
         }
         SecurityToken securityToken = session.getCurrentSecurityToken();
         // 判断上次续约与本次的间隔
-        Long autoRenewalIntervalTime = PROPERTIES.getAutoRenewalIntervalTime();
+        Long autoRenewalIntervalTime = PROPERTIES.get().getAutoRenewalIntervalTime();
         LocalDateTime activityTime = this.tokenLastActivityTime(securityToken.getToken());
         if (Objects.nonNull(activityTime)
                 && activityTime.plusSeconds(autoRenewalIntervalTime).isBefore(LocalDateTime.now())) {
@@ -374,7 +375,7 @@ public interface SecurityService {
         String deviceType = securityToken.getDeviceType();
         session.removeTokenInfo(securityToken.getToken());
         session.flushSessionStorage();
-        if (REPOSITORY.removeTokenByTokenValue(securityToken.getToken())) {
+        if (REPOSITORY.get().removeTokenByTokenValue(securityToken.getToken())) {
             // token 被删除通知
             SecurityEventPublishManager.doRemove(session.getLoginId(), securityToken.getToken(), deviceType);
         }
@@ -408,16 +409,16 @@ public interface SecurityService {
         }
 
         // 清理 request 中的 token 信息
-        ServletUtil.removeRequestAttribute(PROPERTIES.getSecurityName());
+        ServletUtil.removeRequestAttribute(PROPERTIES.get().getSecurityName());
 
         // 清理 cookie
-        if (Boolean.TRUE.equals(PROPERTIES.getEnableCookie())) {
-            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.getCookieConfig();
+        if (Boolean.TRUE.equals(PROPERTIES.get().getEnableCookie())) {
+            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.get().getCookieConfig();
             ServletUtil.addCookie(cookieProperties.getCookieName(), null, 0);
             ServletUtil.addCookie(SecurityConstant.SECURITY_SESSION_ID, null, 0);
         }
 
-        if (REPOSITORY.removeTokenByTokenValue(securityToken.getToken())) {
+        if (REPOSITORY.get().removeTokenByTokenValue(securityToken.getToken())) {
             SecurityEventPublishManager.doLoginOut(session.getLoginId(), securityToken.getToken(), deviceType);
         }
     }
@@ -431,7 +432,7 @@ public interface SecurityService {
      * @return SecurityPagination
      */
     default List<SecuritySession> querySecuritySessionList(String tokenValue, Boolean sortedDesc) {
-        List<String> list = REPOSITORY.queryTokenList(tokenValue, sortedDesc);
+        List<String> list = REPOSITORY.get().queryTokenList(tokenValue, sortedDesc);
         List<SecuritySession> resultList = new ArrayList<>();
         if (Objects.nonNull(list)) {
             // 数据处理
@@ -460,7 +461,7 @@ public interface SecurityService {
      * @return List<String>
      */
     default List<String> queryTokenValueList(String tokenValue, Boolean sortedDesc) {
-        return REPOSITORY.queryTokenList(tokenValue, sortedDesc);
+        return REPOSITORY.get().queryTokenList(tokenValue, sortedDesc);
     }
 
     /**
@@ -471,7 +472,7 @@ public interface SecurityService {
      * @return 时长秒 -1 表示永久有效
      */
     default Long sessionTimeout(String loginId) {
-        return REPOSITORY.getSessionTimeoutByLoginId(loginId);
+        return REPOSITORY.get().getSessionTimeoutByLoginId(loginId);
     }
 
     /**
@@ -482,7 +483,7 @@ public interface SecurityService {
      * @return 时长秒 -1 表示永久有效
      */
     default Long tokenTimeout(String token) {
-        return REPOSITORY.getTokenTimeOutByTokenValue(token);
+        return REPOSITORY.get().getTokenTimeOutByTokenValue(token);
     }
 
     /**
@@ -493,7 +494,7 @@ public interface SecurityService {
      * @return 时长秒 -1 表示永久有效
      */
     default Long tokenActivityTimeout(String token) {
-        return REPOSITORY.getTokenActivityTimeOutByTokenValue(token);
+        return REPOSITORY.get().getTokenActivityTimeOutByTokenValue(token);
     }
 
     /**
@@ -504,7 +505,7 @@ public interface SecurityService {
      * @return 续约时间
      */
     default LocalDateTime tokenLastActivityTime(String token) {
-        String activityTime = REPOSITORY.getActivityTimeByTokenValue(token);
+        String activityTime = REPOSITORY.get().getActivityTimeByTokenValue(token);
         if (ObjectUtil.isEmpty(activityTime)) {
             return null;
         }
@@ -577,7 +578,7 @@ public interface SecurityService {
      * @return 总数
      */
     default Long getTokenCount() {
-        List<String> list = REPOSITORY.queryTokenList(null, true);
+        List<String> list = REPOSITORY.get().queryTokenList(null, true);
         if (Objects.isNull(list)) {
             return 0L;
         }
@@ -593,7 +594,7 @@ public interface SecurityService {
         // 清空全局存储的自定义 token，防止登录时用户传入导致登录异常
         ServletUtil.removeRequestAttribute(SecurityConstant.SECURITY_CUSTOM_IDENTITY_TOKEN);
         // 将 token 设置到请求参数中
-        ServletUtil.setRequestAttribute(PROPERTIES.getSecurityName(),
+        ServletUtil.setRequestAttribute(PROPERTIES.get().getSecurityName(),
                 appendTokenPrefix(securitySession.getCurrentSecurityToken().getToken()));
     }
 
@@ -604,13 +605,13 @@ public interface SecurityService {
      */
     private void setResponseInfo(@Nonnull SecuritySession securitySession) {
         // 设置 header
-        ServletUtil.setHeader(PROPERTIES.getSecurityName(),
+        ServletUtil.setHeader(PROPERTIES.get().getSecurityName(),
                 appendTokenPrefix(securitySession.getCurrentSecurityToken().getToken()));
-        ServletUtil.addHeader("Access-Control-Expose-Headers", PROPERTIES.getSecurityName());
+        ServletUtil.addHeader("Access-Control-Expose-Headers", PROPERTIES.get().getSecurityName());
 
         // 设置 cookie
-        if (Boolean.TRUE.equals(PROPERTIES.getEnableCookie())) {
-            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.getCookieConfig();
+        if (Boolean.TRUE.equals(PROPERTIES.get().getEnableCookie())) {
+            SecurityProperties.CookieProperties cookieProperties = PROPERTIES.get().getCookieConfig();
             // 将 security token value 写入 cookie
             ServletUtil.addCookie(cookieProperties.getCookieName(),
                     securitySession.getCurrentSecurityToken().getToken(),
@@ -631,14 +632,14 @@ public interface SecurityService {
      */
     private SecuritySession checkAndSetSecuritySession(String loginId, SecurityLoginParams model) {
         // 判断是否超过最大颁发 token 数
-        if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.getIssueTokenMaxLimit())) {
+        if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.get().getIssueTokenMaxLimit())) {
             long tokenCount = this.getTokenCount();
-            if (PROPERTIES.getIssueTokenMaxLimit() >= tokenCount) {
+            if (PROPERTIES.get().getIssueTokenMaxLimit() >= tokenCount) {
                 throw new UnauthorizedException("颁发 token 已超过最大限制数");
             }
         }
         SecurityToken securityToken = model.convert(loginId);
-        SecuritySession session = REPOSITORY.getSecuritySessionByLoginId(loginId);
+        SecuritySession session = REPOSITORY.get().getSecuritySessionByLoginId(loginId);
         if (Objects.isNull(session)) {
             session = model.convert(loginId, securityToken);
             return session;
@@ -658,11 +659,11 @@ public interface SecurityService {
             // 最先登录的 token
             SecurityToken earliestToken = availableTokenInfoList.getFirst();
             // 验证登录设备类型数量
-            if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.getMaxLoginDeviceTypeLimit())
+            if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.get().getMaxLoginDeviceTypeLimit())
                     && availableTokenInfoList.stream()
                     .map(SecurityToken::getDeviceType)
                     .distinct()
-                    .count() >= PROPERTIES.getMaxLoginDeviceTypeLimit()) {
+                    .count() >= PROPERTIES.get().getMaxLoginDeviceTypeLimit()) {
 
                 availableTokenInfoList.stream()
                         .filter(item -> item.getDeviceType().equals(earliestToken.getDeviceType()))
@@ -674,10 +675,10 @@ public interface SecurityService {
                                     tokenInfo.getDeviceType());
                         });
             }
-            if (Boolean.TRUE.equals(PROPERTIES.getIsConcurrentLogin())) {
+            if (Boolean.TRUE.equals(PROPERTIES.get().getIsConcurrentLogin())) {
                 // 允许并发，验证登录设备数量
-                if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.getMaxLoginLimit())
-                        && availableTokenInfoList.size() >= PROPERTIES.getMaxLoginLimit()) {
+                if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.get().getMaxLoginLimit())
+                        && availableTokenInfoList.size() >= PROPERTIES.get().getMaxLoginLimit()) {
                     // 已达到登录上限，顶掉最先登录的设备
                     securitySession.updateTokenInfoState(earliestToken.getToken(),
                             SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);

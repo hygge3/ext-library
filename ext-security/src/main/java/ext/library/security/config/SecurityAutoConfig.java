@@ -2,9 +2,6 @@ package ext.library.security.config;
 
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.config.properties.SecurityProperties;
-import ext.library.security.enums.SecurityRepositoryEnum;
-import ext.library.security.repository.SecurityRamRepository;
-import ext.library.security.repository.SecurityRedisRepository;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +25,7 @@ public class SecurityAutoConfig {
      * @return {@code SecurityService }
      */
     @Bean
+    @ConditionalOnMissingBean
     public SecurityService securityService() {
         return new SecurityService() {
         };
@@ -39,13 +37,10 @@ public class SecurityAutoConfig {
      * @return {@code SecurityRepository }
      */
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnBean(SecurityProperties.class)
     public SecurityRepository securityRepository(SecurityProperties securityProperties) {
-        if (SecurityRepositoryEnum.REDIS.equals(securityProperties.getRepository())) {
-            return new SecurityRedisRepository();
-        } else {
-            return new SecurityRamRepository();
-        }
+        return securityProperties.getRepository().getSecurityRepository();
     }
 
     /**

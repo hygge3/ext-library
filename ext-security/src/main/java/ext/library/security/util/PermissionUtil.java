@@ -4,6 +4,7 @@ import ext.library.core.util.SpringUtil;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.enums.Logical;
+import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 import lombok.experimental.UtilityClass;
@@ -17,14 +18,14 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class PermissionUtil {
 
-    private static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
+    private static final Lazy<SecurityAuthority> authority = Lazy.of(() -> SpringUtil.getBean(SecurityAuthority.class));
 
     /**
      * 当前用户是否有角色
      */
     public boolean hasRole(String role) {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
-        List<String> roleList = authority.getRoleCodeList(securitySession.getLoginId());
+        List<String> roleList = authority.get().getRoleCodeList(securitySession.getLoginId());
         return null != roleList && roleList.stream().anyMatch(item -> strMatch(item, role));
     }
 
@@ -33,7 +34,7 @@ public class PermissionUtil {
      */
     public boolean hasPermission(String permission) {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
-        List<String> permissionCodeList = authority.getPermissionCodeList(securitySession.getLoginId());
+        List<String> permissionCodeList = authority.get().getPermissionCodeList(securitySession.getLoginId());
         return null != permissionCodeList && permissionCodeList.stream().anyMatch(item -> strMatch(item, permission));
     }
 
@@ -42,7 +43,7 @@ public class PermissionUtil {
      */
     public List<String> getRoles() {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
-        return authority.getRoleCodeList(securitySession.getLoginId());
+        return authority.get().getRoleCodeList(securitySession.getLoginId());
     }
 
     /**
@@ -50,7 +51,7 @@ public class PermissionUtil {
      */
     public List<String> getPermissions() {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
-        return authority.getPermissionCodeList(securitySession.getLoginId());
+        return authority.get().getPermissionCodeList(securitySession.getLoginId());
     }
 
     /**

@@ -38,9 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @UtilityClass
 public class BeanUtil {
 
-    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
+    private final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
 
-    private static final Lazy<Map<String, BeanCopier>> BEAN_COPIER_CACHE = Lazy.of(ConcurrentHashMap::new);
+    private final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 对象转 Map
@@ -242,11 +242,11 @@ public class BeanUtil {
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
         BeanCopier copier;
-        if (!BEAN_COPIER_CACHE.get().containsKey(beanKey)) {
+        if (!BEAN_COPIER_CACHE.containsKey(beanKey)) {
             copier = BeanCopier.create(sourceType, targetType, false);
-            BEAN_COPIER_CACHE.get().put(beanKey, copier);
+            BEAN_COPIER_CACHE.put(beanKey, copier);
         } else {
-            copier = BEAN_COPIER_CACHE.get().get(beanKey);
+            copier = BEAN_COPIER_CACHE.get(beanKey);
         }
         try {
             copier.copy(source, target, null);

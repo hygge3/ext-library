@@ -23,15 +23,11 @@ public class CacheProperties {
     private String keyPrefix = "ext:cache";
 
     /**
-     * 空值标识
-     */
-    private String nullValue = "N_V";
-
-    /**
      * 默认缓存数据的超时时间 (s)
      */
     private Duration expireTime = Duration.ofSeconds(86400L);
 
     /** 缓存存储方式 */
     private CacheStorage cacheStorage = CacheStorage.L2;
+
 }

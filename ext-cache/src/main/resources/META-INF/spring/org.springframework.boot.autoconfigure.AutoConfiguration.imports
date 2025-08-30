@@ -1,3 +1,2 @@
-ext.library.cache.config.properties.CacheProperties
 ext.library.cache.config.CacheAutoConfig
 ext.library.cache.core.CacheAspect

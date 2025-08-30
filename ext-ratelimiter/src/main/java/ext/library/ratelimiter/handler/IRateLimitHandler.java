@@ -4,6 +4,7 @@ import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.tool.constant.Symbol;
+import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -43,7 +44,7 @@ public interface IRateLimitHandler {
      * 方法参数解析器
      */
     ParameterNameDiscoverer PND = new DefaultParameterNameDiscoverer();
-    String RATE_LIMIT_KEY = SpringUtil.getProperty("ext.limiter.key-prefix", "ext.rate_limit");
+    Lazy<String> RATE_LIMIT_KEY = Lazy.of(() -> SpringUtil.getProperty("ext.limiter.key-prefix", "ext.rate_limit"));
 
     /**
      * 执行
@@ -81,7 +82,7 @@ public interface IRateLimitHandler {
             key = expression.getValue(context, String.class);
         }
         HttpServletRequest request = ServletUtil.getRequest();
-        String finalKey = String.join(Symbol.COLON, RATE_LIMIT_KEY, request.getRequestURI(), ServletUtil.getIpAddr(request), key);
+        String finalKey = String.join(Symbol.COLON, RATE_LIMIT_KEY.get(), request.getRequestURI(), ServletUtil.getIpAddr(request), key);
         if (log.isDebugEnabled()) {
             log.debug("[🚥] rate.limit.key:{}", finalKey);
         }

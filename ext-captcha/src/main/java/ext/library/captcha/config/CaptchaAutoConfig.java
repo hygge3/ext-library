@@ -7,7 +7,6 @@ import ext.library.captcha.service.CaptchaServiceImpl;
 import ext.library.captcha.service.ICaptchaService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -17,26 +16,25 @@ import jakarta.annotation.Nonnull;
  * 验证码自动配置
  */
 @AutoConfiguration
-@ConditionalOnProperty(prefix = CaptchaProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(CaptchaProperties.class)
 public class CaptchaAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public Captcha imageCaptcha(@Nonnull CaptchaProperties properties) {
-        return new Captcha(properties.getCaptchaType());
+    public Captcha imageCaptcha(@Nonnull CaptchaProperties captchaProperties) {
+        return new Captcha(captchaProperties.getCaptchaType());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaService imageCaptchaService(CaptchaProperties properties, CaptchaCache captchaCache, Captcha captcha) {
-        return new CaptchaServiceImpl(properties, captchaCache, captcha);
+    public ICaptchaService imageCaptchaService(@Nonnull CaptchaProperties captchaProperties, CaptchaCache captchaCache, Captcha captcha) {
+        return new CaptchaServiceImpl(captchaProperties, captchaCache, captcha);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CaptchaCache captchaCache(CaptchaProperties properties) {
-        return new CaptchaCache(properties.getCacheStorage().getCacheStrategy());
+    public CaptchaCache captchaCache(@Nonnull CaptchaProperties captchaProperties) {
+        return new CaptchaCache(captchaProperties.getCacheStorage().getCacheStrategy());
     }
 
 }

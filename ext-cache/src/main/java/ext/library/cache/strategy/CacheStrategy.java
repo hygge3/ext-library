@@ -13,7 +13,6 @@ import java.time.Duration;
  * @since 2025.08.29
  */
 public interface CacheStrategy {
-    CacheProperties CACHE_PROPERTIES = SpringUtil.getBean(CacheProperties.class);
 
     /**
      * 获取缓存值
@@ -65,7 +64,7 @@ public interface CacheStrategy {
      * @return {@code String }
      */
     default String genKey(String cacheName, String key) {
-        return StringUtil.join(Symbol.COLON, CACHE_PROPERTIES.getKeyPrefix(), cacheName, key);
+        return StringUtil.join(Symbol.COLON, SpringUtil.getBean(CacheProperties.class).getKeyPrefix(), cacheName, key);
     }
 
     /**
@@ -74,6 +73,6 @@ public interface CacheStrategy {
      * @return {@link Duration }
      */
     default Duration getDefaultExpireTime() {
-        return CACHE_PROPERTIES.getExpireTime();
+        return SpringUtil.getBean(CacheProperties.class).getExpireTime();
     }
 }

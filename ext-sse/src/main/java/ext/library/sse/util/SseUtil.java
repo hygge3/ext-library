@@ -3,6 +3,7 @@ package ext.library.sse.util;
 import ext.library.core.util.SpringUtil;
 import ext.library.sse.domain.SseMessage;
 import ext.library.sse.manager.SseEmitterManager;
+import ext.library.tool.holder.Lazy;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public final class SseUtil {
 
-    private final static SseEmitterManager MANAGER = SpringUtil.getBean(SseEmitterManager.class);
+    private final static Lazy<SseEmitterManager> MANAGER = Lazy.of(() -> SpringUtil.getBean(SseEmitterManager.class));
 
     /**
      * 向指定的 WebSocket 会话发送消息
@@ -22,7 +23,7 @@ public final class SseUtil {
      * @param message 要发送的消息内容
      */
     public static void sendMessage(String userId, String message) {
-        MANAGER.sendMessage(userId, message);
+        MANAGER.get().sendMessage(userId, message);
     }
 
     /**
@@ -31,7 +32,7 @@ public final class SseUtil {
      * @param message 要发送的消息内容
      */
     public static void sendMessage(String message) {
-        MANAGER.sendMessage(message);
+        MANAGER.get().sendMessage(message);
     }
 
     /**
@@ -40,7 +41,7 @@ public final class SseUtil {
      * @param sseMessage 要发布的 SSE 消息对象
      */
     public static void publishMessage(SseMessage sseMessage) {
-        MANAGER.publishMessage(sseMessage);
+        MANAGER.get().publishMessage(sseMessage);
     }
 
     /**
@@ -49,7 +50,7 @@ public final class SseUtil {
      * @param message 要发布的消息内容
      */
     public static void publishAll(String message) {
-        MANAGER.publishAll(message);
+        MANAGER.get().publishAll(message);
     }
 
 }

@@ -2,6 +2,7 @@ package ext.library.websocket.handler;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.security.domain.SecuritySession;
+import ext.library.tool.holder.Lazy;
 import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
@@ -28,7 +29,7 @@ import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
 @Slf4j
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
 
-    private final WebSocketProperties properties = SpringUtil.getBean(WebSocketProperties.class);
+    private final Lazy<WebSocketProperties> properties = Lazy.of(() -> SpringUtil.getBean(WebSocketProperties.class));
 
     /**
      * 连接成功后
@@ -37,8 +38,8 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(@Nonnull WebSocketSession session) throws IOException {
         // 实现 session 支持并发，可参考 https://blog.csdn.net/abu935009066/article/details/131218149
         session = new ConcurrentWebSocketSessionDecorator(session,
-                properties.getSendTimeLimit(),
-                properties.getBufferSizeLimit());
+                properties.get().getSendTimeLimit(),
+                properties.get().getBufferSizeLimit());
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);

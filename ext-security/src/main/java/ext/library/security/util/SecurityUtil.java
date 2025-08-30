@@ -9,6 +9,7 @@ import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.service.SecurityService;
+import ext.library.tool.holder.Lazy;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ public class SecurityUtil {
      * <p>
      * 返回 SecurityService
      */
-    private static final SecurityService SERVICE = SpringUtil.getBean(SecurityService.class);
+    private static final Lazy<SecurityService> SERVICE = Lazy.of(() -> SpringUtil.getBean(SecurityService.class));
 
     /*
      * ***************************************操作相关方法**************************************
@@ -53,7 +54,7 @@ public class SecurityUtil {
      * @param loginModel 参数
      */
     public void doLogin(String loginId, SecurityLoginParams loginModel) {
-        SERVICE.doLogin(loginId, loginModel);
+        SERVICE.get().doLogin(loginId, loginModel);
     }
 
     /**
@@ -66,7 +67,7 @@ public class SecurityUtil {
         SecurityLoginParams securityLoginParams = new SecurityLoginParams();
         securityLoginParams.setDeviceType(getPlatform());
         securityLoginParams.setAttributes(data);
-        SERVICE.doLogin(loginId, securityLoginParams);
+        SERVICE.get().doLogin(loginId, securityLoginParams);
     }
 
     /**
@@ -89,28 +90,28 @@ public class SecurityUtil {
      * @return token
      */
     public String createLoginByLoginId(String loginId, SecurityLoginParams loginModel) {
-        return SERVICE.createLoginByLoginId(loginId, loginModel);
+        return SERVICE.get().createLoginByLoginId(loginId, loginModel);
     }
 
     /**
      * 检查 token 信息
      */
     public void checkToken() {
-        SERVICE.checkToken();
+        SERVICE.get().checkToken();
     }
 
     /**
      * 续约 token
      */
     public void renewalToken() {
-        SERVICE.renewalToken();
+        SERVICE.get().renewalToken();
     }
 
     /**
      * 退出操作
      */
     public void loginOut() {
-        SERVICE.loginOut();
+        SERVICE.get().loginOut();
     }
 
     /**
@@ -119,7 +120,7 @@ public class SecurityUtil {
      * @param token token
      */
     public void loginOut(String token) {
-        SERVICE.loginOut(token);
+        SERVICE.get().loginOut(token);
     }
 
     /**
@@ -128,7 +129,7 @@ public class SecurityUtil {
      * @param token 用户 token
      */
     public void replaceToken(String token) {
-        SERVICE.replaceOut(token);
+        SERVICE.get().replaceOut(token);
     }
 
     /**
@@ -137,7 +138,7 @@ public class SecurityUtil {
      * @param token 用户 token
      */
     public void kickToken(String token) {
-        SERVICE.kickOut(token);
+        SERVICE.get().kickOut(token);
     }
 
     /**
@@ -146,7 +147,7 @@ public class SecurityUtil {
      * @param token 用户 token
      */
     public void bannedToken(String token) {
-        SERVICE.bannedToken(token);
+        SERVICE.get().bannedToken(token);
     }
 
     /**
@@ -155,7 +156,7 @@ public class SecurityUtil {
      * @param token 用户 token
      */
     public void unsealToken(String token) {
-        SERVICE.unsealToken(token);
+        SERVICE.get().unsealToken(token);
     }
 
     /**
@@ -164,7 +165,7 @@ public class SecurityUtil {
      * @param token 用户 token
      */
     public void removeToken(String token) {
-        SERVICE.removeToken(token);
+        SERVICE.get().removeToken(token);
     }
 
     /*
@@ -178,7 +179,7 @@ public class SecurityUtil {
      * @return {@link SecuritySession}
      */
     public SecuritySession getCurrentSecuritySession() {
-        return SERVICE.getCurrentSecuritySession();
+        return SERVICE.get().getCurrentSecuritySession();
     }
 
     /**
@@ -216,7 +217,7 @@ public class SecurityUtil {
      * @return 时长秒 -1 表示永久有效
      */
     public Long getSessionTimeout(String token) {
-        return SERVICE.sessionTimeout(token);
+        return SERVICE.get().sessionTimeout(token);
     }
 
     /**
@@ -227,7 +228,7 @@ public class SecurityUtil {
      * @return 时长秒 -1 表示永久有效
      */
     public Long getTokenTimeout(String token) {
-        return SERVICE.tokenTimeout(token);
+        return SERVICE.get().tokenTimeout(token);
     }
 
     /**
@@ -238,7 +239,7 @@ public class SecurityUtil {
      * @return 时长秒 -1 表示永久有效
      */
     public Long getTokenActivityTimeout(String token) {
-        return SERVICE.tokenActivityTimeout(token);
+        return SERVICE.get().tokenActivityTimeout(token);
     }
 
     /**
@@ -249,7 +250,7 @@ public class SecurityUtil {
      * @return 续约时间
      */
     public LocalDateTime getTokenLastActivityTime(String token) {
-        return SERVICE.tokenLastActivityTime(token);
+        return SERVICE.get().tokenLastActivityTime(token);
     }
 
     /**
@@ -258,7 +259,7 @@ public class SecurityUtil {
      * @return true 登录 false 未登录
      */
     public Boolean isLogin() {
-        return SERVICE.isLogin();
+        return SERVICE.get().isLogin();
     }
 
     /**
@@ -269,7 +270,7 @@ public class SecurityUtil {
      * @return true 有 false 没有
      */
     public Boolean hasRole(String roleCode) {
-        return SERVICE.hasRole(roleCode);
+        return SERVICE.get().hasRole(roleCode);
     }
 
     /**
@@ -281,7 +282,7 @@ public class SecurityUtil {
      * @return true 有 false 没有
      */
     public Boolean hasRole(String[] roleCode, Logical logical) {
-        return SERVICE.hasRole(roleCode, logical);
+        return SERVICE.get().hasRole(roleCode, logical);
     }
 
     /**
@@ -292,7 +293,7 @@ public class SecurityUtil {
      * @return true 有 false 没有
      */
     public Boolean hasPermission(String permissionCode) {
-        return SERVICE.hasPermission(permissionCode);
+        return SERVICE.get().hasPermission(permissionCode);
     }
 
     /**
@@ -304,7 +305,7 @@ public class SecurityUtil {
      * @return true 有 false 没有
      */
     public Boolean hasPermission(String[] permissionCode, Logical logical) {
-        return SERVICE.hasPermission(permissionCode, logical);
+        return SERVICE.get().hasPermission(permissionCode, logical);
     }
 
     /**
@@ -316,7 +317,7 @@ public class SecurityUtil {
      * @return List<SecuritySession>
      */
     public List<SecuritySession> querySecuritySessionList(String tokenValue, boolean sortedDesc) {
-        return SERVICE.querySecuritySessionList(tokenValue, sortedDesc);
+        return SERVICE.get().querySecuritySessionList(tokenValue, sortedDesc);
     }
 
 }

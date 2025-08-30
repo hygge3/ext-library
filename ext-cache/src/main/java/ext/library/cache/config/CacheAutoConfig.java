@@ -3,6 +3,7 @@ package ext.library.cache.config;
 import ext.library.cache.config.properties.CacheProperties;
 import ext.library.cache.strategy.CacheStrategy;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 @EnableConfigurationProperties({CacheProperties.class})
 public class CacheAutoConfig {
     @Bean
+    @ConditionalOnMissingBean
     public CacheStrategy rateLimitAspect(CacheProperties cacheProperties) {
         return cacheProperties.getCacheStorage().getCacheStrategy();
 
