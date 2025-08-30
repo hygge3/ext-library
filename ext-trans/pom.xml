@@ -8,7 +8,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>ext-translation</artifactId>
+    <artifactId>ext-trans</artifactId>
 
     <dependencies>
         <dependency>

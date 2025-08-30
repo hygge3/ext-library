@@ -87,8 +87,9 @@ public class SpelUtil {
      *
      * @return 解析后的 List<String>
      */
+    @SuppressWarnings("unchecked")
     public static List<String> parseValueToStringList(StandardEvaluationContext context, String spelExpression) {
-        return PARSER.get().parseExpression(spelExpression).getValue(context, List.class);
+        return (List<String>) PARSER.get().parseExpression(spelExpression).getValue(context, List.class);
     }
 
 }

@@ -7,9 +7,9 @@ import ext.library.security.repository.SecurityRamRepository;
 import ext.library.security.repository.SecurityRedisRepository;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.service.SecurityService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,13 +17,10 @@ import org.springframework.context.annotation.Bean;
 /**
  * 自动配置
  */
-@RequiredArgsConstructor
 @AutoConfiguration
 @EnableConfigurationProperties(SecurityProperties.class)
 @Slf4j
 public class SecurityAutoConfig {
-
-    private final SecurityProperties securityProperties;
 
     /**
      * 权限服务注入
@@ -42,7 +39,8 @@ public class SecurityAutoConfig {
      * @return {@code SecurityRepository }
      */
     @Bean
-    public SecurityRepository securityRepository() {
+    @ConditionalOnBean(SecurityProperties.class)
+    public SecurityRepository securityRepository(SecurityProperties securityProperties) {
         if (SecurityRepositoryEnum.REDIS.equals(securityProperties.getRepository())) {
             return new SecurityRedisRepository();
         } else {

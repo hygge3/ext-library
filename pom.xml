@@ -33,7 +33,7 @@
         <module>ext-ratelimiter</module>
         <module>ext-satoken</module>
         <module>ext-sse</module>
-        <module>ext-translation</module>
+        <module>ext-trans</module>
         <module>ext-web</module>
         <module>ext-websocket</module>
     </modules>
@@ -55,7 +55,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies.version -->
-        <revision>3.0.0</revision>
+        <revision>3.5.0</revision>
         <lombok.version>1.18.38</lombok.version>
         <spring-boot.version>3.5.5</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
@@ -253,7 +253,7 @@
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-translation</artifactId>
+                <artifactId>ext-trans</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

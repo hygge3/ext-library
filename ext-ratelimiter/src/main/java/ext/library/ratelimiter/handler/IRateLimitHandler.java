@@ -43,7 +43,7 @@ public interface IRateLimitHandler {
      * 方法参数解析器
      */
     ParameterNameDiscoverer PND = new DefaultParameterNameDiscoverer();
-    String RATE_LIMIT_KEY = "rate_limit:";
+    String RATE_LIMIT_KEY = SpringUtil.getProperty("ext.limiter.key-prefix", "ext.rate_limit");
 
     /**
      * 执行
@@ -81,11 +81,10 @@ public interface IRateLimitHandler {
             key = expression.getValue(context, String.class);
         }
         HttpServletRequest request = ServletUtil.getRequest();
-        String finalKey = String.join(Symbol.COLON, Symbol.GLOBAL_PREFIX, request.getRequestURI(), ServletUtil.getIpAddr(request), key);
+        String finalKey = String.join(Symbol.COLON, RATE_LIMIT_KEY, request.getRequestURI(), ServletUtil.getIpAddr(request), key);
         if (log.isDebugEnabled()) {
             log.debug("[🚥] rate.limit.key:{}", finalKey);
         }
         return finalKey;
     }
-
 }

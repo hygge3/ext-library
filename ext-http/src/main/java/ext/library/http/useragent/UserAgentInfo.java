@@ -12,14 +12,12 @@ import java.util.regex.Pattern;
 @Getter
 public class UserAgentInfo implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     /**
      * 未知类型
      */
-    private static final String NameUnknown = "Unknown";
-
+    static final String NameUnknown = "Unknown";
+    @Serial
+    private static final long serialVersionUID = 1L;
     /**
      * 信息名称
      */

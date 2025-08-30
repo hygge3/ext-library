@@ -22,6 +22,9 @@ public class RateLimiterProperties {
      */
     private boolean enable = true;
 
+    /** 键前缀 */
+    private String keyPrefix = "ext.rate_limit";
+
     /** 限速器类型 */
     private RateLimiterType rateLimiterType;
 

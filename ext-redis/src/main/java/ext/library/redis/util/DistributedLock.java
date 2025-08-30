@@ -6,6 +6,7 @@ import ext.library.tool.core.Threads;
 import ext.library.tool.util.INetUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
@@ -199,7 +200,7 @@ public class DistributedLock implements Lock {
      * @throws InterruptedException 被中断
      */
     @Override
-    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+    public boolean tryLock(long time, @NonNull TimeUnit unit) throws InterruptedException {
         return tryLock(time, unit, false);
     }
 
@@ -213,7 +214,7 @@ public class DistributedLock implements Lock {
      *
      * @throws InterruptedException 被中断
      */
-    private boolean tryLock(Duration time, boolean interruptibly) throws InterruptedException {
+    private boolean tryLock(Duration time, boolean interruptibly) {
         long millis = time.toMillis();
         long current = System.currentTimeMillis();
         do {
@@ -239,7 +240,7 @@ public class DistributedLock implements Lock {
      *
      * @throws InterruptedException 被中断
      */
-    private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) throws InterruptedException {
+    private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) {
         long millis = unit.convert(time, TimeUnit.MILLISECONDS);
         long current = System.currentTimeMillis();
         do {
@@ -285,6 +286,7 @@ public class DistributedLock implements Lock {
     }
 
     @Override
+    @NonNull
     public Condition newCondition() {
         throw new UnsupportedOperationException();
     }

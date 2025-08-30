@@ -1,6 +1,7 @@
 package ext.library.translation.annotation;
 
 import ext.library.translation.service.TranslationInterface;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -13,13 +14,13 @@ import java.lang.annotation.Target;
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Documented
 public @interface TranslationType {
 
-	/**
-	 * 类型
-	 */
-	String type();
+    /**
+     * 类型
+     */
+    String type();
 
 }
