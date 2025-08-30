@@ -1,12 +1,9 @@
 package ext.library.captcha.cache;
 
-import ext.library.cache.util.CacheUtil;
-import ext.library.captcha.config.properties.CaptchaProperties;
-import ext.library.tool.constant.Symbol;
+import ext.library.cache.strategy.CacheStrategy;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 验证码缓存
@@ -14,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CaptchaCache {
 
-    final CaptchaProperties properties;
+    final CacheStrategy cacheStrategy;
 
     /**
      * 保存缓存
@@ -24,9 +21,7 @@ public class CaptchaCache {
      * @param value     缓存 value
      */
     public void put(String cacheName, String uuid, String value) {
-        String cacheKey = cacheName + Symbol.COLON + uuid;
-        CacheUtil.put(cacheKey, value, properties.getExpireTime(), TimeUnit.SECONDS);
-
+        cacheStrategy.put(cacheName, uuid, value);
     }
 
 
@@ -39,12 +34,11 @@ public class CaptchaCache {
      * @return 验证码
      */
     public String getAndRemove(String cacheName, String uuid) {
-        String cacheKey = cacheName + Symbol.COLON + uuid;
-        String value = CacheUtil.get(cacheKey, String.class);
+        String value = cacheStrategy.get(cacheName, uuid, String.class);
         if (Objects.isNull(value)) {
             return null;
         }
-        CacheUtil.evict(cacheKey);
+        cacheStrategy.evict(cacheName, uuid);
         return value;
     }
 

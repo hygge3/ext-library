@@ -29,15 +29,14 @@ public class CaptchaAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaService imageCaptchaService(CaptchaProperties properties, CaptchaCache captchaCache,
-                                               Captcha captcha) {
+    public ICaptchaService imageCaptchaService(CaptchaProperties properties, CaptchaCache captchaCache, Captcha captcha) {
         return new CaptchaServiceImpl(properties, captchaCache, captcha);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public CaptchaCache captchaCache(CaptchaProperties properties) {
-        return new CaptchaCache(properties);
+        return new CaptchaCache(properties.getCacheStorage().getCacheStrategy());
     }
 
 }

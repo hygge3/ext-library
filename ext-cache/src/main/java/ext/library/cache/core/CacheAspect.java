@@ -1,16 +1,18 @@
 package ext.library.cache.core;
 
-import ext.library.cache.annotion.L2Cache;
-import ext.library.cache.util.CacheUtil;
+import ext.library.cache.annotion.Cache;
+import ext.library.cache.enums.CacheType;
+import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
-import ext.library.tool.constant.Symbol;
-import lombok.AllArgsConstructor;
+import ext.library.tool.util.DateUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -18,10 +20,12 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Aspect
-@AllArgsConstructor
+@AutoConfiguration
+@RequiredArgsConstructor
 public class CacheAspect {
+    private final CacheStrategy cacheStrategy;
 
-    @Pointcut("@annotation(ext.library.cache.annotion.L2Cache)")
+    @Pointcut("@annotation(ext.library.cache.annotion.Cache)")
     public void cacheAspect() {
     }
 
@@ -32,22 +36,22 @@ public class CacheAspect {
 
         Object[] args = point.getArgs();
 
-        L2Cache annotation = method.getAnnotation(L2Cache.class);
-        String elResult = SpelUtil.parseValueToString(point.getThis(), method, args, annotation.key());
-        String realKey = annotation.cacheName() + Symbol.COLON + elResult;
+        Cache annotation = method.getAnnotation(Cache.class);
+        String cacheName = annotation.cacheName();
+        String key = SpelUtil.parseValueToString(point.getThis(), method, args, annotation.key());
 
         // 强制更新
         if (annotation.type() == CacheType.PUT) {
             Object object = point.proceed();
-            CacheUtil.put(realKey, object, annotation.timeOut(), TimeUnit.SECONDS);
+            cacheStrategy.put(cacheName, key, object);
             return object;
         }
         // 删除
         else if (annotation.type() == CacheType.DELETE) {
-            CacheUtil.evict(realKey);
+            cacheStrategy.evict(cacheName, key);
             return point.proceed();
         }
-        Object cache = CacheUtil.get(realKey, signature.getReturnType());
+        Object cache = cacheStrategy.get(cacheName, key, signature.getReturnType());
         if (Objects.nonNull(cache)) {
             return cache;
         }
@@ -55,7 +59,7 @@ public class CacheAspect {
         log.debug("[💾] get data from database");
         Object object = point.proceed();
         if (Objects.nonNull(object)) {
-            CacheUtil.put(realKey, object, annotation.timeOut(), TimeUnit.SECONDS);
+            cacheStrategy.put(cacheName, key, object, DateUtil.convert(annotation.timeout(), TimeUnit.SECONDS));
         }
         return object;
     }

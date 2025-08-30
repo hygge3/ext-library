@@ -2,6 +2,8 @@ package ext.library.redis.util;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
+import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.DateUtil;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,9 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -123,6 +127,57 @@ public class RedisUtil {
 
     /**
      * 删除指定的 key
+     * unlink 命令会异步地删除指定的键以及与之相关联的值。
+     * 即，它会将要删除的键添加到一个待删除的列表中，并立即返回，不会阻塞客户端。Redis 服务器会在后台异步地删除待删除列表中的键。
+     * 使用 unlink 命令的好处是可以减少删除操作的阻塞时间。在删除大量键的情况下，unlink 命令可以使 Redis 服务器更快地响应客户端请求。
+     *
+     * @param key 要删除的 key
+     *
+     * @return 删除成功返回 true, 如果 key 不存在则返回 false
+     *
+     * @see <a href="https://redis.io/docs/latest/commands/unlink/">Unlink Command</a>
+     */
+    public boolean unlink(String key) {
+        return getRedisTemplate().unlink(key);
+    }
+
+    /**
+     * 删除所有匹配指定前缀的 key（例如：user:*）
+     * 使用 SCAN + UNLINK，避免阻塞
+     *
+     * @param pattern key 的匹配模式
+     *
+     * @throws RuntimeException 当 Redis 操作出现异常时抛出
+     */
+    public void patternUnlink(String pattern) {
+        try (Cursor<String> cursor = scan(pattern)) {
+            cursor.forEachRemaining(RedisUtil::unlink);
+        } catch (Exception e) {
+            throw Exceptions.throwOut(e, "Failed to unlink keys with pattern:{} ", pattern);
+        }
+    }
+
+    /**
+     * 删除指定的 keys
+     * unlink 命令会异步地删除指定的键以及与之相关联的值。
+     * 即，它会将要删除的键添加到一个待删除的列表中，并立即返回，不会阻塞客户端。Redis 服务器会在后台异步地删除待删除列表中的键。
+     * 使用 unlink 命令的好处是可以减少删除操作的阻塞时间。在删除大量键的情况下，unlink 命令可以使 Redis 服务器更快地响应客户端请求。
+     *
+     * @param keys 要删除的 key 数组
+     *
+     * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
+     */
+    public long unlink(String... keys) {
+        return del(Arrays.asList(keys));
+    }
+
+    public long unlink(Collection<String> keys) {
+        Long deleteNumber = getRedisTemplate().unlink(keys);
+        return deleteNumber == null ? 0 : deleteNumber;
+    }
+
+    /**
+     * 删除指定的 key
      *
      * @param key 要删除的 key
      *
@@ -185,12 +240,24 @@ public class RedisUtil {
      * 设置过期时间
      *
      * @param key     待修改过期时间的 key
+     * @param timeout 过期时长
+     *
+     * @see <a href="http://redis.io/commands/expire">Expire Command</a>
+     */
+    public boolean expire(String key, Duration timeout) {
+        return getRedisTemplate().expire(key, timeout);
+    }
+
+    /**
+     * 设置过期时间
+     *
+     * @param key     待修改过期时间的 key
      * @param timeout 过期时长，单位 秒
      *
      * @see <a href="http://redis.io/commands/expire">Expire Command</a>
      */
     public boolean expire(String key, long timeout) {
-        return expire(key, timeout, TimeUnit.SECONDS);
+        return expire(key, Duration.ofSeconds(timeout));
     }
 
     /**
@@ -218,6 +285,30 @@ public class RedisUtil {
         return getRedisTemplate().expireAt(key, date);
     }
 
+    /**
+     * 设置 key 的过期时间到指定的日期
+     *
+     * @param key           待修改过期时间的 key
+     * @param localDateTime 过期时间
+     *
+     * @return 修改成功返回 true
+     *
+     * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
+     */
+    public boolean expireAt(String key, LocalDateTime localDateTime) {
+        return Boolean.TRUE.equals(getRedisTemplate().expireAt(key, localDateTime.toInstant(DateUtil.DEFAULT_ZONE_OFFSET)));
+    }
+
+    /**
+     * 设置 key 的过期时间到指定的日期
+     *
+     * @param key      待修改过期时间的 key
+     * @param expireAt 过期时间
+     *
+     * @return 修改成功返回 true
+     *
+     * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
+     */
     public boolean expireAt(String key, Instant expireAt) {
         return Boolean.TRUE.equals(getRedisTemplate().expireAt(key, expireAt));
     }
@@ -375,6 +466,20 @@ public class RedisUtil {
      */
     public String getEx(String key, long timeout) {
         return getEx(key, timeout, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 获取指定 key 的 value 值，并对 key 设置指定的过期时间
+     *
+     * @param key     指定的 key
+     * @param timeout 过期时间，单位时间秒
+     *
+     * @return 当 key 不存在时返回 null
+     *
+     * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
+     */
+    public String getEx(String key, Duration timeout) {
+        return valueOps().getAndExpire(key, timeout);
     }
 
     /**
@@ -543,6 +648,19 @@ public class RedisUtil {
     /**
      * 设置 value for key, 同时为其设置过期时间
      *
+     * @param key     key
+     * @param value   value
+     * @param timeout 过期时间 单位：秒
+     *
+     * @see #setEx(String, String, long)
+     */
+    public void set(String key, String value, Duration timeout) {
+        valueOps().set(key, value, timeout);
+    }
+
+    /**
+     * 设置 value for key, 同时为其设置过期时间
+     *
      * @param key      key
      * @param value    value
      * @param timeout  过期时间 单位：秒
@@ -565,6 +683,19 @@ public class RedisUtil {
      */
     public void setEx(String key, String value, long timeout) {
         setEx(key, value, timeout, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 设置 value for key, 同时为其设置过期时间
+     *
+     * @param key     指定的 key
+     * @param value   值
+     * @param timeout 过期时间
+     *
+     * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
+     */
+    public void setEx(String key, String value, Duration timeout) {
+        valueOps().set(key, value, timeout);
     }
 
     /**
@@ -605,6 +736,18 @@ public class RedisUtil {
     }
 
     /**
+     * 设置 value for key, 同时为其设置其在指定时间过期
+     *
+     * @param key        key
+     * @param value      value
+     * @param expireTime 在指定时间过期
+     */
+    public void setExAt(String key, String value, LocalDateTime expireTime) {
+        Duration timeout = Duration.between(LocalDateTime.now(), expireTime);
+        setEx(key, value, timeout);
+    }
+
+    /**
      * 当 key 不存在时，进行 value 设置，当 key 存在时不执行操作
      *
      * @param key   key
@@ -616,6 +759,21 @@ public class RedisUtil {
      */
     public boolean setNx(String key, String value) {
         return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value));
+    }
+
+    /**
+     * 当 key 不存在时，进行 value 设置并添加过期时间，当 key 存在时不执行操作
+     *
+     * @param key     key
+     * @param value   value
+     * @param timeout 过期时间
+     *
+     * @return boolean 操作是否成功
+     *
+     * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
+     */
+    public boolean setNxEx(String key, String value, Duration timeout) {
+        return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value, timeout));
     }
 
     /**

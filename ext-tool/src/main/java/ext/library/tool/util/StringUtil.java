@@ -499,6 +499,19 @@ public class StringUtil {
         return Joiner.on(delim).join(arr);
     }
 
+
+    /**
+     * 将数组拼接成字符串，默认指定分隔符
+     *
+     * @param arr   the array to display
+     * @param delim the delimiter to use (typically a ",")
+     *
+     * @return the delimited {@code String}
+     */
+    public String join(String delim, Object... arr) {
+        return Joiner.on(delim).join(arr);
+    }
+
     /**
      * 分割 字符串
      *

@@ -268,15 +268,15 @@ public final class DateUtil {
     }
 
     /**
-     * 计算相差天数
+     * 计算相差时间
      *
      * @param start 开始时间
      * @param end   结束时间
      *
      * @return 天数
      */
-    public long differentDays(LocalDateTime start, LocalDateTime end) {
-        return Duration.between(start, end).toDays();
+    public Duration different(LocalDateTime start, LocalDateTime end) {
+        return Duration.between(start, end);
     }
 
     /**

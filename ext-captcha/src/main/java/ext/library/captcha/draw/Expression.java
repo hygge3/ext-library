@@ -1,8 +1,8 @@
 package ext.library.captcha.draw;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.captcha.core.CaptchaUtil;
+
+import jakarta.annotation.Nonnull;
 import java.util.Random;
 
 /**
@@ -10,16 +10,17 @@ import java.util.Random;
  */
 class Expression {
 
-    static final char PLUS = '+';
+    private static final char PLUS = '+';
 
-    static final char MINUS = '-';
+    private static final char MINUS = '-';
 
-    static final char MULTIPLY = '×';
+    private static final char MULTIPLY = '×';
 
     /**
      * 执行表达式
      *
      * @param expr 表达式
+     *
      * @return 结果，-1 为 expr 表达式不合法
      */
     public static int eval(@Nonnull String expr) {

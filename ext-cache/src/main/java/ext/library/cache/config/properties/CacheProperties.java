@@ -1,12 +1,17 @@
-package ext.library.cache.properties;
+package ext.library.cache.config.properties;
 
-import lombok.Data;
+import ext.library.cache.enums.CacheStorage;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
 
 /**
  * 缓存属性
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = CacheProperties.PREFIX)
 public class CacheProperties {
 
@@ -15,12 +20,7 @@ public class CacheProperties {
     /**
      * 通用的 key 前缀
      */
-    private String keyPrefix = "ext";
-
-    /**
-     * 默认分隔符
-     */
-    private String delimiter = ":";
+    private String keyPrefix = "ext:cache";
 
     /**
      * 空值标识
@@ -30,7 +30,8 @@ public class CacheProperties {
     /**
      * 默认缓存数据的超时时间 (s)
      */
-    private long expireTime = 86400L;
+    private Duration expireTime = Duration.ofSeconds(86400L);
 
-
+    /** 缓存存储方式 */
+    private CacheStorage cacheStorage = CacheStorage.L2;
 }

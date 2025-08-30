@@ -16,11 +16,11 @@ import java.io.OutputStream;
 @RequiredArgsConstructor
 public class CaptchaServiceImpl implements ICaptchaService {
 
-    final CaptchaProperties properties;
+    private final CaptchaProperties properties;
 
-    final CaptchaCache captchaCache;
+    private final CaptchaCache captchaCache;
 
-    final Captcha captcha;
+    private final Captcha captcha;
 
     @Override
     public void generate(String uuid, OutputStream outputStream) {

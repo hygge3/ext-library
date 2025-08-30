@@ -34,16 +34,16 @@ public class Captcha implements ICaptcha {
     /**
      * 默认的验证码大小，暂时不支持外部设置，因为字体大小是写死的，后期会加自动计算
      */
-    static final int WIDTH = 130;
+    private static final int WIDTH = 130;
 
-    static final int HEIGHT = 48;
+    private static final int HEIGHT = 48;
 
-    static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf", "JetBrainsMonoNL.ttf"};
-    final Font[] fonts;
-    BackgroundDraw backgroundDraw;
-    CaptchaDraw captchaDraw;
-    InterferenceDraw interferenceDraw;
-    Random random;
+    private static final String[] FONT_NAMES = new String[]{"001.ttf", "002.ttf", "003.ttf", "004.ttf", "JetBrainsMonoNL.ttf"};
+    private final Font[] fonts;
+    private BackgroundDraw backgroundDraw;
+    private CaptchaDraw captchaDraw;
+    private InterferenceDraw interferenceDraw;
+    private Random random;
 
     public Captcha() {
         this(new RandomCaptchaDraw());

@@ -1,5 +1,6 @@
 package ext.library.captcha.config.properties;
 
+import ext.library.cache.enums.CacheStorage;
 import ext.library.captcha.enums.CaptchaType;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,10 @@ public class CaptchaProperties {
      * 验证码类型，默认：随机数
      */
     CaptchaType captchaType = CaptchaType.RANDOM;
+
+    /** 缓存存储方式 */
+    CacheStorage cacheStorage = CacheStorage.CAFFEINE;
+
     /**
      * 验证码 cache 名，默认：captcha
      */
