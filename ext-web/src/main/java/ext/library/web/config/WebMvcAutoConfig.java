@@ -39,7 +39,7 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @ConditionalOnWebApplication(type = SERVLET)
 public class WebMvcAutoConfig implements WebMvcConfigurer {
 
-    final WebMvcProperties webMvcProperties;
+    private final WebMvcProperties webMvcProperties;
 
     private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -64,7 +64,6 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
 
     /**
      * 增加 GET 请求参数中时间类型转换
-     * {@link ext.library.json.module.CustomJavaTimeModule}
      *
      * <ul>
      * <li>HH:mm:ss -> LocalTime</li>

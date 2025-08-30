@@ -22,12 +22,12 @@ public class SpelUtil {
     /**
      * SpEL 解析器
      */
-    static final Lazy<ExpressionParser> PARSER = Lazy.of(SpelExpressionParser::new);
+    private static final Lazy<ExpressionParser> PARSER = Lazy.of(SpelExpressionParser::new);
 
     /**
      * 方法参数获取
      */
-    static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(StandardReflectionParameterNameDiscoverer::new);
+    private static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(StandardReflectionParameterNameDiscoverer::new);
 
     /**
      * 支持 #p0 参数索引的表达式解析

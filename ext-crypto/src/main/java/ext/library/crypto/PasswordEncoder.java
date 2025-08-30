@@ -13,10 +13,10 @@ import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 @UtilityClass
 public class PasswordEncoder {
 
-    final static Lazy<Argon2PasswordEncoder> ARGON2_ENCODER = Lazy.of(Argon2PasswordEncoder::defaultsForSpringSecurity_v5_8);
-    final static Lazy<BCryptPasswordEncoder> BCRYPT_ENCODER = Lazy.of(() -> new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B));
-    final static Lazy<Pbkdf2PasswordEncoder> PBKDF2_ENCODER = Lazy.of(Pbkdf2PasswordEncoder::defaultsForSpringSecurity_v5_8);
-    final static Lazy<SCryptPasswordEncoder> SCRYPT_ENCODER = Lazy.of(SCryptPasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private final static Lazy<Argon2PasswordEncoder> ARGON2_ENCODER = Lazy.of(Argon2PasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private final static Lazy<BCryptPasswordEncoder> BCRYPT_ENCODER = Lazy.of(() -> new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B));
+    private final static Lazy<Pbkdf2PasswordEncoder> PBKDF2_ENCODER = Lazy.of(Pbkdf2PasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private final static Lazy<SCryptPasswordEncoder> SCRYPT_ENCODER = Lazy.of(SCryptPasswordEncoder::defaultsForSpringSecurity_v5_8);
 
     /**
      * 通过 默认加密器 BCrypt 加密

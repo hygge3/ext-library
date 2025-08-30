@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public class BizException extends RuntimeException {
 
-    final Integer code;
+    private final Integer code;
 
     /**
      * 异常提示消息构造

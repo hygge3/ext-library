@@ -36,7 +36,7 @@ import java.nio.charset.StandardCharsets;
 @ControllerAdvice
 public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
 
-    final CryptoProperties cryptoProperties;
+    private final CryptoProperties cryptoProperties;
 
     @Override
     public boolean supports(@Nonnull MethodParameter methodParameter, @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {

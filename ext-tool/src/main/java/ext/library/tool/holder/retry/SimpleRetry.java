@@ -19,12 +19,12 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
     /**
      * The default limit to the number of attempts for a new policy.
      */
-    static final int DEFAULT_MAX_ATTEMPTS = 3;
+    private static final int DEFAULT_MAX_ATTEMPTS = 3;
 
     /**
      * Default back off period - 1ms.
      */
-    static final long DEFAULT_BACK_OFF_PERIOD = 1L;
+    private static final long DEFAULT_BACK_OFF_PERIOD = 1L;
 
     public SimpleRetry() {
         this(DEFAULT_MAX_ATTEMPTS, DEFAULT_BACK_OFF_PERIOD);

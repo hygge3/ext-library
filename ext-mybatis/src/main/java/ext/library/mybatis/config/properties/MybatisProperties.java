@@ -1,13 +1,15 @@
 package ext.library.mybatis.config.properties;
 
 import ext.library.mybatis.constant.DbField;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Mybatis 自动配置属性
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(MybatisProperties.PREFIX)
 public class MybatisProperties {
 
@@ -18,12 +20,12 @@ public class MybatisProperties {
      * <p>
      * 默认：false
      */
-    Boolean sqlPrint = false;
+    private Boolean sqlPrint = false;
 
     /** 删除字段 */
-    String deleteField = DbField.DELETED;
+    private String deleteField = DbField.DELETED;
 
     /** 开启内置的多租户实现，必须使用 TenantUtil 放入 */
-    Boolean tenant = false;
+    private Boolean tenant = false;
 
 }

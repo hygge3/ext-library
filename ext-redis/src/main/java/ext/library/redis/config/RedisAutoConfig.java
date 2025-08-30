@@ -2,6 +2,7 @@ package ext.library.redis.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ext.library.redis.config.properties.RedisProperties;
+import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.IRedisPrefixConverter;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
@@ -25,8 +26,8 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisAutoConfig {
 
-    final RedisConnectionFactory redisConnectionFactory;
-    final ObjectMapper objectMapper;
+    private final RedisConnectionFactory redisConnectionFactory;
+    private final ObjectMapper objectMapper;
 
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)
@@ -36,6 +37,13 @@ public class RedisAutoConfig {
         template.setConnectionFactory(this.redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(redisPrefixConverter));
         return template;
+    }
+
+    @Bean
+    @ConditionalOnBean(RedisProperties.class)
+    @ConditionalOnMissingBean(IRedisPrefixConverter.class)
+    public IRedisPrefixConverter prefixConverter(RedisProperties redisProperties) {
+        return new DefaultRedisPrefixConverter(redisProperties);
     }
 
     @Bean

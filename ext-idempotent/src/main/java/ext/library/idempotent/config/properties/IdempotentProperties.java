@@ -12,24 +12,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(IdempotentProperties.PREFIX)
 public class IdempotentProperties {
 
-	public static final String PREFIX = "ext.idempotent";
+    public static final String PREFIX = "ext.idempotent";
 
-	 KeyStoreType keyStoreType = KeyStoreType.MEMORY;
+    private KeyStoreType keyStoreType = KeyStoreType.MEMORY;
 
-	/**
-	 * 存储方式
-	 */
-	public enum KeyStoreType {
+    /**
+     * 存储方式
+     */
+    public enum KeyStoreType {
 
-		/**
-		 * 内存存储
-		 */
-		MEMORY,
-		/**
-		 * redis 存储
-		 */
-		REDIS
+        /**
+         * 内存存储
+         */
+        MEMORY,
+        /**
+         * redis 存储
+         */
+        REDIS
 
-	}
+    }
 
 }

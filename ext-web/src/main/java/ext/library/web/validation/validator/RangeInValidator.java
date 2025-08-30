@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RangeInValidator implements ConstraintValidator<RangeIn, Object> {
 
-    RangeIn rangeIn;
+    private RangeIn rangeIn;
 
     @Override
     public void initialize(RangeIn constraintAnnotation) {

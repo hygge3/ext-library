@@ -34,7 +34,7 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         QueryColumnBehavior.setSmartConvertInToEquals(true);
     }
 
-    final MybatisProperties mybatisProperties;
+    private final MybatisProperties mybatisProperties;
 
     private static String formatSQL(@Nonnull String sql) {
         return sql.replaceAll("\\s+", Symbol.SPACE).replace("\\r", Symbol.SPACE).replace("\\n", Symbol.SPACE);

@@ -1,10 +1,10 @@
 package ext.library.web.validation.validator;
 
+import ext.library.web.validation.constraints.OneOfInts;
+
 import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import ext.library.web.validation.constraints.OneOfInts;
 
 
 /**
@@ -12,9 +12,9 @@ import ext.library.web.validation.constraints.OneOfInts;
  */
 public class EnumValueValidatorOfInt implements ConstraintValidator<OneOfInts, Integer> {
 
-     int[] ints;
+    private int[] ints;
 
-     boolean allowNull;
+    private boolean allowNull;
 
     @Override
     public void initialize(@Nonnull OneOfInts constraintAnnotation) {

@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
 
-    final static ThreadLocal<StopWatch> KEY_CACHE = new InheritableThreadLocal<>();
+    private final static ThreadLocal<StopWatch> KEY_CACHE = new InheritableThreadLocal<>();
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,

@@ -31,7 +31,7 @@ import java.util.Objects;
 @RestControllerAdvice
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
-    final WebMvcProperties webMvcProperties;
+    private final WebMvcProperties webMvcProperties;
 
     /**
      * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值

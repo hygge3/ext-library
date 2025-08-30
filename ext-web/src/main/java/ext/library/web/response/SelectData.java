@@ -1,51 +1,53 @@
 package ext.library.web.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 /**
  * 下拉框所对应的视图类
  */
-@Data
+@Getter
+@Setter
 @Schema(title = "下拉框数据")
 public class SelectData<T> {
 
-	/**
-	 * 显示的数据
-	 */
-	@Schema(title = "显示的数据", requiredMode = REQUIRED)
-	 String name;
+    /**
+     * 显示的数据
+     */
+    @Schema(title = "显示的数据", requiredMode = REQUIRED)
+    private String name;
 
-	/**
-	 * 选中获取的属性
-	 */
-	@Schema(title = "选中获取的属性", requiredMode = REQUIRED)
-	 T value;
+    /**
+     * 选中获取的属性
+     */
+    @Schema(title = "选中获取的属性", requiredMode = REQUIRED)
+    private T value;
 
-	/**
-	 * 是否被选中
-	 */
-	@Schema(title = "是否被选中")
-	 Boolean selected;
+    /**
+     * 是否被选中
+     */
+    @Schema(title = "是否被选中")
+    private Boolean selected;
 
-	/**
-	 * 是否禁用
-	 */
-	@Schema(title = "是否禁用")
-	 Boolean disabled;
+    /**
+     * 是否禁用
+     */
+    @Schema(title = "是否禁用")
+    private Boolean disabled;
 
-	/**
-	 * 分组标识
-	 */
-	@Schema(title = "分组标识")
-	 String type;
+    /**
+     * 分组标识
+     */
+    @Schema(title = "分组标识")
+    private String type;
 
-	/**
-	 * 附加属性
-	 */
-	@Schema(title = "附加属性")
-	 T attributes;
+    /**
+     * 附加属性
+     */
+    @Schema(title = "附加属性")
+    private T attributes;
 
 }

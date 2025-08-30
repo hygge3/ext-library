@@ -1,47 +1,30 @@
 package ext.library.redis.config.properties;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
 
 /**
  * 缓存属性
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = RedisProperties.PREFIX)
 public class RedisProperties {
 
-    public static final String PREFIX = "ext.redis";
+    static final String PREFIX = "ext.redis";
 
     /**
      * 通用的 key 前缀
      */
-    String keyPrefix = "";
+    private String keyPrefix;
 
     /**
-     * redis 锁 后缀
+     * 默认锁的超时时间
      */
-    String lockKeySuffix = "locked";
-
-    /**
-     * 默认分隔符
-     */
-    String delimiter = ":";
-
-    /**
-     * 空值标识
-     */
-    String nullValue = "N_V";
-
-    /**
-     * 默认缓存数据的超时时间 (s)
-     */
-    long expireTime = 86400L;
-
-    /**
-     * 默认锁的超时时间 (s)
-     */
-    long defaultLockTimeout = 10L;
-
+    private Duration defaultLockTimeout = Duration.ofSeconds(10L);
 
 
 }

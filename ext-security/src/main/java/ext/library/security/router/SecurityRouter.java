@@ -30,7 +30,7 @@ public class SecurityRouter {
     /**
      * 忽略路由匹配列表
      */
-    final List<String> excludePathList = new ArrayList<>();
+    private final List<String> excludePathList = new ArrayList<>();
 
     private SecurityRouter() {
         // 全局忽略

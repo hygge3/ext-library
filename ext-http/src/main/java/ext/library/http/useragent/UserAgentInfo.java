@@ -1,9 +1,10 @@
 package ext.library.http.useragent;
 
+import lombok.Getter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.regex.Pattern;
-import lombok.Getter;
 
 /**
  * User-agent 信息
@@ -12,22 +13,22 @@ import lombok.Getter;
 public class UserAgentInfo implements Serializable {
 
     @Serial
-     static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 未知类型
      */
-     static final String NameUnknown = "Unknown";
+    private static final String NameUnknown = "Unknown";
 
     /**
      * 信息名称
      */
-     final String name;
+    private final String name;
 
     /**
      * 信息匹配模式
      */
-     final Pattern pattern;
+    private final Pattern pattern;
 
     /**
      * 构造
@@ -54,6 +55,7 @@ public class UserAgentInfo implements Serializable {
      * 指定内容中是否包含匹配此信息的内容
      *
      * @param content User-Agent 字符串
+     *
      * @return 是否包含匹配此信息的内容
      */
     public boolean isMatch(String content) {

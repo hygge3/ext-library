@@ -15,11 +15,11 @@ public class Browser extends UserAgentInfo {
     /**
      * 未知
      */
-    public static final Browser Unknown = new Browser(NameUnknown, null, null);
+    protected static final Browser Unknown = new Browser(NameUnknown, null, null);
     /**
      * 其它版本
      */
-    public static final String Other_Version = "[\\/ ]([\\d\\w\\.\\-]+)";
+    private static final String Other_Version = "[\\/ ]([\\d\\w\\.\\-]+)";
     /**
      * 支持的浏览器类型
      */

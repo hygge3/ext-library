@@ -1,6 +1,5 @@
 package ext.library.ratelimiter.config.properties;
 
-import ext.library.ratelimiter.enums.RateLimiterType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,6 +22,15 @@ public class RateLimiterProperties {
      */
     private boolean enable = true;
 
+    /** 限速器类型 */
     private RateLimiterType rateLimiterType;
 
+    /**
+     * 限速器类型
+     *
+     * @since 2025.08.29
+     */
+    public enum RateLimiterType {
+        REDIS, GUAVA
+    }
 }

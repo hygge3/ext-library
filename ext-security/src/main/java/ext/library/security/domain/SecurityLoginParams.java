@@ -26,27 +26,27 @@ import java.util.Objects;
 public class SecurityLoginParams implements Serializable {
 
     @Serial
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     /**
      * session 挂载数据
      */
-    final Map<String, Object> mountData = Maps.newHashMap();
+    private final Map<String, Object> mountData = Maps.newHashMap();
     /**
      * token 挂载数据
      */
-    final Map<String, Object> tokenMountData = Maps.newHashMap();
+    private final Map<String, Object> tokenMountData = Maps.newHashMap();
     /**
      * 设备类型
      */
-    String deviceType;
+    private String deviceType;
     /**
      * 超时时间
      */
-    Long timeout;
+    private Long timeout;
     /**
      * 活跃超时时间
      */
-    Long activityTimeout;
+    private Long activityTimeout;
 
     /**
      * 获取设备类型

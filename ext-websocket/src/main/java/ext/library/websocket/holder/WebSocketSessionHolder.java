@@ -1,11 +1,12 @@
 package ext.library.websocket.holder;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * WebSocketSession 用于保存当前所有在线的会话信息
@@ -13,7 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WebSocketSessionHolder {
 
-     static final Map<String, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
 
     /**
      * 将 WebSocket 会话添加到用户会话 Map 中
@@ -38,6 +39,7 @@ public class WebSocketSessionHolder {
      * 根据会话键从用户会话 Map 中获取 WebSocket 会话
      *
      * @param sessionKey 要获取的会话键
+     *
      * @return 与给定会话键对应的 WebSocket 会话，如果不存在则返回 null
      */
     public static WebSocketSession getSessions(String sessionKey) {
@@ -57,6 +59,7 @@ public class WebSocketSessionHolder {
      * 检查给定的会话键是否存在于用户会话 Map 中
      *
      * @param sessionKey 要检查的会话键
+     *
      * @return 如果存在对应的会话键，则返回 true；否则返回 false
      */
     public static Boolean existSession(String sessionKey) {

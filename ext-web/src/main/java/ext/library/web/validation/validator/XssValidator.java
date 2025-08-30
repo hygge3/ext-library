@@ -1,18 +1,18 @@
 package ext.library.web.validation.validator;
 
+import ext.library.core.util.ValidatorUtil;
+import ext.library.web.validation.constraints.Xss;
+
 import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import ext.library.core.util.ValidatorUtil;
-import ext.library.web.validation.constraints.Xss;
 
 /**
  * 自定义 xss 校验注解实现
  */
 public class XssValidator implements ConstraintValidator<Xss, String> {
 
-     boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull Xss constraintAnnotation) {

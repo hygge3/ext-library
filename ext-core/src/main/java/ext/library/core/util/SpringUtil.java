@@ -32,17 +32,16 @@ import java.util.Map;
 public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextAware {
 
     /**
+     * "@PostConstruct"注解标记的类中，由于 ApplicationContext 还未加载，导致空指针<br>
+     * 因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
+     */
+    private static ConfigurableListableBeanFactory beanFactory;
+    /**
      * Spring 应用上下文环境 -- GETTER -- 获取
      */
     @Getter
     @Setter
-    static ApplicationContext context;
-
-    /**
-     * "@PostConstruct"注解标记的类中，由于 ApplicationContext 还未加载，导致空指针<br>
-     * 因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
-     */
-    static ConfigurableListableBeanFactory beanFactory;
+    private static ApplicationContext context;
 
     /**
      * 获取{@link ListableBeanFactory}，可能为{@link ConfigurableListableBeanFactory} 或

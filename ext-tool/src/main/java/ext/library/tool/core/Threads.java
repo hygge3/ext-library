@@ -4,6 +4,7 @@ package ext.library.tool.core;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +27,17 @@ public class Threads {
     public void sleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * sleep 等待，单位为毫秒
+     */
+    public void sleep(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

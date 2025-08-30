@@ -30,19 +30,19 @@ public class SecurityRamRepository implements SecurityRepository {
     /**
      * SecuritySession 存储
      */
-    static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
+    private static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * SecurityToken 存储
      */
-    static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
+    private static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     /**
      * 记录数据版本信息
      */
-    static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
+    private static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
 
     @Override

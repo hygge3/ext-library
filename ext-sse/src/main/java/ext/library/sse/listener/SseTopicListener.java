@@ -3,10 +3,11 @@ package ext.library.sse.listener;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.tool.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+
+import jakarta.annotation.Resource;
 
 /**
  * SSE 主题订阅监听器
@@ -15,8 +16,8 @@ import org.springframework.core.annotation.Order;
 @Order(-1)
 public class SseTopicListener implements ApplicationRunner {
 
-    @Autowired
-    SseEmitterManager sseEmitterManager;
+    @Resource
+    private SseEmitterManager sseEmitterManager;
 
     /**
      * 在 Spring Boot 应用程序启动时初始化 SSE 主题订阅监听器

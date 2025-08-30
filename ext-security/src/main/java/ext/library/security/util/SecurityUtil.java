@@ -25,7 +25,7 @@ public class SecurityUtil {
      * <p>
      * 返回 SecurityService
      */
-    public static final SecurityService SERVICE = SpringUtil.getBean(SecurityService.class);
+    private static final SecurityService SERVICE = SpringUtil.getBean(SecurityService.class);
 
     /*
      * ***************************************操作相关方法**************************************

@@ -14,7 +14,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class ChineseValidator implements ConstraintValidator<Chinese, Object> {
 
-    boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull Chinese constraintAnnotation) {

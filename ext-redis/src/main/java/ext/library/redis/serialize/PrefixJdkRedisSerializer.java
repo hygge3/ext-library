@@ -10,22 +10,22 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 @Slf4j
 public class PrefixJdkRedisSerializer extends JdkSerializationRedisSerializer {
 
-	 final IRedisPrefixConverter redisPrefixConverter;
+    private final IRedisPrefixConverter redisPrefixConverter;
 
-	public PrefixJdkRedisSerializer(IRedisPrefixConverter redisPrefixConverter) {
-		this.redisPrefixConverter = redisPrefixConverter;
-	}
+    public PrefixJdkRedisSerializer(IRedisPrefixConverter redisPrefixConverter) {
+        this.redisPrefixConverter = redisPrefixConverter;
+    }
 
-	@Override
-	public Object deserialize(byte[] bytes) {
-		byte[] unwrap = this.redisPrefixConverter.unwrap(bytes);
-		return super.deserialize(unwrap);
-	}
+    @Override
+    public Object deserialize(byte[] bytes) {
+        byte[] unwrap = this.redisPrefixConverter.unwrap(bytes);
+        return super.deserialize(unwrap);
+    }
 
-	@Override
+    @Override
     public byte[] serialize(Object object) {
-		byte[] originBytes = super.serialize(object);
-		return this.redisPrefixConverter.wrap(originBytes);
-	}
+        byte[] originBytes = super.serialize(object);
+        return this.redisPrefixConverter.wrap(originBytes);
+    }
 
 }

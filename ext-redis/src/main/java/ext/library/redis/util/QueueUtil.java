@@ -1,9 +1,11 @@
 package ext.library.redis.util;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.redis.core.script.RedisScript;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 分布式队列工具 轻量级队列 重量级数据量 请使用 MQ 要求 redis 5.X 以上
@@ -53,6 +55,18 @@ public class QueueUtil {
      */
     public void delayedProducer(String queueName, String data, long time) {
         long score = System.currentTimeMillis() / 1000 + time;
+        RedisUtil.zSetOps().add(queueName, data, score);
+    }
+
+    /**
+     * 添加延迟队列数据 默认秒
+     *
+     * @param queueName 队列名
+     * @param data      数据
+     * @param time      延迟时间
+     */
+    public void delayedProducer(String queueName, String data, Duration time) {
+        long score = time.getSeconds();
         RedisUtil.zSetOps().add(queueName, data, score);
     }
 

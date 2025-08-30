@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class PermissionUtil {
 
-    static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
+    private static final SecurityAuthority authority = SpringUtil.getBean(SecurityAuthority.class);
 
     /**
      * 当前用户是否有角色

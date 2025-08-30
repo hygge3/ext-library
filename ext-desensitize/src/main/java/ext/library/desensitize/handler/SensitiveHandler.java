@@ -22,7 +22,7 @@ import java.util.Objects;
 @Slf4j
 public class SensitiveHandler extends JsonSerializer<String> implements ContextualSerializer {
 
-    IDesensitizeRule strategy;
+    private IDesensitizeRule strategy;
 
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

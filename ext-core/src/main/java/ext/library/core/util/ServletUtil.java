@@ -37,7 +37,7 @@ public class ServletUtil {
     /**
      * 如果在前端和服务端中间还有一层 Node 服务 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息 便于获取真实 IP
      */
-    public final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
+    private final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
     private final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
             "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
 

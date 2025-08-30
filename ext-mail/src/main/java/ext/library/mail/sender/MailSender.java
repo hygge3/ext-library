@@ -1,12 +1,12 @@
 package ext.library.mail.sender;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
-import java.util.List;
 import org.springframework.mail.MailSendException;
 import org.springframework.util.StringUtils;
+
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * 邮件发送器
@@ -17,6 +17,7 @@ public interface MailSender {
      * 发送邮件
      *
      * @param mailDetails 邮件信息
+     *
      * @return MailSendInfo
      */
     MailSendInfo sendMail(MailDetails mailDetails);
@@ -28,6 +29,7 @@ public interface MailSender {
      * @param content  邮件正文
      * @param showHtml 是否将正文渲染为 html
      * @param to       收件人，多个邮箱使用，号间隔
+     *
      * @return MailSendInfo
      */
     default MailSendInfo sendMail(String subject, String content, boolean showHtml, String... to) {
@@ -45,6 +47,7 @@ public interface MailSender {
      * @param subject 主题
      * @param content 邮件正文
      * @param to      收件人
+     *
      * @return MailSendInfo
      */
     default MailSendInfo sendTextMail(String subject, String content, String... to) {
@@ -57,6 +60,7 @@ public interface MailSender {
      * @param subject 主题
      * @param content 邮件正文
      * @param to      收件人
+     *
      * @return MailSendInfo
      */
     default MailSendInfo sendTextMail(String subject, String content, @Nonnull List<String> to) {
@@ -69,6 +73,7 @@ public interface MailSender {
      * @param subject 主题
      * @param content 邮件正文
      * @param to      收件人
+     *
      * @return MailSendInfo
      */
     default MailSendInfo sendHtmlMail(String subject, String content, String... to) {
@@ -81,6 +86,7 @@ public interface MailSender {
      * @param subject 主题
      * @param content 邮件正文
      * @param to      收件人
+     *
      * @return MailSendInfo 邮件发送结果信息
      */
     default MailSendInfo sendHtmlMail(String subject, String content, @Nonnull List<String> to) {

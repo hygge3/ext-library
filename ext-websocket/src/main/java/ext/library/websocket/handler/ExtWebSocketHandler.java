@@ -28,7 +28,7 @@ import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
 @Slf4j
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
 
-    final WebSocketProperties properties = SpringUtil.getBean(WebSocketProperties.class);
+    private final WebSocketProperties properties = SpringUtil.getBean(WebSocketProperties.class);
 
     /**
      * 连接成功后

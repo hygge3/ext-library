@@ -8,7 +8,8 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -18,7 +19,8 @@ import java.util.Map;
 /**
  * openAPI 属性
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(OpenApiProperties.PREFIX)
 public class OpenApiProperties {
 
@@ -90,7 +92,8 @@ public class OpenApiProperties {
      * <p>
      * 为了 springboot 自动生产配置提示信息，所以这里复制一个类出来
      */
-    @Data
+    @Getter
+    @Setter
     public static class InfoProperties {
 
         /**

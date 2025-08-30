@@ -1,9 +1,10 @@
 package ext.library.security.listener;
 
 import ext.library.tool.core.Exceptions;
+import lombok.experimental.UtilityClass;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
 /**
  * <p>
@@ -13,7 +14,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SecurityListenerManager {
 
-     static final List<SecurityListener> LISTENER_LIST = new ArrayList<>();
+    private static final List<SecurityListener> LISTENER_LIST = new ArrayList<>();
 
     static {
         SecurityListenerManager.LISTENER_LIST.add(new SecurityListener() {

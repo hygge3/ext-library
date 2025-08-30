@@ -3,14 +3,15 @@ package ext.library.web.response;
 import ext.library.core.exception.BizCode;
 import ext.library.core.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serial;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * HTTP 请求最外层响应对象，更适应 RESTful 风格 API
@@ -25,25 +26,25 @@ import lombok.experimental.Accessors;
 public class R<T> implements Serializable {
 
     @Serial
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 响应状态码
      */
     @Schema(title = "返回状态码", defaultValue = "200")
-     int code;
+    private int code;
 
     /**
      * 响应提示
      */
     @Schema(title = "返回信息", defaultValue = "Success")
-     String msg;
+    private String msg;
 
     /**
      * 业务数据
      */
     @Schema(title = "数据", nullable = true, defaultValue = "null")
-     T data;
+    private T data;
 
     public static <T> R<T> ok() {
         return ok(null);
@@ -61,11 +62,11 @@ public class R<T> implements Serializable {
         return new R<T>().setCode(code).setMsg(message);
     }
 
-    public static <T> R<T> failed( ResponseCode failMsg) {
+    public static <T> R<T> failed(ResponseCode failMsg) {
         return failed(failMsg.getCode(), failMsg.getMsg());
     }
 
-    public static <T> R<T> failed( ResponseCode failMsg, String message) {
+    public static <T> R<T> failed(ResponseCode failMsg, String message) {
         return failed(failMsg.getCode(), message);
     }
 

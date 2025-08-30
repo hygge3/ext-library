@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableConfigurationProperties(CryptoProperties.class)
 public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
 
-    final CryptoProperties cryptoProperties;
+    private final CryptoProperties cryptoProperties;
 
     @Override
     public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {

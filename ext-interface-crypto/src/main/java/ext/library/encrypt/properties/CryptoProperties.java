@@ -19,23 +19,23 @@ public class CryptoProperties {
     public static final String PREFIX = "ext.crypto";
 
     /** 算法 */
-    Algorithm algo;
+    private Algorithm algo;
 
     /**
      * 公钥
      */
-    String publicKey;
+    private String publicKey;
 
     /**
      * 私钥
      */
-    String privateKey;
+    private String privateKey;
 
     /**
      * 密钥
      */
-    String secretKey;
+    private String secretKey;
 
     /** 盐 */
-    String salt;
+    private String salt;
 }

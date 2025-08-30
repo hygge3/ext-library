@@ -13,7 +13,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class CellphoneValidator implements ConstraintValidator<Cellphone, String> {
 
-    boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull Cellphone constraintAnnotation) {

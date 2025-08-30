@@ -25,7 +25,7 @@ import java.util.Objects;
 @Slf4j
 public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-    static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
 
     /**
      * 判断是否需要处理该参数

@@ -19,10 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
 
     /** 表达式缓存 */
-    final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
+    private final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
 
     /** 方法缓存 */
-    final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
+    private final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
 
     /**
      * Create an {@link EvaluationContext}.

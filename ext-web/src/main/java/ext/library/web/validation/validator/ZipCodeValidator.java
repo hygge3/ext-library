@@ -13,7 +13,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class ZipCodeValidator implements ConstraintValidator<ZipCode, String> {
 
-    boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull ZipCode constraintAnnotation) {

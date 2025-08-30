@@ -37,46 +37,46 @@ import java.util.UUID;
 public class SecuritySession implements Serializable {
 
     @Serial
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     /**
      * 挂载数据
      */
-    final Map<String, Object> mountData = new HashMap<>();
+    private final Map<String, Object> mountData = new HashMap<>();
     /**
      * sessionId
      */
-    String securitySessionId;
+    private String securitySessionId;
     /**
      * 登录 Id
      */
-    String loginId;
+    private String loginId;
     /**
      * 过期时间 单位秒
      */
-    Long timeout;
+    private Long timeout;
     /**
      * 当前的 SecurityToken
      */
-    SecurityToken currentSecurityToken;
+    private SecurityToken currentSecurityToken;
     /**
      * 创建时间 格式 yyyy-MM-dd HH:mm:ss
      */
-    String createTime;
+    private String createTime;
 
     /**
      * 更新时间 格式 yyyy-MM-dd HH:mm:ss
      */
-    String updateTime;
+    private String updateTime;
 
     /**
      * 登录的 token 列表
      */
-    List<SecurityToken> tokenInfoList = new ArrayList<>();
+    private List<SecurityToken> tokenInfoList = new ArrayList<>();
 
     /**
      * 版本号
      */
-    Long version;
+    private Long version;
 
     public SecuritySession(boolean isCreate) {
         if (isCreate) {

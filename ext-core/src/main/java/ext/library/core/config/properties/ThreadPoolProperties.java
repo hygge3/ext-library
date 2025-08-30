@@ -1,13 +1,15 @@
 package ext.library.core.config.properties;
 
 import ext.library.tool.constant.Holder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 线程池 配置属性
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "thread-pool")
 public class ThreadPoolProperties {
 

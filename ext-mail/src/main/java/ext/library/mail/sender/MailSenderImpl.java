@@ -1,13 +1,8 @@
 package ext.library.mail.sender;
 
-import jakarta.annotation.Nonnull;
-import jakarta.mail.MessagingException;
-
 import ext.library.mail.event.MailSendEvent;
 import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
-import java.io.File;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +11,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.mail.MessagingException;
+import java.io.File;
+import java.time.LocalDateTime;
+
 /**
  * 邮件发送器实现
  */
@@ -23,9 +23,9 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class MailSenderImpl implements MailSender {
 
-    final JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    final ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 配置文件中我的邮箱
@@ -37,6 +37,7 @@ public class MailSenderImpl implements MailSender {
      * 发送邮件
      *
      * @param mailDetails 邮件参数
+     *
      * @return boolean 发送是否成功
      */
     @Override

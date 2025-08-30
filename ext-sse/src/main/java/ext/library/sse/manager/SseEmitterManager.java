@@ -25,9 +25,9 @@ public class SseEmitterManager {
     /**
      * 订阅的频道
      */
-    final static String SSE_TOPIC = "global:sse";
+    private final static String SSE_TOPIC = "ext:sse";
 
-    final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
+    private final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
 
     /**
      * 建立与指定用户的 SSE 连接

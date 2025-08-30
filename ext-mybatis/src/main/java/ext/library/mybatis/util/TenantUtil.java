@@ -1,7 +1,8 @@
 package ext.library.mybatis.util;
 
-import java.io.Serializable;
 import lombok.experimental.UtilityClass;
+
+import java.io.Serializable;
 
 /**
  * 租户 ID 存取类
@@ -9,7 +10,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TenantUtil {
 
-    static final ThreadLocal<Serializable> TENANT_ID = new InheritableThreadLocal<>();
+    private static final ThreadLocal<Serializable> TENANT_ID = new InheritableThreadLocal<>();
 
     /**
      * 设置租户 ID

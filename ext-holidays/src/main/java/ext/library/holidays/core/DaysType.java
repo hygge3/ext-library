@@ -25,12 +25,13 @@ public enum DaysType {
     HOLIDAYS((byte) 2);
 
     @JsonValue
-     final byte type;
+    private final byte type;
 
     /**
      * 将 type 转换成枚举
      *
      * @param type type
+     *
      * @return DaysType
      */
     public static DaysType from(byte type) {

@@ -1,12 +1,13 @@
 package ext.library.web.body.resolver;
 
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.bind.annotation.ValueConstants;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.web.bind.annotation.ValueConstants;
 
 /**
  * 自定义注解接收 Body 单个参数，仿 @RequestParam

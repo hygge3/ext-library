@@ -23,8 +23,8 @@ import java.io.IOException;
 @AutoConfiguration
 public class TraceFilter extends OncePerRequestFilter {
 
-    static final ThreadLocal<String> TRACE_ID = new InheritableThreadLocal<>();
-    final WebMvcProperties properties;
+    private static final ThreadLocal<String> TRACE_ID = new InheritableThreadLocal<>();
+    private final WebMvcProperties properties;
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

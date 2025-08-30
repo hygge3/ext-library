@@ -13,7 +13,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class UsernameValidator implements ConstraintValidator<Username, String> {
 
-    boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull Username constraintAnnotation) {

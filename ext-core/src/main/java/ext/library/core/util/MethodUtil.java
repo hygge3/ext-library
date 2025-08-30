@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 @UtilityClass
 public class MethodUtil extends org.springframework.util.ClassUtils {
 
-    final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
+    private final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
     /**
      * 获取方法参数信息

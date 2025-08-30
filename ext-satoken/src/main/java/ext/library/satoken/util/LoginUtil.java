@@ -22,21 +22,21 @@ import java.util.Objects;
 @UtilityClass
 public class LoginUtil {
 
-    public static final String LOGIN_USER_KEY = "loginUser";
+    private static final String LOGIN_USER_KEY = "loginUser";
 
-    public static final String TENANT_KEY = "tenantId";
+    private static final String TENANT_KEY = "tenantId";
 
-    public static final String USER_KEY = "userId";
+    private static final String USER_KEY = "userId";
 
-    public static final String USER_NAME_KEY = "userName";
+    private static final String USER_NAME_KEY = "userName";
 
-    public static final String DEPT_KEY = "deptId";
+    private static final String DEPT_KEY = "deptId";
 
-    public static final String DEPT_NAME_KEY = "deptName";
+    private static final String DEPT_NAME_KEY = "deptName";
 
-    public static final String DEPT_CATEGORY_KEY = "deptCategory";
+    private static final String DEPT_CATEGORY_KEY = "deptCategory";
 
-    public static final String CLIENT_KEY = "clientid";
+    private static final String CLIENT_KEY = "clientid";
 
     /**
      * 登录系统 基于 设备类型 针对相同用户体系不同设备

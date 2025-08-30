@@ -14,7 +14,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class EnglishValidator implements ConstraintValidator<English, String> {
 
-    boolean notNull;
+    private boolean notNull;
 
     @Override
     public void initialize(@Nonnull English constraintAnnotation) {
