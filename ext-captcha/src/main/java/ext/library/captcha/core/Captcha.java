@@ -38,7 +38,7 @@ public class Captcha implements ICaptcha {
 
     private static final int HEIGHT = 48;
 
-    private static final String[] FONT_NAMES = new String[]{"actionj.ttf", "american.ttf", "epilog.ttf", "fresnel.ttf", "headache.ttf", "lexo.ttf", "marker.ttf", "papyrus.ttf", "prefix.ttf", "progbot.ttf", "ransom.ttf", "robot.ttf", "scandal.ttf"};
+    private static final String[] FONT_NAMES = new String[]{"marker.ttf", "american.ttf", "papyrus.ttf",};
     private final Font[] fonts;
     private BackgroundDraw backgroundDraw;
     private CaptchaDraw captchaDraw;
