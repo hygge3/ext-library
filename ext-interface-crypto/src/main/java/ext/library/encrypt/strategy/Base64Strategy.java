@@ -7,11 +7,11 @@ import jakarta.annotation.Nonnull;
 public class Base64Strategy implements CryptoStrategy {
     @Override
     public String decrypt(String secretKey, @Nonnull String encryptedText, String salt) {
-        return Base64Util.decodeToStr(encryptedText);
+        return Base64Util.decodeUrlSafeToStr(encryptedText);
     }
 
     @Override
     public String encrypt(String secretKey, @Nonnull String plainText, String salt) {
-        return Base64Util.encodeToStr(plainText);
+        return Base64Util.encodeUrlSafeToStr(plainText);
     }
 }

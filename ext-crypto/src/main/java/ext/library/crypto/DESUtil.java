@@ -24,7 +24,7 @@ public class DESUtil {
     /**
      * 生成密钥
      *
-     * @param keySize 密钥大小
+     * @param keySize 密钥大小，56
      *
      * @return {@link String } 密钥
      */

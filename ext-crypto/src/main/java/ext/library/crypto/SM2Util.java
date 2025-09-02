@@ -1,266 +1,278 @@
 package ext.library.crypto;
 
-import com.google.common.collect.Maps;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
-import ext.library.tool.holder.Lazy;
-import ext.library.tool.util.Base64Util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.gm.GMNamedCurves;
-import org.bouncycastle.asn1.gm.GMObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.SM2Engine;
-import org.bouncycastle.crypto.params.ECNamedDomainParameters;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.crypto.signers.SM2Signer;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi;
-import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.custom.gm.SM2P256V1Curve;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.Signature;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Base64;
 
+/**
+ * sm2 工具
+ * <p>
+ * 公钥/私钥(数据格式) HEX
+ * 密文数据顺序 C1C3C
+ * 字符编码 UTF-8
+ *
+ * @since 2025.09.02
+ */
 @Slf4j
 @UtilityClass
 public class SM2Util {
-    private static final String ALGO = "EC";
 
-    private static final Lazy<BouncyCastleProvider> PROVIDER = Lazy.of(() -> {
-        BouncyCastleProvider provider = new BouncyCastleProvider();
-        if (Objects.isNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME))) {
-            Security.addProvider(provider);
+    // SM2 曲线参数
+    private static final SM2P256V1Curve CURVE = new SM2P256V1Curve();
+    private static final ECPoint EC_POINT = CURVE.createPoint(new BigInteger("32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16), new BigInteger("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16));
+    private static final ECDomainParameters DOMAIN_PARAMS = new ECDomainParameters(CURVE, EC_POINT, CURVE.getOrder(), CURVE.getCofactor());
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    /**
+     * 生成 SM2 密钥对
+     *
+     * @return 密钥对数组，[0] 为私钥 (Base64 格式)，[1] 为公钥 (Base64 格式)
+     */
+    public String[] genKeyPair() {
+        // 初始化密钥对生成器
+        ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
+        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, Holder.SECURE_RANDOM));
+
+        // 生成密钥对
+        org.bouncycastle.crypto.AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
+        ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) keyPair.getPrivate();
+        ECPublicKeyParameters publicKey = (ECPublicKeyParameters) keyPair.getPublic();
+
+        // 转换为 Base64 格式
+        byte[] priKeyBytes = privateKey.getD().toByteArray();
+        // 处理可能的负数情况，去掉多余的符号位
+        if (priKeyBytes[0] == 0 && priKeyBytes.length > 32) {
+            byte[] tmp = new byte[priKeyBytes.length - 1];
+            System.arraycopy(priKeyBytes, 1, tmp, 0, tmp.length);
+            priKeyBytes = tmp;
         }
-        return new BouncyCastleProvider();
-    });
-
-    /**
-     * 获取 SM2 密钥对
-     * BC 库使用的公钥=64 个字节 +1 个字节（04 标志位），BC 库使用的私钥=32 个字节
-     * SM2 秘钥的组成部分有 私钥 D、公钥 X、公钥 Y , 他们都可以用长度为 64 的 16 进制的 HEX 串表示，
-     * SM2 公钥并不是直接由 X+Y 表示 , 而是额外添加了一个头，当启用压缩时：公钥=有头 + 公钥 X，即省略了公钥 Y 的部分
-     *
-     * @param compressed 是否压缩公钥（加密解密都使用 BC 库才能使用压缩）
-     *
-     * @return {@link Map.Entry }<{@link String }, {@link String }> 密钥对：{公钥：私钥}
-     */
-    public Map.Entry<String, String> genKeyPair(boolean compressed) {
-        // 1.创建密钥生成器
-        KeyPairGeneratorSpi.EC spi = new KeyPairGeneratorSpi.EC();
-        // 获取一条 SM2 曲线参数
-        X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
-        // 构造 spec 参数
-        ECParameterSpec parameterSpec = new ECParameterSpec(parameters.getCurve(), parameters.getG(), parameters.getN());
-        // 2.初始化生成器，带上随机数
-        try {
-            spi.initialize(parameterSpec, Holder.SECURE_RANDOM);
-        } catch (InvalidAlgorithmParameterException e) {
-            log.error("[🔐] 生成 SM2 密钥对失败", e);
-            throw Exceptions.unchecked(e);
-        }
-        // 3.生成密钥对
-        KeyPair asymmetricCipherKeyPair = spi.generateKeyPair();
-        // 把公钥放入 map 中，默认压缩公钥
-        // 公钥前面的 02 或者 03 表示是压缩公钥，04 表示未压缩公钥，04 的时候，可以去掉前面的 04
-        BCECPublicKey publicKeyParameters = (BCECPublicKey) asymmetricCipherKeyPair.getPublic();
-        ECPoint ecPoint = publicKeyParameters.getQ();
-        byte[] publicKey = ecPoint.getEncoded(compressed);
-        // 把私钥放入 map 中
-        BCECPrivateKey privateKeyParameters = (BCECPrivateKey) asymmetricCipherKeyPair.getPrivate();
-        BigInteger intPrivateKey = privateKeyParameters.getD();
-        return Maps.immutableEntry(Base64Util.encodeToStr(publicKey), Base64Util.encodeToStr(intPrivateKey.toByteArray()));
+        String priKeyBase64 = Base64.getEncoder().encodeToString(priKeyBytes);
+        String pubKeyBase64 = Base64.getEncoder().encodeToString(publicKey.getQ().getEncoded(false));
+        return new String[]{priKeyBase64, pubKeyBase64};
     }
 
     /**
-     * 转换为公钥格式
+     * SM2 加密
      *
-     * @param publicKey 公钥字符串
-     *
-     * @return {@link byte[] } 公钥
-     */
-    private byte[] castPublicKey(String publicKey) {
-        return Base64Util.decode(publicKey);
-    }
-
-    /**
-     * 转换为私钥格式
-     *
-     * @param privateKey 私钥字符串
-     *
-     * @return {@link BigInteger } 私钥
-     */
-    private BigInteger castPrivateKey(String privateKey) {
-        return new BigInteger(Base64Util.decodeToStr(privateKey));
-    }
-
-    /**
-     * SM2 加密算法
-     *
-     * @param publicKey 公钥字符串
+     * @param publicKey 公钥（Base64 格式）
      * @param plainText 明文
      *
-     * @return 密文，BC 库产生的密文带由 04 标识符，与非 BC 库对接时需要去掉开头的 04
+     * @return 密文（Base64 编码）
      */
     public static String encrypt(String publicKey, String plainText) {
-        byte[] bytes = plainText.getBytes(StandardCharsets.UTF_8);
-        // 获取一条 SM2 曲线参数
-        X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
-        // 构造 ECC 算法参数，曲线方程、椭圆曲线 G 点、大整数 N
-        ECNamedDomainParameters namedDomainParameters = new ECNamedDomainParameters(GMObjectIdentifiers.sm2p256v1, parameters.getCurve(), parameters.getG(), parameters.getN());
-        // 提取公钥点
-        ECPoint pukPoint = parameters.getCurve().decodePoint(castPublicKey(publicKey));
-        // 公钥前面的 02 或者 03 表示是压缩公钥，04 表示未压缩公钥，04 的时候，可以去掉前面的 04
-        ECPublicKeyParameters publicKeyParameters = new ECPublicKeyParameters(pukPoint, namedDomainParameters);
-        SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
-        // 设置 sm2 为加密模式
-        sm2Engine.init(true, new ParametersWithRandom(publicKeyParameters, Holder.SECURE_RANDOM));
-        final byte[] encrypt;
+        // 解析公钥
+        byte[] pubKeyBytes = Base64.getDecoder().decode(publicKey);
+        ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
+
+        // 初始化加密引擎
+        SM2Engine sm2Engine = new SM2Engine();
+        sm2Engine.init(true, new ParametersWithRandom(pubKeyParams));
+
+        // 执行加密
         try {
-            encrypt = sm2Engine.processBlock(bytes, 0, bytes.length);
+            byte[] encryptedData = sm2Engine.processBlock(plainText.getBytes(StandardCharsets.UTF_8), 0, plainText.length());
+            // 返回 Base64 编码结果
+            return Base64.getEncoder().encodeToString(encryptedData);
         } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 加密失败", e);
             throw Exceptions.unchecked(e);
         }
-        return Base64Util.encodeToStr(encrypt);
+
     }
 
 
     /**
-     * RSA 解密
+     * SM2 解密
      *
-     * @param cipherText 密文
-     * @param privateKey 私钥字符串
+     * @param privateKey 私钥（Base64 格式）
+     * @param cipherText 密文（Base64 编码）
      *
-     * @return {@link String } 明文
-     *
+     * @return 明文
      */
     public String decrypt(String privateKey, String cipherText) {
-        byte[] cipherBytes = Base64Util.decode(cipherText);
-        // 获取一条 SM2 曲线参数
-        X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
-        // 构造 ECC 算法参数，曲线方程、椭圆曲线 G 点、大整数 N
-        ECNamedDomainParameters namedDomainParameters = new ECNamedDomainParameters(GMObjectIdentifiers.sm2p256v1, parameters.getCurve(), parameters.getG(), parameters.getN());
-        ECPrivateKeyParameters privateKeyParameters = new ECPrivateKeyParameters(castPrivateKey(privateKey), namedDomainParameters);
-        SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
-        // 设置 sm2 为解密模式
-        sm2Engine.init(false, privateKeyParameters);
-        // 使用 BC 库加解密时密文以 04 开头，传入的密文前面没有 04 则补上
-        byte[] plainBytes;
+        // 解析私钥
+        byte[] priKeyBytes = Base64.getDecoder().decode(privateKey);
+        BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
+        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
+
+        // 初始化解密引擎
+        SM2Engine sm2Engine = new SM2Engine();
+        sm2Engine.init(false, priKeyParams);
+
+        // 解码密文
+        byte[] cipherData = Base64.getDecoder().decode(cipherText);
         try {
-            if (cipherBytes[0] == 0x04) {
-                plainBytes = sm2Engine.processBlock(cipherBytes, 0, cipherBytes.length);
-            } else {
-                byte[] bytes = new byte[cipherBytes.length + 1];
-                bytes[0] = 0x04;
-                System.arraycopy(cipherBytes, 0, bytes, 1, cipherBytes.length);
-                plainBytes = sm2Engine.processBlock(bytes, 0, bytes.length);
-            }
-        } catch (Exception e) {
+            // 执行解密
+            byte[] decryptedData = sm2Engine.processBlock(cipherData, 0, cipherData.length);
+
+            // 返回明文
+            return new String(decryptedData, StandardCharsets.UTF_8);
+        } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 解密失败", e);
             throw Exceptions.unchecked(e);
         }
-        return new String(plainBytes, StandardCharsets.UTF_8);
     }
 
+
     /**
-     * 签名
+     * SM2 签名
      *
-     * @param plainText  明文
-     * @param privateKey 私钥字符串
+     * @param privateKey 私钥（Base64 格式）
+     * @param plainText  待签名数据
      *
-     * @return {@link String } 签名
-     *
+     * @return 签名值（Base64 编码）
      */
     public String sign(String privateKey, String plainText) {
-        X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
-        ECParameterSpec parameterSpec = new ECParameterSpec(parameters.getCurve(), parameters.getG(), parameters.getN());
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(castPrivateKey(privateKey), parameterSpec);
-        PrivateKey bcecPrivateKey = new BCECPrivateKey(ALGO, privateKeySpec, BouncyCastleProvider.CONFIGURATION);
+        // 解析私钥
+        byte[] priKeyBytes = Base64.getDecoder().decode(privateKey);
+        BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
+        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
+
+        // 初始化签名器
+        SM2Signer signer = new SM2Signer();
+        signer.init(true, new ParametersWithRandom(priKeyParams));
+
+        // 生成签名
+        byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
+        signer.update(data, 0, data.length);
         try {
-            // 创建签名对象
-            Signature signature = Signature.getInstance(GMObjectIdentifiers.sm2sign_with_sm3.toString(), PROVIDER.get());
-            // 初始化为签名状态
-            signature.initSign(bcecPrivateKey);
-            // 传入签名字节
-            signature.update(plainText.getBytes(StandardCharsets.UTF_8));
-            // 签名
-            return Base64Util.encodeToStr(signature.sign());
-        } catch (Exception e) {
+            byte[] signature = signer.generateSignature();
+            // 返回 Base64 编码结果
+            return Base64.getEncoder().encodeToString(signature);
+        } catch (CryptoException e) {
             log.error("[🔐] SM2 签名失败", e);
             throw Exceptions.unchecked(e);
         }
     }
 
     /**
-     * 验签
+     * SM2 验签
      *
-     * @param plainText 明文
-     * @param publicKey 公钥字符串
-     * @param sign      签名
+     * @param publicKey 公钥（Base64 格式）
+     * @param plainText 待验证数据
+     * @param signature 签名值（Base64 编码）
      *
-     * @return boolean 通过验证
+     * @return 验签结果
      */
-    public boolean verify(String publicKey, String plainText, String sign) {
-        X9ECParameters parameters = GMNamedCurves.getByOID(GMObjectIdentifiers.sm2p256v1);
-        ECParameterSpec parameterSpec = new ECParameterSpec(parameters.getCurve(), parameters.getG(), parameters.getN());
-        ECPoint ecPoint = parameters.getCurve().decodePoint(castPublicKey(publicKey));
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecPoint, parameterSpec);
-        PublicKey bcecPublicKey = new BCECPublicKey(ALGO, publicKeySpec, BouncyCastleProvider.CONFIGURATION);
-        try {
-            // 创建签名对象
-            Signature signature = Signature.getInstance(GMObjectIdentifiers.sm2sign_with_sm3.toString(), PROVIDER.get());
-            // 初始化为验签状态
-            signature.initVerify(bcecPublicKey);
-            signature.update(plainText.getBytes(StandardCharsets.UTF_8));
-            return signature.verify(Base64Util.decode(sign));
-        } catch (Exception e) {
-            log.error("[🔐] SM2 验签失败", e);
-            throw Exceptions.unchecked(e);
-        }
+    public boolean verify(String publicKey, String plainText, String signature) {
+        // 解析公钥
+        byte[] pubKeyBytes = Base64.getDecoder().decode(publicKey);
+        ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
+
+        // 初始化验签器
+        SM2Signer signer = new SM2Signer();
+        signer.init(false, pubKeyParams);
+
+        // 验证签名
+        byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
+        byte[] signData = Base64.getDecoder().decode(signature);
+        signer.update(data, 0, data.length);
+        return signer.verifySignature(signData);
     }
 
     /**
-     * 证书验签
+     * 使用证书进行 SM2 验签
      *
-     * @param certText  证书串
-     * @param plainText 签名原文
-     * @param signText  签名产生签名值 此处的签名值实际上就是 R 和 S 的 sequence
+     * @param certText  证书（Base64 格式）
+     * @param plainText 待验证数据
+     * @param signature 签名值（Base64 编码）
      *
-     * @return 通过验签
-     *
+     * @return 验签结果
      */
-    public static boolean certVerify(String certText, String plainText, String signText) {
+    public boolean verifyWithCertificate(String certText, String plainText, String signature) {
+        X509Certificate certificate;
         try {
             // 解析证书
-            CertificateFactory factory = new CertificateFactory();
-            X509Certificate certificate = (X509Certificate) factory.engineGenerateCertificate(new ByteArrayInputStream(Base64Util.decode(certText)));
-            // 验证签名
-            Signature signature = Signature.getInstance(certificate.getSigAlgName(), PROVIDER.get());
-            signature.initVerify(certificate);
-            signature.update(plainText.getBytes(StandardCharsets.UTF_8));
-            return signature.verify(Base64Util.decode(signText));
+            byte[] certBytes = Base64.getDecoder().decode(certText);
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (Exception e) {
-            log.error("[🔐] SM2 证书验签失败", e);
+            log.error("[🔐] SM2 使用证书验签失败", e);
             throw Exceptions.unchecked(e);
         }
+        // 获取证书中的公钥
+        PublicKey publicKey = certificate.getPublicKey();
+
+        // 检查是否为 EC 公钥
+        if (!(publicKey instanceof BCECPublicKey ecPublicKey)) {
+            throw new IllegalArgumentException("证书中的公钥不是 EC 公钥");
+        }
+
+        ECParameterSpec parameterSpec = ecPublicKey.getParameters();
+
+        // 检查是否为 SM2 曲线
+        if (!isSM2Curve(parameterSpec)) {
+            throw new IllegalArgumentException("证书中的公钥不是 SM2 曲线");
+        }
+
+        // 转换为 BC 的参数格式
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(ecPublicKey.getQ(), DOMAIN_PARAMS);
+
+        // 初始化验签器
+        SM2Signer signer = new SM2Signer();
+        signer.init(false, pubKeyParams);
+
+        // 验证签名
+        byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
+        byte[] signData = Base64.getDecoder().decode(signature);
+        signer.update(data, 0, data.length);
+
+        return signer.verifySignature(signData);
+
     }
 
+    /**
+     * 检查是否为 SM2 曲线
+     *
+     * @param parameterSpec EC 参数规范
+     *
+     * @return 是否为 SM2 曲线
+     */
+    private boolean isSM2Curve(ECParameterSpec parameterSpec) {
+        if (parameterSpec == null) {
+            return false;
+        }
+
+        // 检查曲线参数是否匹配 SM2 标准
+        BigInteger curveA = parameterSpec.getCurve().getA().toBigInteger();
+        BigInteger curveB = parameterSpec.getCurve().getB().toBigInteger();
+        BigInteger order = parameterSpec.getN();
+
+        // SM2 曲线参数
+        BigInteger sm2A = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16);
+        BigInteger sm2B = new BigInteger("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16);
+        BigInteger sm2Order = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16);
+
+        return curveA.equals(sm2A) && curveB.equals(sm2B) && order.equals(sm2Order);
+    }
 }

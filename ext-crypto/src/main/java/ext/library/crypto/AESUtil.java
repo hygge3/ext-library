@@ -20,7 +20,7 @@ public class AESUtil {
     /**
      * 生成密钥对
      *
-     * @param keySize 密钥大小
+     * @param keySize 密钥大小，128/192/256
      *
      * @return {@link String } 密钥
      */
