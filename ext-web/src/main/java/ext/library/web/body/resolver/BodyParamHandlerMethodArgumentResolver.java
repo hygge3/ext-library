@@ -47,7 +47,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
         String contentType = Objects.requireNonNull(request).getContentType();
 
         if (ObjectUtil.isNotEqual(contentType, APPLICATION_JSON)) {
-            throw Exceptions.throwOut("解析参数异常，ContentType 需为 application/json");
+            throw Exceptions.throwOut("[🌐] 解析参数异常，ContentType 需为 application/json");
         }
 
         // 解析字段
@@ -58,9 +58,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
 
         JsonNode jsonNode = JsonNodeUtil.readTree(request.getReader());
 
-        Object result = JsonNodeUtil.treeToObj(jsonNode.get(paramName), parameterType);
-
-        if (jsonNode.isEmpty() || Objects.isNull(result)) {
+        if (jsonNode.isNull() || jsonNode.isEmpty()) {
             if (param.required()) {
                 throw new MissingServletRequestParameterException(paramName, parameter.getNestedParameterType().getSimpleName());
             } else if (Objects.equals(ValueConstants.DEFAULT_NONE, param.defaultValue())) {
@@ -70,7 +68,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
             }
         }
 
-        return result;
+        return JsonNodeUtil.treeToObj(jsonNode.get(paramName), parameterType);
     }
 
 }

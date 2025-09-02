@@ -74,7 +74,7 @@ public class SM2Util {
             spi.initialize(parameterSpec, Holder.SECURE_RANDOM);
         } catch (InvalidAlgorithmParameterException e) {
             log.error("[🔐] 生成 SM2 密钥对失败", e);
-            throw Exceptions.throwOut("SM2 生成密钥失败");
+            throw Exceptions.unchecked(e);
         }
         // 3.生成密钥对
         KeyPair asymmetricCipherKeyPair = spi.generateKeyPair();
@@ -137,7 +137,7 @@ public class SM2Util {
             encrypt = sm2Engine.processBlock(bytes, 0, bytes.length);
         } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 加密失败", e);
-            throw Exceptions.throwOut("SM2 加密失败");
+            throw Exceptions.unchecked(e);
         }
         return Base64Util.encodeToStr(encrypt);
     }
@@ -175,7 +175,7 @@ public class SM2Util {
             }
         } catch (Exception e) {
             log.error("[🔐] SM2 解密失败", e);
-            throw Exceptions.throwOut("SM2 解密失败");
+            throw Exceptions.unchecked(e);
         }
         return new String(plainBytes, StandardCharsets.UTF_8);
     }
@@ -205,7 +205,7 @@ public class SM2Util {
             return Base64Util.encodeToStr(signature.sign());
         } catch (Exception e) {
             log.error("[🔐] SM2 签名失败", e);
-            throw Exceptions.throwOut("SM2 签名失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -233,7 +233,7 @@ public class SM2Util {
             return signature.verify(Base64Util.decode(sign));
         } catch (Exception e) {
             log.error("[🔐] SM2 验签失败", e);
-            throw Exceptions.throwOut("SM2 验签失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -259,7 +259,7 @@ public class SM2Util {
             return signature.verify(Base64Util.decode(signText));
         } catch (Exception e) {
             log.error("[🔐] SM2 证书验签失败", e);
-            throw Exceptions.throwOut("SM2 证书验签失败");
+            throw Exceptions.unchecked(e);
         }
     }
 

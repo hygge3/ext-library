@@ -50,8 +50,8 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
             Algorithm algo = cryptoProperties.getAlgo();
             return algo.getCryptoStrategy().decrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
-            log.error("响应加密异常", e);
-            throw Exceptions.throwOut("响应加密异常，uri:{}", request.getURI().toString());
+            log.error("[🔒] 响应加密异常", e);
+            throw Exceptions.unchecked(e);
         }
     }
 

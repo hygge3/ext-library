@@ -301,7 +301,7 @@ public class SecuritySession implements Serializable {
 
         boolean result = repository.saveSecuritySession(this);
         if (!result) {
-            throw Exceptions.throwOut("保存 session 认证数据失败");
+            throw Exceptions.throwOut("[🛡️] 保存 session 认证数据失败");
         }
         // 移除无效的 token
         invalidTokenInfoList.forEach(item -> {

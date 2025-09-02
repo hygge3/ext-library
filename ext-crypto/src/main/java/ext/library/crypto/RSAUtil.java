@@ -55,7 +55,7 @@ public class RSAUtil {
             generator = KeyPairGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 RSA 密钥对失败", e);
-            throw Exceptions.throwOut("RSA 生成密钥对失败");
+            throw Exceptions.unchecked(e);
         }
         generator.initialize(1024);
         return generator.generateKeyPair();
@@ -77,7 +77,7 @@ public class RSAUtil {
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
             log.error("[🔐] RSA 公钥转换失败", e);
-            throw Exceptions.throwOut("转换 RSA 公钥失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -96,7 +96,7 @@ public class RSAUtil {
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
             log.error("[🔐] RSA 私钥转换失败", e);
-            throw Exceptions.throwOut("转换 RSA 私钥失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -136,7 +136,7 @@ public class RSAUtil {
             return Base64Util.encodeToStr(encryptedData);
         } catch (Exception e) {
             log.error("[🔐] RSA 加密失败", e);
-            throw Exceptions.throwOut("RSA 加密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -175,7 +175,7 @@ public class RSAUtil {
             return out.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] RSA 解密失败", e);
-            throw Exceptions.throwOut("RSA 解密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class RSAUtil {
             return signature.verify(Base64Util.decode(sign.getBytes()));
         } catch (Exception e) {
             log.error("[🔐] RSA 验签失败", e);
-            throw Exceptions.throwOut("RSA 验签失败");
+            throw Exceptions.unchecked(e);
         }
     }
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,7 +117,7 @@ public class JsonUtil {
      * @return {@code String } json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
-    public String toJson(Object obj) {
+    public String toJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "";
         }
@@ -137,7 +138,7 @@ public class JsonUtil {
      * @return jsonString json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
-    public String toPrettyJson(Object obj) {
+    public String toPrettyJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "";
         }
@@ -158,7 +159,7 @@ public class JsonUtil {
      * @return jsonString json 字符串
      */
     @SneakyThrows(JsonProcessingException.class)
-    public byte[] toJsonAsBytes(Object obj) {
+    public byte[] toJsonAsBytes(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "".getBytes();
         }
@@ -176,6 +177,42 @@ public class JsonUtil {
     // region json 序列化为 javaBean
 
     /**
+     * 可强制类型转换
+     *
+     * @param obj   obj
+     * @param clazz 类对象
+     *
+     * @return boolean
+     */
+    private boolean isAssignable(Object obj, Class<?> clazz) {
+        return clazz.isAssignableFrom(obj.getClass());
+    }
+
+    /**
+     * 可强制类型转换
+     *
+     * @param obj      obj
+     * @param javaType Java 类型
+     *
+     * @return boolean
+     */
+    private boolean isAssignable(Object obj, JavaType javaType) {
+        return javaType.hasRawClass(obj.getClass());
+    }
+
+    /**
+     * 可强制类型转换
+     *
+     * @param obj           obj
+     * @param typeReference 类型
+     *
+     * @return boolean
+     */
+    private boolean isAssignable(Object obj, TypeReference<?> typeReference) {
+        return typeReference.getClass().isAssignableFrom(obj.getClass());
+    }
+
+    /**
      * 将 json 反序列化成对象
      *
      * @param json      jsonString
@@ -185,7 +222,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
+    @SuppressWarnings("unchecked")
     public <T> T readObj(String json, Class<T> valueType) {
+        if (isAssignable(json, valueType)) {
+            return (T) json;
+        }
         return CustomizeMapper.MAPPER.readValue(json, valueType);
     }
 
@@ -200,6 +241,9 @@ public class JsonUtil {
      */
     @SneakyThrows({IOException.class})
     public <T> T readObj(byte[] content, Class<T> valueType) {
+        if (isAssignable(content, valueType)) {
+            return (T) content;
+        }
         return CustomizeMapper.MAPPER.readValue(content, valueType);
     }
 
@@ -213,7 +257,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({IOException.class})
+    @SuppressWarnings("unchecked")
     public <T> T readObj(InputStream in, Class<T> valueType) {
+        if (isAssignable(in, valueType)) {
+            return (T) in;
+        }
         return CustomizeMapper.MAPPER.readValue(in, valueType);
     }
 
@@ -227,7 +275,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({IOException.class})
+    @SuppressWarnings("unchecked")
     public <T> T readObj(Reader reader, Class<T> valueType) {
+        if (isAssignable(reader, valueType)) {
+            return (T) reader;
+        }
         return CustomizeMapper.MAPPER.readValue(reader, valueType);
     }
 
@@ -241,7 +293,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
+    @SuppressWarnings("unchecked")
     public <T> T readObj(String json, JavaType javaType) {
+        if (isAssignable(json, javaType)) {
+            return (T) json;
+        }
         return CustomizeMapper.MAPPER.readValue(json, javaType);
     }
 
@@ -256,6 +312,9 @@ public class JsonUtil {
      */
     @SneakyThrows(IOException.class)
     public <T> T readObj(byte[] content, JavaType javaType) {
+        if (isAssignable(content, javaType)) {
+            return (T) content;
+        }
         return CustomizeMapper.MAPPER.readValue(content, javaType);
     }
 
@@ -269,7 +328,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows(IOException.class)
+    @SuppressWarnings("unchecked")
     public <T> T readObj(InputStream in, JavaType javaType) {
+        if (isAssignable(in, javaType)) {
+            return (T) in;
+        }
         return CustomizeMapper.MAPPER.readValue(in, javaType);
     }
 
@@ -283,7 +346,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows(IOException.class)
+    @SuppressWarnings("unchecked")
     public <T> T readObj(Reader reader, JavaType javaType) {
+        if (isAssignable(reader, javaType)) {
+            return (T) reader;
+        }
         return CustomizeMapper.MAPPER.readValue(reader, javaType);
     }
 
@@ -297,7 +364,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
+    @SuppressWarnings("unchecked")
     public <T> T readObj(String json, TypeReference<T> typeReference) {
+        if (isAssignable(json, typeReference)) {
+            return (T) json;
+        }
         return CustomizeMapper.MAPPER.readValue(json, typeReference);
     }
 
@@ -312,6 +383,9 @@ public class JsonUtil {
      */
     @SneakyThrows({IOException.class})
     public <T> T readObj(byte[] content, TypeReference<T> typeReference) {
+        if (isAssignable(content, typeReference)) {
+            return (T) content;
+        }
         return CustomizeMapper.MAPPER.readValue(content, typeReference);
     }
 
@@ -325,7 +399,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows(IOException.class)
+    @SuppressWarnings("unchecked")
     public <T> T readObj(InputStream in, TypeReference<T> typeReference) {
+        if (isAssignable(in, typeReference)) {
+            return (T) in;
+        }
         return CustomizeMapper.MAPPER.readValue(in, typeReference);
     }
 
@@ -339,7 +417,11 @@ public class JsonUtil {
      * @return Bean
      */
     @SneakyThrows(IOException.class)
+    @SuppressWarnings("unchecked")
     public <T> T readObj(Reader reader, TypeReference<T> typeReference) {
+        if (isAssignable(reader, typeReference)) {
+            return (T) reader;
+        }
         return CustomizeMapper.MAPPER.readValue(reader, typeReference);
     }
 

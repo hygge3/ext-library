@@ -66,8 +66,8 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
                 }
             };
         } catch (Exception e) {
-            log.error("请求解密异常", e);
-            throw Exceptions.throwOut("请求解密异常");
+            log.error("[🔓] 请求解密异常", e);
+            throw Exceptions.unchecked(e);
         }
 
     }

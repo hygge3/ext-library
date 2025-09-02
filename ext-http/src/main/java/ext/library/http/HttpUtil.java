@@ -4,8 +4,9 @@ import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.annotation.Nonnull;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
@@ -42,6 +43,7 @@ import java.util.concurrent.Executors;
  *
  * @since jdk11
  */
+@Slf4j
 public class HttpUtil {
 
     /**
@@ -97,10 +99,8 @@ public class HttpUtil {
      *
      * @return {@code String }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String get(String url) throws IOException, InterruptedException {
+    public static String get(String url) {
         return get(url, Map.of());
     }
 
@@ -110,10 +110,8 @@ public class HttpUtil {
      * @param url       访问 URL
      * @param headerMap header 键值对
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String get(String url, Map<String, String> headerMap) throws IOException, InterruptedException {
+    public static String get(String url, Map<String, String> headerMap) {
         return get(url, headerMap, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -124,10 +122,8 @@ public class HttpUtil {
      * @param headerMap header 键值对
      * @param timeout   超时时间
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String get(String url, Map<String, String> headerMap, long timeout) throws IOException, InterruptedException {
+    public static String get(String url, Map<String, String> headerMap, long timeout) {
         return get(url, headerMap, timeout, String.class);
     }
 
@@ -139,10 +135,8 @@ public class HttpUtil {
      * @param timeout   超时时间
      * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T get(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T get(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
         return getResData(httpRequest, resClass);
     }
@@ -157,10 +151,8 @@ public class HttpUtil {
      *
      * @return {@code HttpResponse<T> }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> getResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> getResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
         return getRes(httpRequest, resClass);
     }
@@ -218,10 +210,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, String requestBody) throws IOException, InterruptedException {
+    public static String post(String url, String requestBody) {
         return post(url, Map.of(), requestBody, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -233,10 +223,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, Map<String, Object> form) throws IOException, InterruptedException {
+    public static String post(String url, Map<String, Object> form) {
         return post(url, Map.of(), form, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -249,10 +237,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, Map<String, String> headerMap, String requestBody) throws IOException, InterruptedException {
+    public static String post(String url, Map<String, String> headerMap, String requestBody) {
         return post(url, headerMap, requestBody, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -265,10 +251,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form) throws IOException, InterruptedException {
+    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form) {
         return post(url, headerMap, form, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -282,10 +266,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static String post(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         return post(url, headerMap, requestBody, timeout, String.class);
     }
 
@@ -299,10 +281,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) throws IOException, InterruptedException {
+    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
         return post(url, headerMap, form, timeout, String.class);
     }
 
@@ -317,10 +297,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T post(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T post(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
         return getResData(httpRequest, resClass);
     }
@@ -336,10 +314,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
         return postResponse(url, headerMap, form, timeout, resClass).body();
     }
 
@@ -354,10 +330,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
         return postResponse(url, headerMap, HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8), timeout, resClass);
     }
 
@@ -372,10 +346,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
         String[] headers = createHeader(headerMap, "application/x-www-form-urlencoded");
         Map<String, String> newHeader = new HashMap<>();
         for (int i = 0; i < headers.length; i = i + 2) {
@@ -396,10 +368,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildPostRequest(url, headerMap, bodyPublisher, timeout);
         return getRes(httpRequest, resClass);
     }
@@ -459,10 +429,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<byte[]>> postByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<byte[]>> postByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
     }
@@ -477,10 +445,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<InputStream>> postInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<InputStream>> postInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
     }
@@ -495,10 +461,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<String>> postStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<String>> postStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
     }
@@ -518,12 +482,15 @@ public class HttpUtil {
      *
      * @return {@code Path }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static Path download(HttpRequest httpRequest, String filePath) throws IOException, InterruptedException {
-        HttpResponse<Path> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
-        return httpResponse.body();
+    public static Path download(HttpRequest httpRequest, String filePath) {
+        try {
+            HttpResponse<Path> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
+            return httpResponse.body();
+        } catch (IOException | InterruptedException e) {
+            log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -538,11 +505,14 @@ public class HttpUtil {
      *
      * @return {@code HttpResponse<Path> }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static HttpResponse<Path> downloadResponse(HttpRequest httpRequest, String filePath) throws IOException, InterruptedException {
-        return client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
+    public static HttpResponse<Path> downloadResponse(HttpRequest httpRequest, String filePath) {
+        try {
+            return client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
+        } catch (IOException | InterruptedException e) {
+            log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
+            throw Exceptions.unchecked(e);
+        }
     }
 
     // endregion
@@ -556,10 +526,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, String requestBody) throws IOException, InterruptedException {
+    public static String put(String url, String requestBody) {
         return put(url, Map.of(), requestBody, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -571,10 +539,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, Map<String, Object> form) throws IOException, InterruptedException {
+    public static String put(String url, Map<String, Object> form) {
         return put(url, Map.of(), form, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -587,10 +553,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, Map<String, String> headerMap, String requestBody) throws IOException, InterruptedException {
+    public static String put(String url, Map<String, String> headerMap, String requestBody) {
         return put(url, headerMap, requestBody, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -603,10 +567,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form) throws IOException, InterruptedException {
+    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form) {
         return put(url, headerMap, form, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -619,11 +581,8 @@ public class HttpUtil {
      * @param timeout     超时时间
      *
      * @return java.net.http.HttpResponse<T>
-     *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static String put(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         return put(url, headerMap, requestBody, timeout, String.class);
     }
 
@@ -637,10 +596,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) throws IOException, InterruptedException {
+    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
         return put(url, headerMap, form, timeout, String.class);
     }
 
@@ -655,10 +612,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T put(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T put(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
         return getResData(httpRequest, resClass);
     }
@@ -674,10 +629,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
         return putResponse(url, headerMap, form, timeout, resClass).body();
     }
 
@@ -692,10 +645,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
         return putResponse(url, headerMap, HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8), timeout, resClass);
     }
 
@@ -710,10 +661,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
         String[] headers = createHeader(headerMap, "application/x-www-form-urlencoded");
         Map<String, String> newHeader = new HashMap<>();
         for (int i = 0; i < headers.length; i = i + 2) {
@@ -734,10 +683,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildPutRequest(url, headerMap, bodyPublisher, timeout);
         return getRes(httpRequest, resClass);
     }
@@ -797,10 +744,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<byte[]>> putByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<byte[]>> putByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
     }
@@ -815,10 +760,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<InputStream>> putInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<InputStream>> putInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
     }
@@ -833,10 +776,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static CompletableFuture<HttpResponse<String>> putStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) throws IOException, InterruptedException {
+    public static CompletableFuture<HttpResponse<String>> putStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) {
         HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
         return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
     }
@@ -851,10 +792,8 @@ public class HttpUtil {
      *
      * @return {@code String }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String delete(String url) throws IOException, InterruptedException {
+    public static String delete(String url) {
         return delete(url, Map.of());
     }
 
@@ -866,10 +805,8 @@ public class HttpUtil {
      *
      * @return {@code String }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String delete(String url, Map<String, String> headerMap) throws IOException, InterruptedException {
+    public static String delete(String url, Map<String, String> headerMap) {
         return delete(url, headerMap, httpClientProps.getDefaultReadTimeout());
     }
 
@@ -882,10 +819,8 @@ public class HttpUtil {
      *
      * @return {@code String }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static String delete(String url, Map<String, String> headerMap, long timeout) throws IOException, InterruptedException {
+    public static String delete(String url, Map<String, String> headerMap, long timeout) {
         return delete(url, headerMap, timeout, String.class);
     }
 
@@ -899,10 +834,8 @@ public class HttpUtil {
      *
      * @return {@code T }
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> T delete(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> T delete(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
         return getResData(httpRequest, resClass);
     }
@@ -917,10 +850,8 @@ public class HttpUtil {
      *
      * @return java.net.http.HttpResponse<T>
      *
-     * @throws IOException          IO 异常
-     * @throws InterruptedException 中断异常
      */
-    public static <T> HttpResponse<T> deleteResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) throws IOException, InterruptedException {
+    public static <T> HttpResponse<T> deleteResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
         HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
         return getRes(httpRequest, resClass);
     }
@@ -971,33 +902,43 @@ public class HttpUtil {
     // region common methods
 
     @SuppressWarnings("unchecked")
-    private static <T> T getResData(HttpRequest httpRequest, Class<T> resClass) throws IOException, InterruptedException {
+    private static <T> T getResData(HttpRequest httpRequest, Class<T> resClass) {
         T t;
-        if (byte[].class == resClass) {
-            t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray()).body();
-        } else if (String.class == resClass) {
-            t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-        } else if (InputStream.class == resClass) {
-            t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).body();
-        } else {
-            throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
+        try {
+            if (byte[].class == resClass) {
+                t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray()).body();
+            } else if (String.class == resClass) {
+                t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
+            } else if (InputStream.class == resClass) {
+                t = (T) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).body();
+            } else {
+                throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
+            }
+            return t;
+        } catch (IOException | InterruptedException e) {
+            log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
+            throw Exceptions.unchecked(e);
         }
-        return t;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> HttpResponse<T> getRes(HttpRequest httpRequest, Class<T> resClass) throws IOException, InterruptedException {
+    private static <T> HttpResponse<T> getRes(HttpRequest httpRequest, Class<T> resClass) {
         HttpResponse<T> response;
-        if (byte[].class == resClass) {
-            response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-        } else if (String.class == resClass) {
-            response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        } else if (InputStream.class == resClass) {
-            response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        } else {
-            throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
+        try {
+            if (byte[].class == resClass) {
+                response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+            } else if (String.class == resClass) {
+                response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            } else if (InputStream.class == resClass) {
+                response = (HttpResponse<T>) client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+            } else {
+                throw new UnsupportedOperationException(StringUtil.format("不支持的返回类型:[{}]", resClass));
+            }
+            return response;
+        } catch (IOException | InterruptedException e) {
+            log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
+            throw Exceptions.unchecked(e);
         }
-        return response;
     }
 
     // region 构建请求
@@ -1007,9 +948,7 @@ public class HttpUtil {
             timeout = httpClientProps.defaultReadTimeout;
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().GET()
-                .headers(createHeader(headerMap, httpClientProps.defaultContentType))
-                .uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder().GET().headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
     }
 
     public static HttpRequest buildDeleteRequest(String url, Map<String, String> headerMap, long timeout) {
@@ -1017,21 +956,19 @@ public class HttpUtil {
             timeout = httpClientProps.defaultReadTimeout;
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().DELETE()
-                .headers(createHeader(headerMap, httpClientProps.defaultContentType))
-                .uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder().DELETE().headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
     }
 
-    public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, @Nonnull Map<String, Object> form, long timeout) {
+    public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
         StringJoiner sj = new StringJoiner("&");
-        form.forEach((k, v) -> sj.add(k + "=" + v.toString()));
+        form.forEach((k, v) -> sj.add(k + "=" + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPostRequest(url, headerMap, bodyPublisher, timeout);
     }
 
-    public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, @Nonnull Map<String, Object> form, long timeout) {
+    public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
         StringJoiner sj = new StringJoiner("&");
-        form.forEach((k, v) -> sj.add(k + "=" + v.toString()));
+        form.forEach((k, v) -> sj.add(k + "=" + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPutRequest(url, headerMap, bodyPublisher, timeout);
     }
@@ -1049,9 +986,7 @@ public class HttpUtil {
             timeout = httpClientProps.defaultReadTimeout;
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().POST(bodyPublisher)
-                .headers(createHeader(headerMap, httpClientProps.defaultContentType))
-                .uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder().POST(bodyPublisher).headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
     }
 
     public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout) {
@@ -1059,14 +994,12 @@ public class HttpUtil {
             timeout = httpClientProps.defaultReadTimeout;
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().PUT(bodyPublisher)
-                .headers(createHeader(headerMap, httpClientProps.defaultContentType))
-                .uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder().PUT(bodyPublisher).headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
     }
 
     // endregion
 
-    private static String[] createHeader(Map<String, String> headerMap, String contentType) {
+    private static String[] createHeader(@Nullable Map<String, String> headerMap, String contentType) {
         if (headerMap == null) {
             headerMap = new HashMap<>();
             headerMap.put("Content-Type", contentType);

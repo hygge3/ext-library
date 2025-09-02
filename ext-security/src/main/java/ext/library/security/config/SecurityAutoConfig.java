@@ -6,7 +6,6 @@ import ext.library.security.repository.SecurityRepository;
 import ext.library.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +24,7 @@ public class SecurityAutoConfig {
      * @return {@code SecurityService }
      */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(SecurityService.class)
     public SecurityService securityService() {
         return new SecurityService() {
         };
@@ -37,8 +36,7 @@ public class SecurityAutoConfig {
      * @return {@code SecurityRepository }
      */
     @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnBean(SecurityProperties.class)
+    @ConditionalOnMissingBean(SecurityRepository.class)
     public SecurityRepository securityRepository(SecurityProperties securityProperties) {
         return securityProperties.getRepository().getSecurityRepository();
     }

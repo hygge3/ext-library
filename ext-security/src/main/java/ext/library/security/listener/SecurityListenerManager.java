@@ -37,7 +37,7 @@ public class SecurityListenerManager {
      */
     public void registerListener(SecurityListener listener) {
         if (null == listener) {
-            throw Exceptions.throwOut("注册监听器不能为空");
+            throw Exceptions.throwOut("[🛡️] 注册监听器不能为空");
         }
         LISTENER_LIST.add(listener);
     }
@@ -49,7 +49,7 @@ public class SecurityListenerManager {
      */
     public void removeListener(SecurityListener listener) {
         if (null == listener) {
-            throw Exceptions.throwOut("移除监听器不能为空");
+            throw Exceptions.throwOut("[🛡️] 移除监听器不能为空");
         }
         LISTENER_LIST.remove(listener);
     }

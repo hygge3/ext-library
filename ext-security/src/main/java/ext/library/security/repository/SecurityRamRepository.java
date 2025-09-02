@@ -88,7 +88,7 @@ public class SecurityRamRepository implements SecurityRepository {
         Long version = versionMap.get().get(session.getLoginId());
         version = null == version ? 0L : version;
         if (null != session.getVersion() && !session.getVersion().equals(version)) {
-            throw Exceptions.throwOut("版本验证异常");
+            throw Exceptions.throwOut("[🛡️] 版本验证异常");
         }
         versionMap.get().put(session.getLoginId(), ++version);
         sessionMap.get().put(session.getLoginId(), session);

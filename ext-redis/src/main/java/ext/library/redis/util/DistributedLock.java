@@ -107,7 +107,7 @@ public class DistributedLock implements Lock {
     public void lock() {
         try {
             if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
-                throw Exceptions.throwOut("try lock timeout, lockKey: {}", lockKey);
+                throw Exceptions.throwOut("[🔐] 尝试锁定超时，key: {}", lockKey);
             }
         } catch (InterruptedException e) {
             throw Exceptions.unchecked(e);
@@ -122,7 +122,7 @@ public class DistributedLock implements Lock {
     @Override
     public void lockInterruptibly() throws InterruptedException {
         if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
-            throw Exceptions.throwOut("try lock timeout, lockKey: {}", this.lockKey);
+            throw Exceptions.throwOut("[🔐] 尝试锁定超时，key: {}", this.lockKey);
         }
     }
 
@@ -219,7 +219,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("tryLock interrupted");
+                throw Exceptions.throwOut("[🔐] 尝试锁定中断");
             }
             if (tryLock()) {
                 return true;
@@ -245,7 +245,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("tryLock interrupted");
+                throw Exceptions.throwOut("[🔐] 尝试锁定中断");
             }
             if (tryLock()) {
                 return true;

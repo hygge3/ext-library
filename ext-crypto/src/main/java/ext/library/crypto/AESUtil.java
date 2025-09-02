@@ -31,7 +31,7 @@ public class AESUtil {
             keyGenerator = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 AES 密钥失败", e);
-            throw Exceptions.throwOut("AES 生成密钥失败");
+            throw Exceptions.unchecked(e);
         }
         // 设置密钥长度和随机源
         keyGenerator.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());

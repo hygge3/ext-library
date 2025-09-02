@@ -53,7 +53,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         final ListableBeanFactory factory = ObjectUtil.defaultIfNull(beanFactory, context);
         if (null == factory) {
             throw Exceptions.throwOut(
-                    "没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
+                    "[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
         }
         return factory;
     }
@@ -70,7 +70,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         } else if (context instanceof ConfigurableApplicationContext) {
             factory = ((ConfigurableApplicationContext) context).getBeanFactory();
         } else {
-            throw Exceptions.throwOut("上下文中没有可配置的 BeanFactory！");
+            throw Exceptions.throwOut("[🫛] 上下文中没有可配置的 BeanFactory！");
         }
         return factory;
     }
@@ -269,7 +269,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         if (factory instanceof DefaultSingletonBeanRegistry registry) {
             registry.destroySingleton(beanName);
         } else {
-            throw Exceptions.throwOut("无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
+            throw Exceptions.throwOut("[🫛] 无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
         }
     }
 

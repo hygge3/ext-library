@@ -46,7 +46,7 @@ public class RateLimiterAspect {
         if (rateLimitHandler.proceed(rateLimit, pjp)) {
             return pjp.proceed();
         } else {
-            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
+            throw Exceptions.throwOut("[🫗] " + (ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg()));
         }
     }
 

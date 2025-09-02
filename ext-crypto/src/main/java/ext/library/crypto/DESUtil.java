@@ -34,7 +34,7 @@ public class DESUtil {
             keyGen = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 DES 密钥失败", e);
-            throw Exceptions.throwOut("DES 生成密钥失败");
+            throw Exceptions.unchecked(e);
         }
         keyGen.init(Objects.requireNonNullElse(keySize, 56));// 初始化密钥生成器
         SecretKey secretKey = keyGen.generateKey();// 生成密钥
@@ -63,7 +63,7 @@ public class DESUtil {
             encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("[🔐] DES 加密失败", e);
-            throw Exceptions.throwOut("DES 加密失败");
+            throw Exceptions.unchecked(e);
         }
         return Base64Util.encodeToStr(encryptedBytes);
     }
@@ -89,7 +89,7 @@ public class DESUtil {
             decryptedBytes = cipher.doFinal(Base64Util.decode(cipherText));
         } catch (Exception e) {
             log.error("[🔐] DES 解密失败", e);
-            throw Exceptions.throwOut("DES 解密失败");
+            throw Exceptions.unchecked(e);
         }
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }

@@ -61,7 +61,7 @@ public class SM4Util {
             return Base64Util.encodeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 加密失败", e);
-            throw Exceptions.throwOut("SM4 加密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -81,7 +81,7 @@ public class SM4Util {
             return new String(cipher.doFinal(Base64Util.decode(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 ECB 解密失败", e);
-            throw Exceptions.throwOut("SM4 ECB 解密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -101,7 +101,7 @@ public class SM4Util {
             return Base64Util.encodeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 加密失败", e);
-            throw Exceptions.throwOut("SM4 CBC 加密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 
@@ -121,7 +121,7 @@ public class SM4Util {
             return new String(cipher.doFinal(Base64Util.decode(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 解密失败", e);
-            throw Exceptions.throwOut("SM4 CBC 解密失败");
+            throw Exceptions.unchecked(e);
         }
     }
 }

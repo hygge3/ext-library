@@ -117,7 +117,7 @@ public class SecurityToken implements Serializable {
 
         boolean result = repository.saveToken(this);
         if (!result) {
-            throw Exceptions.throwOut("保存 token 认证数据失败");
+            throw Exceptions.throwOut("[🛡️] 保存 token 认证数据失败");
         }
     }
 
