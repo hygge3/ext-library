@@ -1,7 +1,7 @@
 package ext.library.web.handler;
 
-import ext.library.core.exception.BizCode;
-import ext.library.core.exception.BizException;
+import ext.library.tool.biz.exception.BizCode;
+import ext.library.tool.biz.exception.BizException;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;

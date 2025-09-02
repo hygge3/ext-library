@@ -1,8 +1,8 @@
 package ext.library.security.handler;
 
-import ext.library.core.exception.BizCode;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.exception.UnauthorizedException;
+import ext.library.tool.biz.exception.BizCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;

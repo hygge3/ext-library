@@ -1,6 +1,7 @@
 package ext.library.tool.core;
 
 
+import ext.library.tool.biz.exception.BizException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 import lombok.experimental.UtilityClass;
@@ -49,11 +50,11 @@ public class Exceptions {
      *
      * @return {RuntimeException}
      */
-    public RuntimeException throwOut(@Nonnull String message, Object... args) {
+    public BizException throwOut(@Nonnull String message, Object... args) {
         if (ObjectUtil.isEmpty(args)) {
-            return new RuntimeException(message);
+            return new BizException(message);
         }
-        return new RuntimeException(StringUtil.format(message, args));
+        return new BizException(StringUtil.format(message, args));
     }
 
     /**
@@ -64,11 +65,11 @@ public class Exceptions {
      *
      * @return {RuntimeException}
      */
-    public RuntimeException throwOut(Exception e, @Nonnull String message, Object... args) {
+    public BizException throwOut(Exception e, @Nonnull String message, Object... args) {
         if (ObjectUtil.isEmpty(args)) {
-            return new RuntimeException(message);
+            return new BizException(message);
         }
-        return new RuntimeException(StringUtil.format(message, args), e);
+        return new BizException(StringUtil.format(message, args), e);
     }
 
     /**

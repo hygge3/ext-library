@@ -1,7 +1,7 @@
 package ext.library.mybatis.handler;
 
 import com.mybatisflex.core.exception.MybatisFlexException;
-import ext.library.core.exception.BizCode;
+import ext.library.tool.biz.exception.BizCode;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

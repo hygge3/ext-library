@@ -1,19 +1,19 @@
 package ext.library.security.exception;
 
-import ext.library.core.exception.BizCode;
-import ext.library.core.exception.BizException;
+import ext.library.tool.biz.exception.BizCode;
+import ext.library.tool.biz.exception.BizException;
 
 /**
  * 未经授权
  */
 public class UnauthorizedException extends BizException {
 
-	public UnauthorizedException() {
-		super(BizCode.UNAUTHORIZED);
-	}
+    public UnauthorizedException() {
+        super(BizCode.UNAUTHORIZED);
+    }
 
-	public UnauthorizedException(String msg) {
-		super(BizCode.UNAUTHORIZED, msg);
-	}
+    public UnauthorizedException(String msg) {
+        super(BizCode.UNAUTHORIZED, msg);
+    }
 
 }

@@ -1,6 +1,6 @@
-package ext.library.core.exception;
+package ext.library.tool.biz.exception;
 
-import ext.library.core.response.ResponseCode;
+import ext.library.tool.biz.response.ResponseCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

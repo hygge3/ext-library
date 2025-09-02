@@ -42,7 +42,6 @@ public class TraceFilter extends OncePerRequestFilter {
             TRACE_ID.remove();
             MDC.remove(traceIdHeaderName);
         }
-        log.info("[🗒️] TraceID 模块载入成功");
     }
 
 }

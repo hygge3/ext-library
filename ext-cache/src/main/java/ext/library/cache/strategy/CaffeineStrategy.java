@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Expiry;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * 咖啡因策略
@@ -35,7 +36,11 @@ public class CaffeineStrategy implements CacheStrategy {
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {
-        return clazz.cast(CACHE.getIfPresent(genKey(cacheName, key)));
+        CaffeineEntry entry = CACHE.getIfPresent(genKey(cacheName, key));
+        if (Objects.isNull(entry)) {
+            return null;
+        }
+        return clazz.cast(entry.value());
     }
 
     @Override

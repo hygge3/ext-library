@@ -1,7 +1,7 @@
 package ext.library.web.response;
 
-import ext.library.core.exception.BizCode;
-import ext.library.core.response.ResponseCode;
+import ext.library.tool.biz.exception.BizCode;
+import ext.library.tool.biz.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

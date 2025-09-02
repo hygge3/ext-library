@@ -1,4 +1,4 @@
-package ext.library.core.response;
+package ext.library.tool.biz.response;
 
 
 /**
