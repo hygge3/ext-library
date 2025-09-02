@@ -1,10 +1,6 @@
 package ext.library.web.validation;
 
-import jakarta.validation.MessageInterpolator;
-import jakarta.validation.Validator;
-import jakarta.validation.executable.ExecutableValidator;
-
-import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,19 +13,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
+import java.util.Properties;
+
 /**
  * Validation 自动配置类，扩展支持使用 {} 占位替换默认消息
  */
+@Slf4j
 @AutoConfiguration(before = org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
-public class ValidationAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean({Validator.class, MessageInterpolator.class})
-    public EmptyCurlyToDefaultMessageInterpolator messageInterpolator() {
-        return new EmptyCurlyToDefaultMessageInterpolator();
-    }
+public class ValidationAutoConfig {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
@@ -39,6 +35,12 @@ public class ValidationAutoConfiguration {
         LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
         factoryBean.setMessageInterpolator(messageInterpolator);
         return factoryBean;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean({Validator.class, MessageInterpolator.class})
+    public EmptyCurlyToDefaultMessageInterpolator messageInterpolator() {
+        return new EmptyCurlyToDefaultMessageInterpolator();
     }
 
     /**
@@ -57,6 +59,7 @@ public class ValidationAutoConfiguration {
             factoryBean.setValidationProperties(properties);
             // 加载配置
             factoryBean.afterPropertiesSet();
+            log.info("[🛂] 校验模块载入成功");
             return factoryBean.getValidator();
         }
     }

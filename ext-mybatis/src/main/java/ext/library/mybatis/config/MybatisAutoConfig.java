@@ -59,6 +59,7 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
                 }
             });
         }
+        log.info("[🐦] MyBatis 模块载入成功");
     }
 
 }

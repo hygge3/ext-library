@@ -30,6 +30,7 @@ public class ThreadPoolConfig {
     private final int core = Holder.CPU_CORE_NUM + 1;
 
     private ScheduledExecutorService scheduledExecutorService;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
     @Bean(name = "threadPoolTaskExecutor")
@@ -43,6 +44,8 @@ public class ThreadPoolConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
+        this.threadPoolTaskExecutor = executor;
+        log.info("[🌊] Spring 线程池模块载入成功");
         return executor;
     }
 
@@ -61,6 +64,7 @@ public class ThreadPoolConfig {
             }
         };
         this.scheduledExecutorService = scheduledThreadPoolExecutor;
+        log.info("[🌊] Spring 调度线程池模块载入成功");
         return scheduledThreadPoolExecutor;
     }
 
@@ -70,7 +74,8 @@ public class ThreadPoolConfig {
     @PreDestroy
     public void destroy() {
         try {
-            log.info("[📎] Close the background task thread pool");
+            log.info("[🌊] 关闭后台任务线程池");
+            threadPoolTaskExecutor.shutdown();
             Threads.shutdownAndAwaitTermination(scheduledExecutorService);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

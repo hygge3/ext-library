@@ -1,13 +1,7 @@
 package ext.library.mybatis.handler;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-
 import com.mybatisflex.core.exception.MybatisFlexException;
 import ext.library.core.exception.BizCode;
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,6 +11,12 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
+import java.util.Map;
 
 /**
  * Mybatis 异常处理器
@@ -35,7 +35,7 @@ public class MybatisExceptionHandler {
      * @param e       e
      */
     private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
-        log.error("[⚠️] URI:{},{}", request.getRequestURI(), message, e);
+        log.error("[🐦] URI:{},{}", request.getRequestURI(), message, e);
     }
 
     /**

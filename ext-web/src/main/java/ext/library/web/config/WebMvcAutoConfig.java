@@ -85,7 +85,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(@Nonnull InterceptorRegistry registry) {
         if (webMvcProperties.getInvokeTimeEnabled()) {
-            log.info("[⏱️] 请求调用时间统计拦截器");
+            log.info("[⏱️] 请求调用时间统计模块载入成功");
             // 全局访问性能拦截
             registry.addInterceptor(new ExtWebInvokeTimeInterceptor()).addPathPatterns("/**");
         }
@@ -113,7 +113,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(prefix = WebMvcProperties.PREFIX + ".cors", name = "enabled", havingValue = "true")
     public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean() {
-        log.info("[🔛] CORS ");
+        log.info("[🔛] CORS 模块载入成功");
         // 获取 CORS 配置
         WebMvcProperties.CorsConfig corsConfig = webMvcProperties.getCorsConfig();
 

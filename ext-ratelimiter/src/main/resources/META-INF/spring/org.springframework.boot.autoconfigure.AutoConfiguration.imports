@@ -1,1 +1,1 @@
-ext.library.ratelimiter.aspect.RateLimiterAspect
+ext.library.ratelimiter.config.RateLimiterAutoConfig

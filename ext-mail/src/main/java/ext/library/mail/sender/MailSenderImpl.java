@@ -16,6 +16,7 @@ import jakarta.mail.MessagingException;
 import java.io.File;
 import java.time.LocalDateTime;
 
+
 /**
  * 邮件发送器实现
  */
@@ -51,10 +52,11 @@ public class MailSenderImpl implements MailSender {
             // 2.发送邮件
             sendMimeMail(mailDetails);
             mailSendInfo.setSuccess(true);
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             mailSendInfo.setSuccess(false);
             mailSendInfo.setErrorMsg(e.getMessage());
-            log.error("[📧] Sending email failed:[{}]", mailDetails, e);
+            log.error("[📧] 发送电子邮件失败");
+            throw new RuntimeException(e);
         } finally {
             // 发布邮件发送事件
             eventPublisher.publishEvent(new MailSendEvent(mailSendInfo));

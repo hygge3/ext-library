@@ -16,26 +16,26 @@ public class CryptoProperties {
     /**
      * Prefix of {@link CryptoProperties}.
      */
-    public static final String PREFIX = "ext.crypto";
+    public static final String PREFIX = "ext.interface-crypto";
 
     /** 算法 */
     private Algorithm algo;
 
     /**
-     * 公钥
+     * 公钥，RSA、SM2
      */
     private String publicKey;
 
     /**
-     * 私钥
+     * 私钥，RSA、SM2
      */
     private String privateKey;
 
     /**
-     * 密钥
+     * 密钥，AES、SM4、DES
      */
     private String secretKey;
 
-    /** 盐 */
+    /** 盐，AES */
     private String salt;
 }

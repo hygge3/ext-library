@@ -31,6 +31,7 @@ public class SseAutoConfig {
 
     @Bean
     public SseController sseController(SseEmitterManager sseEmitterManager) {
+        log.info("[📨] SSE 模块载入成功");
         return new SseController(sseEmitterManager);
     }
 

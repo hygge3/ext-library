@@ -41,6 +41,8 @@ public class TranslationAutoConfig {
         // 设置 Bean 序列化修改器
         objectMapper.setSerializerFactory(
                 objectMapper.getSerializerFactory().withSerializerModifier(new TranslationBeanSerializerModifier()));
+        log.info("[📚] 翻译模块载入成功");
+
     }
 
 }

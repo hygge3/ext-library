@@ -12,7 +12,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Aspect
-@AutoConfiguration
 @RequiredArgsConstructor
 public class CacheAspect {
     private final CacheStrategy cacheStrategy;

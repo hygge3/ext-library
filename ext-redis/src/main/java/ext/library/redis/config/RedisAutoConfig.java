@@ -7,6 +7,7 @@ import ext.library.redis.prefix.IRedisPrefixConverter;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,6 +22,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 /**
  * Redis 自动配置类
  */
+@Slf4j
 @AutoConfiguration(before = org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class)
 @RequiredArgsConstructor
 @EnableConfigurationProperties(RedisProperties.class)
@@ -36,6 +38,7 @@ public class RedisAutoConfig {
         StringRedisTemplate template = new StringRedisTemplate();
         template.setConnectionFactory(this.redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(redisPrefixConverter));
+        log.info("[♦️] Redis 模块载入成功");
         return template;
     }
 

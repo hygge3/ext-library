@@ -71,7 +71,7 @@ public class DistributedLock implements Lock {
 
     public DistributedLock(String lockName, Duration timeout, Duration loopInterval) {
         if (lockName == null) {
-            throw new IllegalArgumentException("lockName must assigned");
+            throw new IllegalArgumentException("[🔐] lockName 必须分配");
         }
         this.lockKey = LOCK_PREFIX + lockName;
         this.timeout = timeout;
@@ -107,7 +107,7 @@ public class DistributedLock implements Lock {
     public void lock() {
         try {
             if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
-                throw Exceptions.throwOut("[🔐] 尝试锁定超时，key: {}", lockKey);
+                throw Exceptions.throwOut("[🔐] 尝试加锁超时，key: {}", lockKey);
             }
         } catch (InterruptedException e) {
             throw Exceptions.unchecked(e);
@@ -122,7 +122,7 @@ public class DistributedLock implements Lock {
     @Override
     public void lockInterruptibly() throws InterruptedException {
         if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
-            throw Exceptions.throwOut("[🔐] 尝试锁定超时，key: {}", this.lockKey);
+            throw Exceptions.throwOut("[🔐] 尝试加锁超时，key: {}", this.lockKey);
         }
     }
 
@@ -137,7 +137,7 @@ public class DistributedLock implements Lock {
             Boolean success = setIfAbsent(lockKey, lockValue, timeout);
             if (success != null && success) {
                 locked = true;
-                log.debug("Lock success, lockKey: {}, lockValue: {}", lockKey, lockValue);
+                log.debug("[🔐] 加锁成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return true;
             } else {
                 // 如果持有锁的是当前线程，则重入
@@ -147,12 +147,12 @@ public class DistributedLock implements Lock {
                 if (success != null && success) {
                     this.reentrant = true;
                     locked = true;
-                    log.debug("Lock reentrant success, lockKey: {}, lockValue: {}", lockKey, lockValue);
+                    log.debug("[🔐] 锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                     return true;
                 }
             }
         } catch (Exception e) {
-            log.error("tryLock error, do unlock, lockKey: {}, lockValue: {}", lockKey, lockValue, e);
+            log.error("[🔐] 尝试加锁错误，请先解锁，lockKey: {}, lockValue: {}", lockKey, lockValue, e);
             unlock();
         }
         return false;
@@ -219,7 +219,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("[🔐] 尝试锁定中断");
+                throw Exceptions.throwOut("[🔐] 尝试加锁定中断");
             }
             if (tryLock()) {
                 return true;
@@ -245,7 +245,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("[🔐] 尝试锁定中断");
+                throw Exceptions.throwOut("[🔐] 尝试加锁中断");
             }
             if (tryLock()) {
                 return true;
@@ -265,7 +265,7 @@ public class DistributedLock implements Lock {
                 return;
             }
             if (this.reentrant) {
-                log.debug("Unlock reentrant success, lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+                log.debug("[🔐] 解锁重入成功，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
                 return;
             }
             // 使用 lua 脚本处理锁判断和释放
@@ -276,13 +276,13 @@ public class DistributedLock implements Lock {
             Boolean res = RedisUtil.execute(redisScript, Collections.singletonList(this.lockKey), this.lockValue);
             if (res != null && res) {
                 locked = false;
-                log.debug("Unlock success, lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+                log.debug("[🔐] 解锁成功，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
                 return;
             }
         } catch (Exception e) {
-            log.error("Unlock error", e);
+            log.error("[🔐] 解锁错误", e);
         }
-        log.warn("Unlock failed, lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+        log.warn("[🔐] 解锁失败，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
     }
 
     @Override

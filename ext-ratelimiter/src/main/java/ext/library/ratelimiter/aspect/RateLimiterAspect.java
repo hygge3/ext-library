@@ -4,7 +4,7 @@ import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 速率限制拦截切面处理类
  */
 @Aspect
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RateLimiterAspect {
 
     /**
@@ -46,7 +46,7 @@ public class RateLimiterAspect {
         if (rateLimitHandler.proceed(rateLimit, pjp)) {
             return pjp.proceed();
         } else {
-            throw Exceptions.throwOut("[🫗] " + (ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg()));
+            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
         }
     }
 

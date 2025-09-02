@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -31,6 +32,7 @@ import java.util.Optional;
 /**
  * OpenAPI 的自动配置类
  */
+@Slf4j
 @RequiredArgsConstructor
 @EnableConfigurationProperties(OpenApiProperties.class)
 @AutoConfigureBefore(SpringDocConfiguration.class)
@@ -86,6 +88,7 @@ public class OpenApiAutoConfig {
                                          Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers,
                                          Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers,
                                          Optional<JavadocProvider> javadocProvider) {
+        log.info("[📃] OpenAPI 模块载入成功");
         return new OpenApiHandler(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils,
                 openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
     }

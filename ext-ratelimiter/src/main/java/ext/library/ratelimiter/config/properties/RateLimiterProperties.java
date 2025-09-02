@@ -1,5 +1,9 @@
 package ext.library.ratelimiter.config.properties;
 
+import ext.library.ratelimiter.handler.IRateLimitHandler;
+import ext.library.ratelimiter.handler.RateLimiterHandler;
+import ext.library.ratelimiter.handler.RedisRateLimitHandler;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,11 +21,6 @@ public class RateLimiterProperties {
      */
     public static final String PREFIX = "ext.limiter";
 
-    /**
-     * 开启限流
-     */
-    private boolean enable = true;
-
     /** 键前缀 */
     private String keyPrefix = "ext.rate_limit";
 
@@ -33,7 +32,10 @@ public class RateLimiterProperties {
      *
      * @since 2025.08.29
      */
+    @Getter
+    @AllArgsConstructor
     public enum RateLimiterType {
-        REDIS, GUAVA
+        REDIS(new RedisRateLimitHandler()), GUAVA(new RateLimiterHandler());
+        private final IRateLimitHandler iRateLimitHandler;
     }
 }
