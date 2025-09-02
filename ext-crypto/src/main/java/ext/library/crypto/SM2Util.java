@@ -2,6 +2,7 @@ package ext.library.crypto;
 
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.util.Base64Util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.CryptoException;
@@ -27,7 +28,6 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 /**
  * sm2 工具
@@ -74,8 +74,8 @@ public class SM2Util {
             System.arraycopy(priKeyBytes, 1, tmp, 0, tmp.length);
             priKeyBytes = tmp;
         }
-        String priKeyBase64 = Base64.getEncoder().encodeToString(priKeyBytes);
-        String pubKeyBase64 = Base64.getEncoder().encodeToString(publicKey.getQ().getEncoded(false));
+        String priKeyBase64 = Base64Util.encodeUrlSafeToStr(priKeyBytes);
+        String pubKeyBase64 = Base64Util.encodeUrlSafeToStr(publicKey.getQ().getEncoded(false));
         return new String[]{priKeyBase64, pubKeyBase64};
     }
 
@@ -89,7 +89,7 @@ public class SM2Util {
      */
     public static String encrypt(String publicKey, String plainText) {
         // 解析公钥
-        byte[] pubKeyBytes = Base64.getDecoder().decode(publicKey);
+        byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
         ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
         ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
 
@@ -101,7 +101,7 @@ public class SM2Util {
         try {
             byte[] encryptedData = sm2Engine.processBlock(plainText.getBytes(StandardCharsets.UTF_8), 0, plainText.length());
             // 返回 Base64 编码结果
-            return Base64.getEncoder().encodeToString(encryptedData);
+            return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 加密失败", e);
             throw Exceptions.unchecked(e);
@@ -120,7 +120,7 @@ public class SM2Util {
      */
     public String decrypt(String privateKey, String cipherText) {
         // 解析私钥
-        byte[] priKeyBytes = Base64.getDecoder().decode(privateKey);
+        byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
         ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
 
@@ -129,7 +129,7 @@ public class SM2Util {
         sm2Engine.init(false, priKeyParams);
 
         // 解码密文
-        byte[] cipherData = Base64.getDecoder().decode(cipherText);
+        byte[] cipherData = Base64Util.decodeUrlSafe(cipherText);
         try {
             // 执行解密
             byte[] decryptedData = sm2Engine.processBlock(cipherData, 0, cipherData.length);
@@ -153,7 +153,7 @@ public class SM2Util {
      */
     public String sign(String privateKey, String plainText) {
         // 解析私钥
-        byte[] priKeyBytes = Base64.getDecoder().decode(privateKey);
+        byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
         ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
 
@@ -167,7 +167,7 @@ public class SM2Util {
         try {
             byte[] signature = signer.generateSignature();
             // 返回 Base64 编码结果
-            return Base64.getEncoder().encodeToString(signature);
+            return Base64Util.encodeUrlSafeToStr(signature);
         } catch (CryptoException e) {
             log.error("[🔐] SM2 签名失败", e);
             throw Exceptions.unchecked(e);
@@ -185,7 +185,7 @@ public class SM2Util {
      */
     public boolean verify(String publicKey, String plainText, String signature) {
         // 解析公钥
-        byte[] pubKeyBytes = Base64.getDecoder().decode(publicKey);
+        byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
         ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
         ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
 
@@ -195,7 +195,7 @@ public class SM2Util {
 
         // 验证签名
         byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
-        byte[] signData = Base64.getDecoder().decode(signature);
+        byte[] signData = Base64Util.decodeUrlSafe(signature);
         signer.update(data, 0, data.length);
         return signer.verifySignature(signData);
     }
@@ -213,7 +213,7 @@ public class SM2Util {
         X509Certificate certificate;
         try {
             // 解析证书
-            byte[] certBytes = Base64.getDecoder().decode(certText);
+            byte[] certBytes = Base64Util.decodeUrlSafe(certText);
             CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
             certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (Exception e) {
@@ -244,7 +244,7 @@ public class SM2Util {
 
         // 验证签名
         byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
-        byte[] signData = Base64.getDecoder().decode(signature);
+        byte[] signData = Base64Util.decodeUrlSafe(signature);
         signer.update(data, 0, data.length);
 
         return signer.verifySignature(signData);

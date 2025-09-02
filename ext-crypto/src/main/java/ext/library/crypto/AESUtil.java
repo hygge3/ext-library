@@ -39,7 +39,7 @@ public class AESUtil {
         SecretKey secretKey = keyGenerator.generateKey();
         // 获取密钥内容
         byte[] key = secretKey.getEncoded();
-        return Base64Util.encodeToStr(key);
+        return Base64Util.encodeUrlSafeToStr(key);
     }
 
     /**
@@ -56,7 +56,7 @@ public class AESUtil {
         byte[] byteArray = plainText.getBytes();
         // 加密，设置密钥和随机数
         byte[] cipherArrayTemp = Encryptors.standard(secretKey, salt).encrypt(byteArray);
-        byte[] cipherArray = Base64Util.encode(cipherArrayTemp);
+        byte[] cipherArray = Base64Util.encodeUrlSafe(cipherArrayTemp);
         return new String(cipherArray);
     }
 
@@ -72,7 +72,7 @@ public class AESUtil {
     public String decrypt(String secretKey, String cipherText, String salt) {
         // 密文
         byte[] byteArray = cipherText.getBytes();
-        byte[] plainArrayTemp = Base64Util.decode(byteArray);
+        byte[] plainArrayTemp = Base64Util.decodeUrlSafe(byteArray);
         // 解密
         byte[] plainArray = Encryptors.standard(secretKey, salt).decrypt(plainArrayTemp);
         return new String(plainArray);

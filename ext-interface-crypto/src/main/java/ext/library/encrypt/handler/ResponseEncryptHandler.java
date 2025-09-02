@@ -48,7 +48,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
         try {
             String secretKey = StringUtil.isBlank(cryptoProperties.getPublicKey()) ? cryptoProperties.getSecretKey() : cryptoProperties.getPublicKey();
             Algorithm algo = cryptoProperties.getAlgo();
-            return algo.getCryptoStrategy().decrypt(secretKey, json, cryptoProperties.getSalt());
+            return algo.getCryptoStrategy().encrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
             log.error("[🔒] 响应加密异常", e);
             throw Exceptions.unchecked(e);

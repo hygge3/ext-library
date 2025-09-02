@@ -75,7 +75,6 @@ public class ThreadPoolConfig {
     public void destroy() {
         try {
             log.info("[🌊] 关闭后台任务线程池");
-            threadPoolTaskExecutor.shutdown();
             Threads.shutdownAndAwaitTermination(scheduledExecutorService);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

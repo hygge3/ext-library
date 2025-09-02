@@ -2,6 +2,7 @@ package ext.library.ratelimiter.handler;
 
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
+import ext.library.core.util.spel.SpelUtil;
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.holder.Lazy;
@@ -10,11 +11,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
@@ -70,16 +68,7 @@ public interface IRateLimitHandler {
             MethodSignature signature = (MethodSignature) point.getSignature();
             Method targetMethod = signature.getMethod();
             Object[] args = point.getArgs();
-            // noinspection DataFlowIssue
-            MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(null, targetMethod, args, PND);
-            context.setBeanResolver(new BeanFactoryResolver(SpringUtil.getBeanFactory()));
-            Expression expression;
-            if (key.startsWith(PARSER_CONTEXT.getExpressionPrefix()) && key.endsWith(PARSER_CONTEXT.getExpressionSuffix())) {
-                expression = PARSER.parseExpression(key, PARSER_CONTEXT);
-            } else {
-                expression = PARSER.parseExpression(key);
-            }
-            key = expression.getValue(context, String.class);
+            key = SpelUtil.parseValueToString(point, targetMethod, args, key);
         }
         HttpServletRequest request = ServletUtil.getRequest();
         String finalKey = String.join(Symbol.COLON, RATE_LIMIT_KEY.get(), request.getRequestURI(), ServletUtil.getIpAddr(request), key);

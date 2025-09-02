@@ -39,7 +39,7 @@ public class DESUtil {
         keyGen.init(Objects.requireNonNullElse(keySize, 56));// 初始化密钥生成器
         SecretKey secretKey = keyGen.generateKey();// 生成密钥
         byte[] key = secretKey.getEncoded();// 密钥字节数组
-        return Base64Util.encodeToStr(key);
+        return Base64Util.encodeUrlSafeToStr(key);
     }
 
     /**
@@ -65,7 +65,7 @@ public class DESUtil {
             log.error("[🔐] DES 加密失败", e);
             throw Exceptions.unchecked(e);
         }
-        return Base64Util.encodeToStr(encryptedBytes);
+        return Base64Util.encodeUrlSafeToStr(encryptedBytes);
     }
 
     /**
@@ -86,7 +86,7 @@ public class DESUtil {
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             cipher.init(Cipher.DECRYPT_MODE, key);
 
-            decryptedBytes = cipher.doFinal(Base64Util.decode(cipherText));
+            decryptedBytes = cipher.doFinal(Base64Util.decodeUrlSafe(cipherText));
         } catch (Exception e) {
             log.error("[🔐] DES 解密失败", e);
             throw Exceptions.unchecked(e);

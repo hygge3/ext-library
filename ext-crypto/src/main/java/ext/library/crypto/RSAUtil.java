@@ -72,7 +72,7 @@ public class RSAUtil {
     private PublicKey castPublicKey(String publicKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
-            byte[] decodedKey = Base64Util.decode(publicKey.getBytes());
+            byte[] decodedKey = Base64Util.decodeUrlSafe(publicKey.getBytes());
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class RSAUtil {
     private PrivateKey castPrivateKey(String privateKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
-            byte[] decodedKey = Base64Util.decode(privateKey.getBytes());
+            byte[] decodedKey = Base64Util.decodeUrlSafe(privateKey.getBytes());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class RSAUtil {
             out.close();
             // 获取加密内容使用 base64 进行编码，并以 UTF-8 为标准转化成字符串
             // 加密后的字符串
-            return Base64Util.encodeToStr(encryptedData);
+            return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (Exception e) {
             log.error("[🔐] RSA 加密失败", e);
             throw Exceptions.unchecked(e);
@@ -153,7 +153,7 @@ public class RSAUtil {
         try {
             Cipher cipher = Cipher.getInstance(ALGO);
             cipher.init(Cipher.DECRYPT_MODE, castPrivateKey(privateKey));
-            byte[] dataBytes = Base64Util.decode(cipherText);
+            byte[] dataBytes = Base64Util.decodeUrlSafe(cipherText);
             int inputLen = dataBytes.length;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             int offset = 0;
@@ -197,7 +197,7 @@ public class RSAUtil {
             Signature signature = Signature.getInstance(SIGN_ALGO);
             signature.initSign(key);
             signature.update(plainText.getBytes());
-            return Base64Util.encodeToStr(signature.sign());
+            return Base64Util.encodeUrlSafeToStr(signature.sign());
         } catch (Exception e) {
             log.error("[🔐] RSA 加签失败", e);
             throw Exceptions.throwOut("RSA 加签失败");
@@ -222,7 +222,7 @@ public class RSAUtil {
             Signature signature = Signature.getInstance(SIGN_ALGO);
             signature.initVerify(key);
             signature.update(plainText.getBytes());
-            return signature.verify(Base64Util.decode(sign.getBytes()));
+            return signature.verify(Base64Util.decodeUrlSafe(sign.getBytes()));
         } catch (Exception e) {
             log.error("[🔐] RSA 验签失败", e);
             throw Exceptions.unchecked(e);

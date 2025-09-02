@@ -42,7 +42,7 @@ public class SM4Util {
     public String genKey(Integer keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
         KeyGenerator kg = KeyGenerator.getInstance(ALGORITHM, BouncyCastleProvider.PROVIDER_NAME);
         kg.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());
-        return Base64Util.encodeToStr(kg.generateKey().getEncoded());
+        return Base64Util.encodeUrlSafeToStr(kg.generateKey().getEncoded());
     }
 
     /**
@@ -56,9 +56,9 @@ public class SM4Util {
     public String encryptByECB(String secretKey, String plainText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decode(secretKey), ALGORITHM);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-            return Base64Util.encodeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
+            return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 加密失败", e);
             throw Exceptions.unchecked(e);
@@ -76,9 +76,9 @@ public class SM4Util {
     public String decryptByECB(String secretKey, String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decode(secretKey), ALGORITHM);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            return new String(cipher.doFinal(Base64Util.decode(cipherText)), StandardCharsets.UTF_8);
+            return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 ECB 解密失败", e);
             throw Exceptions.unchecked(e);
@@ -96,9 +96,9 @@ public class SM4Util {
     public String encryptByCBC(String secretKey, String iv, String plainText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decode(secretKey), ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decode(iv)));
-            return Base64Util.encodeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
+            return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 加密失败", e);
             throw Exceptions.unchecked(e);
@@ -116,9 +116,9 @@ public class SM4Util {
     public String decryptByCBC(String secretKey, String iv, String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decode(secretKey), ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decode(iv)));
-            return new String(cipher.doFinal(Base64Util.decode(cipherText)), StandardCharsets.UTF_8);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
+            return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 解密失败", e);
             throw Exceptions.unchecked(e);
