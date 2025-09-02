@@ -1728,11 +1728,11 @@ public class RedisUtil {
         return getRedisTemplate().execute(session);
     }
 
-    public <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
+    public <T> T execute(RedisScript<T> script, List<String> keys, String... args) {
         return getRedisTemplate().execute(script, keys, args);
     }
 
-    public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<String> keys, Object... args) {
+    public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<String> keys, String... args) {
         return getRedisTemplate().execute(script, argsSerializer, resultSerializer, keys, args);
     }
 

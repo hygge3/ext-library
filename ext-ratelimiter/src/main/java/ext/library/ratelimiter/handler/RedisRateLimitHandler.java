@@ -42,9 +42,9 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
                 if current + 1 > count then return 0
                 else redis.call("INCRBY", key, "1") redis.call("expire", key, interval) return current + 1 end
                 """, Long.class);
-        Long currentCount = RedisUtil.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key), count,
+        Long currentCount = RedisUtil.execute(REDIS_SCRIPT_RATE_LIMIT, Collections.singletonList(key), String.valueOf(count),
                 // 间隔时间解析为秒
-                interval);
+                String.valueOf(interval));
         if (null != currentCount) {
             if (currentCount > 0 && currentCount <= count) {
                 if (log.isDebugEnabled()) {

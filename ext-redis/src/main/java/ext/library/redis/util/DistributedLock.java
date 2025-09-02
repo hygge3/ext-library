@@ -173,7 +173,7 @@ public class DistributedLock implements Lock {
         DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
         redisScript.setResultType(Boolean.class);
         redisScript.setScriptText(script);
-        return RedisUtil.execute(redisScript, List.of(key), value, timeout.toSeconds());
+        return RedisUtil.execute(redisScript, List.of(key), value, String.valueOf(timeout.toSeconds()));
     }
 
     /**
