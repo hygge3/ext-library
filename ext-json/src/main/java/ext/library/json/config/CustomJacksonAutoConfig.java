@@ -1,24 +1,27 @@
 package ext.library.json.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import ext.library.json.serializer.BigNumberSerializer;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import ext.library.json.module.CustomModule;
 import ext.library.json.util.CustomizeMapper;
 import ext.library.tool.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
@@ -83,32 +86,32 @@ public class CustomJacksonAutoConfig {
     }
 
     /**
-     * 关于日期时间反序列化，只有在使用 {@link RequestBody} 时有效。
-     *
-     * @return 自定义序列化器
-     */
-    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        return builder -> builder.serializationInclusion(JsonInclude.Include.NON_NULL).featuresToEnable(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS).serializers(BigNumberSerializer.INSTANCE).modules(CustomizeMapper.getModule());
-    }
-
-    /**
      * 自定义 objectMapper
      *
      * @return ObjectMapper
      */
     @Bean
-    @ConditionalOnClass(ObjectMapper.class)
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper(@Nonnull Jackson2ObjectMapperBuilder builder) {
-        // org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration.JacksonObjectMapperConfiguration
-        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
-        objectMapper.registerModule(CustomizeMapper.getModule());
-        // 避免将 LocalDateTime 转为时间戳
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.enable(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS);
+    @Primary
+    @ConditionalOnBean(JsonMapper.class)
+    public JsonMapper jsonMapper(JsonMapper jsonMapper) {
+        // 继承所有 spring.jackson 配置
+        JsonMapper mapper = new JsonMapper.Builder(jsonMapper)
+                // 添加 JSR310 模块（Java 8 时间）;显式添加（更安全）
+                .addModules(new JavaTimeModule()).addModule(new Jdk8Module()).addModule(new ParameterNamesModule())
+                // 添加自定义模块
+                .addModule(new CustomModule())
+                // 忽略未知字段
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                // 避免将 LocalDateTime 转为时间戳
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // 只序列化非 null 字段
+                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                // 字段可见性：允许序列化所有字段（无需 getter）
+                .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY).visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY).visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE).visibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE).build();
         // 更新 JsonUtils 中的 ObjectMapper，保持容器和工具类中的 ObjectMapper 对象一致
-        CustomizeMapper.setMAPPER(objectMapper);
-        return objectMapper;
+        CustomizeMapper.setMAPPER(mapper);
+        log.info("[🔁] JSON 模块载入成功");
+        return mapper;
     }
+
 }

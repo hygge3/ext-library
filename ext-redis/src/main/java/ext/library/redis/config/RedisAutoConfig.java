@@ -6,11 +6,11 @@ import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.IRedisPrefixConverter;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -23,20 +23,16 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
  * Redis 自动配置类
  */
 @Slf4j
-@AutoConfiguration(before = org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class)
-@RequiredArgsConstructor
+@AutoConfiguration(before = RedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisAutoConfig {
-
-    private final RedisConnectionFactory redisConnectionFactory;
-    private final ObjectMapper objectMapper;
 
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)
     @ConditionalOnMissingBean
-    public StringRedisTemplate stringRedisTemplate(IRedisPrefixConverter redisPrefixConverter) {
+    public StringRedisTemplate stringRedisTemplate(IRedisPrefixConverter redisPrefixConverter, RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate template = new StringRedisTemplate();
-        template.setConnectionFactory(this.redisConnectionFactory);
+        template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(redisPrefixConverter));
         log.info("[♦️] Redis 模块载入成功");
         return template;
@@ -52,9 +48,9 @@ public class RedisAutoConfig {
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)
     @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(IRedisPrefixConverter redisPrefixConverter) {
+    public RedisTemplate<Object, Object> redisTemplate(IRedisPrefixConverter redisPrefixConverter, ObjectMapper objectMapper, RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(this.redisConnectionFactory);
+        template.setConnectionFactory(redisConnectionFactory);
         // 设置  key 的序列化方式为 自定义 String Key 序列化
         template.setKeySerializer(new PrefixJdkRedisSerializer(redisPrefixConverter));
         // 设置 hash key 的序列化方式为 自定义 String Key 序列化

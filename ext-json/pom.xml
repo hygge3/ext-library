@@ -23,5 +23,5 @@
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
         </dependency>
-          </dependencies>
+    </dependencies>
 </project>

@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
@@ -22,7 +23,7 @@ import java.util.Properties;
  * Validation 自动配置类，扩展支持使用 {} 占位替换默认消息
  */
 @Slf4j
-@AutoConfiguration(before = org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration.class)
+@AutoConfiguration(before = ValidationAutoConfiguration.class)
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
 public class ValidationAutoConfig {
