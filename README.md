@@ -2,6 +2,7 @@
 
 ![JAVA 21](https://img.shields.io/badge/JDK-21-brightgreen.svg)
 ![GitHub License](https://img.shields.io/github/license/hygge3/web-ext-spring-boot-starter)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/36cd57a6a694406fac04992f3285ad1b)](https://app.codacy.com/gh/hygge3/ext-library?utm_source=github.com&utm_medium=referral&utm_content=hygge3/ext-library&utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/612dec474d514c439103c2d34f755da1)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/web-ext-spring-boot-starter)
 
