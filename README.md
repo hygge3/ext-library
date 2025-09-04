@@ -1,41 +1,44 @@
 ## 🌐 ext-library（SpringBoot 功能扩展库）
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6eafae2ee8d24d80a0d8c7994d91d7ac)](https://app.codacy.com/gh/hygge3/ext-library/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+![Version](https://img.shields.io/badge/version-3.5.0-green.svg)
 ![JAVA 21](https://img.shields.io/badge/JDK-21-brightgreen.svg)
+![Spring Boot](https://img.shields.io/github/v/release/spring-projects/spring-boot?label=version)
+![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/ext-library)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/hygge3/ext-library)
 ![GitHub License](https://img.shields.io/github/license/hygge3/web-ext-spring-boot-starter)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/612dec474d514c439103c2d34f755da1)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/web-ext-spring-boot-starter)
 
 ## 介绍
 
-ext-library，一个基于 Spring Boot
-3 和 JDK21 的开源功能扩展框架，致力于为您提供一个简洁流畅、直观且功能强大的开发框架。它不仅融合了最新的技术趋势，而且通过精心设计，确保了简洁高效，让使用者可以专注业务。
+ext-library，
+一个全面的 Spring Boot 扩展库，旨在简化和提升您的开发体验。基于 Spring Boot 3 和 JDK 21
+构建，这个开源框架提供了一系列模块化组件，用于解决常见的开发挑战，让您能够专注于业务逻辑而非样板代码。
+
+ext-library 是一个精心设计的扩展框架，以简洁直观的设计集成了强大的实用工具和功能。您可以将其视为 Spring Boot
+开发者的瑞士军刀——无需为不同功能搜索和集成多个库，ext-library 提供了具有统一 API 和设计模式的整体解决方案。
 
 ## 🌱 ext 生态
 
-- ext-tool:
+该库采用模块化架构，每个 ext-* 模块都针对特定领域或功能。这种方法让您可以按需选择组件，保持应用程序的轻量化和专注性。
+
+- ext-tool:通用实用类, 用于常见编程任务和实用工具
+- ext-core:    核心实用工具和配置, 始终作为基础包含
+- ext-crypto:    加密操作, 当需要加密/解密时
+- ext-cache:    缓存解决方案, 用于性能优化
+- ext-http:    HTTP 客户端增强, 用于高级 HTTP 操作
+- ext-websocket:    WebSocket 支持, 用于实时双向通信
+- ext-json:    JSON 处理, 用于增强的 JSON 操作
+- ext-mybatis:    MyBatis 扩展, 使用 MyBatis 进行数据库操作时
 
 ## 🐛 已知问题
 
 暂无
 
-## 📌 开源协议
+## 🔍️ 为什么选择 ext-library？
 
-![LGPL v3](https://www.gnu.org/graphics/lgplv3-147x51.png)
-
-### 📄 协议解释
-
-LGPL（[GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html)）
-
-LGPL 是 GPL 的一个为主要为类库使用设计的开源协议。和 GPL 要求任何使用/修改/衍生之 GPL 类库的的软件必须采用 GPL 协议不同。LGPL
-允许商业软件通过类库引用 (link) 方式使用 LGPL 类库而不需要开源商业软件的代码。这使得采用 LGPL 协议的开源代码可以被商业软件作为类库引用并发布和销售。
-
-但是如果修改 LGPL 协议的代码或者衍生，则所有修改的代码，涉及修改部分的额外代码和衍生的代码都必须采用 LGPL 协议。因此 LGPL
-协议的开源代码很适合作为第三方类库被商业软件引用，但不适合希望以 LGPL 协议代码为基础，通过修改和衍生的方式做二次开发的商业软件采用。
-
-### ✅ 用户权益
-
-允许以引入不改源码的形式免费用于学习、毕设、公司项目、私活等。
-
-## 🔍️ 相关链接
-
-- ext 源码 Github：[https://github.com/hygge3/ext-library](https://github.com/hygge3/ext-library)
+- 模块化设计：只使用您需要的，保持应用程序轻量化
+- 一致的 API：所有模块都遵循相同的设计模式和约定
+- 性能优化：以性能为核心构建，利用最新的 Java 功能
+- 生产就绪：经过充分测试并在生产环境中使用
+- 积极开发：持续更新新功能和改进
+- 全面文档：所有模块都有详细的文档和示例
