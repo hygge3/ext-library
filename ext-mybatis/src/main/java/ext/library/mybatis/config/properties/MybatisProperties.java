@@ -1,15 +1,11 @@
 package ext.library.mybatis.config.properties;
 
 import ext.library.mybatis.constant.DbField;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Mybatis 自动配置属性
  */
-@Getter
-@Setter
 @ConfigurationProperties(MybatisProperties.PREFIX)
 public class MybatisProperties {
 
@@ -28,4 +24,27 @@ public class MybatisProperties {
     /** 开启内置的多租户实现，必须使用 TenantUtil 放入 */
     private Boolean tenant = false;
 
+    public Boolean getSqlPrint() {
+        return sqlPrint;
+    }
+
+    public void setSqlPrint(Boolean sqlPrint) {
+        this.sqlPrint = sqlPrint;
+    }
+
+    public String getDeleteField() {
+        return deleteField;
+    }
+
+    public void setDeleteField(String deleteField) {
+        this.deleteField = deleteField;
+    }
+
+    public Boolean getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Boolean tenant) {
+        this.tenant = tenant;
+    }
 }

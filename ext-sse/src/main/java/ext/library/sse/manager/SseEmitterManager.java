@@ -5,7 +5,8 @@ import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
 import ext.library.tool.core.VirtualThreadPools;
 import ext.library.tool.util.ObjectUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import jakarta.annotation.Nonnull;
@@ -19,15 +20,13 @@ import java.util.function.Consumer;
 /**
  * 管理 Server-Sent Events (SSE) 连接
  */
-@Slf4j
 public class SseEmitterManager {
-
     /**
      * 订阅的频道
      */
     private final static String SSE_TOPIC = "ext:sse";
-
     private final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 建立与指定用户的 SSE 连接

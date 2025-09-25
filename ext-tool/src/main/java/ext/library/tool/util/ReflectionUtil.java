@@ -1,13 +1,12 @@
 package ext.library.tool.util;
 
-import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Nonnull;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -16,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-@UtilityClass
 public class ReflectionUtil {
 
     // ---------------------- Info ----------------------
@@ -28,7 +26,7 @@ public class ReflectionUtil {
      *
      * @return package name of {@code clazz}
      */
-    public String getPackageName(Class<?> clazz) {
+    public static String getPackageName(Class<?> clazz) {
         return getPackageName(clazz.getName());
     }
 
@@ -40,7 +38,7 @@ public class ReflectionUtil {
      *
      * @return package name of {@code classFullName}
      */
-    public String getPackageName(String classFullName) {
+    public static String getPackageName(String classFullName) {
         int lastDot = classFullName.lastIndexOf('.');
         return (lastDot < 0) ? "" : classFullName.substring(0, lastDot);
     }
@@ -56,7 +54,7 @@ public class ReflectionUtil {
      *
      * @return the Method object, or {@code null} if none found
      */
-    public Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
+    public static Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
         Assert.notNull(clazz, "Class must not be null");
         Assert.notNull(name, "Method name must not be null");
         Class<?> searchType = clazz;
@@ -75,14 +73,14 @@ public class ReflectionUtil {
     /**
      * check if method has same params
      */
-    private boolean hasSameParams(Method method, Class<?>[] paramTypes) {
+    private static boolean hasSameParams(Method method, Class<?>[] paramTypes) {
         return (paramTypes.length == method.getParameterCount() && Arrays.equals(paramTypes, method.getParameterTypes()));
     }
 
     /**
      * get declared methods
      */
-    private Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
+    private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
         Assert.notNull(clazz, "Class must not be null");
         Method[] result;
         try {
@@ -108,7 +106,7 @@ public class ReflectionUtil {
     /**
      * find concrete（default） methods on interfaces
      */
-    private List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
+    private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
         List<Method> result = null;
         for (Class<?> ifc : clazz.getInterfaces()) {
             for (Method ifcMethod : ifc.getMethods()) {
@@ -128,8 +126,8 @@ public class ReflectionUtil {
      *
      * @param method the method to make accessible
      */
-    public void makeAccessible(Method method) {
-        if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible()) {
+    public static void makeAccessible(Method method) {
+        if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.canAccess(null)) {
             method.setAccessible(true);
         }
     }
@@ -219,7 +217,7 @@ public class ReflectionUtil {
      * @param field field to make accessible
      */
     public static void makeAccessible(Field field) {
-        if (!field.isAccessible()) {
+        if (!field.canAccess(null)) {
             field.setAccessible(true);
         }
     }
@@ -262,8 +260,7 @@ public class ReflectionUtil {
      *
      * @return 函数名
      */
-    @SneakyThrows
-    public String getLambdaFunctionName(@Nonnull Function<?, ?> lambda) {
+    public static String getLambdaFunctionName(@Nonnull Function<?, ?> lambda) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
         replaceMethod.setAccessible(true);
         SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);

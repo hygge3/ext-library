@@ -1,7 +1,5 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -10,7 +8,6 @@ import java.util.Base64;
  *
  * @since 2025.08.19
  */
-@UtilityClass
 public class Base64Util {
 
     // region UrlEncode withoutPadding

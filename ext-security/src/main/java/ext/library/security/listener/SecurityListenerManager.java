@@ -1,7 +1,6 @@
 package ext.library.security.listener;
 
 import ext.library.tool.core.Exceptions;
-import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
  * 监听器管理
  * </p>
  */
-@UtilityClass
 public class SecurityListenerManager {
 
     private static final List<SecurityListener> LISTENER_LIST = new ArrayList<>();
@@ -26,7 +24,7 @@ public class SecurityListenerManager {
      *
      * @return List<SecurityListener>
      */
-    public List<SecurityListener> getListener() {
+    public static List<SecurityListener> getListener() {
         return SecurityListenerManager.LISTENER_LIST;
     }
 
@@ -35,7 +33,7 @@ public class SecurityListenerManager {
      *
      * @param listener {@link SecurityListener}
      */
-    public void registerListener(SecurityListener listener) {
+    public static void registerListener(SecurityListener listener) {
         if (null == listener) {
             throw Exceptions.throwOut("[🛡️] 注册监听器不能为空");
         }
@@ -47,7 +45,7 @@ public class SecurityListenerManager {
      *
      * @param listener {@link SecurityListener}
      */
-    public void removeListener(SecurityListener listener) {
+    public static void removeListener(SecurityListener listener) {
         if (null == listener) {
             throw Exceptions.throwOut("[🛡️] 移除监听器不能为空");
         }
@@ -57,7 +55,7 @@ public class SecurityListenerManager {
     /**
      * 清空所有已注册的监听器
      */
-    public void clearListener() {
+    public static void clearListener() {
         LISTENER_LIST.clear();
     }
 

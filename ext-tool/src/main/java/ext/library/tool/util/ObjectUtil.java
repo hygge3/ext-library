@@ -3,7 +3,6 @@ package ext.library.tool.util;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import ext.library.tool.constant.Symbol;
-import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -15,12 +14,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-@UtilityClass
 public class ObjectUtil {
 
-    private final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
+    private static final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
 
-    private final List<String> STR_FALSE = List.of("0", "false", "no", "n");
+    private static final List<String> STR_FALSE = List.of("0", "false", "no", "n");
 
     /**
      * 判断给定对象是否表示“真”值
@@ -34,7 +32,7 @@ public class ObjectUtil {
      *
      * @return 如果对象表示“真”值，则返回 true；否则返回 false
      */
-    public boolean isTrue(Object object) {
+    public static boolean isTrue(Object object) {
         // 根据对象类型判断其是否表示“真”值
         return switch (object) {
             // 如果是字符串，检查是否在表示真的字符串集合中
@@ -57,7 +55,7 @@ public class ObjectUtil {
      *
      * @return 如果对象表示“假”或无效状态，则返回 true；否则返回 false
      */
-    public boolean isFalse(Object object) {
+    public static boolean isFalse(Object object) {
         // 根据对象类型，判断其是否表示“假”或无效状态
         return switch (object) {
             // 当对象为字符串时，检查其是否包含在预定义的表示“假”的字符串集合中
@@ -79,7 +77,7 @@ public class ObjectUtil {
      * @return {@code true} 如果提供的引用为 {@code null}，否则 {@code false}
      *
      */
-    public boolean isNull(Object object) {
+    public static boolean isNull(Object object) {
         return Objects.isNull(object);
     }
 
@@ -91,7 +89,7 @@ public class ObjectUtil {
      * @return {@code true} 如果提供的引用不是 {@code null}，否则 {@code false}
      *
      */
-    public boolean isNotNull(Object object) {
+    public static boolean isNotNull(Object object) {
         return Objects.nonNull(object);
     }
 
@@ -104,7 +102,7 @@ public class ObjectUtil {
      *
      * @return 对象的元素数量或长度如果对象为 null，则返回 0
      */
-    public int size(Object obj) {
+    public static int size(Object obj) {
         // 检查对象是否为 null，null 对象返回大小为 0
         if (null == obj) {
             return 0;
@@ -140,7 +138,7 @@ public class ObjectUtil {
      *
      * @return 是否数组
      */
-    public boolean isArray(Object obj) {
+    public static boolean isArray(Object obj) {
         return (obj != null && obj.getClass().isArray());
     }
 
@@ -151,7 +149,7 @@ public class ObjectUtil {
      *
      * @return 数组是否为空
      */
-    public boolean isEmpty(Object obj) {
+    public static boolean isEmpty(Object obj) {
         if (null == obj) {
             return true;
         }
@@ -180,7 +178,7 @@ public class ObjectUtil {
      *
      * @return 是否不为空
      */
-    public boolean isNotEmpty(Object obj) {
+    public static boolean isNotEmpty(Object obj) {
         return !isEmpty(obj);
     }
 
@@ -195,7 +193,7 @@ public class ObjectUtil {
      * @see Object#equals(Object)
      * @see Arrays#equals
      */
-    public boolean equalsSafe(Object o1, Object o2) {
+    public static boolean equalsSafe(Object o1, Object o2) {
         if (o1 == o2) {
             return true;
         } else if (o1 != null && o2 != null) {
@@ -213,7 +211,7 @@ public class ObjectUtil {
      *
      * @return 是否不 eq
      */
-    public boolean isNotEqual(Object o1, Object o2) {
+    public static boolean isNotEqual(Object o1, Object o2) {
         return !Objects.equals(o1, o2);
     }
 
@@ -226,7 +224,7 @@ public class ObjectUtil {
      *
      * @return Object
      */
-    public <T> T defaultIfNull(T object, T defaultValue) {
+    public static <T> T defaultIfNull(T object, T defaultValue) {
         return isNull(object) ? defaultValue : object;
     }
 
@@ -238,7 +236,7 @@ public class ObjectUtil {
      *
      * @return Object
      */
-    public <T> T defaultIfEmpty(T object, T defaultValue) {
+    public static <T> T defaultIfEmpty(T object, T defaultValue) {
         return isEmpty(object) ? defaultValue : object;
     }
 

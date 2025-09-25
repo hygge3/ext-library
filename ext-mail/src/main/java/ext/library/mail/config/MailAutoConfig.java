@@ -2,7 +2,8 @@ package ext.library.mail.config;
 
 import ext.library.mail.sender.MailSender;
 import ext.library.mail.sender.MailSenderImpl;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,9 +16,9 @@ import org.springframework.mail.javamail.JavaMailSender;
  * 邮件自动配置
  */
 
-@Slf4j
 @AutoConfiguration(after = MailSenderAutoConfiguration.class)
 public class MailAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnMissingBean(MailSender.class)

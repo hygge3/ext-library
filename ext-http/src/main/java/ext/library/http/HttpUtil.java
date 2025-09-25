@@ -2,10 +2,9 @@ package ext.library.http;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.StringUtil;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -43,17 +42,13 @@ import java.util.concurrent.Executors;
  *
  * @since jdk11
  */
-@Slf4j
 public class HttpUtil {
-
+    private static final Logger log = LoggerFactory.getLogger(HttpUtil.class);
     /**
      * 获取 Http 客户端
      */
-    @Getter
     private static volatile HttpClient client;
     private static HttpClientProps httpClientProps;
-
-    // region init
 
     static {
         client = HttpClient.newBuilder()
@@ -74,6 +69,8 @@ public class HttpUtil {
                 .build();
     }
 
+    // region init
+
     public HttpUtil(HttpClientProps httpClientProps) {
         if (client == null) {
             synchronized (HttpUtil.class) {
@@ -88,6 +85,10 @@ public class HttpUtil {
                 }
             }
         }
+    }
+
+    public static HttpClient getClient() {
+        return client;
     }
     // endregion
     // region GET
@@ -1020,54 +1021,45 @@ public class HttpUtil {
     }
     // endregion
 
-    @Setter
-    @Getter
     public static class HttpClientProps {
 
         /**
          * http 版本
          */
-        private HttpClient.Version version = HttpClient.Version.HTTP_1_1;
+        private final HttpClient.Version version = HttpClient.Version.HTTP_1_1;
 
         /**
          * 转发策略
          */
-        private HttpClient.Redirect redirect = HttpClient.Redirect.NORMAL;
-
+        private final HttpClient.Redirect redirect = HttpClient.Redirect.NORMAL;
+        /**
+         * 连接超时时间毫秒
+         */
+        private final int connectTimeout = 10000;
+        /**
+         * 默认读取数据超时时间
+         */
+        private final int defaultReadTimeout = 1200000;
+        /**
+         * 默认 content-type
+         */
+        private final String defaultContentType = "application/json";
         /**
          * 线程池
          */
         private Executor executor;
-
         /**
          * 认证
          */
         private Authenticator authenticator;
-
         /**
          * 代理
          */
         private ProxySelector proxySelector;
-
         /**
          * cookiehandler
          */
         private CookieHandler cookieHandler;
-
-        /**
-         * 连接超时时间毫秒
-         */
-        private int connectTimeout = 10000;
-
-        /**
-         * 默认读取数据超时时间
-         */
-        private int defaultReadTimeout = 1200000;
-
-        /**
-         * 默认 content-type
-         */
-        private String defaultContentType = "application/json";
 
         public HttpClientProps() {
             TrustManager[] trustAllCertificates = new TrustManager[]{new X509TrustManager() {
@@ -1096,6 +1088,58 @@ public class HttpUtil {
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 Exceptions.log(e);
             }
+        }
+
+        public HttpClient.Version getVersion() {
+            return version;
+        }
+
+        public HttpClient.Redirect getRedirect() {
+            return redirect;
+        }
+
+        public int getConnectTimeout() {
+            return connectTimeout;
+        }
+
+        public int getDefaultReadTimeout() {
+            return defaultReadTimeout;
+        }
+
+        public String getDefaultContentType() {
+            return defaultContentType;
+        }
+
+        public Executor getExecutor() {
+            return executor;
+        }
+
+        public void setExecutor(Executor executor) {
+            this.executor = executor;
+        }
+
+        public Authenticator getAuthenticator() {
+            return authenticator;
+        }
+
+        public void setAuthenticator(Authenticator authenticator) {
+            this.authenticator = authenticator;
+        }
+
+        public ProxySelector getProxySelector() {
+            return proxySelector;
+        }
+
+        public void setProxySelector(ProxySelector proxySelector) {
+            this.proxySelector = proxySelector;
+        }
+
+        public CookieHandler getCookieHandler() {
+            return cookieHandler;
+        }
+
+        public void setCookieHandler(CookieHandler cookieHandler) {
+            this.cookieHandler = cookieHandler;
         }
     }
 }

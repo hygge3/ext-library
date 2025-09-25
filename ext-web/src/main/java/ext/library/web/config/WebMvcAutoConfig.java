@@ -5,8 +5,8 @@ import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -32,14 +32,17 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 /**
  * Web MVC 自动配置
  */
-@Slf4j
 @AutoConfiguration
-@RequiredArgsConstructor
 @EnableConfigurationProperties({WebMvcProperties.class})
 @ConditionalOnWebApplication(type = SERVLET)
 public class WebMvcAutoConfig implements WebMvcConfigurer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final WebMvcProperties webMvcProperties;
+
+    public WebMvcAutoConfig(WebMvcProperties webMvcProperties) {
+        this.webMvcProperties = webMvcProperties;
+    }
 
     private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();

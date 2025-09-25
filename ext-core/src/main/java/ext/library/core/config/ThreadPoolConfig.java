@@ -4,7 +4,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.core.config.properties.ThreadPoolProperties;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Threads;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -19,17 +21,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * 线程池配置
  **/
-@Slf4j
 @AutoConfiguration
 @EnableConfigurationProperties(ThreadPoolProperties.class)
 public class ThreadPoolConfig {
-
+    private final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
     private final int core = Holder.CPU_CORE_NUM + 1;
-
+    @Resource
     private ScheduledExecutorService scheduledExecutorService;
+    @Resource
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
@@ -54,9 +56,7 @@ public class ThreadPoolConfig {
      */
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core,
-                new ThreadFactoryBuilder().setNameFormat("Scheduling-%d").setDaemon(true).build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()) {
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core, new ThreadFactoryBuilder().setNameFormat("Scheduling-%d").setDaemon(true).build(), new ThreadPoolExecutor.CallerRunsPolicy()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);

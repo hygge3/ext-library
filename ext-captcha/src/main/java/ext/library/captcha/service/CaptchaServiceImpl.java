@@ -4,23 +4,28 @@ import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
 import ext.library.tool.util.ObjectUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 
 /**
  * 验证码服务
  */
-@Slf4j
-@RequiredArgsConstructor
 public class CaptchaServiceImpl implements ICaptchaService {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CaptchaProperties properties;
 
     private final CaptchaCache captchaCache;
 
     private final Captcha captcha;
+
+    public CaptchaServiceImpl(CaptchaProperties properties, CaptchaCache captchaCache, Captcha captcha) {
+        this.properties = properties;
+        this.captchaCache = captchaCache;
+        this.captcha = captcha;
+    }
 
     @Override
     public void generate(String uuid, OutputStream outputStream) {

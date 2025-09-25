@@ -4,7 +4,6 @@ import com.google.common.base.Splitter;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
 import io.github.linpeilie.utils.ArrayUtil;
-import lombok.SneakyThrows;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
@@ -32,22 +31,19 @@ public class StrArrayTypeHandler extends BaseTypeHandler<String[]> {
     }
 
     @Override
-    @SneakyThrows
-    public String[] getNullableResult(@Nonnull ResultSet rs, String columnName) {
+    public String[] getNullableResult(@Nonnull ResultSet rs, String columnName) throws SQLException {
         String reString = rs.getString(columnName);
         return toStrArray(reString);
     }
 
     @Override
-    @SneakyThrows
-    public String[] getNullableResult(@Nonnull ResultSet rs, int columnIndex) {
+    public String[] getNullableResult(@Nonnull ResultSet rs, int columnIndex) throws SQLException {
         String reString = rs.getString(columnIndex);
         return toStrArray(reString);
     }
 
     @Override
-    @SneakyThrows
-    public String[] getNullableResult(@Nonnull CallableStatement cs, int columnIndex) {
+    public String[] getNullableResult(@Nonnull CallableStatement cs, int columnIndex) throws SQLException {
         String reString = cs.getString(columnIndex);
         return toStrArray(reString);
     }

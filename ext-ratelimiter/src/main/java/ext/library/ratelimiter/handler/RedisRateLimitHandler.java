@@ -2,7 +2,6 @@ package ext.library.ratelimiter.handler;
 
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.redis.util.RedisUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -13,7 +12,6 @@ import java.util.Collections;
 /**
  * Redis 速率限制处理器
  */
-@Slf4j
 public class RedisRateLimitHandler implements IRateLimitHandler {
 
     @Override

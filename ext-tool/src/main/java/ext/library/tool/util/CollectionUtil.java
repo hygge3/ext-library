@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
-import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-@UtilityClass
 public class CollectionUtil {
     /**
      * 判断数组中是否包含元素
@@ -31,7 +29,7 @@ public class CollectionUtil {
      *
      * @return {@code true} if found, {@code false} else
      */
-    public <T> boolean contains(T[] array, final T element) {
+    public static <T> boolean contains(T[] array, final T element) {
         if (array == null) {
             return false;
         }
@@ -46,7 +44,7 @@ public class CollectionUtil {
      *
      * @return {@code true} if found, {@code false} otherwise
      */
-    public boolean contains(Iterator<?> iterator, Object element) {
+    public static boolean contains(Iterator<?> iterator, Object element) {
         if (iterator != null) {
             while (iterator.hasNext()) {
                 Object candidate = iterator.next();
@@ -67,7 +65,7 @@ public class CollectionUtil {
      *
      * @return {@code true} if found, {@code false} otherwise
      */
-    public boolean contains(Enumeration<?> enumeration, Object element) {
+    public static boolean contains(Enumeration<?> enumeration, Object element) {
         if (enumeration != null) {
             while (enumeration.hasMoreElements()) {
                 Object candidate = enumeration.nextElement();
@@ -88,7 +86,7 @@ public class CollectionUtil {
      *
      * @return 新数组
      */
-    public String[] concat(String[] one, String[] other) {
+    public static String[] concat(String[] one, String[] other) {
         return concat(one, other, String.class);
     }
 
@@ -102,7 +100,7 @@ public class CollectionUtil {
      * @return 新数组
      */
     @SuppressWarnings("unchecked")
-    public <T> T[] concat(T[] one, T[] other, Class<T> clazz) {
+    public static <T> T[] concat(T[] one, T[] other, Class<T> clazz) {
         T[] target = (T[]) Array.newInstance(clazz, one.length + other.length);
         System.arraycopy(one, 0, target, 0, one.length);
         System.arraycopy(other, 0, target, one.length, other.length);
@@ -118,7 +116,7 @@ public class CollectionUtil {
      * @return 集合
      */
     @SafeVarargs
-    public <E> Set<E> ofImmutableSet(E... es) {
+    public static <E> Set<E> ofImmutableSet(E... es) {
         return ImmutableSet.copyOf(es);
     }
 
@@ -131,7 +129,7 @@ public class CollectionUtil {
      * @return 集合
      */
     @SafeVarargs
-    public <E> List<E> ofImmutableList(E... es) {
+    public static <E> List<E> ofImmutableList(E... es) {
         return ImmutableList.copyOf(es);
     }
 
@@ -143,7 +141,7 @@ public class CollectionUtil {
      *
      * @return 集合
      */
-    public <E> List<E> toList(Iterable<E> elements) {
+    public static <E> List<E> toList(Iterable<E> elements) {
         Objects.requireNonNull(elements, "elements es is null.");
         if (elements instanceof Collection) {
             return new ArrayList<>((Collection<E>) elements);
@@ -166,7 +164,7 @@ public class CollectionUtil {
      * @return map 集合
      */
     @SuppressWarnings("unchecked")
-    public <K, V> Map<K, V> toMap(Object... keysValues) {
+    public static <K, V> Map<K, V> toMap(Object... keysValues) {
         int kvLength = keysValues.length;
         if (kvLength % 2 != 0) {
             throw new IllegalArgumentException("wrong number of arguments for met, keysValues length can not be odd");
@@ -189,7 +187,7 @@ public class CollectionUtil {
      *
      * @return List 分片
      */
-    public <T> List<List<T>> partition(List<T> list, int size) {
+    public static <T> List<List<T>> partition(List<T> list, int size) {
         Objects.requireNonNull(list, "List to partition must not null.");
         Preconditions.checkArgument(size > 0, "List to partition size must more then zero.");
         return Lists.partition(list, size);

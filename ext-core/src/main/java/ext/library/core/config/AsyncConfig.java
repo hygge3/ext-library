@@ -4,7 +4,8 @@ import ext.library.core.util.SpringUtil;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
@@ -18,9 +19,9 @@ import java.util.concurrent.Executor;
  * <p>
  * 如果未使用虚拟线程则生效
  */
-@Slf4j
 @AutoConfiguration
 public class AsyncConfig implements AsyncConfigurer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 自定义 @Async 注解使用系统线程池

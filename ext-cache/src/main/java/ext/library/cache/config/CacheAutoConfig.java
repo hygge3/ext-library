@@ -3,7 +3,8 @@ package ext.library.cache.config;
 import ext.library.cache.config.properties.CacheProperties;
 import ext.library.cache.core.CacheAspect;
 import ext.library.cache.strategy.CacheStrategy;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,10 +16,11 @@ import org.springframework.context.annotation.Bean;
  * @since 2025.08.29
  */
 
-@Slf4j
 @AutoConfiguration
 @EnableConfigurationProperties({CacheProperties.class})
 public class CacheAutoConfig {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnMissingBean

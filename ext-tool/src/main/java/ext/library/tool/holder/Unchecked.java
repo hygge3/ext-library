@@ -8,6 +8,7 @@ import ext.library.tool.holder.function.CheckedFunction;
 import ext.library.tool.holder.function.CheckedPredicate;
 import ext.library.tool.holder.function.CheckedRunnable;
 import ext.library.tool.holder.function.CheckedSupplier;
+
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -15,7 +16,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import lombok.experimental.UtilityClass;
 
 /**
  * Lambda 受检异常处理
@@ -25,7 +25,6 @@ import lombok.experimental.UtilityClass;
  * href=https://github.com/jOOQ/jOOL>jOOλ</a>
  * </p>
  */
-@UtilityClass
 public class Unchecked {
 
     /**
@@ -33,9 +32,10 @@ public class Unchecked {
      *
      * @param function CheckedFunction
      * @param <T>      泛型
+     *
      * @return Function
      */
-    public <T, R> Function<T, R> function(CheckedFunction<T, R> function) {
+    public static <T, R> Function<T, R> function(CheckedFunction<T, R> function) {
         Objects.requireNonNull(function);
         return t -> {
             try {
@@ -51,9 +51,10 @@ public class Unchecked {
      *
      * @param consumer CheckedConsumer
      * @param <T>      泛型
+     *
      * @return Consumer
      */
-    public <T> Consumer<T> consumer(CheckedConsumer<T> consumer) {
+    public static <T> Consumer<T> consumer(CheckedConsumer<T> consumer) {
         Objects.requireNonNull(consumer);
         return t -> {
             try {
@@ -69,9 +70,10 @@ public class Unchecked {
      *
      * @param supplier CheckedSupplier
      * @param <T>      泛型
+     *
      * @return Supplier
      */
-    public <T> Supplier<T> supplier(CheckedSupplier<T> supplier) {
+    public static <T> Supplier<T> supplier(CheckedSupplier<T> supplier) {
         Objects.requireNonNull(supplier);
         return () -> {
             try {
@@ -87,9 +89,10 @@ public class Unchecked {
      *
      * @param predicate CheckedPredicate
      * @param <T>       泛型
+     *
      * @return Supplier
      */
-    public <T> Predicate<T> predicate(CheckedPredicate<T> predicate) {
+    public static <T> Predicate<T> predicate(CheckedPredicate<T> predicate) {
         Objects.requireNonNull(predicate);
         return (t) -> {
             try {
@@ -104,9 +107,10 @@ public class Unchecked {
      * 构造受检的 runnable
      *
      * @param runnable CheckedRunnable
+     *
      * @return Runnable
      */
-    public Runnable runnable(CheckedRunnable runnable) {
+    public static Runnable runnable(CheckedRunnable runnable) {
         Objects.requireNonNull(runnable);
         return () -> {
             try {
@@ -122,9 +126,10 @@ public class Unchecked {
      *
      * @param callable CheckedCallable
      * @param <T>      泛型
+     *
      * @return Callable
      */
-    public <T> Callable<T> callable(CheckedCallable<T> callable) {
+    public static <T> Callable<T> callable(CheckedCallable<T> callable) {
         Objects.requireNonNull(callable);
         return () -> {
             try {
@@ -140,9 +145,10 @@ public class Unchecked {
      *
      * @param comparator CheckedComparator
      * @param <T>        泛型
+     *
      * @return Comparator
      */
-    public <T> Comparator<T> comparator(CheckedComparator<T> comparator) {
+    public static <T> Comparator<T> comparator(CheckedComparator<T> comparator) {
         Objects.requireNonNull(comparator);
         return (T o1, T o2) -> {
             try {

@@ -6,7 +6,6 @@ import com.google.common.net.HttpHeaders;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.GeneralTypeCastUtil;
 import ext.library.tool.util.ObjectUtil;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -31,14 +30,13 @@ import java.util.stream.Stream;
 /**
  * 客户端工具类
  */
-@UtilityClass
 public class ServletUtil {
 
     /**
      * 如果在前端和服务端中间还有一层 Node 服务 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息 便于获取真实 IP
      */
-    private final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
-    private final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
+    private static final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
+    private static final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP",
             "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
 
     // region 请求
@@ -46,56 +44,56 @@ public class ServletUtil {
     /**
      * 获取 request
      */
-    public HttpServletRequest getRequest() {
+    public static HttpServletRequest getRequest() {
         return getRequestAttributes().getRequest();
     }
 
     /**
      * 获取 response
      */
-    public HttpServletResponse getResponse() {
+    public static HttpServletResponse getResponse() {
         return getRequestAttributes().getResponse();
     }
 
     /**
      * 获取 String 参数
      */
-    public String getParameter(String name) {
+    public static String getParameter(String name) {
         return getRequest().getParameter(name);
     }
 
     /**
      * 获取 String 参数
      */
-    public String getParameter(String name, String defaultValue) {
+    public static String getParameter(String name, String defaultValue) {
         return GeneralTypeCastUtil.getAsString(getParameter(name), defaultValue);
     }
 
     /**
      * 获取 Integer 参数
      */
-    public Integer getParameterToInt(String name) {
+    public static Integer getParameterToInt(String name) {
         return GeneralTypeCastUtil.getAsInteger(getParameter(name));
     }
 
     /**
      * 获取 Integer 参数
      */
-    public Integer getParameterToInt(String name, Integer defaultValue) {
+    public static Integer getParameterToInt(String name, Integer defaultValue) {
         return GeneralTypeCastUtil.getAsInteger(getParameter(name), defaultValue);
     }
 
     /**
      * 获取 Boolean 参数
      */
-    public Boolean getParameterToBool(String name) {
+    public static Boolean getParameterToBool(String name) {
         return GeneralTypeCastUtil.getAsBoolean(getParameter(name));
     }
 
     /**
      * 获取 Boolean 参数
      */
-    public Boolean getParameterToBool(String name, Boolean defaultValue) {
+    public static Boolean getParameterToBool(String name, Boolean defaultValue) {
         return GeneralTypeCastUtil.getAsBoolean(getParameter(name), defaultValue);
     }
 
@@ -106,7 +104,7 @@ public class ServletUtil {
      *
      * @return Map
      */
-    public Map<String, String[]> getParams(ServletRequest request) {
+    public static Map<String, String[]> getParams(ServletRequest request) {
         final Map<String, String[]> map = request.getParameterMap();
         return Collections.unmodifiableMap(map);
     }
@@ -118,7 +116,7 @@ public class ServletUtil {
      *
      * @return Map
      */
-    public Map<String, String> getParamMap(ServletRequest request) {
+    public static Map<String, String> getParamMap(ServletRequest request) {
         Map<String, String[]> paramsMap = getParams(request);
         Map<String, String> params = Maps.newHashMapWithExpectedSize(paramsMap.size());
         for (Map.Entry<String, String[]> entry : paramsMap.entrySet()) {
@@ -130,16 +128,16 @@ public class ServletUtil {
     /**
      * 获取 session
      */
-    public HttpSession getSession() {
+    public static HttpSession getSession() {
         return getRequest().getSession();
     }
 
-    public ServletRequestAttributes getRequestAttributes() {
+    public static ServletRequestAttributes getRequestAttributes() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         return (ServletRequestAttributes) attributes;
     }
 
-    public void setRequestAttribute(String name, Object value) {
+    public static void setRequestAttribute(String name, Object value) {
         getRequest().setAttribute(name, value);
     }
 
@@ -150,7 +148,7 @@ public class ServletUtil {
      *
      * @return 属性的值，如果属性不存在，则返回 null
      */
-    public Object getRequestAttribute(String name) {
+    public static Object getRequestAttribute(String name) {
         return getRequest().getAttribute(name);
     }
 
@@ -159,15 +157,15 @@ public class ServletUtil {
      *
      * @param name 要移除的属性的名称。这是一个字符串值，用于唯一标识要移除的属性。
      */
-    public void removeRequestAttribute(String name) {
+    public static void removeRequestAttribute(String name) {
         getRequest().removeAttribute(name);
     }
 
-    public String getHeader(@Nonnull HttpServletRequest request, String name) {
+    public static String getHeader(@Nonnull HttpServletRequest request, String name) {
         return ObjectUtil.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
     }
 
-    public String getHeader(String name) {
+    public static String getHeader(String name) {
         return getHeader(getRequest(), name);
     }
 
@@ -177,15 +175,15 @@ public class ServletUtil {
      * @param name  名
      * @param value 值，可以是 String，Date，int
      */
-    public void setHeader(String name, String value) {
+    public static void setHeader(String name, String value) {
         getResponse().setHeader(name, value);
     }
 
-    public void addHeader(String name, String value) {
+    public static void addHeader(String name, String value) {
         getResponse().addHeader(name, value);
     }
 
-    public Map<String, String> getHeaders(@Nonnull HttpServletRequest request) {
+    public static Map<String, String> getHeaders(@Nonnull HttpServletRequest request) {
         Map<String, String> map = new LinkedCaseInsensitiveMap<>();
         Enumeration<String> enumeration = request.getHeaderNames();
         if (enumeration != null) {
@@ -203,7 +201,7 @@ public class ServletUtil {
      *
      * @return Cookie map
      */
-    public Map<String, Cookie> readCookieMap() {
+    public static Map<String, Cookie> readCookieMap() {
         final Cookie[] cookies = getRequest().getCookies();
         if (ObjectUtil.isEmpty(cookies)) {
             return new HashMap<>(0);
@@ -212,11 +210,11 @@ public class ServletUtil {
                 .collect(Collectors.toMap(Cookie::getName, Function.identity(), (key1, key2) -> key2));
     }
 
-    public Cookie getCookie(String name) {
+    public static Cookie getCookie(String name) {
         return readCookieMap().get(name);
     }
 
-    public String getCookieValue(String name) {
+    public static String getCookieValue(String name) {
         Cookie cookie = getCookie(name);
         return cookie != null ? cookie.getValue() : null;
     }
@@ -226,13 +224,13 @@ public class ServletUtil {
      *
      * @param key cookie key
      */
-    public void removeCookie(String key) {
+    public static void removeCookie(String key) {
         addCookie(key, null, 0);
     }
 
     // region ip 获取
 
-    public void addCookie(String name, String value, Integer maxAge) {
+    public static void addCookie(String name, String value, Integer maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(Symbol.SLASH);
         cookie.setMaxAge(maxAge);
@@ -245,21 +243,21 @@ public class ServletUtil {
      *
      * @return {@code String }
      */
-    public String getUA() {
+    public static String getUA() {
         return getHeader(HttpHeaders.USER_AGENT);
     }
 
     /**
      * 获取客户端 IP
      */
-    public String getIpAddr() {
+    public static String getIpAddr() {
         return getIpAddr(getRequest(), NODE_FORWARDED_IP);
     }
 
     /**
      * 获取客户端 IP
      */
-    public String getIpAddr(HttpServletRequest request) {
+    public static String getIpAddr(HttpServletRequest request) {
         return getIpAddr(request, NODE_FORWARDED_IP);
     }
 
@@ -268,7 +266,7 @@ public class ServletUtil {
      * <p>
      * 参考 huTool 稍微调整了下 headers 顺序
      */
-    public String getIpAddr(HttpServletRequest request, String... otherHeaderNames) {
+    public static String getIpAddr(HttpServletRequest request, String... otherHeaderNames) {
         return getClientIpByHeader(request, mergeClientIpHeaders(otherHeaderNames));
     }
 
@@ -287,7 +285,7 @@ public class ServletUtil {
      *
      * @since 4.4.1
      */
-    public String getClientIpByHeader(HttpServletRequest request, @Nonnull String... headerNames) {
+    public static String getClientIpByHeader(HttpServletRequest request, @Nonnull String... headerNames) {
         String ip;
         for (String header : headerNames) {
             ip = request.getHeader(header);
@@ -299,7 +297,7 @@ public class ServletUtil {
         return getMultistageReverseProxyIp(ip);
     }
 
-    private String[] mergeClientIpHeaders(String... otherHeaderNames) {
+    private static String[] mergeClientIpHeaders(String... otherHeaderNames) {
         if (ObjectUtils.isEmpty(otherHeaderNames)) {
             return CLIENT_IP_HEADERS;
         }
@@ -313,7 +311,7 @@ public class ServletUtil {
      *
      * @return 真实 ip
      */
-    private String getMultistageReverseProxyIp(String ip) {
+    private static String getMultistageReverseProxyIp(String ip) {
         if (null == ip || ip.indexOf(Symbol.COMMA) <= 0) {
             return ip;
         }
@@ -326,7 +324,7 @@ public class ServletUtil {
         return ip;
     }
 
-    private boolean checkNotUnknown(String checkString) {
+    private static boolean checkNotUnknown(String checkString) {
         return !"unknown".equalsIgnoreCase(checkString);
     }
 

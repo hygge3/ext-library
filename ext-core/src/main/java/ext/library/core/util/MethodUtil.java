@@ -1,7 +1,6 @@
 package ext.library.core.util;
 
 import ext.library.tool.holder.Lazy;
-import lombok.experimental.UtilityClass;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -21,10 +20,9 @@ import java.lang.reflect.Method;
  *
  * @since 2025.08.19
  */
-@UtilityClass
 public class MethodUtil extends org.springframework.util.ClassUtils {
 
-    private final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
+    private static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
     /**
      * 获取方法参数信息
@@ -34,7 +32,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {MethodParameter}
      */
-    public MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
+    public static MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(constructor, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
@@ -48,7 +46,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {MethodParameter}
      */
-    public MethodParameter getMethodParameter(Method method, int parameterIndex) {
+    public static MethodParameter getMethodParameter(Method method, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(method, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
@@ -63,7 +61,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public <A extends Annotation> A getAnnotation(@Nonnull Method method, Class<A> annotationType) {
+    public static <A extends Annotation> A getAnnotation(@Nonnull Method method, Class<A> annotationType) {
         Class<?> targetClass = method.getDeclaringClass();
         // The method may be on an interface, but we need attributes from the target
         // class.
@@ -90,7 +88,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public <A extends Annotation> A getAnnotation(@Nonnull HandlerMethod handlerMethod, Class<A> annotationType) {
+    public static <A extends Annotation> A getAnnotation(@Nonnull HandlerMethod handlerMethod, Class<A> annotationType) {
         // 先找方法，再找方法上的类
         A annotation = handlerMethod.getMethodAnnotation(annotationType);
         if (null != annotation) {

@@ -2,7 +2,6 @@ package ext.library.ratelimiter.handler;
 
 import com.google.common.util.concurrent.RateLimiter;
 import ext.library.ratelimiter.annotation.RateLimit;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 
@@ -16,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 2025.08.29
  */
-@Slf4j
 public class RateLimiterHandler implements IRateLimitHandler {
 
     /**

@@ -1,7 +1,6 @@
 package ext.library.tool.util;
 
 import ext.library.tool.core.Exceptions;
-import lombok.experimental.UtilityClass;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -13,10 +12,9 @@ import java.util.Enumeration;
 /**
  * INet 相关工具
  */
-@UtilityClass
 public class INetUtil {
 
-    public static final String LOCAL_HOST = "127.0.0.1";
+    private static final String LOCAL_HOST = "127.0.0.1";
 
     /**
      * 获取 服务器 hostname

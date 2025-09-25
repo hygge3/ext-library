@@ -1,20 +1,24 @@
 package ext.library.idempotent.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 幂等属性配置
  */
-@Setter
-@Getter
 @ConfigurationProperties(IdempotentProperties.PREFIX)
 public class IdempotentProperties {
 
     public static final String PREFIX = "ext.idempotent";
 
     private KeyStoreType keyStoreType = KeyStoreType.MEMORY;
+
+    public KeyStoreType getKeyStoreType() {
+        return keyStoreType;
+    }
+
+    public void setKeyStoreType(KeyStoreType keyStoreType) {
+        this.keyStoreType = keyStoreType;
+    }
 
     /**
      * 存储方式

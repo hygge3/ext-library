@@ -1,6 +1,5 @@
 package ext.library.redis.util;
 
-import lombok.experimental.UtilityClass;
 import org.springframework.data.redis.core.script.RedisScript;
 
 import java.time.Duration;
@@ -10,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式队列工具 轻量级队列 重量级数据量 请使用 MQ 要求 redis 5.X 以上
  */
-@UtilityClass
 public class QueueUtil {
 
     /**
@@ -19,7 +17,7 @@ public class QueueUtil {
      * @param queueName 队列名
      * @param data      数据
      */
-    public void producer(String queueName, String data) {
+    public static void producer(String queueName, String data) {
         RedisUtil.listOps().leftPush(queueName, data);
     }
 
@@ -28,21 +26,21 @@ public class QueueUtil {
      *
      * @param queueName 队列名
      */
-    public String consumer(String queueName) {
+    public static String consumer(String queueName) {
         return RedisUtil.listOps().rightPop(queueName);
     }
 
     /**
      * 通用删除队列数据 (不支持延迟队列)
      */
-    public void remove(String queueName, String data) {
+    public static void remove(String queueName, String data) {
         RedisUtil.listOps().remove(queueName, 0, data);
     }
 
     /**
      * 通用销毁队列 所有阻塞监听 报错 (不支持延迟队列)
      */
-    public void destroy(String queueName) {
+    public static void destroy(String queueName) {
         RedisUtil.getRedisTemplate().delete(queueName);
     }
 
@@ -53,7 +51,7 @@ public class QueueUtil {
      * @param data      数据
      * @param time      延迟时间
      */
-    public void delayedProducer(String queueName, String data, long time) {
+    public static void delayedProducer(String queueName, String data, long time) {
         long score = System.currentTimeMillis() / 1000 + time;
         RedisUtil.zSetOps().add(queueName, data, score);
     }
@@ -65,7 +63,7 @@ public class QueueUtil {
      * @param data      数据
      * @param time      延迟时间
      */
-    public void delayedProducer(String queueName, String data, Duration time) {
+    public static void delayedProducer(String queueName, String data, Duration time) {
         long score = time.getSeconds();
         RedisUtil.zSetOps().add(queueName, data, score);
     }
@@ -78,7 +76,7 @@ public class QueueUtil {
      * @param time      延迟时间
      * @param timeUnit  单位
      */
-    public void delayedProducer(String queueName, String data, long time, TimeUnit timeUnit) {
+    public static void delayedProducer(String queueName, String data, long time, TimeUnit timeUnit) {
         long seconds = timeUnit.toSeconds(time);
         delayedProducer(queueName, data, seconds);
     }
@@ -88,7 +86,7 @@ public class QueueUtil {
      *
      * @param queueName 队列名
      */
-    public String delayedConsumer(String queueName) {
+    public static String delayedConsumer(String queueName) {
         // language=redis
         String luaScript = """
                 -- KEYS[1] 延时队列的 key
@@ -118,7 +116,7 @@ public class QueueUtil {
     /**
      * 删除延迟队列数据
      */
-    public void delayedRemove(String queueName, String data) {
+    public static void delayedRemove(String queueName, String data) {
         RedisUtil.zSetOps().remove(queueName, data);
     }
 

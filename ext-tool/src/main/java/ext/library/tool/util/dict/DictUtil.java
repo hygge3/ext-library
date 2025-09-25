@@ -1,7 +1,8 @@
 package ext.library.tool.util.dict;
 
 import ext.library.tool.util.ReflectionUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.Nonnull;
@@ -15,8 +16,8 @@ import java.util.function.Function;
 /**
  * 字典工具
  */
-@Slf4j
 public class DictUtil {
+    private static final Logger log = LoggerFactory.getLogger(DictUtil.class);
 
     /**
      * 获取词典列表

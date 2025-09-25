@@ -1,23 +1,20 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.HexFormat;
 
-@UtilityClass
 public class HexUtil {
 
     /**
      * 字节流转成十六进制表示
      */
-    public String encode(byte[] bytes) {
+    public static String encode(byte[] bytes) {
         return HexFormat.of().formatHex(bytes);
     }
 
     /**
      * 十六进制字符串转成字节流
      */
-    public byte[] decode(String hex) {
+    public static byte[] decode(String hex) {
         return HexFormat.of().parseHex(hex);
     }
 
@@ -28,7 +25,7 @@ public class HexUtil {
      *
      * @return {@link String } 二进制字符串
      */
-    public String decToBin(Integer num) {
+    public static String decToBin(Integer num) {
         return Integer.toString(num, 2);
     }
 
@@ -40,7 +37,7 @@ public class HexUtil {
      *
      * @return {@link Integer } 十进制数字
      */
-    public Integer binToDec(String data) {
+    public static Integer binToDec(String data) {
         return Integer.parseInt(data, 2);
     }
 
@@ -51,7 +48,7 @@ public class HexUtil {
      *
      * @return {@link String } 八进制字符串
      */
-    public String decToOct(Integer num) {
+    public static String decToOct(Integer num) {
         return Integer.toString(num, 8);
     }
 
@@ -62,7 +59,7 @@ public class HexUtil {
      *
      * @return {@link Integer } 十进制数字
      */
-    public Integer octToDec(String data) {
+    public static Integer octToDec(String data) {
         return Integer.parseInt(data, 8);
     }
 
@@ -73,7 +70,7 @@ public class HexUtil {
      *
      * @return {@link String } 十六进制字符串
      */
-    public String decToHex(Integer num) {
+    public static String decToHex(Integer num) {
         return Integer.toString(num, 16);
     }
 
@@ -84,7 +81,7 @@ public class HexUtil {
      *
      * @return {@link Integer } 十进制数字
      */
-    public Integer hexToDec(String data) {
+    public static Integer hexToDec(String data) {
         return Integer.parseInt(data, 16);
     }
 

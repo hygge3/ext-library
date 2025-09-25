@@ -3,12 +3,10 @@ package ext.library.tool.biz.exception;
 
 import ext.library.tool.biz.response.ResponseCode;
 import ext.library.tool.util.StringUtil;
-import lombok.Getter;
 
 /**
  * 业务异常
  */
-@Getter
 public class BizException extends RuntimeException {
 
     private final Integer code;
@@ -56,4 +54,7 @@ public class BizException extends RuntimeException {
         this.code = BizCode.WARN.getCode();
     }
 
+    public Integer getCode() {
+        return code;
+    }
 }

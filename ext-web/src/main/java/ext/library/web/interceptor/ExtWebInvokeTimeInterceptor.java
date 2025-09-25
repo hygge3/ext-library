@@ -3,8 +3,8 @@ package ext.library.web.interceptor;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.ObjectUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,11 +18,9 @@ import java.util.Map;
 /**
  * web 的调用时间统计拦截器
  */
-@RequiredArgsConstructor
-@Slf4j
 public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
-
     private final static ThreadLocal<StopWatch> KEY_CACHE = new InheritableThreadLocal<>();
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,

@@ -6,8 +6,8 @@ import ext.library.tool.core.VirtualThreadPools;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -24,9 +24,8 @@ import static ext.library.websocket.constant.WebSocketConstants.WEB_SOCKET_TOPIC
 /**
  * 工具类
  */
-@Slf4j
-@UtilityClass
 public class WebSocketUtil {
+    private static final Logger log = LoggerFactory.getLogger(WebSocketUtil.class);
 
     /**
      * 向指定的 WebSocket 会话发送消息
@@ -34,7 +33,7 @@ public class WebSocketUtil {
      * @param sessionKey 要发送消息的用户 id
      * @param message    要发送的消息内容
      */
-    public void sendMessage(String sessionKey, String message) {
+    public static void sendMessage(String sessionKey, String message) {
         WebSocketSession session = WebSocketSessionHolder.getSessions(sessionKey);
         sendMessage(session, message);
     }
@@ -44,7 +43,7 @@ public class WebSocketUtil {
      *
      * @param consumer 处理 WebSocket 消息的消费者函数
      */
-    public void subscribeMessage(Consumer<WebSocketMessage> consumer) {
+    public static void subscribeMessage(Consumer<WebSocketMessage> consumer) {
         RedisUtil.subscribe(WEB_SOCKET_TOPIC, WebSocketMessage.class, consumer);
     }
 
@@ -53,7 +52,7 @@ public class WebSocketUtil {
      *
      * @param webSocketMessage 要发布的 WebSocket 消息对象
      */
-    public void publishMessage(@Nonnull WebSocketMessage webSocketMessage) {
+    public static void publishMessage(@Nonnull WebSocketMessage webSocketMessage) {
         List<String> unsentSessionKeys = new ArrayList<>();
         // 当前服务内 session，直接发送消息
         for (String sessionKey : webSocketMessage.getSessionKeys()) {
@@ -78,7 +77,7 @@ public class WebSocketUtil {
      *
      * @param message 要发布的消息内容
      */
-    public void publishAll(String message) {
+    public static void publishAll(String message) {
         WebSocketMessage broadcastMessage = new WebSocketMessage();
         broadcastMessage.setMessage(message);
         log.info("[⛓️] WebSocket 发送主题订阅消息，topic:{},message:{}", WEB_SOCKET_TOPIC, message);
@@ -90,7 +89,7 @@ public class WebSocketUtil {
      *
      * @param session 要发送 Pong 消息的 WebSocket 会话
      */
-    public void sendPongMessage(WebSocketSession session) {
+    public static void sendPongMessage(WebSocketSession session) {
         sendMessage(session, new PongMessage());
     }
 
@@ -100,7 +99,7 @@ public class WebSocketUtil {
      * @param session WebSocket 会话
      * @param message 要发送的文本消息内容
      */
-    public void sendMessage(WebSocketSession session, String message) {
+    public static void sendMessage(WebSocketSession session, String message) {
         sendMessage(session, new TextMessage(message));
     }
 
@@ -110,7 +109,7 @@ public class WebSocketUtil {
      * @param session WebSocket 会话
      * @param message 要发送的 WebSocket 消息对象
      */
-    private synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
+    private static synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
         VirtualThreadPools.execute("WebSocket Send", () -> {
             if (session == null || !session.isOpen()) {
                 log.warn("[⛓️][send] session 会话已经关闭");

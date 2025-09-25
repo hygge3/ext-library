@@ -8,11 +8,8 @@ import ext.library.security.repository.SecurityRepository;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,15 +26,10 @@ import java.util.UUID;
  * 认证 session 信息
  * </p>
  */
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Slf4j
 public class SecuritySession implements Serializable {
-
     @Serial
     private static final long serialVersionUID = 1L;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 挂载数据
      */
@@ -82,6 +74,20 @@ public class SecuritySession implements Serializable {
         if (isCreate) {
             this.createdSecuritySession();
         }
+    }
+
+    public SecuritySession(String securitySessionId, String loginId, Long timeout, SecurityToken currentSecurityToken, String createTime, String updateTime, List<SecurityToken> tokenInfoList, Long version) {
+        this.securitySessionId = securitySessionId;
+        this.loginId = loginId;
+        this.timeout = timeout;
+        this.currentSecurityToken = currentSecurityToken;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+        this.tokenInfoList = tokenInfoList;
+        this.version = version;
+    }
+
+    public SecuritySession() {
     }
 
     /**
@@ -311,4 +317,71 @@ public class SecuritySession implements Serializable {
         });
     }
 
+    public Map<String, Object> getMountData() {
+        return mountData;
+    }
+
+    public String getSecuritySessionId() {
+        return securitySessionId;
+    }
+
+    public void setSecuritySessionId(String securitySessionId) {
+        this.securitySessionId = securitySessionId;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+    public SecurityToken getCurrentSecurityToken() {
+        return currentSecurityToken;
+    }
+
+    public void setCurrentSecurityToken(SecurityToken currentSecurityToken) {
+        this.currentSecurityToken = currentSecurityToken;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public List<SecurityToken> getTokenInfoList() {
+        return tokenInfoList;
+    }
+
+    public void setTokenInfoList(List<SecurityToken> tokenInfoList) {
+        this.tokenInfoList = tokenInfoList;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }

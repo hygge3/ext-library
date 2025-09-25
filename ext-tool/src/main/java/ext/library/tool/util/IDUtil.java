@@ -3,13 +3,11 @@ package ext.library.tool.util;
 import com.google.common.base.Preconditions;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.domain.ObjectId;
-import lombok.experimental.UtilityClass;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
 
-@UtilityClass
 public class IDUtil {
 
     /**
@@ -18,7 +16,7 @@ public class IDUtil {
      *
      * @return {@code String }
      */
-    public String getUUID() {
+    public static String getUUID() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
@@ -59,7 +57,7 @@ public class IDUtil {
      *
      * @return {@code String }
      */
-    public String getULID() {
+    public static String getULID() {
         return Holder.ULID.nextULID();
     }
 
@@ -69,7 +67,7 @@ public class IDUtil {
      *
      * @return {@code String }
      */
-    public String getObjectId() {
+    public static String getObjectId() {
         return ObjectId.get().toHexString();
     }
 
@@ -79,8 +77,8 @@ public class IDUtil {
      *
      * @return {@code String }
      */
-    public String getSnowflakeId() {
-        return String.valueOf(Holder.SNOWFLAKE_ID.nextId());
+    public static String getSnowflakeId() {
+        return java.lang.String.valueOf(Holder.SNOWFLAKE_ID.nextId());
     }
 
     /**
@@ -90,7 +88,7 @@ public class IDUtil {
      *
      * @return {@code String }
      */
-    public String sqidsEncode(List<Long> numbers) {
+    public static String sqidsEncode(List<Long> numbers) {
         return Holder.SQIDS.encode(numbers);
     }
 
@@ -101,7 +99,7 @@ public class IDUtil {
      *
      * @return {@code List<Long> }
      */
-    public List<Long> sqidsDecode(String sqids) {
+    public static List<Long> sqidsDecode(String sqids) {
         return Holder.SQIDS.decode(sqids);
     }
 
@@ -112,7 +110,7 @@ public class IDUtil {
      *
      * @return 随机数
      */
-    public String random(int count) {
+    public static String random(int count) {
         if (count == 0) {
             return "";
         }

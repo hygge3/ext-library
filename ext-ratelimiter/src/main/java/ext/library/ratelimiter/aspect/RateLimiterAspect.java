@@ -4,7 +4,6 @@ import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
-import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 速率限制拦截切面处理类
  */
 @Aspect
-@RequiredArgsConstructor
 public class RateLimiterAspect {
 
     /**
@@ -28,6 +26,10 @@ public class RateLimiterAspect {
     private static final Map<String, RateLimit> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
 
     private final IRateLimitHandler rateLimitHandler;
+
+    public RateLimiterAspect(IRateLimitHandler rateLimitHandler) {
+        this.rateLimitHandler = rateLimitHandler;
+    }
 
     /**
      * 限流注解切面

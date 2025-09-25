@@ -7,8 +7,6 @@ import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.util.DateUtil;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,8 +19,6 @@ import java.util.Objects;
  * 登录参数
  * </p>
  */
-@Getter
-@Setter
 public class SecurityLoginParams implements Serializable {
 
     @Serial
@@ -69,30 +65,6 @@ public class SecurityLoginParams implements Serializable {
      */
     public SecurityLoginParams setDeviceType(String deviceType) {
         this.deviceType = deviceType;
-        return this;
-    }
-
-    /**
-     * 设置超时时间
-     *
-     * @param timeout 超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setTimeout(Long timeout) {
-        this.timeout = timeout;
-        return this;
-    }
-
-    /**
-     * 设置活跃超时时间
-     *
-     * @param activityTimeout 活跃超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
-        this.activityTimeout = activityTimeout;
         return this;
     }
 
@@ -171,17 +143,16 @@ public class SecurityLoginParams implements Serializable {
 
     public SecurityToken convert(String loginId) {
         SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
-        SecurityToken securityToken = SecurityToken.builder()
-                .token(Holder.ULID.nextULID())
-                .loginId(loginId)
-                .deviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN))
-                .timeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout())
-                .activityTime(DateUtil.format(LocalDateTime.now()))
-                .activityTimeout(Objects.isNull(this.getActivityTimeout()) ? properties.getActivityTimeout()
-                        : this.getActivityTimeout())
-                .state(SecurityConstant.TOKEN_STATE_NORMAL)
-                .createTime(DateUtil.format(LocalDateTime.now()))
-                .build();
+        SecurityToken securityToken = new SecurityToken();
+        securityToken.setToken(Holder.ULID.nextULID());
+        securityToken.setLoginId(loginId);
+        securityToken.setDeviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN));
+        securityToken.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
+        securityToken.setActivityTime(DateUtil.format(LocalDateTime.now()));
+        securityToken.setActivityTimeout(Objects.isNull(this.getActivityTimeout()) ? properties.getActivityTimeout() : this.getActivityTimeout());
+        securityToken.setState(SecurityConstant.TOKEN_STATE_NORMAL);
+        securityToken.setCreateTime(DateUtil.format(LocalDateTime.now()));
+
         // 设置 token 挂载数据
         securityToken.getTokenMountData().putAll(this.getTokenMountData());
         return securityToken;
@@ -200,4 +171,43 @@ public class SecurityLoginParams implements Serializable {
         return session;
     }
 
+    public Map<String, Object> getMountData() {
+        return mountData;
+    }
+
+    public Map<String, Object> getTokenMountData() {
+        return tokenMountData;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * 设置超时时间
+     *
+     * @param timeout 超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setTimeout(Long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    public Long getActivityTimeout() {
+        return activityTimeout;
+    }
+
+    /**
+     * 设置活跃超时时间
+     *
+     * @param activityTimeout 活跃超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
+        this.activityTimeout = activityTimeout;
+        return this;
+    }
 }

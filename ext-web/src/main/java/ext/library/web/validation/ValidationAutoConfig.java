@@ -1,7 +1,8 @@
 package ext.library.web.validation;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.HibernateValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -22,11 +23,11 @@ import java.util.Properties;
 /**
  * Validation 自动配置类，扩展支持使用 {} 占位替换默认消息
  */
-@Slf4j
 @AutoConfiguration(before = ValidationAutoConfiguration.class)
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
 public class ValidationAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

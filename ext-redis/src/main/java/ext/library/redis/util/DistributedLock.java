@@ -4,9 +4,9 @@ import ext.library.tool.constant.Symbol;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.core.Threads;
 import ext.library.tool.util.INetUtil;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
@@ -20,9 +20,7 @@ import java.util.concurrent.locks.Lock;
 /**
  * 基于 Redis 的分布式锁 (线程内可重入)
  */
-@Slf4j
 public class DistributedLock implements Lock {
-
     /** 默认的锁超时时间 */
     private final static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30L);
     /** 锁 key 前缀 */
@@ -39,23 +37,18 @@ public class DistributedLock implements Lock {
     private static AtomicLong SERIAL_NUM;
     /** 最大序列值 */
     private static long MAX_SERIAL;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     /** 锁 Key */
-    @Getter
     private final String lockKey;
     /** 锁超时时间 (单位毫秒) */
-    @Getter
     private final Duration timeout;
     /** 等待锁时，自旋尝试的周期 (单位毫秒) */
-    @Getter
     private final Duration loopInterval;
     /** 主机 + 线程 id */
-    @Getter
     private final String hostThreadId;
     /** 锁定值 */
-    @Getter
     private final String lockValue;
     /** 是否重入 */
-    @Getter
     private boolean reentrant = false;
     /** 是否持有锁 */
     private boolean locked = false;
@@ -289,5 +282,29 @@ public class DistributedLock implements Lock {
     @NonNull
     public Condition newCondition() {
         throw new UnsupportedOperationException();
+    }
+
+    public String getLockKey() {
+        return lockKey;
+    }
+
+    public Duration getTimeout() {
+        return timeout;
+    }
+
+    public Duration getLoopInterval() {
+        return loopInterval;
+    }
+
+    public String getHostThreadId() {
+        return hostThreadId;
+    }
+
+    public String getLockValue() {
+        return lockValue;
+    }
+
+    public boolean isReentrant() {
+        return reentrant;
     }
 }

@@ -2,17 +2,14 @@ package ext.library.tool.domain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Sqids is designed to generate short YouTube-looking IDs from numbers.
  * <p>
- * This is the Java implementation of https://github.com/sqids/sqids-spec.
+ * This is the Java implementation of <a href="https://github.com/sqids/sqids-spec">sqids</a>.
  * <p>
  * This implementation is immutable and thread-safe, no lock is necessary.
  */
@@ -283,7 +280,7 @@ public final class Sqids {
          * <p>
          * Note: This is a Immutable Set.
          */
-        public static final Set<String> DEFAULT_BLOCK_LIST = Collections.unmodifiableSet(Stream.of(
+        public static final Set<String> DEFAULT_BLOCK_LIST = Set.of(
                 "1d10t",
                 "1d1ot",
                 "1di0t",
@@ -842,7 +839,7 @@ public final class Sqids {
                 "zocc01a",
                 "zocc0la",
                 "zocco1a",
-                "zoccola").collect(Collectors.toSet()));
+                "zoccola");
 
         private String alphabet = DEFAULT_ALPHABET;
         private int minLength = DEFAULT_MIN_LENGTH;
@@ -883,7 +880,7 @@ public final class Sqids {
          */
         public Builder blockList(final Set<String> blockList) {
             if (blockList != null) {
-                this.blockList = Collections.unmodifiableSet(new HashSet<>(blockList));
+                this.blockList = Set.copyOf(blockList);
             }
             return this;
         }

@@ -1,7 +1,5 @@
 package ext.library.websocket.holder;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
@@ -11,10 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * WebSocketSession 用于保存当前所有在线的会话信息
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WebSocketSessionHolder {
 
     private static final Map<String, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
+
+    private WebSocketSessionHolder() {
+    }
 
     /**
      * 将 WebSocket 会话添加到用户会话 Map 中

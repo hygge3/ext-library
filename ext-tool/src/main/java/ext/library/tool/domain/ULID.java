@@ -1,6 +1,7 @@
 package ext.library.tool.domain;
 
 import ext.library.tool.constant.Holder;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -274,6 +275,7 @@ public class ULID {
         }
 
         @Override
+        @NonNull
         public String toString() {
             char[] buffer = new char[26];
 

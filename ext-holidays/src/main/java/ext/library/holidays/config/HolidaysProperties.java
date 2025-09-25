@@ -1,7 +1,5 @@
 package ext.library.holidays.config;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -10,8 +8,6 @@ import java.util.List;
 /**
  * Holidays 配置类
  */
-@Getter
-@Setter
 @ConfigurationProperties(HolidaysProperties.PREFIX)
 public class HolidaysProperties {
 
@@ -22,8 +18,14 @@ public class HolidaysProperties {
      */
     private List<ExtData> extData = new ArrayList<>();
 
-    @Getter
-    @Setter
+    public List<ExtData> getExtData() {
+        return extData;
+    }
+
+    public void setExtData(List<ExtData> extData) {
+        this.extData = extData;
+    }
+
     public static class ExtData {
 
         /**
@@ -36,6 +38,21 @@ public class HolidaysProperties {
          */
         private String dataPath;
 
+        public Integer getYear() {
+            return year;
+        }
+
+        public void setYear(Integer year) {
+            this.year = year;
+        }
+
+        public String getDataPath() {
+            return dataPath;
+        }
+
+        public void setDataPath(String dataPath) {
+            this.dataPath = dataPath;
+        }
     }
 
 }

@@ -6,7 +6,8 @@ import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.IRedisPrefixConverter;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,10 +23,10 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 /**
  * Redis 自动配置类
  */
-@Slf4j
 @AutoConfiguration(before = RedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)

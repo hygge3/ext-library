@@ -3,8 +3,8 @@ package ext.library.mail.sender;
 import ext.library.mail.event.MailSendEvent;
 import ext.library.mail.model.MailDetails;
 import ext.library.mail.model.MailSendInfo;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,12 +20,10 @@ import java.time.LocalDateTime;
 /**
  * 邮件发送器实现
  */
-@Slf4j
-@RequiredArgsConstructor
 public class MailSenderImpl implements MailSender {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final JavaMailSender mailSender;
-
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -33,6 +31,11 @@ public class MailSenderImpl implements MailSender {
      */
     @Value("${spring.mail.username}")
     private String defaultFrom;
+
+    public MailSenderImpl(JavaMailSender mailSender, ApplicationEventPublisher eventPublisher) {
+        this.mailSender = mailSender;
+        this.eventPublisher = eventPublisher;
+    }
 
     /**
      * 发送邮件

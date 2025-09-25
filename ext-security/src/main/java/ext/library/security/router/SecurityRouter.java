@@ -8,7 +8,8 @@ import ext.library.security.exception.ForbiddenException;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.util.ClassUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -24,8 +25,8 @@ import java.util.function.BooleanSupplier;
  * 路由方法
  * </p>
  */
-@Slf4j
 public class SecurityRouter {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 忽略路由匹配列表

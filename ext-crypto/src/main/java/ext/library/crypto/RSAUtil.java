@@ -2,8 +2,8 @@ package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.Base64Util;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -22,26 +22,22 @@ import java.security.spec.X509EncodedKeySpec;
 /**
  * RSA 加解密
  */
-@Slf4j
-@UtilityClass
 public class RSAUtil {
+    private static final Logger log = LoggerFactory.getLogger(RSAUtil.class);
 
     private static final String ALGO = "RSA";
-
-    /**
-     * 标准签名算法 RSA2
-     */
-    private final String SIGN_ALGO = "SHA256withRSA";
-
     /**
      * RSA 最大加密明文大小
      */
     private static final int MAX_ENCRYPT_BLOCK = 117;
-
     /**
      * RSA 最大解密密文大小
      */
     private static final int MAX_DECRYPT_BLOCK = 128;
+    /**
+     * 标准签名算法 RSA2
+     */
+    private static final String SIGN_ALGO = "SHA256withRSA";
 
     /**
      * 生成密钥对
@@ -49,7 +45,7 @@ public class RSAUtil {
      * @return {@link KeyPair } 密钥对
      *
      */
-    public KeyPair genKeyPair() {
+    public static KeyPair genKeyPair() {
         KeyPairGenerator generator;
         try {
             generator = KeyPairGenerator.getInstance(ALGO);
@@ -69,7 +65,7 @@ public class RSAUtil {
      * @return {@link PublicKey } 公钥
      *
      */
-    private PublicKey castPublicKey(String publicKey) {
+    private static PublicKey castPublicKey(String publicKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
             byte[] decodedKey = Base64Util.decodeUrlSafe(publicKey.getBytes());
@@ -88,7 +84,7 @@ public class RSAUtil {
      *
      * @return {@link PrivateKey } 私钥
      */
-    private PrivateKey castPrivateKey(String privateKey) {
+    private static PrivateKey castPrivateKey(String privateKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
             byte[] decodedKey = Base64Util.decodeUrlSafe(privateKey.getBytes());
@@ -109,7 +105,7 @@ public class RSAUtil {
      * @return {@link String } 密文
      *
      */
-    public String encrypt(String publicKey, String plainText) {
+    public static String encrypt(String publicKey, String plainText) {
         try {
             Cipher cipher = Cipher.getInstance(ALGO);
             cipher.init(Cipher.ENCRYPT_MODE, castPublicKey(publicKey));
@@ -149,7 +145,7 @@ public class RSAUtil {
      * @return {@link String } 明文
      *
      */
-    public String decrypt(String privateKey, String cipherText) {
+    public static String decrypt(String privateKey, String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(ALGO);
             cipher.init(Cipher.DECRYPT_MODE, castPrivateKey(privateKey));
@@ -188,7 +184,7 @@ public class RSAUtil {
      * @return {@link String } 签名
      *
      */
-    public String sign(String privateKey, String plainText) {
+    public static String sign(String privateKey, String plainText) {
         try {
             byte[] keyBytes = castPrivateKey(privateKey).getEncoded();
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
@@ -213,7 +209,7 @@ public class RSAUtil {
      *
      * @return boolean 通过验证
      */
-    public boolean verify(String publicKey, String plainText, String sign) {
+    public static boolean verify(String publicKey, String plainText, String sign) {
         try {
             byte[] keyBytes = castPublicKey(publicKey).getEncoded();
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);

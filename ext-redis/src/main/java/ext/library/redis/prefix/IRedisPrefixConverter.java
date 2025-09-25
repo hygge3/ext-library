@@ -11,8 +11,7 @@ import java.nio.charset.StandardCharsets;
  * redis key 前缀生成器
  */
 public interface IRedisPrefixConverter {
-
-    Logger LOGGER = LoggerFactory.getLogger(IRedisPrefixConverter.class);
+    Logger log = LoggerFactory.getLogger(IRedisPrefixConverter.class);
 
     /**
      * 生成前缀
@@ -41,7 +40,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if (StringUtil.isBlank(prefix)) {
-            LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            log.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);
@@ -66,7 +65,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if (StringUtil.isBlank(prefix)) {
-            LOGGER.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            log.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);

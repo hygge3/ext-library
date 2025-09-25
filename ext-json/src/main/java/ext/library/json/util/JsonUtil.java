@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.MapType;
-import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
+import ext.library.tool.core.Exceptions;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -23,7 +21,6 @@ import java.util.Objects;
 /**
  * JSON 工具类
  */
-@UtilityClass
 public class JsonUtil {
 
     // region java 类型转换获取
@@ -35,7 +32,7 @@ public class JsonUtil {
      *
      * @return MapType
      */
-    public JavaType getType(Class<?> clazz) {
+    public static JavaType getType(Class<?> clazz) {
         return CustomizeMapper.MAPPER.getTypeFactory().constructType(clazz);
     }
 
@@ -46,7 +43,7 @@ public class JsonUtil {
      *
      * @return MapType
      */
-    public MapType getMapType(Class<?> valueClass) {
+    public static MapType getMapType(Class<?> valueClass) {
         return getMapType(String.class, valueClass);
     }
 
@@ -58,7 +55,7 @@ public class JsonUtil {
      *
      * @return MapType
      */
-    public MapType getMapType(Class<?> keyClass, Class<?> valueClass) {
+    public static MapType getMapType(Class<?> keyClass, Class<?> valueClass) {
         return CustomizeMapper.MAPPER.getTypeFactory().constructMapType(Map.class, keyClass, valueClass);
     }
 
@@ -69,7 +66,7 @@ public class JsonUtil {
      *
      * @return CollectionLikeType
      */
-    public CollectionLikeType getListType(Class<?> elementClass) {
+    public static CollectionLikeType getListType(Class<?> elementClass) {
         return CustomizeMapper.MAPPER.getTypeFactory().constructCollectionLikeType(List.class, elementClass);
     }
 
@@ -85,7 +82,7 @@ public class JsonUtil {
      *
      * @return JavaType
      */
-    public JavaType getParametricType(Class<?> parametrized, Class<?>... parameterClasses) {
+    public static JavaType getParametricType(Class<?> parametrized, Class<?>... parameterClasses) {
         return CustomizeMapper.MAPPER.getTypeFactory().constructParametricType(parametrized, parameterClasses);
     }
 
@@ -101,7 +98,7 @@ public class JsonUtil {
      *
      * @return JavaType
      */
-    public JavaType getParametricType(Class<?> parametrized, JavaType... parameterTypes) {
+    public static JavaType getParametricType(Class<?> parametrized, JavaType... parameterTypes) {
         return CustomizeMapper.MAPPER.getTypeFactory().constructParametricType(parametrized, parameterTypes);
     }
 
@@ -116,8 +113,7 @@ public class JsonUtil {
      *
      * @return {@code String } json 字符串
      */
-    @SneakyThrows(JsonProcessingException.class)
-    public String toJson(@Nullable Object obj) {
+    public static String toJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "";
         }
@@ -127,7 +123,11 @@ public class JsonUtil {
         if (obj instanceof BigDecimal bd) {
             return bd.toPlainString();
         }
-        return CustomizeMapper.MAPPER.writeValueAsString(obj);
+        try {
+            return CustomizeMapper.MAPPER.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -137,8 +137,7 @@ public class JsonUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows(JsonProcessingException.class)
-    public String toPrettyJson(@Nullable Object obj) {
+    public static String toPrettyJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "";
         }
@@ -148,7 +147,11 @@ public class JsonUtil {
         if (obj instanceof BigDecimal bd) {
             return bd.toPlainString();
         }
-        return CustomizeMapper.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        try {
+            return CustomizeMapper.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -158,8 +161,7 @@ public class JsonUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows(JsonProcessingException.class)
-    public byte[] toJsonAsBytes(@Nullable Object obj) {
+    public static byte[] toJsonAsBytes(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
             return "".getBytes();
         }
@@ -169,48 +171,16 @@ public class JsonUtil {
         if (obj instanceof BigDecimal bd) {
             return bd.toPlainString().getBytes();
         }
-        return CustomizeMapper.MAPPER.writeValueAsBytes(obj);
+        try {
+            return CustomizeMapper.MAPPER.writeValueAsBytes(obj);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     // endregion
 
     // region json 序列化为 javaBean
-
-    /**
-     * 可强制类型转换
-     *
-     * @param obj   obj
-     * @param clazz 类对象
-     *
-     * @return boolean
-     */
-    private boolean isAssignable(Object obj, Class<?> clazz) {
-        return clazz.isAssignableFrom(obj.getClass());
-    }
-
-    /**
-     * 可强制类型转换
-     *
-     * @param obj      obj
-     * @param javaType Java 类型
-     *
-     * @return boolean
-     */
-    private boolean isAssignable(Object obj, JavaType javaType) {
-        return javaType.hasRawClass(obj.getClass());
-    }
-
-    /**
-     * 可强制类型转换
-     *
-     * @param obj           obj
-     * @param typeReference 类型
-     *
-     * @return boolean
-     */
-    private boolean isAssignable(Object obj, TypeReference<?> typeReference) {
-        return typeReference.getClass().isAssignableFrom(obj.getClass());
-    }
 
     /**
      * 将 json 反序列化成对象
@@ -221,13 +191,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
     @SuppressWarnings("unchecked")
-    public <T> T readObj(String json, Class<T> valueType) {
+    public static <T> T readObj(String json, Class<T> valueType) {
         if (isAssignable(json, valueType)) {
             return (T) json;
         }
-        return CustomizeMapper.MAPPER.readValue(json, valueType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(json, valueType);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -239,12 +212,15 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({IOException.class})
-    public <T> T readObj(byte[] content, Class<T> valueType) {
+    public static <T> T readObj(byte[] content, Class<T> valueType) {
         if (isAssignable(content, valueType)) {
             return (T) content;
         }
-        return CustomizeMapper.MAPPER.readValue(content, valueType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, valueType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -256,13 +232,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({IOException.class})
     @SuppressWarnings("unchecked")
-    public <T> T readObj(InputStream in, Class<T> valueType) {
+    public static <T> T readObj(InputStream in, Class<T> valueType) {
         if (isAssignable(in, valueType)) {
             return (T) in;
         }
-        return CustomizeMapper.MAPPER.readValue(in, valueType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(in, valueType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -274,13 +253,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({IOException.class})
     @SuppressWarnings("unchecked")
-    public <T> T readObj(Reader reader, Class<T> valueType) {
+    public static <T> T readObj(Reader reader, Class<T> valueType) {
         if (isAssignable(reader, valueType)) {
             return (T) reader;
         }
-        return CustomizeMapper.MAPPER.readValue(reader, valueType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(reader, valueType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -292,13 +274,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
     @SuppressWarnings("unchecked")
-    public <T> T readObj(String json, JavaType javaType) {
+    public static <T> T readObj(String json, JavaType javaType) {
         if (isAssignable(json, javaType)) {
             return (T) json;
         }
-        return CustomizeMapper.MAPPER.readValue(json, javaType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(json, javaType);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -310,12 +295,15 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows(IOException.class)
-    public <T> T readObj(byte[] content, JavaType javaType) {
+    public static <T> T readObj(byte[] content, JavaType javaType) {
         if (isAssignable(content, javaType)) {
             return (T) content;
         }
-        return CustomizeMapper.MAPPER.readValue(content, javaType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, javaType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -327,13 +315,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows(IOException.class)
     @SuppressWarnings("unchecked")
-    public <T> T readObj(InputStream in, JavaType javaType) {
+    public static <T> T readObj(InputStream in, JavaType javaType) {
         if (isAssignable(in, javaType)) {
             return (T) in;
         }
-        return CustomizeMapper.MAPPER.readValue(in, javaType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(in, javaType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -345,13 +336,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows(IOException.class)
     @SuppressWarnings("unchecked")
-    public <T> T readObj(Reader reader, JavaType javaType) {
+    public static <T> T readObj(Reader reader, JavaType javaType) {
         if (isAssignable(reader, javaType)) {
             return (T) reader;
         }
-        return CustomizeMapper.MAPPER.readValue(reader, javaType);
+        try {
+            return CustomizeMapper.MAPPER.readValue(reader, javaType);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -363,13 +357,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({JsonMappingException.class, JsonProcessingException.class})
     @SuppressWarnings("unchecked")
-    public <T> T readObj(String json, TypeReference<T> typeReference) {
+    public static <T> T readObj(String json, TypeReference<T> typeReference) {
         if (isAssignable(json, typeReference)) {
             return (T) json;
         }
-        return CustomizeMapper.MAPPER.readValue(json, typeReference);
+        try {
+            return CustomizeMapper.MAPPER.readValue(json, typeReference);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -381,12 +378,15 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows({IOException.class})
-    public <T> T readObj(byte[] content, TypeReference<T> typeReference) {
+    public static <T> T readObj(byte[] content, TypeReference<T> typeReference) {
         if (isAssignable(content, typeReference)) {
             return (T) content;
         }
-        return CustomizeMapper.MAPPER.readValue(content, typeReference);
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, typeReference);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -398,13 +398,16 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows(IOException.class)
     @SuppressWarnings("unchecked")
-    public <T> T readObj(InputStream in, TypeReference<T> typeReference) {
+    public static <T> T readObj(InputStream in, TypeReference<T> typeReference) {
         if (isAssignable(in, typeReference)) {
             return (T) in;
         }
-        return CustomizeMapper.MAPPER.readValue(in, typeReference);
+        try {
+            return CustomizeMapper.MAPPER.readValue(in, typeReference);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -416,18 +419,17 @@ public class JsonUtil {
      *
      * @return Bean
      */
-    @SneakyThrows(IOException.class)
     @SuppressWarnings("unchecked")
-    public <T> T readObj(Reader reader, TypeReference<T> typeReference) {
+    public static <T> T readObj(Reader reader, TypeReference<T> typeReference) {
         if (isAssignable(reader, typeReference)) {
             return (T) reader;
         }
-        return CustomizeMapper.MAPPER.readValue(reader, typeReference);
+        try {
+            return CustomizeMapper.MAPPER.readValue(reader, typeReference);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
-
-    // endregion
-
-    // region json 序列化为集合
 
     /**
      * 将 json 反序列化成集合
@@ -438,7 +440,7 @@ public class JsonUtil {
      *
      * @return {@link List}<{@link T}>
      */
-    public <T> List<T> readList(String json, Class<T> elementClass) {
+    public static <T> List<T> readList(String json, Class<T> elementClass) {
         return readObj(json, getListType(elementClass));
     }
 
@@ -451,9 +453,12 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <T> List<T> readList(byte[] content, Class<T> elementClass) {
-        return CustomizeMapper.MAPPER.readValue(content, getListType(elementClass));
+    public static <T> List<T> readList(byte[] content, Class<T> elementClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, getListType(elementClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -465,10 +470,17 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <T> List<T> readList(InputStream content, Class<T> elementClass) {
-        return CustomizeMapper.MAPPER.readValue(content, getListType(elementClass));
+    public static <T> List<T> readList(InputStream content, Class<T> elementClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, getListType(elementClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
+
+    // endregion
+
+    // region json 序列化为集合
 
     /**
      * 读取集合
@@ -479,14 +491,13 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <T> List<T> readList(Reader reader, Class<T> elementClass) {
-        return CustomizeMapper.MAPPER.readValue(reader, getListType(elementClass));
+    public static <T> List<T> readList(Reader reader, Class<T> elementClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(reader, getListType(elementClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
-
-    // endregion
-
-    // region json 序列化为 Map 集合
 
     /**
      * 将 json 反序列化成 Map 集合
@@ -495,7 +506,7 @@ public class JsonUtil {
      *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public Map<String, Object> readMap(String json) {
+    public static Map<String, Object> readMap(String json) {
         return readMap(json, String.class, Object.class);
     }
 
@@ -506,7 +517,7 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public Map<String, Object> readMap(byte[] content) {
+    public static Map<String, Object> readMap(byte[] content) {
         return readMap(content, Object.class);
     }
 
@@ -517,9 +528,13 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public Map<String, Object> readMap(InputStream content) {
+    public static Map<String, Object> readMap(InputStream content) {
         return readMap(content, Object.class);
     }
+
+    // endregion
+
+    // region json 序列化为 Map 集合
 
     /**
      * 读取集合
@@ -528,7 +543,7 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public Map<String, Object> readMap(Reader reader) {
+    public static Map<String, Object> readMap(Reader reader) {
         return readMap(reader, Object.class);
     }
 
@@ -541,7 +556,7 @@ public class JsonUtil {
      *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public <V> Map<String, V> readMap(String json, Class<?> valueClass) {
+    public static <V> Map<String, V> readMap(String json, Class<?> valueClass) {
         return readMap(json, String.class, valueClass);
     }
 
@@ -554,7 +569,7 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public <V> Map<String, V> readMap(byte[] content, Class<?> valueClass) {
+    public static <V> Map<String, V> readMap(byte[] content, Class<?> valueClass) {
         return readMap(content, String.class, valueClass);
     }
 
@@ -567,7 +582,7 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public <V> Map<String, V> readMap(InputStream content, Class<?> valueClass) {
+    public static <V> Map<String, V> readMap(InputStream content, Class<?> valueClass) {
         return readMap(content, String.class, valueClass);
     }
 
@@ -580,7 +595,7 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    public <V> Map<String, V> readMap(Reader reader, Class<?> valueClass) {
+    public static <V> Map<String, V> readMap(Reader reader, Class<?> valueClass) {
         return readMap(reader, String.class, valueClass);
     }
 
@@ -595,7 +610,7 @@ public class JsonUtil {
      *
      * @return {@link Map}<{@link String}, {@link Object}>
      */
-    public <K, V> Map<K, V> readMap(String json, Class<?> keyClass, Class<?> valueClass) {
+    public static <K, V> Map<K, V> readMap(String json, Class<?> keyClass, Class<?> valueClass) {
         return readObj(json, getMapType(keyClass, valueClass));
     }
 
@@ -610,9 +625,12 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <K, V> Map<K, V> readMap(byte[] content, Class<?> keyClass, Class<?> valueClass) {
-        return CustomizeMapper.MAPPER.readValue(content, getMapType(keyClass, valueClass));
+    public static <K, V> Map<K, V> readMap(byte[] content, Class<?> keyClass, Class<?> valueClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, getMapType(keyClass, valueClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -626,9 +644,12 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <K, V> Map<K, V> readMap(InputStream content, Class<?> keyClass, Class<?> valueClass) {
-        return CustomizeMapper.MAPPER.readValue(content, getMapType(keyClass, valueClass));
+    public static <K, V> Map<K, V> readMap(InputStream content, Class<?> keyClass, Class<?> valueClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(content, getMapType(keyClass, valueClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -642,14 +663,13 @@ public class JsonUtil {
      *
      * @return 集合
      */
-    @SneakyThrows(IOException.class)
-    public <K, V> Map<K, V> readMap(Reader reader, Class<?> keyClass, Class<?> valueClass) {
-        return CustomizeMapper.MAPPER.readValue(reader, getMapType(keyClass, valueClass));
+    public static <K, V> Map<K, V> readMap(Reader reader, Class<?> keyClass, Class<?> valueClass) {
+        try {
+            return CustomizeMapper.MAPPER.readValue(reader, getMapType(keyClass, valueClass));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
-
-    // endregion
-
-    // region json 实现对象类型转换
 
     /**
      * jackson 的类型转换
@@ -660,7 +680,7 @@ public class JsonUtil {
      *
      * @return 转换结果
      */
-    public <T> T convert(Object fromValue, Class<T> toValueType) {
+    public static <T> T convert(Object fromValue, Class<T> toValueType) {
         return CustomizeMapper.MAPPER.convertValue(fromValue, toValueType);
     }
 
@@ -673,7 +693,7 @@ public class JsonUtil {
      *
      * @return 转换结果
      */
-    public <T> T convert(Object fromValue, JavaType toValueType) {
+    public static <T> T convert(Object fromValue, JavaType toValueType) {
         return CustomizeMapper.MAPPER.convertValue(fromValue, toValueType);
     }
 
@@ -686,13 +706,13 @@ public class JsonUtil {
      *
      * @return 转换结果
      */
-    public <T> T convert(Object fromValue, TypeReference<T> toValueTypeRef) {
+    public static <T> T convert(Object fromValue, TypeReference<T> toValueTypeRef) {
         return CustomizeMapper.MAPPER.convertValue(fromValue, toValueTypeRef);
     }
 
     // endregion
 
-    // region 校验
+    // region json 实现对象类型转换
 
     /**
      * 检验 json 格式
@@ -701,7 +721,7 @@ public class JsonUtil {
      *
      * @return 是否成功
      */
-    public boolean isValidJson(String json) {
+    public static boolean isValidJson(String json) {
         ObjectMapper mapper = CustomizeMapper.MAPPER.copy();
         mapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
         mapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
@@ -711,6 +731,46 @@ public class JsonUtil {
         } catch (Throwable e) {
             return false;
         }
+    }
+
+    /**
+     * 可强制类型转换
+     *
+     * @param obj   obj
+     * @param clazz 类对象
+     *
+     * @return boolean
+     */
+    private static boolean isAssignable(Object obj, Class<?> clazz) {
+        return clazz.isAssignableFrom(obj.getClass());
+    }
+
+    /**
+     * 可强制类型转换
+     *
+     * @param obj      obj
+     * @param javaType Java 类型
+     *
+     * @return boolean
+     */
+    private static boolean isAssignable(Object obj, JavaType javaType) {
+        return javaType.hasRawClass(obj.getClass());
+    }
+
+    // endregion
+
+    // region 校验
+
+    /**
+     * 可强制类型转换
+     *
+     * @param obj           obj
+     * @param typeReference 类型
+     *
+     * @return boolean
+     */
+    private static boolean isAssignable(Object obj, TypeReference<?> typeReference) {
+        return typeReference.getClass().isAssignableFrom(obj.getClass());
     }
 
     // endregion

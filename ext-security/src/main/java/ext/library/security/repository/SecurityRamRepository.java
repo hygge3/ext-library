@@ -6,7 +6,8 @@ import ext.library.security.domain.SecurityToken;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -24,26 +25,23 @@ import java.util.concurrent.atomic.AtomicReference;
  * 默认基于内存存储实现
  * </p>
  */
-@Slf4j
 public class SecurityRamRepository implements SecurityRepository {
-
     /**
      * SecuritySession 存储
      */
     private static final AtomicReference<Map<String, SecuritySession>> sessionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
-
     /**
      * SecurityToken 存储
      */
     private static final AtomicReference<Map<String, SecurityToken>> tokenMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
-
     /**
      * 记录数据版本信息
      */
     private static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public SecuritySession getSecuritySessionByLoginId(String loginId) {

@@ -10,14 +10,12 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import ext.library.json.module.CustomModule;
-import lombok.Setter;
 
 /**
  * 自定义映射器
  */
 public class CustomizeMapper {
 
-    @Setter
     protected static JsonMapper MAPPER = JsonMapper.builder()
             // 添加 JSR310 模块（Java 8 时间）;显式添加（更安全）
             .addModules(new JavaTimeModule()).addModule(new Jdk8Module()).addModule(new ParameterNamesModule())
@@ -31,5 +29,9 @@ public class CustomizeMapper {
             .serializationInclusion(JsonInclude.Include.NON_NULL)
             // 字段可见性：允许序列化所有字段（无需 getter）
             .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY).visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY).visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE).visibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE).build();
+
+    public static void setMAPPER(JsonMapper MAPPER) {
+        CustomizeMapper.MAPPER = MAPPER;
+    }
 
 }

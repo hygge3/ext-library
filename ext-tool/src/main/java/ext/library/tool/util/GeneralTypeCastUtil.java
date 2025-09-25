@@ -1,7 +1,5 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -10,7 +8,6 @@ import java.text.ParseException;
 /**
  * 一个简单的数据类型转换工具类
  */
-@UtilityClass
 public class GeneralTypeCastUtil {
 
     /**
@@ -22,7 +19,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a String, <code>null</code> if null object input
      */
-    public String getAsString(final Object obj) {
+    public static String getAsString(final Object obj) {
         if (obj != null) {
             return obj.toString();
         }
@@ -40,7 +37,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a String, <code>defaultValue</code> if null
      * object input
      */
-    public String getAsString(final Object obj, final String defaultValue) {
+    public static String getAsString(final Object obj, final String defaultValue) {
         String answer = getAsString(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -57,7 +54,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a Number, <code>null</code> if null object input
      */
-    public Number getAsNumber(final Object obj) {
+    public static Number getAsNumber(final Object obj) {
         if (obj != null) {
             switch (obj) {
                 case Number number -> {
@@ -90,7 +87,7 @@ public class GeneralTypeCastUtil {
      * is null, the object is null or the number conversion fails
      */
     @SuppressWarnings("unchecked")
-    public <R extends Number> R getAsNumber(final Object obj, R defaultValue) {
+    public static <R extends Number> R getAsNumber(final Object obj, R defaultValue) {
         Number answer = getAsNumber(obj);
         return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -109,7 +106,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a Boolean, <code>null</code> if null object
      * input
      */
-    public Boolean getAsBoolean(final Object obj) {
+    public static Boolean getAsBoolean(final Object obj) {
         if (obj != null) {
             return switch (obj) {
                 case Boolean aBoolean -> aBoolean;
@@ -136,7 +133,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a Boolean, <code>defaultValue</code> if null
      * object input
      */
-    public Boolean getAsBoolean(final Object obj, final Boolean defaultValue) {
+    public static Boolean getAsBoolean(final Object obj, final Boolean defaultValue) {
         Boolean answer = getAsBoolean(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -155,7 +152,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a Boolean, <code>false</code> if null object
      * input
      */
-    public boolean getAsBooleanValue(final Object obj) {
+    public static boolean getAsBooleanValue(final Object obj) {
         final Boolean booleanObject = getAsBoolean(obj);
         return ObjectUtil.defaultIfNull(booleanObject, false);
     }
@@ -175,7 +172,7 @@ public class GeneralTypeCastUtil {
      * @return the value in the Map as a Boolean, <code>defaultValue</code> if null object
      * input
      */
-    public boolean getAsBooleanValue(final Object obj, final boolean defaultValue) {
+    public static boolean getAsBooleanValue(final Object obj, final boolean defaultValue) {
         final Boolean booleanObject = getAsBoolean(obj);
         return ObjectUtil.defaultIfNull(booleanObject, defaultValue);
     }
@@ -190,7 +187,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of Object as a Byte, <code>null</code> if null object input
      */
-    public Byte getAsByte(final Object obj) {
+    public static Byte getAsByte(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -212,7 +209,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a Byte, <code>defaultValue</code> if null object
      * input
      */
-    public Byte getAsByte(final Object obj, final Byte defaultValue) {
+    public static Byte getAsByte(final Object obj, final Byte defaultValue) {
         Byte answer = getAsByte(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -226,7 +223,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a byte, <code>0</code> if null object input
      */
-    public byte getAsByteValue(final Object obj) {
+    public static byte getAsByteValue(final Object obj) {
         final Byte byteObject = getAsByte(obj);
         return ObjectUtil.defaultIfNull(byteObject, (byte) 0);
     }
@@ -242,7 +239,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a byte, <code>defaultValue</code> if null object
      * input
      */
-    public byte getAsByteValue(final Object obj, final byte defaultValue) {
+    public static byte getAsByteValue(final Object obj, final byte defaultValue) {
         final Byte byteObject = getAsByte(obj);
         return ObjectUtil.defaultIfNull(byteObject, defaultValue);
     }
@@ -256,7 +253,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a Short, <code>null</code> if null object input
      */
-    public Short getAsShort(final Object obj) {
+    public static Short getAsShort(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -278,7 +275,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a Short, <code>defaultValue</code> if null object
      * input
      */
-    public Short getAsShort(final Object obj, final Short defaultValue) {
+    public static Short getAsShort(final Object obj, final Short defaultValue) {
         Short answer = getAsShort(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -292,7 +289,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a short, <code>0</code> if null object input
      */
-    public short getAsShortValue(final Object obj) {
+    public static short getAsShortValue(final Object obj) {
         final Short shortObject = getAsShort(obj);
         return ObjectUtil.defaultIfNull(shortObject, (short) 0);
     }
@@ -308,7 +305,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as a short, <code>defaultValue</code> if null
      * object input
      */
-    public short getAsShortValue(final Object obj, final short defaultValue) {
+    public static short getAsShortValue(final Object obj, final short defaultValue) {
         final Short shortObject = getAsShort(obj);
         return ObjectUtil.defaultIfNull(shortObject, defaultValue);
     }
@@ -323,7 +320,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as an Integer, <code>null</code> if null object
      * input
      */
-    public Integer getAsInteger(final Object obj) {
+    public static Integer getAsInteger(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -345,7 +342,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as an Integer, <code>defaultValue</code> if null object
      * input
      */
-    public Integer getAsInteger(final Object obj, final Integer defaultValue) {
+    public static Integer getAsInteger(final Object obj, final Integer defaultValue) {
         Integer answer = getAsInteger(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -359,7 +356,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as an int, <code>0</code> if null object input
      */
-    public int getAsIntValue(final Object obj) {
+    public static int getAsIntValue(final Object obj) {
         final Integer integerObject = getAsInteger(obj);
         return ObjectUtil.defaultIfNull(integerObject, 0);
     }
@@ -375,7 +372,7 @@ public class GeneralTypeCastUtil {
      * @return the value of the Object as an int, <code>defaultValue</code> if null object
      * input
      */
-    public int getAsIntValue(final Object obj, final int defaultValue) {
+    public static int getAsIntValue(final Object obj, final int defaultValue) {
         final Integer integerObject = getAsInteger(obj);
         return ObjectUtil.defaultIfNull(integerObject, defaultValue);
     }
@@ -389,7 +386,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a Long, <code>null</code> if null object input
      */
-    public Long getAsLong(final Object obj) {
+    public static Long getAsLong(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -411,7 +408,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a Long, <code>defaultValue</code> if null object
      * input
      */
-    public Long getAsLong(final Object obj, final Long defaultValue) {
+    public static Long getAsLong(final Object obj, final Long defaultValue) {
         Long answer = getAsLong(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -425,7 +422,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a long, <code>0L</code> if null object input
      */
-    public long getAsLongValue(final Object obj) {
+    public static long getAsLongValue(final Object obj) {
         final Long longObject = getAsLong(obj);
         return ObjectUtil.defaultIfNull(longObject, 0L);
     }
@@ -442,7 +439,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a long, <code>defaultValue</code> if null object
      * input
      */
-    public long getAsLongValue(final Object obj, final long defaultValue) {
+    public static long getAsLongValue(final Object obj, final long defaultValue) {
         final Long longObject = getAsLong(obj);
         return ObjectUtil.defaultIfNull(longObject, defaultValue);
     }
@@ -456,7 +453,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a Float, <code>null</code> if null object input
      */
-    public Float getAsFloat(final Object obj) {
+    public static Float getAsFloat(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -478,7 +475,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a Float, <code>defaultValue</code> if null object
      * input
      */
-    public Float getAsFloat(final Object obj, final Float defaultValue) {
+    public static Float getAsFloat(final Object obj, final Float defaultValue) {
         Float answer = getAsFloat(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -492,7 +489,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of Object as a float, <code>0.0F</code> if null object input
      */
-    public float getAsFloatValue(final Object obj) {
+    public static float getAsFloatValue(final Object obj) {
         final Float floatObject = getAsFloat(obj);
         return ObjectUtil.defaultIfNull(floatObject, 0F);
     }
@@ -509,7 +506,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a float, <code>defaultValue</code> if null object
      * input
      */
-    public float getAsFloatValue(final Object obj, final float defaultValue) {
+    public static float getAsFloatValue(final Object obj, final float defaultValue) {
         final Float floatObject = getAsFloat(obj);
         return ObjectUtil.defaultIfNull(floatObject, defaultValue);
     }
@@ -523,7 +520,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of the Object as a Double, <code>null</code> if null object input
      */
-    public Double getAsDouble(final Object obj) {
+    public static Double getAsDouble(final Object obj) {
         final Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;
@@ -545,7 +542,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a Double, <code>defaultValue</code> if null object
      * input
      */
-    public Double getAsDouble(final Object obj, final Double defaultValue) {
+    public static Double getAsDouble(final Object obj, final Double defaultValue) {
         Double answer = getAsDouble(obj);
         return ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -559,7 +556,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of Object as a double, <code>0.0</code> if null object input
      */
-    public double getAsDoubleValue(final Object obj) {
+    public static double getAsDoubleValue(final Object obj) {
         final Double doubleObject = getAsDouble(obj);
         return ObjectUtil.defaultIfNull(doubleObject, 0D);
     }
@@ -576,7 +573,7 @@ public class GeneralTypeCastUtil {
      * @return the value of Object as a double, <code>defaultValue</code> if null object
      * input
      */
-    public double getAsDoubleValue(final Object obj, final double defaultValue) {
+    public static double getAsDoubleValue(final Object obj, final double defaultValue) {
         final Double doubleObject = getAsDouble(obj);
         return ObjectUtil.defaultIfNull(doubleObject, defaultValue);
     }
@@ -590,7 +587,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of Object as a BigInteger, <code>0</code> if null object input
      */
-    public BigInteger getAsBigInteger(final Object obj) {
+    public static BigInteger getAsBigInteger(final Object obj) {
         if (obj != null) {
             if (obj instanceof BigInteger) {
                 return (BigInteger) obj;
@@ -621,7 +618,7 @@ public class GeneralTypeCastUtil {
      * object input
      */
     @SuppressWarnings("unchecked")
-    public <R extends BigInteger> R getAsBigInteger(final Object obj, final R defaultValue) {
+    public static <R extends BigInteger> R getAsBigInteger(final Object obj, final R defaultValue) {
         BigInteger answer = getAsBigInteger(obj);
         return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -635,7 +632,7 @@ public class GeneralTypeCastUtil {
      *
      * @return the value of Object as a BigDecimal, <code>0</code> if null object input
      */
-    public BigDecimal getAsBigDecimal(final Object obj) {
+    public static BigDecimal getAsBigDecimal(final Object obj) {
         if (obj != null) {
             if (obj instanceof BigDecimal) {
                 return (BigDecimal) obj;
@@ -666,7 +663,7 @@ public class GeneralTypeCastUtil {
      * object input
      */
     @SuppressWarnings("unchecked")
-    public <R extends BigDecimal> R getAsBigDecimal(final Object obj, final R defaultValue) {
+    public static <R extends BigDecimal> R getAsBigDecimal(final Object obj, final R defaultValue) {
         BigDecimal answer = getAsBigDecimal(obj);
         return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
     }
@@ -680,7 +677,7 @@ public class GeneralTypeCastUtil {
      * @return R
      */
     @SuppressWarnings("unchecked")
-    public <R> R cast(final Object obj, final Class<R> clz) {
+    public static <R> R cast(final Object obj, final Class<R> clz) {
         if (obj == null) {
             throw new IllegalArgumentException("'obj' must not be null");
         }
@@ -727,7 +724,7 @@ public class GeneralTypeCastUtil {
      * @return R
      */
     @SuppressWarnings("unchecked")
-    public <R> R cast(final Object obj, final R defaultValue) {
+    public static <R> R cast(final Object obj, final R defaultValue) {
         if (obj == null) {
             throw new IllegalArgumentException("'obj' must not be null");
         }

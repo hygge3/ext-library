@@ -3,7 +3,8 @@ package ext.library.websocket.listener;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.websocket.holder.WebSocketSessionHolder;
 import ext.library.websocket.util.WebSocketUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -11,9 +12,9 @@ import org.springframework.core.annotation.Order;
 /**
  * WebSocket 主题订阅监听器
  */
-@Slf4j
 @Order(-1)
 public class WebSocketTopicListener implements ApplicationRunner {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 在 Spring Boot 应用程序启动时初始化 WebSocket 主题订阅监听器

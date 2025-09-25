@@ -1,14 +1,11 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 /**
  * 断言获取工具
  *
  * @see org.springframework.util.Assert
  * @since 2025.08.15
  */
-@UtilityClass
 public class RequireUtil {
 
     /**
@@ -20,7 +17,7 @@ public class RequireUtil {
      *
      * @throws IllegalArgumentException 如果对象是 {@code null}
      */
-    public <T> T requireNotNull(T object, String message) {
+    public static <T> T requireNotNull(T object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
         }
@@ -37,7 +34,7 @@ public class RequireUtil {
      *
      * @throws IllegalArgumentException 如果 {@code expression} 是 {@code false}
      */
-    public boolean requireTrue(boolean expression, String message) {
+    public static boolean requireTrue(boolean expression, String message) {
         if (!expression) {
             throw new IllegalArgumentException(message);
         }

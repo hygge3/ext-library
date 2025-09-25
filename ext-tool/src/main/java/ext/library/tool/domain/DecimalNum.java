@@ -1,7 +1,5 @@
 package ext.library.tool.domain;
 
-import lombok.Getter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -10,7 +8,6 @@ import java.math.RoundingMode;
 /**
  * 浮点型数据计算
  */
-@Getter
 public final class DecimalNum extends Number implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -9,8 +9,8 @@ import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import jakarta.annotation.Nonnull;
@@ -28,17 +28,14 @@ import java.util.function.Supplier;
 /**
  * 验证码
  */
-@Slf4j
 public class Captcha implements ICaptcha {
-
     /**
      * 默认的验证码大小，暂时不支持外部设置，因为字体大小是写死的，后期会加自动计算
      */
     private static final int WIDTH = 130;
-
     private static final int HEIGHT = 48;
-
     private static final String[] FONT_NAMES = new String[]{"marker.ttf", "american.ttf", "papyrus.ttf",};
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final Font[] fonts;
     private BackgroundDraw backgroundDraw;
     private CaptchaDraw captchaDraw;
@@ -90,9 +87,12 @@ public class Captcha implements ICaptcha {
         return fontList.toArray(new Font[0]);
     }
 
-    @SneakyThrows
     private static Font loadFont(@Nonnull ClassPathResource resource) {
-        return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
+        try {
+            return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
+        } catch (FontFormatException | IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     public void setBackgroundDraw(BackgroundDraw backgroundDraw) {

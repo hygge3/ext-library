@@ -1,18 +1,15 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.List;
 
 /**
  * Boolean 工具类
  */
-@UtilityClass
 public class BoolUtil {
 
-    private final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
+    private static final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
 
-    private final List<String> STR_FALSE = List.of("0", "false", "no", "n");
+    private static final List<String> STR_FALSE = List.of("0", "false", "no", "n");
 
     /**
      * 判断给定对象是否表示“真”值
@@ -26,7 +23,7 @@ public class BoolUtil {
      *
      * @return 如果对象表示“真”值，则返回 true；否则返回 false
      */
-    public boolean isTrue(Object obj) {
+    public static boolean isTrue(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -52,7 +49,7 @@ public class BoolUtil {
      *
      * @return 如果对象表示“假”或无效状态，则返回 true；否则返回 false
      */
-    public boolean isFalse(Object obj) {
+    public static boolean isFalse(Object obj) {
         if (obj == null) {
             return false;
         }

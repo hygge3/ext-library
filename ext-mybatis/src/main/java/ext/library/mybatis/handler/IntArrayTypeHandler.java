@@ -5,7 +5,6 @@ import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.GeneralTypeCastUtil;
 import ext.library.tool.util.StringUtil;
 import io.github.linpeilie.utils.ArrayUtil;
-import lombok.SneakyThrows;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
@@ -39,15 +38,13 @@ public class IntArrayTypeHandler extends BaseTypeHandler<Integer[]> {
     }
 
     @Override
-    @SneakyThrows
-    public Integer[] getNullableResult(@Nonnull ResultSet rs, int columnIndex) {
+    public Integer[] getNullableResult(@Nonnull ResultSet rs, int columnIndex) throws SQLException {
         String reString = rs.getString(columnIndex);
         return toIntArray(reString);
     }
 
     @Override
-    @SneakyThrows
-    public Integer[] getNullableResult(@Nonnull CallableStatement cs, int columnIndex) {
+    public Integer[] getNullableResult(@Nonnull CallableStatement cs, int columnIndex) throws SQLException {
         String reString = cs.getString(columnIndex);
         return toIntArray(reString);
     }

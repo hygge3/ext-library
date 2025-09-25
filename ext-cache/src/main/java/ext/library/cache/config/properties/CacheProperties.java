@@ -1,8 +1,6 @@
 package ext.library.cache.config.properties;
 
 import ext.library.cache.enums.CacheStorage;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -10,8 +8,6 @@ import java.time.Duration;
 /**
  * 缓存属性
  */
-@Getter
-@Setter
 @ConfigurationProperties(prefix = CacheProperties.PREFIX)
 public class CacheProperties {
 
@@ -30,4 +26,27 @@ public class CacheProperties {
     /** 缓存存储方式 */
     private CacheStorage cacheStorage = CacheStorage.L2;
 
+    public String getKeyPrefix() {
+        return keyPrefix;
+    }
+
+    public void setKeyPrefix(String keyPrefix) {
+        this.keyPrefix = keyPrefix;
+    }
+
+    public Duration getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(Duration expireTime) {
+        this.expireTime = expireTime;
+    }
+
+    public CacheStorage getCacheStorage() {
+        return cacheStorage;
+    }
+
+    public void setCacheStorage(CacheStorage cacheStorage) {
+        this.cacheStorage = cacheStorage;
+    }
 }

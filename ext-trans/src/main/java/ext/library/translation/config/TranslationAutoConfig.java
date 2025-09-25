@@ -5,8 +5,8 @@ import ext.library.translation.annotation.TranslationType;
 import ext.library.translation.handler.TranslationBeanSerializerModifier;
 import ext.library.translation.handler.TranslationHandler;
 import ext.library.translation.service.TranslationInterface;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 
 import jakarta.annotation.PostConstruct;
@@ -17,14 +17,18 @@ import java.util.Map;
 /**
  * 翻译模块配置类
  */
-@Slf4j
-@RequiredArgsConstructor
 @AutoConfiguration(after = ObjectMapper.class)
 public class TranslationAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final List<TranslationInterface<?>> list;
 
     private final ObjectMapper objectMapper;
+
+    public TranslationAutoConfig(List<TranslationInterface<?>> list, ObjectMapper objectMapper) {
+        this.list = list;
+        this.objectMapper = objectMapper;
+    }
 
     @PostConstruct
     public void init() {

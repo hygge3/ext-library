@@ -5,7 +5,8 @@ import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.handler.ExtWebSocketHandler;
 import ext.library.websocket.interceptor.ExtWebSocketInterceptor;
 import ext.library.websocket.listener.WebSocketTopicListener;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,12 +21,12 @@ import jakarta.annotation.Nonnull;
 /**
  * WebSocket 配置
  */
-@Slf4j
 @AutoConfiguration
 @ConditionalOnProperty(value = WebSocketProperties.PREFIX + ".enabled", havingValue = "true")
 @EnableConfigurationProperties(WebSocketProperties.class)
 @EnableWebSocket
 public class WebSocketAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor handshakeInterceptor, WebSocketHandler webSocketHandler, @Nonnull WebSocketProperties webSocketProperties) {

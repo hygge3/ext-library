@@ -1,8 +1,5 @@
 package ext.library.sse.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -11,8 +8,6 @@ import java.util.Objects;
 /**
  * 消息的 dto
  */
-@Setter
-@Getter
 public class SseMessage implements Serializable {
 
     @Serial
@@ -55,4 +50,20 @@ public class SseMessage implements Serializable {
     }
 
     public String toString() {return "SseMessage(userIds=" + this.getUserIds() + ", message=" + this.getMessage() + ")";}
+
+    public List<String> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(List<String> userIds) {
+        this.userIds = userIds;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
+import ext.library.tool.core.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +18,9 @@ import java.util.Objects;
 /**
  * JsonNode 工具类
  */
-@UtilityClass
 public class JsonNodeUtil {
+    private static final Logger log = LoggerFactory.getLogger(JsonNodeUtil.class);
+
 
     // region JsonNode 与对象互转
 
@@ -31,9 +33,12 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    @SneakyThrows(JsonProcessingException.class)
-    public <T> T treeToObj(JsonNode jsonNode, Class<T> valueType) {
-        return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
+    public static <T> T treeToObj(JsonNode jsonNode, Class<T> valueType) {
+        try {
+            return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -45,9 +50,12 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    @SneakyThrows(JsonProcessingException.class)
-    public <T> T treeToObj(JsonNode jsonNode, JavaType valueType) {
-        return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
+    public static <T> T treeToObj(JsonNode jsonNode, JavaType valueType) {
+        try {
+            return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -59,9 +67,12 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    @SneakyThrows(IOException.class)
-    public <T> List<T> treeToList(JsonNode jsonNode, Class<T> elementType) {
-        return CustomizeMapper.MAPPER.readerForListOf(elementType).readValue(jsonNode);
+    public static <T> List<T> treeToList(JsonNode jsonNode, Class<T> elementType) {
+        try {
+            return CustomizeMapper.MAPPER.readerForListOf(elementType).readValue(jsonNode);
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -72,7 +83,7 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    public <T extends JsonNode> T objToTree(Object fromValue) {
+    public static <T extends JsonNode> T objToTree(Object fromValue) {
         return CustomizeMapper.MAPPER.valueToTree(fromValue);
     }
 
@@ -87,9 +98,12 @@ public class JsonNodeUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows({JsonProcessingException.class})
-    public JsonNode readTree(String json) {
-        return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(json, "jsonString is null"));
+    public static JsonNode readTree(String json) {
+        try {
+            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(json, "jsonString is null"));
+        } catch (JsonProcessingException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -99,9 +113,12 @@ public class JsonNodeUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows({IOException.class})
-    public JsonNode readTree(InputStream in) {
-        return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(in, "InputStream in is null"));
+    public static JsonNode readTree(InputStream in) {
+        try {
+            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(in, "InputStream in is null"));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -111,9 +128,12 @@ public class JsonNodeUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows({IOException.class})
-    public JsonNode readTree(Reader reader) {
-        return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(reader, "Reader in is null"));
+    public static JsonNode readTree(Reader reader) {
+        try {
+            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(reader, "Reader in is null"));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -123,9 +143,12 @@ public class JsonNodeUtil {
      *
      * @return jsonString json 字符串
      */
-    @SneakyThrows({IOException.class})
-    public JsonNode readTree(byte[] content) {
-        return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(content, "byte[] content is null"));
+    public static JsonNode readTree(byte[] content) {
+        try {
+            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(content, "byte[] content is null"));
+        } catch (IOException e) {
+            throw Exceptions.unchecked(e);
+        }
     }
 
     /**
@@ -133,7 +156,7 @@ public class JsonNodeUtil {
      *
      * @return {@code ObjectNode }
      */
-    public ObjectNode createObjectNode() {
+    public static ObjectNode createObjectNode() {
         return CustomizeMapper.MAPPER.createObjectNode();
     }
 
@@ -142,7 +165,7 @@ public class JsonNodeUtil {
      *
      * @return {@code ArrayNode }
      */
-    public ArrayNode createArrayNode() {
+    public static ArrayNode createArrayNode() {
         return CustomizeMapper.MAPPER.createArrayNode();
     }
 

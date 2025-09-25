@@ -3,7 +3,6 @@ package ext.library.tool.util;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import ext.library.tool.core.Exceptions;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
@@ -19,19 +18,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-@UtilityClass
 public class IOUtil {
     /**
      * The default buffer size used when copying bytes.
      */
-    public static final int BUFFER_SIZE = 1024 * 4;
+    private static final int BUFFER_SIZE = 1024 * 4;
 
     /**
      * 关闭 Closeable
      *
      * @param closeable 自动关闭
      */
-    public void closeQuietly(Closeable closeable) {
+    public static void closeQuietly(Closeable closeable) {
         if (closeable == null) {
             return;
         }
@@ -58,7 +56,7 @@ public class IOUtil {
      *
      * @throws NullPointerException if the input is null
      */
-    public String readToString(InputStream input) {
+    public static String readToString(InputStream input) {
         try (input) {
             return new String(ByteStreams.toByteArray(input));
         } catch (IOException e) {
@@ -76,7 +74,7 @@ public class IOUtil {
      *
      * @throws NullPointerException if the input is null
      */
-    public String readToString(InputStream input, Charset charset) {
+    public static String readToString(InputStream input, Charset charset) {
         try (input) {
             return new String(ByteStreams.toByteArray(input), charset);
         } catch (IOException e) {
@@ -91,7 +89,7 @@ public class IOUtil {
      *
      * @return the requested byte array
      */
-    public byte[] readToByteArray(InputStream input) {
+    public static byte[] readToByteArray(InputStream input) {
         try (input) {
             return ByteStreams.toByteArray(input);
         } catch (IOException e) {
@@ -106,7 +104,7 @@ public class IOUtil {
      *
      * @return the file contents, never {@code null}
      */
-    public String readToString(final File file) {
+    public static String readToString(final File file) {
         try {
             return new String(Files.toByteArray(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -122,7 +120,7 @@ public class IOUtil {
      *
      * @return the file contents, never {@code null}
      */
-    public String readToString(File file, Charset encoding) {
+    public static String readToString(File file, Charset encoding) {
         try {
             return new String(Files.toByteArray(file), encoding);
         } catch (IOException e) {
@@ -137,7 +135,7 @@ public class IOUtil {
      *
      * @return the file contents, never {@code null}
      */
-    public byte[] readToByteArray(File file) {
+    public static byte[] readToByteArray(File file) {
         try {
             return Files.toByteArray(file);
         } catch (IOException e) {
@@ -150,7 +148,7 @@ public class IOUtil {
      *
      * @return 临时文件目录。
      */
-    public String toTempDirPath(String subDirFile) {
+    public static String toTempDirPath(String subDirFile) {
         return toTempDir(subDirFile).getAbsolutePath();
     }
 
@@ -159,7 +157,7 @@ public class IOUtil {
      *
      * @return the system temporary directory.
      */
-    public File getTempDir() {
+    public static File getTempDir() {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
@@ -168,7 +166,7 @@ public class IOUtil {
      *
      * @return 临时文件目录。
      */
-    public File toTempDir(String subDirFile) {
+    public static File toTempDir(String subDirFile) {
         String tempDirPath = System.getProperty("java.io.tmpdir");
         if (subDirFile.startsWith("/")) {
             subDirFile = subDirFile.substring(1);

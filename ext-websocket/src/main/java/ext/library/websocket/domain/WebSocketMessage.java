@@ -1,8 +1,5 @@
 package ext.library.websocket.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -10,8 +7,6 @@ import java.util.List;
 /**
  * 消息的 dto
  */
-@Getter
-@Setter
 public class WebSocketMessage implements Serializable {
 
     @Serial
@@ -27,4 +22,19 @@ public class WebSocketMessage implements Serializable {
      */
     private String message;
 
+    public List<String> getSessionKeys() {
+        return sessionKeys;
+    }
+
+    public void setSessionKeys(List<String> sessionKeys) {
+        this.sessionKeys = sessionKeys;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

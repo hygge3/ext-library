@@ -2,9 +2,9 @@ package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.Base64Util;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -17,9 +17,9 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Objects;
 
-@Slf4j
-@UtilityClass
 public class SM4Util {
+    private static final Logger log = LoggerFactory.getLogger(SM4Util.class);
+
     private static final String ALGORITHM = "SM4";
     /** 电子密码本模式 */
     private static final String SM4_ECB = "SM4/ECB/PKCS7Padding";
@@ -39,7 +39,7 @@ public class SM4Util {
      *
      * @return {@link String } 密钥
      */
-    public String genKey(Integer keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
+    public static String genKey(Integer keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
         KeyGenerator kg = KeyGenerator.getInstance(ALGORITHM, BouncyCastleProvider.PROVIDER_NAME);
         kg.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());
         return Base64Util.encodeUrlSafeToStr(kg.generateKey().getEncoded());
@@ -53,7 +53,7 @@ public class SM4Util {
      *
      * @return byte[]   加密后的字节数组
      */
-    public String encryptByECB(String secretKey, String plainText) {
+    public static String encryptByECB(String secretKey, String plainText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
             SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
@@ -73,7 +73,7 @@ public class SM4Util {
      *
      * @return byte[]   解密后的字节数组
      */
-    public String decryptByECB(String secretKey, String cipherText) {
+    public static String decryptByECB(String secretKey, String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
             SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
@@ -93,7 +93,7 @@ public class SM4Util {
      *
      * @return byte[]   加密后的字节数组
      */
-    public String encryptByCBC(String secretKey, String iv, String plainText) {
+    public static String encryptByCBC(String secretKey, String iv, String plainText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
             SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
@@ -113,7 +113,7 @@ public class SM4Util {
      *
      * @return byte[]   解密后的字节数组
      */
-    public String decryptByCBC(String secretKey, String iv, String cipherText) {
+    public static String decryptByCBC(String secretKey, String iv, String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
             SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);

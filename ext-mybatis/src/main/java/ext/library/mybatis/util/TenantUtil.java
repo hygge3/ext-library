@@ -1,13 +1,10 @@
 package ext.library.mybatis.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.Serializable;
 
 /**
  * 租户 ID 存取类
  */
-@UtilityClass
 public class TenantUtil {
 
     private static final ThreadLocal<Serializable> TENANT_ID = new InheritableThreadLocal<>();
@@ -20,7 +17,7 @@ public class TenantUtil {
      *
      * @param tenantId 租户 ID，作为一个可序列化的对象传递，确保其可以在分布式环境中被正确地传输和恢复
      */
-    public void set(Serializable tenantId) {
+    public static void set(Serializable tenantId) {
         TENANT_ID.set(tenantId);
     }
 
@@ -32,7 +29,7 @@ public class TenantUtil {
      *
      * @return Serializable 类型的租户标识，该标识是线程本地变量中存储的租户信息
      */
-    public Serializable get() {
+    public static Serializable get() {
         return TENANT_ID.get();
     }
 
@@ -42,7 +39,7 @@ public class TenantUtil {
      * 本方法通过移除线程局部变量中的租户键值，来实现清除当前线程租户信息的目的
      * 主要用于在业务逻辑完成后，清理线程环境，避免信息泄露
      */
-    public void clear() {
+    public static void clear() {
         TENANT_ID.remove();
     }
 }

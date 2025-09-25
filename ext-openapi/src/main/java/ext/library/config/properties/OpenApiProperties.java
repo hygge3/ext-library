@@ -8,8 +8,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -19,8 +17,6 @@ import java.util.Map;
 /**
  * openAPI 属性
  */
-@Getter
-@Setter
 @ConfigurationProperties(OpenApiProperties.PREFIX)
 public class OpenApiProperties {
 
@@ -83,6 +79,78 @@ public class OpenApiProperties {
      */
     private Map<String, Object> extensions = null;
 
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public InfoProperties getInfo() {
+        return info;
+    }
+
+    public void setInfo(InfoProperties info) {
+        this.info = info;
+    }
+
+    public ExternalDocumentation getExternalDocs() {
+        return externalDocs;
+    }
+
+    public void setExternalDocs(ExternalDocumentation externalDocs) {
+        this.externalDocs = externalDocs;
+    }
+
+    public List<Server> getServers() {
+        return servers;
+    }
+
+    public void setServers(List<Server> servers) {
+        this.servers = servers;
+    }
+
+    public List<SecurityRequirement> getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(List<SecurityRequirement> security) {
+        this.security = security;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public Paths getPaths() {
+        return paths;
+    }
+
+    public void setPaths(Paths paths) {
+        this.paths = paths;
+    }
+
+    public Components getComponents() {
+        return components;
+    }
+
+    public void setComponents(Components components) {
+        this.components = components;
+    }
+
+    public Map<String, Object> getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(Map<String, Object> extensions) {
+        this.extensions = extensions;
+    }
+
     /**
      * <p>
      * 文档的基础属性信息
@@ -92,47 +160,100 @@ public class OpenApiProperties {
      * <p>
      * 为了 springboot 自动生产配置提示信息，所以这里复制一个类出来
      */
-    @Getter
-    @Setter
     public static class InfoProperties {
 
         /**
          * 标题
          */
-        private String title = null;
+        private String title;
 
         /**
          * 描述
          */
-        private String description = null;
+        private String description;
 
         /**
          * 服务条款 URL
          */
-        private String termsOfService = null;
+        private String termsOfService;
 
         /**
          * 联系人信息
          */
         @NestedConfigurationProperty
-        private Contact contact = null;
+        private Contact contact;
 
         /**
          * 许可证
          */
         @NestedConfigurationProperty
-        private License license = null;
+        private License license;
 
         /**
          * 版本
          */
-        private String version = null;
+        private String version;
 
         /**
          * 扩展属性
          */
-        private Map<String, Object> extensions = null;
+        private Map<String, Object> extensions;
 
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getTermsOfService() {
+            return termsOfService;
+        }
+
+        public void setTermsOfService(String termsOfService) {
+            this.termsOfService = termsOfService;
+        }
+
+        public Contact getContact() {
+            return contact;
+        }
+
+        public void setContact(Contact contact) {
+            this.contact = contact;
+        }
+
+        public License getLicense() {
+            return license;
+        }
+
+        public void setLicense(License license) {
+            this.license = license;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public Map<String, Object> getExtensions() {
+            return extensions;
+        }
+
+        public void setExtensions(Map<String, Object> extensions) {
+            this.extensions = extensions;
+        }
     }
 
 }

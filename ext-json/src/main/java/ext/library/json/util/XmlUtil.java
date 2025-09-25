@@ -2,7 +2,8 @@ package ext.library.json.util;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -261,20 +262,15 @@ public class XmlUtil {
     /**
      * 内部类单例
      */
-    @Slf4j
     private static class XmlHelperHolder {
-
         private static final String FEATURE_HTTP_XML_ORG_SAX_FEATURES_EXTERNAL_GENERAL_ENTITIES = "https://xml.org/sax/features/external-general-entities";
-
         private static final String FEATURE_HTTP_XML_ORG_SAX_FEATURES_EXTERNAL_PARAMETER_ENTITIES = "https://xml.org/sax/features/external-parameter-entities";
-
-        private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY = XmlHelperHolder
-                .newDocumentBuilderFactory();
-
         private static final DocumentBuilderFactory UNSAFE_DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory
                 .newInstance();
-
         private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
+        private static final Logger log = LoggerFactory.getLogger(XmlHelperHolder.class);
+        private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY = XmlHelperHolder
+                .newDocumentBuilderFactory();
 
         private static DocumentBuilderFactory newDocumentBuilderFactory() {
             DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();

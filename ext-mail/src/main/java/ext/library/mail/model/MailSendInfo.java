@@ -1,17 +1,10 @@
 package ext.library.mail.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 /**
  * 邮件发送详情
  */
-@Getter
-@Setter
-@RequiredArgsConstructor
 public class MailSendInfo {
 
     /**
@@ -21,17 +14,29 @@ public class MailSendInfo {
     /**
      * 发送时间
      */
-    @Setter
     private LocalDateTime sentDate;
     /**
      * 是否发送成功
      */
-    @Setter
     private Boolean success;
     /**
      * 错误信息 errorMsg
      */
-    @Setter
     private String errorMsg;
 
+    public MailSendInfo(MailDetails mailDetails) {
+        this.mailDetails = mailDetails;
+    }
+
+    public void setSentDate(LocalDateTime sentDate) {
+        this.sentDate = sentDate;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 }

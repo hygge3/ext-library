@@ -7,7 +7,8 @@ import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
 import ext.library.websocket.util.WebSocketUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
@@ -26,8 +27,8 @@ import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
 /**
  * WebSocketHandler 实现类
  */
-@Slf4j
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final Lazy<WebSocketProperties> properties = Lazy.of(() -> SpringUtil.getBean(WebSocketProperties.class));
 

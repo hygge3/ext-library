@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.html.HtmlEscapers;
 import ext.library.tool.constant.Symbol;
-import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -13,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-@UtilityClass
 public class StringUtil {
 
     /**
@@ -23,7 +21,7 @@ public class StringUtil {
      *
      * @return {String}
      */
-    public String firstCharToLower(String str) {
+    public static String firstCharToLower(String str) {
         char firstChar = str.charAt(0);
         if (firstChar >= 'a' && firstChar <= 'z') {
             char[] chars = str.toCharArray();
@@ -40,7 +38,7 @@ public class StringUtil {
      *
      * @return {String}
      */
-    public String firstCharToUpper(String str) {
+    public static String firstCharToUpper(String str) {
         char firstChar = str.charAt(0);
         if (firstChar >= 'A' && firstChar <= 'Z') {
             char[] chars = str.toCharArray();
@@ -98,7 +96,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isEmpty(String str) {
+    public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
 
@@ -116,7 +114,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isNotEmpty(String str) {
+    public static boolean isNotEmpty(String str) {
         return !isEmpty(str);
     }
 
@@ -137,7 +135,7 @@ public class StringUtil {
      *
      * @see Character#isWhitespace
      */
-    public boolean isBlank(String str) {
+    public static boolean isBlank(String str) {
         if (str == null) {
             return true;
         }
@@ -160,7 +158,7 @@ public class StringUtil {
      *
      * @see Character#isWhitespace
      */
-    public boolean isNotBlank(String str) {
+    public static boolean isNotBlank(String str) {
         return !isBlank(str);
     }
 
@@ -171,7 +169,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isAnyBlank(String... strs) {
+    public static boolean isAnyBlank(String... strs) {
         if (null == strs || Array.getLength(strs) == 0) {
             return true;
         }
@@ -185,7 +183,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isAnyBlank(Collection<String> strs) {
+    public static boolean isAnyBlank(Collection<String> strs) {
         if (null == strs || strs.isEmpty()) {
             return true;
         }
@@ -199,7 +197,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isNoneBlank(String... strs) {
+    public static boolean isNoneBlank(String... strs) {
         return !isAnyBlank(strs);
     }
 
@@ -210,7 +208,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isNoneBlank(Collection<String> strs) {
+    public static boolean isNoneBlank(Collection<String> strs) {
         return !isAnyBlank(strs);
     }
 
@@ -221,25 +219,11 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public boolean isAnyNotBlank(String... strs) {
+    public static boolean isAnyNotBlank(String... strs) {
         if (null == strs || Array.getLength(strs) == 0) {
             return false;
         }
         return Stream.of(strs).anyMatch(StringUtil::isNotBlank);
-    }
-
-    /**
-     * 有任意一个非空
-     *
-     * @param strs 字符串列表
-     *
-     * @return boolean
-     */
-    public boolean isAnyNotBlank(Collection<String> strs) {
-        if (null == strs || Array.getLength(strs) == 0) {
-            return false;
-        }
-        return strs.stream().anyMatch(StringUtil::isNotBlank);
     }
 
     /**
@@ -250,7 +234,7 @@ public class StringUtil {
      *
      * @return {boolean}
      */
-    public boolean startWith(String str, String prefix) {
+    public static boolean startWith(String str, String prefix) {
         if (isEmpty(str)) {
             return false;
         }
@@ -265,7 +249,7 @@ public class StringUtil {
      *
      * @return {boolean}
      */
-    public boolean startWith(CharSequence cs, char c) {
+    public static boolean startWith(CharSequence cs, char c) {
         return cs.charAt(0) == c;
     }
 
@@ -277,7 +261,7 @@ public class StringUtil {
      *
      * @return {boolean}
      */
-    public boolean endWith(String str, String prefix) {
+    public static boolean endWith(String str, String prefix) {
         if (isEmpty(str)) {
             return false;
         }
@@ -292,7 +276,7 @@ public class StringUtil {
      *
      * @return {boolean}
      */
-    public boolean endWith(CharSequence cs, char c) {
+    public static boolean endWith(CharSequence cs, char c) {
         return cs.charAt(cs.length() - 1) == c;
     }
 
@@ -307,7 +291,7 @@ public class StringUtil {
      *
      * @return 转换后的字符串
      */
-    public String format(String message, Map<String, ?> params) {
+    public static String format(String message, Map<String, ?> params) {
         // message 为 null 返回空字符串
         if (message == null) {
             return Symbol.EMPTY;
@@ -351,7 +335,7 @@ public class StringUtil {
      *
      * @return 转换后的字符串
      */
-    public String format(String message, Object... arguments) {
+    public static String format(String message, Object... arguments) {
         // message 为 null 返回空字符串
         if (message == null) {
             return Symbol.EMPTY;
@@ -405,7 +389,7 @@ public class StringUtil {
      *
      * @return {String}
      */
-    public String cleanText(String txt) {
+    public static String cleanText(String txt) {
         if (txt == null) {
             return null;
         }
@@ -419,7 +403,7 @@ public class StringUtil {
      *
      * @return 清理后的标识符
      */
-    public String cleanIdentifier(String param) {
+    public static String cleanIdentifier(String param) {
         if (param == null) {
             return null;
         }
@@ -440,7 +424,7 @@ public class StringUtil {
      *
      * @return {boolean}
      */
-    public boolean isNumeric(String str) {
+    public static boolean isNumeric(String str) {
         if (isBlank(str)) {
             return false;
         }
@@ -460,7 +444,7 @@ public class StringUtil {
      *
      * @return the delimited {@code String}
      */
-    public String join(Collection<?> coll) {
+    public static String join(Collection<?> coll) {
         return Joiner.on(Symbol.C_COMMA).join(coll);
     }
 
@@ -472,7 +456,7 @@ public class StringUtil {
      *
      * @return the delimited {@code String}
      */
-    public String join(Collection<?> coll, String delim) {
+    public static String join(Collection<?> coll, String delim) {
         return Joiner.on(delim).join(coll);
     }
 
@@ -483,7 +467,7 @@ public class StringUtil {
      *
      * @return the delimited {@code String}
      */
-    public String join(Object[] arr) {
+    public static String join(Object[] arr) {
         return Joiner.on(Symbol.C_COMMA).join(arr);
     }
 
@@ -495,10 +479,9 @@ public class StringUtil {
      *
      * @return the delimited {@code String}
      */
-    public String join(Object[] arr, String delim) {
+    public static String join(Object[] arr, String delim) {
         return Joiner.on(delim).join(arr);
     }
-
 
     /**
      * 将数组拼接成字符串，默认指定分隔符
@@ -508,7 +491,7 @@ public class StringUtil {
      *
      * @return the delimited {@code String}
      */
-    public String join(String delim, Object... arr) {
+    public static String join(String delim, Object... arr) {
         return Joiner.on(delim).join(arr);
     }
 
@@ -520,7 +503,7 @@ public class StringUtil {
      *
      * @return 字符串数组
      */
-    public String[] split(String str, String delimiter) {
+    public static String[] split(String str, String delimiter) {
         return Splitter.on(delimiter).splitToStream(str).toArray(String[]::new);
     }
 
@@ -532,7 +515,7 @@ public class StringUtil {
      *
      * @return 字符串数组
      */
-    public String[] splitTrim(String str, String delimiter) {
+    public static String[] splitTrim(String str, String delimiter) {
         return Splitter.on(delimiter).trimResults().splitToStream(str).toArray(String[]::new);
     }
 
@@ -548,7 +531,7 @@ public class StringUtil {
      *
      * @return 是否匹配
      */
-    public boolean simpleMatch(String pattern, String str) {
+    public static boolean simpleMatch(String pattern, String str) {
         // 检查参数是否为空
         if (pattern != null && str != null) {
             // 查找表达式中第一个通配符'*'的位置
@@ -607,7 +590,7 @@ public class StringUtil {
      *
      * @return 是否匹配
      */
-    public boolean simpleMatch(String[] patterns, String str) {
+    public static boolean simpleMatch(String[] patterns, String str) {
         if (patterns != null) {
             for (String pattern : patterns) {
                 if (simpleMatch(pattern, str)) {
@@ -626,7 +609,7 @@ public class StringUtil {
      *
      * @return {String}
      */
-    public String escapeHtml(String html) {
+    public static String escapeHtml(String html) {
         return HtmlEscapers.htmlEscaper().escape(html);
     }
 
@@ -663,6 +646,20 @@ public class StringUtil {
             idx += sub.length();
         }
         return count;
+    }
+
+    /**
+     * 有任意一个非空
+     *
+     * @param strs 字符串列表
+     *
+     * @return boolean
+     */
+    public boolean isAnyNotBlank(Collection<String> strs) {
+        if (null == strs || Array.getLength(strs) == 0) {
+            return false;
+        }
+        return strs.stream().anyMatch(StringUtil::isNotBlank);
     }
 
 }

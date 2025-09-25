@@ -2,8 +2,8 @@ package ext.library.tool.util;
 
 import com.google.common.collect.Maps;
 import ext.library.tool.core.Exceptions;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 /**
  * Map 工具
  */
-@Slf4j
-@UtilityClass
 public class MapUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(MapUtil.class);
 
     /**
      * 去掉 Map 中指定 key 的键值对，修改原 Map
@@ -44,7 +44,7 @@ public class MapUtil {
      * @since 5.0.5
      */
     @SuppressWarnings("unchecked")
-    public <K, V> Map<K, V> removeAny(Map<K, V> map, final K... keys) {
+    public static <K, V> Map<K, V> removeAny(Map<K, V> map, final K... keys) {
         for (K key : keys) {
             map.remove(key);
         }
@@ -60,7 +60,8 @@ public class MapUtil {
      *
      * @return 是否满足条件
      */
-    public <K> boolean isKeys(Map<K, ?> paramMap, K[] mustContainKeys, K... canContainKeys) {
+    @SafeVarargs
+    public static <K> boolean isKeys(Map<K, ?> paramMap, K[] mustContainKeys, K... canContainKeys) {
         // 1. 必传参数校验
         for (K key : mustContainKeys) {
             if (!paramMap.containsKey(key)) {
@@ -101,7 +102,7 @@ public class MapUtil {
      *
      * @return 匹配所有的 key 且大小一致（true）
      */
-    public <K> boolean isKeysEqual(Map<K, ?> paramMap, K[] keys) {
+    public static <K> boolean isKeysEqual(Map<K, ?> paramMap, K[] keys) {
         if (paramMap.size() != keys.length) {
             return false;
         }
@@ -121,7 +122,7 @@ public class MapUtil {
      *
      * @return 只要包含一个 key（true）
      */
-    public <K> boolean isContainsOneOfKey(Map<K, ?> paramMap, K[] keys) {
+    public static <K> boolean isContainsOneOfKey(Map<K, ?> paramMap, K[] keys) {
         for (K key : keys) {
             if (paramMap.containsKey(key)) {
                 return true;
@@ -141,7 +142,7 @@ public class MapUtil {
      *
      * @return Map 数组元素 0 包含所有的 key（true）
      */
-    public <K> boolean isMapsKeys(Map<K, ?>[] paramMaps, K[] keys) {
+    public static <K> boolean isMapsKeys(Map<K, ?>[] paramMaps, K[] keys) {
         return isKeys(paramMaps[0], keys);
     }
 
@@ -155,7 +156,7 @@ public class MapUtil {
      *
      * @return Map 数组==null 或长度==0 或第一个元素为空（true）
      */
-    public boolean isEmptys(Map<?, ?>[] paramMaps) {
+    public static boolean isEmptys(Map<?, ?>[] paramMaps) {
         return null == paramMaps || paramMaps.length == 0 || paramMaps[0].isEmpty();
     }
 
@@ -166,7 +167,7 @@ public class MapUtil {
      *
      * @return value 值是否为空
      */
-    public boolean isStringValueEmpty(Map<?, ?> paramMap) {
+    public static boolean isStringValueEmpty(Map<?, ?> paramMap) {
         if (paramMap.isEmpty()) {
             return true;
         }
@@ -183,7 +184,7 @@ public class MapUtil {
      *
      * @param paramMap 需要处理的 map
      */
-    public <K> void trimStringValues(Map<K, String> paramMap) {
+    public static <K> void trimStringValues(Map<K, String> paramMap) {
         for (K key : paramMap.keySet()) {
             String str = MapUtil.getObject(paramMap, key, String.class);
             String value = str.trim();
@@ -199,7 +200,7 @@ public class MapUtil {
      * @param paramMap 要操作的 Map
      * @param keys     被移除的 key 数组
      */
-    public <K> void remove(Map<K, ?> paramMap, K[] keys) {
+    public static <K> void remove(Map<K, ?> paramMap, K[] keys) {
         for (K key : keys) {
             paramMap.remove(key);
         }
@@ -210,7 +211,7 @@ public class MapUtil {
      *
      * @param paramMap 要操作的 Map
      */
-    public void removeEmpty(Map<?, ?> paramMap) {
+    public static void removeEmpty(Map<?, ?> paramMap) {
         Iterator<? extends Map.Entry<?, ?>> iter = paramMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<?, ?> entry = iter.next();
@@ -231,7 +232,7 @@ public class MapUtil {
      *
      * @param paramMap 要操作的 Map
      */
-    public void removeBlankStr(Map<?, ?> paramMap) {
+    public static void removeBlankStr(Map<?, ?> paramMap) {
         Iterator<? extends Map.Entry<?, ?>> iter = paramMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<?, ?> entry = iter.next();
@@ -249,7 +250,7 @@ public class MapUtil {
      * @param key        被替换的 key
      * @param replaceKey 替换的 key
      */
-    public <K, V> void replaceKey(Map<K, V> paramMap, K key, K replaceKey) {
+    public static <K, V> void replaceKey(Map<K, V> paramMap, K key, K replaceKey) {
         V value = paramMap.get(key);
         paramMap.put(replaceKey, value);
         paramMap.remove(key);
@@ -262,7 +263,7 @@ public class MapUtil {
      *
      * @return keyList
      */
-    public <K> List<K> keyList(Map<K, ?> paramMap) {
+    public static <K> List<K> keyList(Map<K, ?> paramMap) {
         return new ArrayList<>(paramMap.keySet());
     }
 
@@ -276,7 +277,7 @@ public class MapUtil {
      *
      * @return 结果
      */
-    public <K, T> T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
+    public static <K, T> T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
         if (paramMap != null) {
             Object answer = paramMap.get(key);
             if (answer != null) {
@@ -310,7 +311,7 @@ public class MapUtil {
      *
      * @return key 为 map key 的键值对
      */
-    public <K, T> Map<K, List<T>> extractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
+    public static <K, T> Map<K, List<T>> extractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
         // 如果需要转换的值是空的，直接返回一个空的集合
         if (ObjectUtil.isEmpty(objectList)) {
             return Collections.emptyMap();
@@ -344,7 +345,7 @@ public class MapUtil {
      *
      * @return Map&lt;String, T&gt;
      */
-    public <K, T, V> Map<K, V> extractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
+    public static <K, T, V> Map<K, V> extractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
         // 声明一个返回的 map 集合
         Map<K, V> map = new LinkedHashMap<>();
         // 如果需要转换的值是空的，直接返回一个空的集合
@@ -382,7 +383,7 @@ public class MapUtil {
      *
      * @return Map&lt;String, T&gt;
      */
-    public <K, T> Map<K, T> extractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
+    public static <K, T> Map<K, T> extractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
         // 声明一个返回的 map 集合
         Map<K, T> map = new LinkedHashMap<>();
         // 如果需要转换的值是空的，直接返回一个空的集合
@@ -398,7 +399,7 @@ public class MapUtil {
     /**
      * 获取
      */
-    private <T> T getValue(Object obj, String name, Class<T> calzz) {
+    private static <T> T getValue(Object obj, String name, Class<T> calzz) {
         if (obj instanceof Map<?, ?> map) {
             return GeneralTypeCastUtil.cast(map.get(name), calzz);
         }
@@ -436,7 +437,7 @@ public class MapUtil {
      *
      * @return {Map}
      */
-    public Map<String, Object> toMap(Object bean) {
+    public static Map<String, Object> toMap(Object bean) {
         if (bean == null) {
             return Maps.newHashMap();
         }
@@ -462,7 +463,7 @@ public class MapUtil {
      *
      * @return {T}
      */
-    public <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
+    public static <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
         if (beanMap == null) {
             return null;
         }

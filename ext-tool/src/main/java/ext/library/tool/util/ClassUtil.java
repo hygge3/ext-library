@@ -1,7 +1,6 @@
 package ext.library.tool.util;
 
 import ext.library.tool.core.Exceptions;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.Assert;
 
 import java.beans.IntrospectionException;
@@ -27,7 +26,6 @@ import java.util.Set;
  *
  * @since 2025.08.19
  */
-@UtilityClass
 public class ClassUtil {
 
 
@@ -207,7 +205,7 @@ public class ClassUtil {
      *
      * @return {MethodParameter}
      */
-    public Parameter getMethod(Constructor<?> constructor, int parameterIndex) {
+    public static Parameter getMethod(Constructor<?> constructor, int parameterIndex) {
         return constructor.getParameters()[parameterIndex];
     }
 
@@ -219,7 +217,7 @@ public class ClassUtil {
      *
      * @return {MethodParameter}
      */
-    public Parameter getMethodParameter(Method method, int parameterIndex) {
+    public static Parameter getMethodParameter(Method method, int parameterIndex) {
         return method.getParameters()[parameterIndex];
     }
 
@@ -233,7 +231,7 @@ public class ClassUtil {
      * @return {Annotation}
      */
 
-    public <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
+    public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
         return annotatedElement.getDeclaredAnnotation(annotationType);
     }
 
@@ -247,7 +245,7 @@ public class ClassUtil {
      * @return {Annotation}
      */
 
-    public <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
+    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
         return ObjectUtil.defaultIfNull(method.getAnnotation(annotationType), method.getDeclaringClass().getAnnotation(annotationType));
     }
 
@@ -260,7 +258,7 @@ public class ClassUtil {
      * @return 对象
      */
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(Class<?> clazz) {
+    public static <T> T newInstance(Class<?> clazz) {
         try {
             return (T) clazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
@@ -277,7 +275,7 @@ public class ClassUtil {
      *
      * @return 对象
      */
-    public <T> T newInstance(String clazzStr) {
+    public static <T> T newInstance(String clazzStr) {
         try {
             return newInstance(Class.forName(clazzStr));
         } catch (ClassNotFoundException e) {
@@ -294,7 +292,7 @@ public class ClassUtil {
      * @return 属性值
      */
 
-    public Object getProperty(Object bean, String propertyName) {
+    public static Object getProperty(Object bean, String propertyName) {
         Class<?> beanClass = bean.getClass();
         try {
             PropertyDescriptor pd = new PropertyDescriptor(propertyName, beanClass);
@@ -312,7 +310,7 @@ public class ClassUtil {
      * @param propertyName 属性名
      * @param value        属性值
      */
-    public void setProperty(Object bean, String propertyName, Object value) {
+    public static void setProperty(Object bean, String propertyName, Object value) {
         Class<?> beanClass = bean.getClass();
         try {
             // 获取属性对象
@@ -335,7 +333,7 @@ public class ClassUtil {
      */
 
     @SuppressWarnings("unchecked")
-    public <T> T clone(T source) {
+    public static <T> T clone(T source) {
         if (source == null) {
             return null;
         }

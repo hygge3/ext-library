@@ -2,10 +2,6 @@ package ext.library.core.util;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ObjectUtil;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -28,7 +24,6 @@ import java.util.Map;
  * Spring 工具类
  */
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextAware {
 
     /**
@@ -39,9 +34,11 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     /**
      * Spring 应用上下文环境 -- GETTER -- 获取
      */
-    @Getter
-    @Setter
     private static ApplicationContext context;
+
+    public static void setContext(ApplicationContext context) {
+        SpringUtil.context = context;
+    }
 
     /**
      * 获取{@link ListableBeanFactory}，可能为{@link ConfigurableListableBeanFactory} 或
@@ -52,8 +49,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     public static ListableBeanFactory getBeanFactory() {
         final ListableBeanFactory factory = ObjectUtil.defaultIfNull(beanFactory, context);
         if (null == factory) {
-            throw Exceptions.throwOut(
-                    "[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
+            throw Exceptions.throwOut("[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
         }
         return factory;
     }

@@ -1,16 +1,12 @@
 package ext.library.web.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 /**
  * 下拉框所对应的视图类
  */
-@Getter
-@Setter
 @Schema(title = "下拉框数据")
 public class SelectData<T> {
 
@@ -50,4 +46,51 @@ public class SelectData<T> {
     @Schema(title = "附加属性")
     private T attributes;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
+
+    public Boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public T getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(T attributes) {
+        this.attributes = attributes;
+    }
 }

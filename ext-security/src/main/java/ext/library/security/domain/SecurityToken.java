@@ -4,11 +4,6 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.tool.core.Exceptions;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,11 +15,6 @@ import java.util.Map;
  * SecurityToken
  * </p>
  */
-@Getter
-@Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class SecurityToken implements Serializable {
 
     @Serial
@@ -69,6 +59,21 @@ public class SecurityToken implements Serializable {
      * 更新时间 格式 yyyy-MM-dd HH:mm:ss
      */
     private String updateTime;
+
+    public SecurityToken(String token, String loginId, String deviceType, Long timeout, String activityTime, Long activityTimeout, String state, String createTime, String updateTime) {
+        this.token = token;
+        this.loginId = loginId;
+        this.deviceType = deviceType;
+        this.timeout = timeout;
+        this.activityTime = activityTime;
+        this.activityTimeout = activityTimeout;
+        this.state = state;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
+
+    public SecurityToken() {
+    }
 
     /**
      * 设置存储信息
@@ -121,4 +126,79 @@ public class SecurityToken implements Serializable {
         }
     }
 
+    public Map<String, Object> getTokenMountData() {
+        return tokenMountData;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+    public String getActivityTime() {
+        return activityTime;
+    }
+
+    public void setActivityTime(String activityTime) {
+        this.activityTime = activityTime;
+    }
+
+    public Long getActivityTimeout() {
+        return activityTimeout;
+    }
+
+    public void setActivityTimeout(Long activityTimeout) {
+        this.activityTimeout = activityTimeout;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
 }

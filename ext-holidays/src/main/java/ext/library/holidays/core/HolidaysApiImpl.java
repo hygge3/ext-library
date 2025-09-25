@@ -3,8 +3,8 @@ package ext.library.holidays.core;
 import com.google.common.collect.Maps;
 import ext.library.holidays.config.HolidaysProperties;
 import ext.library.json.util.JsonUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
@@ -19,16 +19,17 @@ import java.util.Map;
 /**
  * 节假日实现
  */
-@Slf4j
-@RequiredArgsConstructor
 public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
-
     /**
      * 存储节假日
      */
     private static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = Maps.newHashMap();
-
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final HolidaysProperties properties;
+
+    public HolidaysApiImpl(HolidaysProperties properties) {
+        this.properties = properties;
+    }
 
     /**
      * 判断是否工作日

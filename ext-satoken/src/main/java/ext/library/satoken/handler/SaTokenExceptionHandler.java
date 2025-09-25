@@ -4,7 +4,8 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import ext.library.tool.biz.exception.BizCode;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -15,9 +16,10 @@ import java.util.Map;
 /**
  * SaToken 异常处理器
  */
-@Slf4j
 @RestControllerAdvice
 public class SaTokenExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(SaTokenExceptionHandler.class);
+
     /**
      * 打印日志
      *

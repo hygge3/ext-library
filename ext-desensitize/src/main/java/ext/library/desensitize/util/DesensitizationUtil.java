@@ -1,7 +1,5 @@
 package ext.library.desensitize.util;
 
-import lombok.experimental.UtilityClass;
-
 /**
  * 脱敏工具类
  * <ul>
@@ -10,8 +8,23 @@ import lombok.experimental.UtilityClass;
  * <li>支持基于自定义规则的脱敏：如指定"3-6，8，10-"表示第 4，5，6，7，9，11 以及 11 之后的位使用加密字符替换</li>
  * </ul>
  */
-@UtilityClass
 public final class DesensitizationUtil {
+
+    /**
+     * 银行卡号脱敏，显示前六位后四位 <pre>
+     * DesensitizationUtil.maskBankCardNo("62226000000043211234") = "622260**********1234"
+     * </pre>
+     *
+     * @param input 待处理的文本
+     *
+     * @return 屏蔽后的文本
+     */
+    public static String maskBankCardNo(String input) {
+        if (isEmptyText(input)) {
+            return input;
+        }
+        return maskBySlide(input, 6, 4);
+    }
 
     /**
      * 中文姓名只显示第一个姓和最后一个汉字（单名则只显示最后一个汉字），其他隐藏为星号 <pre>
@@ -20,9 +33,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskChineseName(String input) {
+    public static String maskChineseName(String input) {
         if (isEmptyText(input)) {
             return input;
         }
@@ -35,9 +49,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskIdCardNo(String input) {
+    public static String maskIdCardNo(String input) {
         if (isEmptyText(input)) {
             return input;
         }
@@ -50,9 +65,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskPhoneNumber(String input) {
+    public static String maskPhoneNumber(String input) {
         if (isEmptyText(input)) {
             return input;
         }
@@ -65,9 +81,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskAddress(String input) {
+    public static String maskAddress(String input) {
         if (isEmptyText(input)) {
             return input;
         }
@@ -80,28 +97,14 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskEmail(String input) {
+    public static String maskEmail(String input) {
         if (isEmptyText(input)) {
             return input;
         }
         return input.replaceAll("(^\\\\w)[^@]*(@.*$)", "$1****$2");
-    }
-
-    /**
-     * 银行卡号脱敏，显示前六位后四位 <pre>
-     * DesensitizationUtil.maskBankCardNo("62226000000043211234") = "622260**********1234"
-     * </pre>
-     *
-     * @param input 待处理的文本
-     * @return 屏蔽后的文本
-     */
-    public String maskBankCardNo(String input) {
-        if (isEmptyText(input)) {
-            return input;
-        }
-        return maskBySlide(input, 6, 4);
     }
 
     /**
@@ -110,9 +113,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskPassword(String input) {
+    public static String maskPassword(String input) {
         return "******";
     }
 
@@ -125,9 +129,10 @@ public final class DesensitizationUtil {
      * </pre>
      *
      * @param input 待处理的文本
+     *
      * @return 屏蔽后的文本
      */
-    public String maskIp(String input) {
+    public static String maskIp(String input) {
         if (null == input) {
             return null;
         }
@@ -152,9 +157,10 @@ public final class DesensitizationUtil {
      * @param input 输入字符串
      * @param head  头部保留长度
      * @param tail  尾部保留长度
+     *
      * @return 屏蔽后的文本
      */
-    public String maskBySlide(String input, int head, int tail) {
+    public static String maskBySlide(String input, int head, int tail) {
         return maskBySlide(input, head, tail, false);
     }
 
@@ -169,9 +175,10 @@ public final class DesensitizationUtil {
      * @param head    头部保留长度
      * @param tail    尾部保留长度
      * @param reverse 是否反转
+     *
      * @return 屏蔽后的文本
      */
-    public String maskBySlide(String input, int head, int tail, boolean reverse) {
+    public static String maskBySlide(String input, int head, int tail, boolean reverse) {
         return maskBySlide(input, head, tail, "*", reverse);
     }
 
@@ -184,9 +191,10 @@ public final class DesensitizationUtil {
      * @param head       头部保留长度
      * @param tail       尾部保留长度
      * @param maskString 替换结果字符
+     *
      * @return 屏蔽后的文本
      */
-    public String maskBySlide(String input, int head, int tail, String maskString) {
+    public static String maskBySlide(String input, int head, int tail, String maskString) {
         return maskBySlide(input, head, tail, maskString, false);
     }
 
@@ -199,9 +207,10 @@ public final class DesensitizationUtil {
      * @param head       头部保留长度
      * @param tail       尾部保留长度
      * @param maskString 替换结果字符
+     *
      * @return 屏蔽后的文本
      */
-    public String maskBySlide(String input, int head, int tail, String maskString, boolean reverse) {
+    public static String maskBySlide(String input, int head, int tail, String maskString, boolean reverse) {
         if (isEmptyText(input)) {
             return input;
         }
@@ -227,9 +236,10 @@ public final class DesensitizationUtil {
      * 判断是否无效字符串
      *
      * @param text 字符串
+     *
      * @return true-无效字符串
      */
-    private boolean isEmptyText(String text) {
+    private static boolean isEmptyText(String text) {
         return null == text || text.isEmpty();
     }
 

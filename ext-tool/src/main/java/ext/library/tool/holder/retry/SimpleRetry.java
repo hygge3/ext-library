@@ -3,7 +3,8 @@ package ext.library.tool.holder.retry;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.core.Threads;
 import ext.library.tool.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -13,8 +14,8 @@ import java.io.IOException;
  * @param maxAttempts 重试次数
  * @param sleepMillis 重试时间间隔
  */
-@Slf4j
 public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
+    private static final Logger log = LoggerFactory.getLogger(SimpleRetry.class);
 
     /**
      * The default limit to the number of attempts for a new policy.

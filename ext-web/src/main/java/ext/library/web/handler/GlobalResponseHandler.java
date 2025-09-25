@@ -7,8 +7,8 @@ import ext.library.tool.util.ObjectUtil;
 import ext.library.web.annotation.RestWrapper;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.response.R;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -26,12 +26,15 @@ import java.util.Objects;
  * <p>
  * 标准 HTTP 状态码
  */
-@RequiredArgsConstructor
-@Slf4j
 @RestControllerAdvice
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final WebMvcProperties webMvcProperties;
+
+    public GlobalResponseHandler(WebMvcProperties webMvcProperties) {
+        this.webMvcProperties = webMvcProperties;
+    }
 
     /**
      * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值

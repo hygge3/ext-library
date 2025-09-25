@@ -1,7 +1,5 @@
 package ext.library.monitor;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.ComputerSystem;
@@ -27,14 +25,16 @@ import java.util.Properties;
 /**
  * 基于 OShi 服务器信息收集监控
  */
-@Getter
-@AllArgsConstructor
 public class OshiMonitor {
 
     /**
      * 获取系统信息
      */
     SystemInfo systemInfo;
+
+    public OshiMonitor(SystemInfo systemInfo) {
+        this.systemInfo = systemInfo;
+    }
 
     /**
      * 获取硬件抽象层信息
@@ -252,4 +252,7 @@ public class OshiMonitor {
         return new BigDecimal(str).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
+    public SystemInfo getSystemInfo() {
+        return systemInfo;
+    }
 }

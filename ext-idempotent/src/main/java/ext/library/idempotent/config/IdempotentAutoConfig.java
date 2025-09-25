@@ -7,8 +7,8 @@ import ext.library.idempotent.key.generator.IdempotentKeyGenerator;
 import ext.library.idempotent.key.store.IdempotentKeyStore;
 import ext.library.idempotent.key.store.InMemoryIdempotentKeyStore;
 import ext.library.idempotent.key.store.RedisIdempotentKeyStore;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,11 +17,10 @@ import org.springframework.context.annotation.Bean;
 /**
  * 幂等自动装配
  */
-@Slf4j
 @AutoConfiguration
-@RequiredArgsConstructor
 @EnableConfigurationProperties(IdempotentProperties.class)
 public class IdempotentAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 默认的幂等前缀生成器

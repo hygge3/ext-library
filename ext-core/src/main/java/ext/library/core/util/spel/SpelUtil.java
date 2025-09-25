@@ -2,7 +2,6 @@ package ext.library.core.util.spel;
 
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ObjectUtil;
-import lombok.experimental.UtilityClass;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
@@ -16,7 +15,6 @@ import java.util.List;
 /**
  * EL 工具类
  */
-@UtilityClass
 public class SpelUtil {
 
     /**

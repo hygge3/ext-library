@@ -5,7 +5,6 @@ import ext.library.idempotent.key.generator.IdempotentKeyGenerator;
 import ext.library.idempotent.key.store.IdempotentKeyStore;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.DateUtil;
-import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,12 +15,16 @@ import org.springframework.util.Assert;
  * 幂等切面
  */
 @Aspect
-@RequiredArgsConstructor
 public class IdempotentAspect {
 
     private final IdempotentKeyStore idempotentKeyStore;
 
     private final IdempotentKeyGenerator idempotentKeyGenerator;
+
+    public IdempotentAspect(IdempotentKeyStore idempotentKeyStore, IdempotentKeyGenerator idempotentKeyGenerator) {
+        this.idempotentKeyStore = idempotentKeyStore;
+        this.idempotentKeyGenerator = idempotentKeyGenerator;
+    }
 
     @Around("@annotation(idempotentAnnotation)")
     public Object around(ProceedingJoinPoint joinPoint, Idempotent idempotentAnnotation) throws Throwable {

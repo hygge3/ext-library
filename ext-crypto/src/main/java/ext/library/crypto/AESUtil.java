@@ -2,8 +2,8 @@ package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.Base64Util;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.encrypt.Encryptors;
 
 import javax.crypto.KeyGenerator;
@@ -12,10 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Objects;
 
-@Slf4j
-@UtilityClass
 public class AESUtil {
     private static final String ALGO = "AES";
+    private static final Logger log = LoggerFactory.getLogger(AESUtil.class);
 
     /**
      * 生成密钥对
@@ -24,7 +23,7 @@ public class AESUtil {
      *
      * @return {@link String } 密钥
      */
-    public String genKey(Integer keySize) {
+    public static String genKey(Integer keySize) {
         // 获取 AES 密钥生成器
         KeyGenerator keyGenerator;
         try {
@@ -51,7 +50,7 @@ public class AESUtil {
      *
      * @return 密文
      */
-    public String encrypt(String secretKey, String plainText, String salt) {
+    public static String encrypt(String secretKey, String plainText, String salt) {
         // 明文
         byte[] byteArray = plainText.getBytes();
         // 加密，设置密钥和随机数
@@ -69,7 +68,7 @@ public class AESUtil {
      *
      * @return 明文
      */
-    public String decrypt(String secretKey, String cipherText, String salt) {
+    public static String decrypt(String secretKey, String cipherText, String salt) {
         // 密文
         byte[] byteArray = cipherText.getBytes();
         byte[] plainArrayTemp = Base64Util.decodeUrlSafe(byteArray);

@@ -8,7 +8,8 @@ import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -27,8 +28,8 @@ import java.util.stream.Collectors;
  * redis 存储
  * </p>
  */
-@Slf4j
 public class SecurityRedisRepository implements SecurityRepository {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 根据登录 Id 查询 SecuritySession

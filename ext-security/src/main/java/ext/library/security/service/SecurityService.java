@@ -675,7 +675,7 @@ public interface SecurityService {
                                     tokenInfo.getDeviceType());
                         });
             }
-            if (Boolean.TRUE.equals(PROPERTIES.get().getIsConcurrentLogin())) {
+            if (Boolean.TRUE.equals(PROPERTIES.get().getConcurrentLogin())) {
                 // 允许并发，验证登录设备数量
                 if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.get().getMaxLoginLimit())
                         && availableTokenInfoList.size() >= PROPERTIES.get().getMaxLoginLimit()) {

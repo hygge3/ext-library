@@ -1,14 +1,11 @@
 package ext.library.tool.core;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.File;
 import java.nio.charset.Charset;
 
 /**
  * 系统工具类
  */
-@UtilityClass
 public class Systems {
 
     /**
@@ -16,46 +13,46 @@ public class Systems {
      *
      * @return boolean
      */
-    public boolean isWindows() {
+    public static boolean isWindows() {
         return osName().contains("Windows");
     }
 
-    public boolean isLinux() {
+    public static boolean isLinux() {
         return osName().contains("Linux");
     }
 
-    public boolean isMacX() {
+    public static boolean isMacX() {
         return osName().contains("OS X");
     }
 
-    public boolean isMac() {
+    public static boolean isMac() {
         return osName().contains("Mac OS");
     }
 
-    public boolean isAix() {
+    public static boolean isAix() {
         return osName().contains("AIX");
     }
 
-    public String osName() {
+    public static String osName() {
         return System.getProperty("os.name");
     }
 
     /**
      * 获取系统字符集
      */
-    public Charset charset() {
+    public static Charset charset() {
         return Charset.forName(System.getProperty("sun.jnu.encoding"));
     }
 
-    public String lineSeparator() {
+    public static String lineSeparator() {
         return System.lineSeparator();
     }
 
-    public String fileSeparator() {
+    public static String fileSeparator() {
         return File.separator;
     }
 
-    public String username() {
+    public static String username() {
         return System.getProperty("user.name");
     }
 

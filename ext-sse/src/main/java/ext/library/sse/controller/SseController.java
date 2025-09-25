@@ -5,7 +5,6 @@ import ext.library.sse.config.properties.SseProperties;
 import ext.library.sse.domain.SseMessage;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.web.annotation.RestWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -21,10 +20,13 @@ import java.util.List;
  */
 @RestController
 @ConditionalOnProperty(value = SseProperties.PREFIX + ".enabled", havingValue = "true")
-@RequiredArgsConstructor
 public class SseController implements DisposableBean {
 
     private final SseEmitterManager sseEmitterManager;
+
+    public SseController(SseEmitterManager sseEmitterManager) {
+        this.sseEmitterManager = sseEmitterManager;
+    }
 
     /**
      * 建立 SSE 连接

@@ -3,7 +3,8 @@ package ext.library.security.handler;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.tool.biz.exception.BizCode;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,11 +17,12 @@ import java.util.Map;
 /**
  * 认证异常处理器
  */
-@Slf4j
 @Order(0)
 @AutoConfiguration
 @RestControllerAdvice
 public class SecurityExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(SecurityExceptionHandler.class);
+
     /**
      * 打印日志
      *

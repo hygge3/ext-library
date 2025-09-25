@@ -1,7 +1,8 @@
 package ext.library.redis.serialize;
 
 import ext.library.redis.prefix.IRedisPrefixConverter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.nio.charset.StandardCharsets;
@@ -9,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * 自定义 String Key 序列化工具，添加全局 key 前缀
  */
-@Slf4j
 public class PrefixStringRedisSerializer extends StringRedisSerializer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final IRedisPrefixConverter iRedisPrefixConverter;
 

@@ -5,23 +5,25 @@ import ext.library.cache.enums.CacheType;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.tool.util.DateUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
 @Aspect
-@RequiredArgsConstructor
 public class CacheAspect {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     private final CacheStrategy cacheStrategy;
+
+    public CacheAspect(CacheStrategy cacheStrategy) {this.cacheStrategy = cacheStrategy;}
 
     @Pointcut("@annotation(ext.library.cache.annotion.Cache)")
     public void cacheAspect() {

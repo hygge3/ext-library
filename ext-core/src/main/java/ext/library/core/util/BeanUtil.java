@@ -6,8 +6,8 @@ import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
 import io.github.linpeilie.Converter;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanCopier;
@@ -34,13 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * bean 工具类
  */
-@Slf4j
-@UtilityClass
 public class BeanUtil {
+    private static final Logger log = LoggerFactory.getLogger(BeanUtil.class);
 
-    private final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
+    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
 
-    private final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 对象转 Map
@@ -49,7 +48,7 @@ public class BeanUtil {
      *
      * @return {@code Map<String, Object> }
      */
-    public Map<String, Object> beanToMap(@Nonnull Object obj) {
+    public static Map<String, Object> beanToMap(@Nonnull Object obj) {
         Map<String, Object> map = Maps.newHashMap();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
@@ -77,7 +76,7 @@ public class BeanUtil {
      *
      * @return {@code T }
      */
-    public <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
+    public static <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
         T object = org.springframework.beans.BeanUtils.instantiateClass(targetClass);
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
@@ -102,7 +101,7 @@ public class BeanUtil {
      *
      * @return 属性值
      */
-    public Object getProperty(Object bean, String propertyName) {
+    public static Object getProperty(Object bean, String propertyName) {
         if (bean == null) {
             return null;
         }
@@ -117,7 +116,7 @@ public class BeanUtil {
      * @param propertyName 属性名
      * @param value        属性值
      */
-    public void setProperty(Object bean, String propertyName, Object value) {
+    public static void setProperty(Object bean, String propertyName, Object value) {
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean could not null"));
         beanWrapper.setPropertyValue(propertyName, value);
     }
@@ -131,7 +130,7 @@ public class BeanUtil {
      */
 
     @SuppressWarnings("unchecked")
-    public <T> T deepClone(T source) {
+    public static <T> T deepClone(T source) {
         if (source == null) {
             return null;
         }
@@ -158,7 +157,7 @@ public class BeanUtil {
      * @return targetType
      */
     @SuppressWarnings("unchecked")
-    public <S, T> T convert(S source, Class<T> targetType) {
+    public static <S, T> T convert(S source, Class<T> targetType) {
         if (ObjectUtils.isEmpty(source)) {
             return ClassUtil.newInstance(targetType);
         }
@@ -180,7 +179,7 @@ public class BeanUtil {
      * @param target 转换后的对象
      */
     @SuppressWarnings("unchecked")
-    public <S, T> void convert(@Nonnull S source, @Nonnull T target) {
+    public static <S, T> void convert(@Nonnull S source, @Nonnull T target) {
         if (target.getClass().equals(source.getClass())) {
             target = (T) source;
         }
@@ -202,7 +201,7 @@ public class BeanUtil {
      */
 
     @SuppressWarnings("unchecked")
-    public <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
+    public static <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
         if (ObjectUtil.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
@@ -225,7 +224,7 @@ public class BeanUtil {
      *
      * @return bean 对象
      */
-    public <T> T convert(Map<String, Object> map, Class<T> targetType) {
+    public static <T> T convert(Map<String, Object> map, Class<T> targetType) {
         if (ObjectUtil.isEmpty(map)) {
             return ClassUtil.newInstance(targetType);
         }
@@ -237,7 +236,7 @@ public class BeanUtil {
         return mapToBean(map, targetType);
     }
 
-    private void copyByCopier(@Nonnull Object source, @Nonnull Object target) {
+    private static void copyByCopier(@Nonnull Object source, @Nonnull Object target) {
         Class<?> sourceType = source.getClass();
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
@@ -255,7 +254,7 @@ public class BeanUtil {
         }
     }
 
-    private <T> T copyByCopier(Object source, @Nonnull Class<T> targetType) {
+    private static <T> T copyByCopier(Object source, @Nonnull Class<T> targetType) {
         T t;
         try {
             t = targetType.getDeclaredConstructor().newInstance();
@@ -268,7 +267,7 @@ public class BeanUtil {
     }
 
     @Nonnull
-    private <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
+    private static <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
         List<T> resultList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
             T target;

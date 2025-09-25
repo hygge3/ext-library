@@ -1,17 +1,19 @@
 package ext.library.captcha.cache;
 
 import ext.library.cache.strategy.CacheStrategy;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
 /**
  * 验证码缓存
  */
-@RequiredArgsConstructor
 public class CaptchaCache {
 
-    final CacheStrategy cacheStrategy;
+    private final CacheStrategy cacheStrategy;
+
+    public CaptchaCache(CacheStrategy cacheStrategy) {
+        this.cacheStrategy = cacheStrategy;
+    }
 
     /**
      * 保存缓存

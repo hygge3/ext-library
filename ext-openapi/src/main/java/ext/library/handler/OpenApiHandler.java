@@ -11,7 +11,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
@@ -43,7 +42,6 @@ import java.util.stream.Stream;
 /**
  * 自定义 openapi 处理器 对源码功能进行修改 增强使用
  */
-@Slf4j
 @SuppressWarnings("all")
 public class OpenApiHandler extends OpenAPIService {
 

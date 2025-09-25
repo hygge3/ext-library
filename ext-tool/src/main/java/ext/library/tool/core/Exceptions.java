@@ -4,8 +4,8 @@ package ext.library.tool.core;
 import ext.library.tool.biz.exception.BizException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.io.PrintWriter;
@@ -16,9 +16,21 @@ import java.lang.reflect.UndeclaredThrowableException;
 /**
  * 异常处理工具类
  */
-@Slf4j
-@UtilityClass
 public class Exceptions {
+    private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
+
+    /**
+     * parse error to string
+     *
+     * @param e 异常
+     *
+     * @return 要打印的异常栈信息
+     */
+    public static String print(Throwable e) {
+        StringWriter stringWriter = new StringWriter();
+        e.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
+    }
 
     /**
      * 将 CheckedException 转换为 UncheckedException.
@@ -27,7 +39,7 @@ public class Exceptions {
      *
      * @return {RuntimeException}
      */
-    public RuntimeException unchecked(Throwable e) {
+    public static RuntimeException unchecked(Throwable e) {
         if (e instanceof Error error) {
             throw error;
         } else if (e instanceof IllegalAccessException || e instanceof IllegalArgumentException || e instanceof NoSuchMethodException) {
@@ -50,7 +62,7 @@ public class Exceptions {
      *
      * @return {RuntimeException}
      */
-    public BizException throwOut(@Nonnull String message, Object... args) {
+    public static BizException throwOut(@Nonnull String message, Object... args) {
         if (ObjectUtil.isEmpty(args)) {
             return new BizException(message);
         }
@@ -65,7 +77,7 @@ public class Exceptions {
      *
      * @return {RuntimeException}
      */
-    public BizException throwOut(Exception e, @Nonnull String message, Object... args) {
+    public static BizException throwOut(Exception e, @Nonnull String message, Object... args) {
         if (ObjectUtil.isEmpty(args)) {
             return new BizException(message);
         }
@@ -83,7 +95,7 @@ public class Exceptions {
      * @throws T 泛型
      */
     @SuppressWarnings("unchecked")
-    private <T extends Throwable> T runtime(Throwable throwable) throws T {
+    private static <T extends Throwable> T runtime(Throwable throwable) throws T {
         throw (T) throwable;
     }
 
@@ -94,7 +106,7 @@ public class Exceptions {
      *
      * @return 解包后的异常
      */
-    public Throwable unwrap(Throwable wrapped) {
+    public static Throwable unwrap(Throwable wrapped) {
         Throwable unwrapped = wrapped;
         while (true) {
             if (unwrapped instanceof InvocationTargetException exception) {
@@ -107,28 +119,14 @@ public class Exceptions {
         }
     }
 
-
     /**
      * 打印异常信息
      *
      * @param e 异常
      */
-    public void log(@Nonnull Throwable e) {
+    public static void log(@Nonnull Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
         log.error(e.getCause().getMessage());
-    }
-
-    /**
-     * parse error to string
-     *
-     * @param e 异常
-     *
-     * @return 要打印的异常栈信息
-     */
-    public static String print(Throwable e) {
-        StringWriter stringWriter = new StringWriter();
-        e.printStackTrace(new PrintWriter(stringWriter));
-        return stringWriter.toString();
     }
 
 

@@ -1,14 +1,10 @@
 package ext.library.tool.biz.exception;
 
 import ext.library.tool.biz.response.ResponseCode;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * http 状态码
  */
-@Getter
-@AllArgsConstructor
 public enum BizCode implements ResponseCode {
 
     // region 2xx Success
@@ -172,6 +168,11 @@ public enum BizCode implements ResponseCode {
 
     final String msg;
 
+    BizCode(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
     /**
      * 创建异常
      *
@@ -181,4 +182,13 @@ public enum BizCode implements ResponseCode {
         return new BizException(this);
     }
 
+    @Override
+    public int getCode() {
+        return code;
+    }
+
+    @Override
+    public String getMsg() {
+        return msg;
+    }
 }

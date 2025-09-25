@@ -2,8 +2,8 @@ package ext.library.crypto;
 
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.Base64Util;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -14,9 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-@Slf4j
-@UtilityClass
 public class DESUtil {
+    private static final Logger log = LoggerFactory.getLogger(DESUtil.class);
 
     private static final String ALGO = "DES";
     private static final String TRANSFORMATION = "DES/ECB/PKCS5Padding";
@@ -28,8 +27,8 @@ public class DESUtil {
      *
      * @return {@link String } 密钥
      */
-    public String genKey(Integer keySize) {
-        KeyGenerator keyGen = null;// 密钥生成器
+    public static String genKey(Integer keySize) {
+        KeyGenerator keyGen;// 密钥生成器
         try {
             keyGen = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
@@ -50,7 +49,7 @@ public class DESUtil {
      *
      * @return 密文
      */
-    public String encrypt(String secretKey, String plainText) {
+    public static String encrypt(String secretKey, String plainText) {
         byte[] encryptedBytes;
         try {
             DESKeySpec desKeySpec = new DESKeySpec(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -76,7 +75,7 @@ public class DESUtil {
      *
      * @return 明文
      */
-    public String decrypt(String secretKey, String cipherText) {
+    public static String decrypt(String secretKey, String cipherText) {
         byte[] decryptedBytes;
         try {
             DESKeySpec desKeySpec = new DESKeySpec(secretKey.getBytes(StandardCharsets.UTF_8));

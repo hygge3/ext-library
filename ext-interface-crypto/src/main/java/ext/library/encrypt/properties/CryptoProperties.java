@@ -1,15 +1,11 @@
 package ext.library.encrypt.properties;
 
 import ext.library.encrypt.enums.Algorithm;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 加解密自动配置属性
  */
-@Getter
-@Setter
 @ConfigurationProperties(CryptoProperties.PREFIX)
 public class CryptoProperties {
 
@@ -38,4 +34,44 @@ public class CryptoProperties {
 
     /** 盐，AES */
     private String salt;
+
+    public Algorithm getAlgo() {
+        return algo;
+    }
+
+    public void setAlgo(Algorithm algo) {
+        this.algo = algo;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
 }

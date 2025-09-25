@@ -7,7 +7,6 @@ import ext.library.security.enums.Logical;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.experimental.UtilityClass;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,7 +14,6 @@ import java.util.regex.Pattern;
 /**
  * 权限校验工具
  */
-@UtilityClass
 public class PermissionUtil {
 
     private static final Lazy<SecurityAuthority> authority = Lazy.of(() -> SpringUtil.getBean(SecurityAuthority.class));
@@ -23,7 +21,7 @@ public class PermissionUtil {
     /**
      * 当前用户是否有角色
      */
-    public boolean hasRole(String role) {
+    public static boolean hasRole(String role) {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
         List<String> roleList = authority.get().getRoleCodeList(securitySession.getLoginId());
         return null != roleList && roleList.stream().anyMatch(item -> strMatch(item, role));
@@ -32,7 +30,7 @@ public class PermissionUtil {
     /**
      * 当前用户是否有权限
      */
-    public boolean hasPermission(String permission) {
+    public static boolean hasPermission(String permission) {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
         List<String> permissionCodeList = authority.get().getPermissionCodeList(securitySession.getLoginId());
         return null != permissionCodeList && permissionCodeList.stream().anyMatch(item -> strMatch(item, permission));
@@ -41,7 +39,7 @@ public class PermissionUtil {
     /**
      * 当前用户是否有角色
      */
-    public List<String> getRoles() {
+    public static List<String> getRoles() {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
         return authority.get().getRoleCodeList(securitySession.getLoginId());
     }
@@ -49,7 +47,7 @@ public class PermissionUtil {
     /**
      * 当前用户是否有权限
      */
-    public List<String> getPermissions() {
+    public static List<String> getPermissions() {
         SecuritySession securitySession = SecurityUtil.getCurrentSecuritySession();
         return authority.get().getPermissionCodeList(securitySession.getLoginId());
     }
@@ -63,7 +61,7 @@ public class PermissionUtil {
      *
      * @return true 条件成立 false 条件不成立
      */
-    public boolean hasMultiPermValid(List<String> requires, Logical logical, List<String> has) {
+    public static boolean hasMultiPermValid(List<String> requires, Logical logical, List<String> has) {
         // 如果没有指定要校验的角色，那么直接跳过
         if (ObjectUtil.isEmpty(requires)) {
             return true;
@@ -94,7 +92,7 @@ public class PermissionUtil {
      *
      * @return boolean
      */
-    public boolean hasElement(List<String> list, String element) {
+    public static boolean hasElement(List<String> list, String element) {
         // 空集合直接返回 false
         if (ObjectUtil.isEmpty(list)) {
             return false;
@@ -116,7 +114,7 @@ public class PermissionUtil {
     /**
      * 两个字符串是否匹配，支持正则表达式
      */
-    public boolean strMatch(String s1, String s2) {
+    public static boolean strMatch(String s1, String s2) {
         // 两者均为 null 时，直接返回 true
         if (s1 == null && s2 == null) {
             return true;

@@ -1,7 +1,5 @@
 package ext.library.tool.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,60 +16,32 @@ import java.util.concurrent.TimeUnit;
 /**
  * 时间工具类
  */
-@UtilityClass
 public final class DateUtil {
 
     // region Common
     /** 默认时区 */
-    public final ZoneOffset DEFAULT_ZONE_OFFSET = ZoneOffset.of("+8");
+    public static final ZoneOffset DEFAULT_ZONE_OFFSET = ZoneOffset.of("+8");
 
     /** 默认时区 */
-    public final ZoneId DEFAULT_ZONE_ID = DEFAULT_ZONE_OFFSET.normalized();
+    public static final ZoneId DEFAULT_ZONE_ID = DEFAULT_ZONE_OFFSET.normalized();
 
     /** 日期时间格式化字符串 YMD HMS */
-    public final String STRING_FORMATTER_YMD_HMS = "yyyy-MM-dd HH:mm:ss";
+    public static final String STRING_FORMATTER_YMD_HMS = "yyyy-MM-dd HH:mm:ss";
 
     /** 日期时间格式化 YMD HMS */
-    public final DateTimeFormatter FORMATTER_YMD_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD_HMS);
+    public static final DateTimeFormatter FORMATTER_YMD_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD_HMS);
 
     /** 日期格式化字符串 YMD */
-    public final String STRING_FORMATTER_YMD = "yyyy-MM-dd";
+    public static final String STRING_FORMATTER_YMD = "yyyy-MM-dd";
 
     /** 日期格式化 YMD */
-    public final DateTimeFormatter FORMATTER_YMD = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD);
+    public static final DateTimeFormatter FORMATTER_YMD = DateTimeFormatter.ofPattern(STRING_FORMATTER_YMD);
 
     /** 时间格式化字符串 HMS */
-    public final String STRING_FORMATTER_HMS = "HH:mm:ss";
+    public static final String STRING_FORMATTER_HMS = "HH:mm:ss";
 
     /** 时间格式化 HMS */
-    public final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
-
-    /**
-     * 使用指定的格式化器格式化时间对象
-     *
-     * @param temporal  需要格式化的时间对象
-     * @param formatter 时间格式化器
-     *
-     * @return 格式化后的时间字符串
-     */
-    public String format(Temporal temporal, DateTimeFormatter formatter) {
-        return formatter.format(temporal);
-    }
-
-    /**
-     * 将时间间隔和时间单位转换为 Duration 对象
-     *
-     * @param interval 时间间隔
-     * @param timeUnit 时间单位
-     *
-     * @return 转换后的 Duration 对象
-     */
-    public Duration convert(long interval, TimeUnit timeUnit) {
-        return Duration.of(interval, timeUnit.toChronoUnit());
-    }
-    // endregion Common
-
-    // region LocalDateTime
+    public static final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
 
     /**
      * 字符串转时间
@@ -80,7 +50,7 @@ public final class DateUtil {
      *
      * @return java.time.LocalDateTime 时间
      */
-    public LocalDateTime parse(String str) {
+    public static LocalDateTime parse(String str) {
         return LocalDateTime.parse(str, FORMATTER_YMD_HMS);
     }
 
@@ -91,9 +61,12 @@ public final class DateUtil {
      *
      * @return java.time.LocalDateTime
      */
-    public LocalDateTime parse(Long timestamp) {
+    public static LocalDateTime parse(Long timestamp) {
         return parse(timestamp, DEFAULT_ZONE_ID);
     }
+    // endregion Common
+
+    // region LocalDateTime
 
     /**
      * 时间戳转时间
@@ -103,7 +76,7 @@ public final class DateUtil {
      *
      * @return java.time.LocalDateTime
      */
-    public LocalDateTime parse(Long timestamp, ZoneId zoneId) {
+    public static LocalDateTime parse(Long timestamp, ZoneId zoneId) {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId);
     }
 
@@ -114,7 +87,7 @@ public final class DateUtil {
      *
      * @return {@code Long }
      */
-    public Long toTimestamp(LocalDateTime dateTime) {
+    public static Long toTimestamp(LocalDateTime dateTime) {
         return toTimestamp(dateTime, DEFAULT_ZONE_OFFSET);
     }
 
@@ -126,7 +99,7 @@ public final class DateUtil {
      *
      * @return {@code Long }
      */
-    public Long toTimestamp(LocalDateTime dateTime, ZoneOffset offset) {
+    public static Long toTimestamp(LocalDateTime dateTime, ZoneOffset offset) {
         return dateTime.toInstant(offset).toEpochMilli();
     }
 
@@ -137,7 +110,7 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalDateTime dateTime) {
+    public static String format(LocalDateTime dateTime) {
         return format(dateTime, FORMATTER_YMD_HMS);
     }
 
@@ -149,13 +122,9 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalDateTime dateTime, String formatter) {
+    public static String format(LocalDateTime dateTime, String formatter) {
         return format(dateTime, DateTimeFormatter.ofPattern(formatter));
     }
-
-    // endregion LocalDateTime
-
-    // region LocalDate
 
     /**
      * 字符串转日期
@@ -164,7 +133,7 @@ public final class DateUtil {
      *
      * @return java.time.LocalDate 日期
      */
-    public LocalDate parseDate(String str) {
+    public static LocalDate parseDate(String str) {
         return LocalDate.parse(str, FORMATTER_YMD);
     }
 
@@ -175,9 +144,13 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalDate date) {
+    public static String format(LocalDate date) {
         return format(date, FORMATTER_YMD);
     }
+
+    // endregion LocalDateTime
+
+    // region LocalDate
 
     /**
      * 日期格式化
@@ -187,13 +160,9 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalDate date, String formatter) {
+    public static String format(LocalDate date, String formatter) {
         return format(date, DateTimeFormatter.ofPattern(formatter));
     }
-
-    // endregion LocalDate
-
-    // region LocalTime
 
     /**
      * 字符串转时间
@@ -202,7 +171,7 @@ public final class DateUtil {
      *
      * @return java.time.LocalTime 日期
      */
-    public LocalTime parseTime(String str) {
+    public static LocalTime parseTime(String str) {
         return LocalTime.parse(str, FORMATTER_HMS);
     }
 
@@ -213,9 +182,13 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalTime time) {
+    public static String format(LocalTime time) {
         return format(time, FORMATTER_HMS);
     }
+
+    // endregion LocalDate
+
+    // region LocalTime
 
     /**
      * 时间格式化
@@ -225,13 +198,9 @@ public final class DateUtil {
      *
      * @return {@code String }
      */
-    public String format(LocalTime time, String formatter) {
+    public static String format(LocalTime time, String formatter) {
         return format(time, DateTimeFormatter.ofPattern(formatter));
     }
-
-    // endregion LocalTime
-
-    // region Helper
 
     /**
      * 格式化 Duration 为天时分秒毫秒
@@ -240,7 +209,7 @@ public final class DateUtil {
      *
      * @return 格式化后的字符串
      */
-    public String format(Duration duration) {
+    public static String format(Duration duration) {
         long days = duration.toDays();
         long hours = duration.toHours() % 24;
         long minutes = duration.toMinutes() % 60;
@@ -275,9 +244,13 @@ public final class DateUtil {
      *
      * @return 天数
      */
-    public Duration different(LocalDateTime start, LocalDateTime end) {
+    public static Duration different(LocalDateTime start, LocalDateTime end) {
         return Duration.between(start, end);
     }
+
+    // endregion LocalTime
+
+    // region Helper
 
     /**
      * 判断某个时间是否在某个时间段
@@ -288,7 +261,7 @@ public final class DateUtil {
      *
      * @return 是否在…之间
      */
-    public boolean isBetween(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
+    public static boolean isBetween(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
         return dateTime.isBefore(endTime) && dateTime.isAfter(startTime);
     }
 
@@ -302,7 +275,7 @@ public final class DateUtil {
      *
      * @return 是否在…之间
      */
-    public Integer position(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
+    public static Integer position(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
         // 未开始
         if (startTime.isAfter(dateTime)) {
             return -1;
@@ -322,7 +295,7 @@ public final class DateUtil {
      *
      * @return 当天的开始时间
      */
-    public LocalDateTime getDayStart(LocalDateTime time) {
+    public static LocalDateTime getDayStart(LocalDateTime time) {
         return time.with(LocalTime.MIN);
     }
 
@@ -333,7 +306,7 @@ public final class DateUtil {
      *
      * @return 当天的结束时间
      */
-    public LocalDateTime getDayEnd(LocalDateTime time) {
+    public static LocalDateTime getDayEnd(LocalDateTime time) {
         return time.with(LocalTime.MAX);
     }
 
@@ -344,7 +317,7 @@ public final class DateUtil {
      *
      * @return 当周的开始时间
      */
-    public LocalDateTime getWeekStart(LocalDateTime time) {
+    public static LocalDateTime getWeekStart(LocalDateTime time) {
         return time.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
     }
 
@@ -355,7 +328,7 @@ public final class DateUtil {
      *
      * @return 当周的结束时间
      */
-    public LocalDateTime getWeekEnd(LocalDateTime time) {
+    public static LocalDateTime getWeekEnd(LocalDateTime time) {
         return time.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX);
     }
 
@@ -366,7 +339,7 @@ public final class DateUtil {
      *
      * @return 当月的开始时间
      */
-    public LocalDateTime getMonthStart(LocalDateTime time) {
+    public static LocalDateTime getMonthStart(LocalDateTime time) {
         return time.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
     }
 
@@ -377,8 +350,32 @@ public final class DateUtil {
      *
      * @return 当月的结束时间
      */
-    public LocalDateTime getMonthEnd(LocalDateTime time) {
+    public static LocalDateTime getMonthEnd(LocalDateTime time) {
         return time.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+    }
+
+    /**
+     * 使用指定的格式化器格式化时间对象
+     *
+     * @param temporal  需要格式化的时间对象
+     * @param formatter 时间格式化器
+     *
+     * @return 格式化后的时间字符串
+     */
+    public static String format(Temporal temporal, DateTimeFormatter formatter) {
+        return formatter.format(temporal);
+    }
+
+    /**
+     * 将时间间隔和时间单位转换为 Duration 对象
+     *
+     * @param interval 时间间隔
+     * @param timeUnit 时间单位
+     *
+     * @return 转换后的 Duration 对象
+     */
+    public static Duration convert(long interval, TimeUnit timeUnit) {
+        return Duration.of(interval, timeUnit.toChronoUnit());
     }
 
     // endregion Helper

@@ -6,8 +6,9 @@ import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.path.PathImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.annotation.Order;
@@ -40,12 +41,12 @@ import java.util.Set;
 /**
  * 全局异常处理器
  */
-@Slf4j
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * 打印日志

@@ -7,8 +7,8 @@ import ext.library.tool.util.ObjectUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -32,16 +32,20 @@ import java.util.Optional;
 /**
  * OpenAPI 的自动配置类
  */
-@Slf4j
-@RequiredArgsConstructor
 @EnableConfigurationProperties(OpenApiProperties.class)
 @AutoConfigureBefore(SpringDocConfiguration.class)
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final OpenApiProperties openApiProperties;
 
     private final ServerProperties serverProperties;
+
+    public OpenApiAutoConfig(OpenApiProperties openApiProperties, ServerProperties serverProperties) {
+        this.openApiProperties = openApiProperties;
+        this.serverProperties = serverProperties;
+    }
 
     @Bean
     @ConditionalOnMissingBean(OpenAPI.class)

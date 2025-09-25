@@ -46,6 +46,7 @@ public class LatchUtil {
      *
      * @param timeout  等待的最长时间
      * @param timeUnit 时间单位
+     *
      * @return 如果所有任务都完成则返回 true，否则返回 false
      */
     public static boolean waitFor(long timeout, TimeUnit timeUnit) {

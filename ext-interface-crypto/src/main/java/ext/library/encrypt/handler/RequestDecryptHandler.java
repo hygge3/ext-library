@@ -5,8 +5,8 @@ import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.StringUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -29,14 +29,17 @@ import java.nio.charset.StandardCharsets;
 /**
  * 请求解密处理器
  */
-@RequiredArgsConstructor
-@Slf4j
 @ConditionalOnClass(HttpServletRequest.class)
 @EnableConfigurationProperties(CryptoProperties.class)
 @ControllerAdvice
 public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CryptoProperties cryptoProperties;
+
+    public RequestDecryptHandler(CryptoProperties cryptoProperties) {
+        this.cryptoProperties = cryptoProperties;
+    }
 
     @Override
     public boolean supports(@Nonnull MethodParameter methodParameter, @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {

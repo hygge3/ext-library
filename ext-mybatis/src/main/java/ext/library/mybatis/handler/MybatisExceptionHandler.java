@@ -2,8 +2,9 @@ package ext.library.mybatis.handler;
 
 import com.mybatisflex.core.exception.MybatisFlexException;
 import ext.library.tool.biz.exception.BizCode;
-import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.MyBatisSystemException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -21,11 +22,11 @@ import java.util.Map;
 /**
  * Mybatis 异常处理器
  */
-@Slf4j
 @Order(0)
 @AutoConfiguration
 @RestControllerAdvice
 public class MybatisExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(MybatisExceptionHandler.class);
 
     /**
      * 打印日志

@@ -1,14 +1,15 @@
 package ext.library.redis.serialize;
 
 import ext.library.redis.prefix.IRedisPrefixConverter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 /**
  * 自定义 JDK Key 序列化工具，添加全局 key 前缀
  */
-@Slf4j
 public class PrefixJdkRedisSerializer extends JdkSerializationRedisSerializer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final IRedisPrefixConverter redisPrefixConverter;
 

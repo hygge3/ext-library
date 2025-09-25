@@ -5,7 +5,8 @@ import ext.library.captcha.config.properties.CaptchaProperties;
 import ext.library.captcha.core.Captcha;
 import ext.library.captcha.service.CaptchaServiceImpl;
 import ext.library.captcha.service.ICaptchaService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,10 +17,10 @@ import jakarta.annotation.Nonnull;
 /**
  * 验证码自动配置
  */
-@Slf4j
 @AutoConfiguration
 @EnableConfigurationProperties(CaptchaProperties.class)
 public class CaptchaAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnMissingBean

@@ -9,18 +9,19 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /**
  * 数据脱敏 json 序列化工具
  */
-@Slf4j
 public class SensitiveHandler extends JsonSerializer<String> implements ContextualSerializer {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private IDesensitizeRule strategy;
 
@@ -34,15 +35,18 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
         }
     }
 
-    @SneakyThrows
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, @Nonnull BeanProperty property)
-            throws JsonMappingException {
+    public JsonSerializer<?> createContextual(SerializerProvider prov, @Nonnull BeanProperty property) throws JsonMappingException {
         Sensitive annotation = property.getAnnotation(Sensitive.class);
         if (Objects.nonNull(annotation) && Objects.equals(String.class, property.getType().getRawClass())) {
             if (annotation.isCustomRule()) {
                 Class<? extends IDesensitizeRule> rule = annotation.customRule();
-                this.strategy = rule.getDeclaredConstructor().newInstance();
+                try {
+                    this.strategy = rule.getDeclaredConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                         NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
                 return this;
             }
             this.strategy = annotation.strategy();

@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.translation.annotation.Translation;
 import ext.library.translation.service.TranslationInterface;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.StringUtils;
@@ -21,14 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 翻译处理器
  */
-@Slf4j
 public class TranslationHandler extends JsonSerializer<Object> implements ContextualSerializer {
-
     /**
      * 全局翻译实现类映射器
      */
     public static final Map<String, TranslationInterface<?>> TRANSLATION_MAPPER = new ConcurrentHashMap<>();
-
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private Translation translation;
 
     @Override

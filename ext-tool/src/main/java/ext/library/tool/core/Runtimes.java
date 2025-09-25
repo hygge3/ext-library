@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.GeneralTypeCastUtil;
-import lombok.experimental.UtilityClass;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
@@ -14,10 +13,9 @@ import java.util.List;
 /**
  * 运行时工具类
  */
-@UtilityClass
 public class Runtimes {
 
-    private volatile int pId = -1;
+    private static volatile int pId = -1;
 
     /**
      * 获得当前进程的 PID
@@ -26,7 +24,7 @@ public class Runtimes {
      *
      * @return pid
      */
-    public int getPId() {
+    public static int getPId() {
         if (pId > 0) {
             return pId;
         }
@@ -45,7 +43,7 @@ public class Runtimes {
      *
      * @return {Instant}
      */
-    public Instant getStartTime() {
+    public static Instant getStartTime() {
         return Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime());
     }
 
@@ -54,7 +52,7 @@ public class Runtimes {
      *
      * @return {Duration}
      */
-    public Duration getUpTime() {
+    public static Duration getUpTime() {
         return Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime());
     }
 
@@ -63,7 +61,7 @@ public class Runtimes {
      *
      * @return jvm 参数
      */
-    public String getJvmArguments() {
+    public static String getJvmArguments() {
         List<String> vmArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
         return Joiner.on(Symbol.C_SPACE).skipNulls().join(vmArguments);
     }
@@ -73,7 +71,7 @@ public class Runtimes {
      *
      * @return cpu count
      */
-    public int getCpuNum() {
+    public static int getCpuNum() {
         return Holder.CPU_CORE_NUM;
     }
 

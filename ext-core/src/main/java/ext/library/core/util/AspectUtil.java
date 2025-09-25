@@ -1,26 +1,25 @@
 package ext.library.core.util;
 
-import jakarta.annotation.Nonnull;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import lombok.experimental.UtilityClass;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+
+import jakarta.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * 切面工具类
  */
-@UtilityClass
 public final class AspectUtil {
 
     /**
      * 获取切入的方法
      *
      * @param point 切面
+     *
      * @return java.lang.reflect.Method
      */
-    public Method getMethod(@Nonnull ProceedingJoinPoint point) {
+    public static Method getMethod(@Nonnull ProceedingJoinPoint point) {
         if (point.getSignature() instanceof MethodSignature ms) {
             return ms.getMethod();
         }
@@ -32,9 +31,10 @@ public final class AspectUtil {
      *
      * @param point 切面
      * @param cls   注解类型
+     *
      * @return T 注解类型
      */
-    public <T extends Annotation> T getAnnotation(ProceedingJoinPoint point, Class<T> cls) {
+    public static <T extends Annotation> T getAnnotation(ProceedingJoinPoint point, Class<T> cls) {
         Method method = getMethod(point);
         T t = null;
         if (method != null) {

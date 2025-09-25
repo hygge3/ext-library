@@ -1,7 +1,8 @@
 package ext.library.cache.strategy;
 
 import ext.library.json.util.JsonUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -11,10 +12,10 @@ import java.util.Objects;
  *
  * @since 2025.08.29
  */
-@Slf4j
 public class L2Strategy implements CacheStrategy {
     final CacheStrategy redisStrategy = new RedisStrategy();
     final CacheStrategy caffeineStrategy = new CaffeineStrategy();
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {

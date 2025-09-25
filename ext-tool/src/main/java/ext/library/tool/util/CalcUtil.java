@@ -1,7 +1,6 @@
 package ext.library.tool.util;
 
 import com.google.common.base.Preconditions;
-import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,13 +10,12 @@ import java.math.RoundingMode;
  * <p>
  * 由于 Java 的简单类型不能够精确的对浮点数进行运算，这个工具类提供精确的浮点数运算，包括加减乘除和四舍五入。
  */
-@UtilityClass
 public class CalcUtil {
 
     /**
      * 默认精确到小数点以后 10 位
      */
-    private final int DEFAULT_DIV_SCALE = 10;
+    private static final int DEFAULT_DIV_SCALE = 10;
 
     /**
      * 提供精确的加法运算。
@@ -27,7 +25,7 @@ public class CalcUtil {
      *
      * @return 参数的和
      */
-    public BigDecimal add(Object augend, Object... addends) {
+    public static BigDecimal add(Object augend, Object... addends) {
         BigDecimal bdAugend = GeneralTypeCastUtil.getAsBigDecimal(augend);
         for (Object addend : addends) {
             BigDecimal bdAddend = GeneralTypeCastUtil.getAsBigDecimal(addend);
@@ -44,7 +42,7 @@ public class CalcUtil {
      *
      * @return 参数的差
      */
-    public BigDecimal sub(Object minuend, Object... subtrahends) {
+    public static BigDecimal sub(Object minuend, Object... subtrahends) {
         BigDecimal bdMinuend = GeneralTypeCastUtil.getAsBigDecimal(minuend);
         for (Object subtrahend : subtrahends) {
             BigDecimal bdSubtrahend = GeneralTypeCastUtil.getAsBigDecimal(subtrahend);
@@ -61,7 +59,7 @@ public class CalcUtil {
      *
      * @return 两个参数的积
      */
-    public BigDecimal mul(Object v1, Object v2) {
+    public static BigDecimal mul(Object v1, Object v2) {
         BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
         BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
         return b1.multiply(b2);
@@ -75,7 +73,7 @@ public class CalcUtil {
      *
      * @return 两个参数的商
      */
-    public BigDecimal div(Object v1, Object v2) {
+    public static BigDecimal div(Object v1, Object v2) {
         return div(v1, v2, DEFAULT_DIV_SCALE);
     }
 
@@ -88,7 +86,7 @@ public class CalcUtil {
      *
      * @return 两个参数的商
      */
-    public BigDecimal div(Object v1, Object v2, int scale) {
+    public static BigDecimal div(Object v1, Object v2, int scale) {
         return div(v1, v2, scale, RoundingMode.HALF_UP);
     }
 
@@ -101,7 +99,7 @@ public class CalcUtil {
      *
      * @return 两个参数的商
      */
-    public BigDecimal div(Object v1, Object v2, int scale, RoundingMode roundingMode) {
+    public static BigDecimal div(Object v1, Object v2, int scale, RoundingMode roundingMode) {
         Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
         BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
         BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
@@ -144,7 +142,7 @@ public class CalcUtil {
      *
      * @return {@code BigDecimal }
      */
-    public BigDecimal percentage(Object dividend, int scale) {
+    public static BigDecimal percentage(Object dividend, int scale) {
         if (dividend == null) {
             return null;
         }

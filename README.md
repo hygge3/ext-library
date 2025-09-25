@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6eafae2ee8d24d80a0d8c7994d91d7ac)](https://app.codacy.com/gh/hygge3/ext-library/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![Version](https://img.shields.io/badge/version-3.5.0-green.svg)
-![JAVA 21](https://img.shields.io/badge/JDK-21-brightgreen.svg)
+![JAVA 25](https://img.shields.io/badge/JDK-25-brightgreen.svg)
 ![Spring Boot](https://img.shields.io/github/v/release/spring-projects/spring-boot?label=version)
 ![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/ext-library)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/hygge3/ext-library)
@@ -33,12 +33,3 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 ## 🐛 已知问题
 
 暂无
-
-## 🔍️ 为什么选择 ext-library？
-
-- 模块化设计：只使用您需要的，保持应用程序轻量化
-- 一致的 API：所有模块都遵循相同的设计模式和约定
-- 性能优化：以性能为核心构建，利用最新的 Java 功能
-- 生产就绪：经过充分测试并在生产环境中使用
-- 积极开发：持续更新新功能和改进
-- 全面文档：所有模块都有详细的文档和示例

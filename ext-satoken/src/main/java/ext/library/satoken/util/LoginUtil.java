@@ -6,7 +6,6 @@ import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import ext.library.satoken.domain.SecurityUser;
 import ext.library.tool.util.GeneralTypeCastUtil;
 import ext.library.tool.util.ObjectUtil;
-import lombok.experimental.UtilityClass;
 
 import jakarta.annotation.Nonnull;
 import java.util.Objects;
@@ -19,7 +18,6 @@ import java.util.Objects;
  * <p>
  * 多用户体系 针对 多种用户类型 但权限控制不一致 可以组成 多用户类型表与多设备类型 分别控制权限
  */
-@UtilityClass
 public class LoginUtil {
 
     private static final String LOGIN_USER_KEY = "loginUser";

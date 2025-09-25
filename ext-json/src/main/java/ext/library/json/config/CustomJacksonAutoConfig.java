@@ -14,7 +14,8 @@ import ext.library.json.module.CustomModule;
 import ext.library.json.serializer.BigNumberSerializer;
 import ext.library.json.util.CustomizeMapper;
 import ext.library.tool.util.DateUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -33,13 +34,12 @@ import java.time.LocalTime;
 /**
  * 自定义 Jackson 自动配置
  */
-@Slf4j
 @AutoConfiguration(before = JacksonAutoConfiguration.class)
 @EnableConfigurationProperties({JacksonProperties.class})
 public class CustomJacksonAutoConfig {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     // 没有使用 {@link RequestBody} 反序列化时生效
-
 
     /**
      * 日期参数接收转换器，将 json 字符串转为日期类型

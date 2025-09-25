@@ -1,12 +1,10 @@
 package ext.library.http.useragent;
 
 import ext.library.tool.util.ObjectUtil;
-import lombok.experimental.UtilityClass;
 
 /**
  * User-Agent 解析器
  */
-@UtilityClass
 public class UserAgentParser {
 
     /**
@@ -16,7 +14,7 @@ public class UserAgentParser {
      *
      * @return {@link UserAgent}
      */
-    public UserAgent parse(String userAgentString) {
+    public static UserAgent parse(String userAgentString) {
         if (ObjectUtil.isEmpty(userAgentString)) {
             return null;
         }
@@ -58,7 +56,7 @@ public class UserAgentParser {
      *
      * @return 浏览器类型
      */
-    private Browser parseBrowser(String userAgentString) {
+    private static Browser parseBrowser(String userAgentString) {
         for (Browser browser : Browser.browers) {
             if (browser.isMatch(userAgentString)) {
                 return browser;
@@ -74,7 +72,7 @@ public class UserAgentParser {
      *
      * @return 引擎类型
      */
-    private Engine parseEngine(String userAgentString) {
+    private static Engine parseEngine(String userAgentString) {
         for (Engine engine : Engine.engines) {
             if (engine.isMatch(userAgentString)) {
                 return engine;
@@ -90,7 +88,7 @@ public class UserAgentParser {
      *
      * @return 系统类型
      */
-    private OS parseOS(String userAgentString) {
+    private static OS parseOS(String userAgentString) {
         for (OS os : OS.oses) {
             if (os.isMatch(userAgentString)) {
                 return os;
@@ -106,7 +104,7 @@ public class UserAgentParser {
      *
      * @return 平台类型
      */
-    private Platform parsePlatform(String userAgentString) {
+    private static Platform parsePlatform(String userAgentString) {
         for (Platform platform : Platform.platforms) {
             if (platform.isMatch(userAgentString)) {
                 return platform;

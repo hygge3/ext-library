@@ -3,8 +3,6 @@ package ext.library.crypto;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.Base64Util;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.SM2Engine;
@@ -20,6 +18,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.custom.gm.SM2P256V1Curve;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -38,9 +38,8 @@ import java.security.cert.X509Certificate;
  *
  * @since 2025.09.02
  */
-@Slf4j
-@UtilityClass
 public class SM2Util {
+    private static final Logger log = LoggerFactory.getLogger(SM2Util.class);
 
     // SM2 曲线参数
     private static final SM2P256V1Curve CURVE = new SM2P256V1Curve();
@@ -56,7 +55,7 @@ public class SM2Util {
      *
      * @return 密钥对数组，[0] 为私钥 (Base64 格式)，[1] 为公钥 (Base64 格式)
      */
-    public String[] genKeyPair() {
+    public static String[] genKeyPair() {
         // 初始化密钥对生成器
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
         keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, Holder.SECURE_RANDOM));
@@ -118,7 +117,7 @@ public class SM2Util {
      *
      * @return 明文
      */
-    public String decrypt(String privateKey, String cipherText) {
+    public static String decrypt(String privateKey, String cipherText) {
         // 解析私钥
         byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
@@ -151,7 +150,7 @@ public class SM2Util {
      *
      * @return 签名值（Base64 编码）
      */
-    public String sign(String privateKey, String plainText) {
+    public static String sign(String privateKey, String plainText) {
         // 解析私钥
         byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
@@ -183,7 +182,7 @@ public class SM2Util {
      *
      * @return 验签结果
      */
-    public boolean verify(String publicKey, String plainText, String signature) {
+    public static boolean verify(String publicKey, String plainText, String signature) {
         // 解析公钥
         byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
         ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
@@ -209,7 +208,7 @@ public class SM2Util {
      *
      * @return 验签结果
      */
-    public boolean verifyWithCertificate(String certText, String plainText, String signature) {
+    public static boolean verifyWithCertificate(String certText, String plainText, String signature) {
         X509Certificate certificate;
         try {
             // 解析证书
@@ -258,7 +257,7 @@ public class SM2Util {
      *
      * @return 是否为 SM2 曲线
      */
-    private boolean isSM2Curve(ECParameterSpec parameterSpec) {
+    private static boolean isSM2Curve(ECParameterSpec parameterSpec) {
         if (parameterSpec == null) {
             return false;
         }

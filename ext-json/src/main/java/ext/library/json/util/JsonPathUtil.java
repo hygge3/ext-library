@@ -2,14 +2,13 @@ package ext.library.json.util;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
+
 import java.util.Map;
 import java.util.Objects;
-import lombok.experimental.UtilityClass;
 
 /**
  * JSON-Path 工具类
  */
-@UtilityClass
 public class JsonPathUtil {
 
     /**
@@ -19,9 +18,10 @@ public class JsonPathUtil {
      *
      * @param json json 字符串
      * @param path 路径
+     *
      * @return {@link T }
      */
-    public <T> T readPath(String json, String path) {
+    public static <T> T readPath(String json, String path) {
         return readPath(json).read(path);
     }
 
@@ -31,9 +31,10 @@ public class JsonPathUtil {
      * 返回 JSONPath 读取对象
      *
      * @param json json 字符串
+     *
      * @return {@link ReadContext }
      */
-    public ReadContext readPath(String json) {
+    public static ReadContext readPath(String json) {
         return JsonPath.parse(json);
     }
 
@@ -42,9 +43,10 @@ public class JsonPathUtil {
      *
      * @param context json 内容
      * @param path    路径
+     *
      * @return {@link ReadContext }
      */
-    public Boolean existPath(ReadContext context, String path) {
+    public static Boolean existPath(ReadContext context, String path) {
         return Objects.nonNull(context.read(path));
     }
 
@@ -53,9 +55,10 @@ public class JsonPathUtil {
      *
      * @param context   内容
      * @param valueType value 类型
+     *
      * @return {@link ReadContext }
      */
-    public <T> T readObj(ReadContext context, Class<T> valueType) {
+    public static <T> T readObj(ReadContext context, Class<T> valueType) {
         return JsonUtil.readObj(context.jsonString(), valueType);
     }
 
@@ -63,9 +66,10 @@ public class JsonPathUtil {
      * JSONPath 读取对象
      *
      * @param context 内容
+     *
      * @return {@link ReadContext }
      */
-    public Map<String, Object> readMap(ReadContext context) {
+    public static Map<String, Object> readMap(ReadContext context) {
         return JsonUtil.readMap(context.jsonString());
     }
 

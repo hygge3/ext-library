@@ -368,6 +368,7 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @return a proxy for the document
      */
+    @Serial
     private Object writeReplace() {
         return new SerializationProxy(this);
     }
@@ -383,11 +384,13 @@ public final class ObjectId implements Comparable<ObjectId>, Serializable {
      *
      * @throws InvalidObjectException in all cases
      */
+    @Serial
     private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException("Proxy required");
     }
 
     private record SerializationProxy(byte[] bytes) implements Serializable {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private SerializationProxy(final ObjectId bytes) {

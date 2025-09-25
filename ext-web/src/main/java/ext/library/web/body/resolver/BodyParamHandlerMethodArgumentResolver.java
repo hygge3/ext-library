@@ -6,7 +6,6 @@ import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.GeneralTypeCastUtil;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -22,9 +21,7 @@ import java.util.Objects;
 /**
  * BodyParam 参数解析器 实现 HandlerMethodArgumentResolver 接口
  */
-@Slf4j
 public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
     private static final String APPLICATION_JSON = "application/json";
 
     /**

@@ -4,17 +4,15 @@ import ext.library.core.util.SpringUtil;
 import ext.library.sse.domain.SseMessage;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.tool.holder.Lazy;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SSE 工具类
  */
-@Slf4j
-@UtilityClass
 public final class SseUtil {
-
     private final static Lazy<SseEmitterManager> MANAGER = Lazy.of(() -> SpringUtil.getBean(SseEmitterManager.class));
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 向指定的 WebSocket 会话发送消息

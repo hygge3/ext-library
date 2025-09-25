@@ -4,9 +4,8 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.DateUtil;
-import lombok.Getter;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.connection.MessageListener;
@@ -61,69 +60,14 @@ import java.util.stream.Collectors;
  * Redis 操作的辅助类
  */
 @SuppressWarnings("ConstantConditions")
-@Slf4j
-@UtilityClass
 public class RedisUtil {
-
     /**
      * 自增并设置过期时间的 lua 脚本
      */
     // language=redis
     private static final DefaultRedisScript<Long> INCR_BY_EXPIRE_LUA_SCRIPT = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
-
-    @Getter
-    private final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
-
-    @SuppressWarnings("all")
-    private RedisSerializer<String> getKeySerializer() {
-        return (RedisSerializer<String>) getRedisTemplate().getKeySerializer();
-    }
-
-    @SuppressWarnings("all")
-    private RedisSerializer<String> getValueSerializer() {
-        return (RedisSerializer<String>) getRedisTemplate().getValueSerializer();
-    }
-
-    // region 获取各种 Operations
-
-    public HashOperations<String, String, String> hashOps() {
-        return getRedisTemplate().opsForHash();
-    }
-
-    public ValueOperations<String, String> valueOps() {
-        return getRedisTemplate().opsForValue();
-    }
-
-    public ListOperations<String, String> listOps() {
-        return getRedisTemplate().opsForList();
-    }
-
-    public SetOperations<String, String> setOps() {
-        return getRedisTemplate().opsForSet();
-    }
-
-    public ZSetOperations<String, String> zSetOps() {
-        return getRedisTemplate().opsForZSet();
-    }
-
-    public StreamOperations<String, String, String> streamOps() {
-        return getRedisTemplate().opsForStream();
-    }
-
-    public GeoOperations<String, String> getGeoOps() {
-        return getRedisTemplate().opsForGeo();
-    }
-
-    public HyperLogLogOperations<String, String> getHllOps() {
-        return getRedisTemplate().opsForHyperLogLog();
-    }
-
-    // endregion
-
-    // region 功能操作
-
-    // endregion
-    // region key command
+    private static final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
     /**
      * 删除指定的 key
@@ -137,8 +81,12 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/docs/latest/commands/unlink/">Unlink Command</a>
      */
-    public boolean unlink(String key) {
+    public static boolean unlink(String key) {
         return getRedisTemplate().unlink(key);
+    }
+
+    public static RedisTemplate<String, String> getRedisTemplate() {
+        return redisTemplate;
     }
 
     /**
@@ -149,13 +97,54 @@ public class RedisUtil {
      *
      * @throws RuntimeException 当 Redis 操作出现异常时抛出
      */
-    public void patternUnlink(String pattern) {
+    public static void patternUnlink(String pattern) {
         try (Cursor<String> cursor = scan(pattern)) {
             cursor.forEachRemaining(RedisUtil::unlink);
         } catch (Exception e) {
             throw Exceptions.throwOut(e, "Failed to unlink keys with pattern:{} ", pattern);
         }
     }
+
+    // region 获取各种 Operations
+
+    public static HashOperations<String, String, String> hashOps() {
+        return getRedisTemplate().opsForHash();
+    }
+
+    public static ValueOperations<String, String> valueOps() {
+        return getRedisTemplate().opsForValue();
+    }
+
+    public static ListOperations<String, String> listOps() {
+        return getRedisTemplate().opsForList();
+    }
+
+    public static SetOperations<String, String> setOps() {
+        return getRedisTemplate().opsForSet();
+    }
+
+    public static ZSetOperations<String, String> zSetOps() {
+        return getRedisTemplate().opsForZSet();
+    }
+
+    public static StreamOperations<String, String, String> streamOps() {
+        return getRedisTemplate().opsForStream();
+    }
+
+    public static GeoOperations<String, String> getGeoOps() {
+        return getRedisTemplate().opsForGeo();
+    }
+
+    public static HyperLogLogOperations<String, String> getHllOps() {
+        return getRedisTemplate().opsForHyperLogLog();
+    }
+
+    // endregion
+
+    // region 功能操作
+
+    // endregion
+    // region key command
 
     /**
      * 删除指定的 keys
@@ -167,11 +156,11 @@ public class RedisUtil {
      *
      * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
      */
-    public long unlink(String... keys) {
+    public static long unlink(String... keys) {
         return del(Arrays.asList(keys));
     }
 
-    public long unlink(Collection<String> keys) {
+    public static long unlink(Collection<String> keys) {
         Long deleteNumber = getRedisTemplate().unlink(keys);
         return deleteNumber == null ? 0 : deleteNumber;
     }
@@ -185,7 +174,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/del">Del Command</a>
      */
-    public boolean del(String key) {
+    public static boolean del(String key) {
         return getRedisTemplate().delete(key);
     }
 
@@ -196,11 +185,11 @@ public class RedisUtil {
      *
      * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
      */
-    public long del(String... keys) {
+    public static long del(String... keys) {
         return del(Arrays.asList(keys));
     }
 
-    public long del(Collection<String> keys) {
+    public static long del(Collection<String> keys) {
         Long deleteNumber = getRedisTemplate().delete(keys);
         return deleteNumber == null ? 0 : deleteNumber;
     }
@@ -214,7 +203,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
-    public boolean exists(String key) {
+    public static boolean exists(String key) {
         return getRedisTemplate().hasKey(key);
     }
 
@@ -227,11 +216,11 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
-    public long exists(String... keys) {
+    public static long exists(String... keys) {
         return exists(Arrays.asList(keys));
     }
 
-    public long exists(Collection<String> keys) {
+    public static long exists(Collection<String> keys) {
         Long number = getRedisTemplate().countExistingKeys(keys);
         return number == null ? 0 : number;
     }
@@ -244,7 +233,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/expire">Expire Command</a>
      */
-    public boolean expire(String key, Duration timeout) {
+    public static boolean expire(String key, Duration timeout) {
         return getRedisTemplate().expire(key, timeout);
     }
 
@@ -256,7 +245,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/expire">Expire Command</a>
      */
-    public boolean expire(String key, long timeout) {
+    public static boolean expire(String key, long timeout) {
         return expire(key, Duration.ofSeconds(timeout));
     }
 
@@ -267,7 +256,7 @@ public class RedisUtil {
      * @param timeout  时长
      * @param timeUnit 时间单位
      */
-    public boolean expire(String key, long timeout, TimeUnit timeUnit) {
+    public static boolean expire(String key, long timeout, TimeUnit timeUnit) {
         return getRedisTemplate().expire(key, timeout, timeUnit);
     }
 
@@ -281,7 +270,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
      */
-    public boolean expireAt(String key, Date date) {
+    public static boolean expireAt(String key, Date date) {
         return getRedisTemplate().expireAt(key, date);
     }
 
@@ -295,7 +284,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
      */
-    public boolean expireAt(String key, LocalDateTime localDateTime) {
+    public static boolean expireAt(String key, LocalDateTime localDateTime) {
         return Boolean.TRUE.equals(getRedisTemplate().expireAt(key, localDateTime.toInstant(DateUtil.DEFAULT_ZONE_OFFSET)));
     }
 
@@ -309,7 +298,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/expireat/">ExpireAt Command</a>
      */
-    public boolean expireAt(String key, Instant expireAt) {
+    public static boolean expireAt(String key, Instant expireAt) {
         return Boolean.TRUE.equals(getRedisTemplate().expireAt(key, expireAt));
     }
 
@@ -322,7 +311,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/keys">Keys Command</a>
      */
-    public Set<String> keys(String pattern) {
+    public static Set<String> keys(String pattern) {
         return getRedisTemplate().keys(pattern);
     }
 
@@ -337,7 +326,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/ttl">TTL Command</a>
      */
-    public Long ttl(String key) {
+    public static Long ttl(String key) {
         return getRedisTemplate().getExpire(key);
     }
 
@@ -350,7 +339,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/scan/">Scan Command</a>
      */
-    public Cursor<String> scan(ScanOptions scanOptions) {
+    public static Cursor<String> scan(ScanOptions scanOptions) {
         return getRedisTemplate().scan(scanOptions);
     }
 
@@ -361,7 +350,7 @@ public class RedisUtil {
      *
      * @return Cursor，一个可迭代对象
      */
-    public Cursor<String> scan(String patten) {
+    public static Cursor<String> scan(String patten) {
         ScanOptions scanOptions = ScanOptions.scanOptions().match(patten).build();
         return scan(scanOptions);
     }
@@ -376,13 +365,10 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/scan/">Scan Command</a>
      */
-    public Cursor<String> scan(String patten, long count) {
+    public static Cursor<String> scan(String patten, long count) {
         ScanOptions scanOptions = ScanOptions.scanOptions().match(patten).count(count).build();
         return scan(scanOptions);
     }
-
-    // endregion
-    // region String command
 
     /**
      * 当 key 存在时，对其值进行自减操作（自减步长为 1），当 key 不存在时，则先赋值为 0 再进行自减
@@ -393,7 +379,7 @@ public class RedisUtil {
      *
      * @see #decrBy(String, long)
      */
-    public long decr(String key) {
+    public static long decr(String key) {
         return valueOps().decrement(key);
     }
 
@@ -407,9 +393,12 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/decrby">DecrBy Command</a>
      */
-    public long decrBy(String key, long delta) {
+    public static long decrBy(String key, long delta) {
         return valueOps().decrement(key, delta);
     }
+
+    // endregion
+    // region String command
 
     /**
      * 获取指定 key 的 value 值
@@ -420,7 +409,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
-    public String get(String key) {
+    public static String get(String key) {
         return valueOps().get(key);
     }
 
@@ -433,7 +422,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
-    public <T> T get(String key, Class<T> clazz) {
+    public static <T> T get(String key, Class<T> clazz) {
         String value = get(key);
         if (Objects.isNull(value)) {
             return null;
@@ -450,7 +439,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/getdel/">GetDel Command</a>
      */
-    public String getDel(String key) {
+    public static String getDel(String key) {
         return valueOps().getAndDelete(key);
     }
 
@@ -464,7 +453,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
-    public String getEx(String key, long timeout) {
+    public static String getEx(String key, long timeout) {
         return getEx(key, timeout, TimeUnit.SECONDS);
     }
 
@@ -478,7 +467,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
-    public String getEx(String key, Duration timeout) {
+    public static String getEx(String key, Duration timeout) {
         return valueOps().getAndExpire(key, timeout);
     }
 
@@ -493,7 +482,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
-    public String getEx(String key, long timeout, TimeUnit timeUnit) {
+    public static String getEx(String key, long timeout, TimeUnit timeUnit) {
         return valueOps().getAndExpire(key, timeout, timeUnit);
     }
 
@@ -507,7 +496,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/getset">GetSet Command</a>
      */
-    public String getSet(String key, String value) {
+    public static String getSet(String key, String value) {
         return valueOps().getAndSet(key, value);
     }
 
@@ -520,7 +509,7 @@ public class RedisUtil {
      *
      * @see #incrBy(String, long)
      */
-    public long incr(String key) {
+    public static long incr(String key) {
         return valueOps().increment(key);
     }
 
@@ -529,7 +518,7 @@ public class RedisUtil {
      *
      * @see #incrByAndExpire(String, long, long)
      */
-    public long incrAndExpire(String key, long timeout) {
+    public static long incrAndExpire(String key, long timeout) {
         return incrByAndExpire(key, 1, timeout);
     }
 
@@ -543,7 +532,7 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/incrby">IncrBy Command</a>
      */
-    public long incrBy(String key, long delta) {
+    public static long incrBy(String key, long delta) {
         return valueOps().increment(key, delta);
     }
 
@@ -556,14 +545,14 @@ public class RedisUtil {
      *
      * @return 自增后的 value 值
      */
-    public long incrByAndExpire(String key, long delta, long timeout) {
+    public static long incrByAndExpire(String key, long delta, long timeout) {
         return getRedisTemplate().execute(INCR_BY_EXPIRE_LUA_SCRIPT, Collections.singletonList(key), String.valueOf(delta), String.valueOf(timeout));
     }
 
     /**
      * @see #incrBy(String, long)
      */
-    public double incrByFloat(String key, double delta) {
+    public static double incrByFloat(String key, double delta) {
         return valueOps().increment(key, delta);
     }
 
@@ -576,14 +565,14 @@ public class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/mget">MGet Command</a>
      */
-    public List<String> mGet(Collection<String> keys) {
+    public static List<String> mGet(Collection<String> keys) {
         return valueOps().multiGet(keys);
     }
 
     /**
      * @see #mGet(Collection)
      */
-    public List<String> mGet(String... keys) {
+    public static List<String> mGet(String... keys) {
         return mGet(Arrays.asList(keys));
     }
 
@@ -594,7 +583,7 @@ public class RedisUtil {
      *
      * @return map，key 和 value 的键值对集合，当 value 获取为 null 时，不存入此 map
      */
-    public Map<String, String> mGetToMap(Collection<String> keys) {
+    public static Map<String, String> mGetToMap(Collection<String> keys) {
         List<String> values = valueOps().multiGet(keys);
         Map<String, String> map = new HashMap<>(keys.size());
         if (values == null || values.isEmpty()) {
@@ -616,7 +605,7 @@ public class RedisUtil {
     /**
      * @see #mGetToMap(Collection)
      */
-    public Map<String, String> mGetToMap(String... keys) {
+    public static Map<String, String> mGetToMap(String... keys) {
         return mGetToMap(Arrays.asList(keys));
     }
 
@@ -628,7 +617,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/set">Set Command</a>
      */
-    public void set(String key, String value) {
+    public static void set(String key, String value) {
         valueOps().set(key, value);
     }
 
@@ -641,7 +630,7 @@ public class RedisUtil {
      *
      * @see #setEx(String, String, long)
      */
-    public void set(String key, String value, long timeout) {
+    public static void set(String key, String value, long timeout) {
         set(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -654,7 +643,7 @@ public class RedisUtil {
      *
      * @see #setEx(String, String, long)
      */
-    public void set(String key, String value, Duration timeout) {
+    public static void set(String key, String value, Duration timeout) {
         valueOps().set(key, value, timeout);
     }
 
@@ -668,7 +657,7 @@ public class RedisUtil {
      *
      * @see #setEx(String, String, long, TimeUnit)
      */
-    public void set(String key, String value, long timeout, TimeUnit timeUnit) {
+    public static void set(String key, String value, long timeout, TimeUnit timeUnit) {
         setEx(key, value, timeout, timeUnit);
     }
 
@@ -681,7 +670,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
-    public void setEx(String key, String value, long timeout) {
+    public static void setEx(String key, String value, long timeout) {
         setEx(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -694,7 +683,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
-    public void setEx(String key, String value, Duration timeout) {
+    public static void setEx(String key, String value, Duration timeout) {
         valueOps().set(key, value, timeout);
     }
 
@@ -708,7 +697,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
-    public void setEx(String key, String value, long timeout, TimeUnit timeUnit) {
+    public static void setEx(String key, String value, long timeout, TimeUnit timeUnit) {
         valueOps().set(key, value, timeout, timeUnit);
     }
 
@@ -718,7 +707,7 @@ public class RedisUtil {
      * @param key   key
      * @param value value
      */
-    public void setExAndKeep(String key, String value) {
+    public static void setExAndKeep(String key, String value) {
         Long expire = ttl(key);
         setEx(key, value, expire);
     }
@@ -730,7 +719,7 @@ public class RedisUtil {
      * @param value      value
      * @param expireTime 在指定时间过期
      */
-    public void setExAt(String key, String value, Instant expireTime) {
+    public static void setExAt(String key, String value, Instant expireTime) {
         long timeout = expireTime.getEpochSecond() - Instant.now().getEpochSecond();
         setEx(key, value, timeout);
     }
@@ -742,7 +731,7 @@ public class RedisUtil {
      * @param value      value
      * @param expireTime 在指定时间过期
      */
-    public void setExAt(String key, String value, LocalDateTime expireTime) {
+    public static void setExAt(String key, String value, LocalDateTime expireTime) {
         Duration timeout = Duration.between(LocalDateTime.now(), expireTime);
         setEx(key, value, timeout);
     }
@@ -757,7 +746,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
-    public boolean setNx(String key, String value) {
+    public static boolean setNx(String key, String value) {
         return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value));
     }
 
@@ -772,7 +761,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
-    public boolean setNxEx(String key, String value, Duration timeout) {
+    public static boolean setNxEx(String key, String value, Duration timeout) {
         return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value, timeout));
     }
 
@@ -787,7 +776,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
-    public boolean setNxEx(String key, String value, long timeout) {
+    public static boolean setNxEx(String key, String value, long timeout) {
         return setNxEx(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -803,12 +792,9 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
-    public boolean setNxEx(String key, String value, long timeout, TimeUnit timeUnit) {
+    public static boolean setNxEx(String key, String value, long timeout, TimeUnit timeUnit) {
         return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value, timeout, timeUnit));
     }
-
-    // endregion
-    // region Hash command
 
     /**
      * 删除指定 hash 的 fields
@@ -820,7 +806,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hdel/">HDel Command</a>
      */
-    public long hDel(String key, String... fields) {
+    public static long hDel(String key, String... fields) {
         return hashOps().delete(key, (Object[]) fields);
     }
 
@@ -834,9 +820,12 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hexists/">HExists Command</a>
      */
-    public boolean hExists(String key, String field) {
+    public static boolean hExists(String key, String field) {
         return hashOps().hasKey(key, field);
     }
+
+    // endregion
+    // region Hash command
 
     /**
      * 获取 hash 中的指定 field 对应的 value 值
@@ -846,7 +835,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hget/">HGet Command</a>
      */
-    public String hGet(String key, String field) {
+    public static String hGet(String key, String field) {
         return hashOps().get(key, field);
     }
 
@@ -857,7 +846,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hgetall/">HGetAll Command</a>
      */
-    public Map<String, String> hGetAll(String key) {
+    public static Map<String, String> hGetAll(String key) {
         return hashOps().entries(key);
     }
 
@@ -874,7 +863,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hincrby/">HIncrBy Command</a>
      */
-    public long hIncrBy(String key, String field, long delta) {
+    public static long hIncrBy(String key, String field, long delta) {
         return hashOps().increment(key, field, delta);
     }
 
@@ -883,7 +872,7 @@ public class RedisUtil {
      *
      * @see #hIncrBy(String, String, long)
      */
-    public Long hIncrBy(String key, String field) {
+    public static Long hIncrBy(String key, String field) {
         return hIncrBy(key, field, 1);
     }
 
@@ -900,7 +889,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hincrbyfloat/">HIncrByFloat Command</a>
      */
-    public double hIncrByFloat(String key, String field, double delta) {
+    public static double hIncrByFloat(String key, String field, double delta) {
         return hashOps().increment(key, field, delta);
     }
 
@@ -913,7 +902,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
-    public Set<String> hKeys(String key) {
+    public static Set<String> hKeys(String key) {
         return hashOps().keys(key);
     }
 
@@ -926,7 +915,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hlen/">HLen Command</a>
      */
-    public long hLen(String key) {
+    public static long hLen(String key) {
         return hashOps().size(key);
     }
 
@@ -939,7 +928,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
-    public List<String> hMGet(String key, Collection<String> fields) {
+    public static List<String> hMGet(String key, Collection<String> fields) {
         return hashOps().multiGet(key, fields);
     }
 
@@ -952,7 +941,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
-    public List<String> hMGet(String key, String... fields) {
+    public static List<String> hMGet(String key, String... fields) {
         return hashOps().multiGet(key, Arrays.asList(fields));
     }
 
@@ -965,7 +954,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hset/">HSet Command</a>
      */
-    public void hSet(String key, String field, String value) {
+    public static void hSet(String key, String field, String value) {
         hashOps().put(key, field, value);
     }
 
@@ -978,7 +967,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hsetnx/">HSetNx Command</a>
      */
-    public void hSetNx(String key, String field, String value) {
+    public static void hSetNx(String key, String field, String value) {
         hashOps().putIfAbsent(key, field, value);
     }
 
@@ -991,12 +980,9 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/hvals/">HVals Command</a>
      */
-    public List<String> hVals(String key) {
+    public static List<String> hVals(String key) {
         return hashOps().values(key);
     }
-
-    // endregion
-    // region List command
 
     /**
      * 获取指定 list 指定索引位置的元素
@@ -1008,7 +994,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lindex/">LIndex Command</a>
      */
-    public String lIndex(String key, long index) {
+    public static String lIndex(String key, long index) {
         return listOps().index(key, index);
     }
 
@@ -1021,9 +1007,12 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/llen/">LLen Command</a>
      */
-    public long lLen(String key) {
+    public static long lLen(String key) {
         return listOps().size(key);
     }
+
+    // endregion
+    // region List command
 
     /**
      * 以原子方式返回并删除列表的第一个元素，例如列表包含元素 "a", "b", "c" LPOP 操作将返回”a“并将其删除，list 中元素变为”b“, "c"
@@ -1034,7 +1023,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lpop/">LPop Command</a>
      */
-    public String lPop(String key) {
+    public static String lPop(String key) {
         return listOps().leftPop(key);
     }
 
@@ -1049,7 +1038,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/lpop/">LPop Command</a>
      * @since Redis 版本大于等于 6.2.0
      */
-    public List<String> lPop(String key, long count) {
+    public static List<String> lPop(String key, long count) {
         return listOps().leftPop(key, count);
     }
 
@@ -1064,7 +1053,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/lpos/">LPos Command</a>
      * @since Redis 版本大于等于 6.0.6
      */
-    public Long lPos(String key, String element) {
+    public static Long lPos(String key, String element) {
         return listOps().indexOf(key, element);
     }
 
@@ -1078,7 +1067,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lpush/">LPush Command</a>
      */
-    public long lPush(String key, String... elements) {
+    public static long lPush(String key, String... elements) {
         return listOps().leftPushAll(key, elements);
     }
 
@@ -1092,7 +1081,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lpush/">LPush Command</a>
      */
-    public long lPush(String key, List<String> elements) {
+    public static long lPush(String key, List<String> elements) {
         return listOps().leftPushAll(key, elements);
     }
 
@@ -1108,7 +1097,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lrange/">LRange Command</a>
      */
-    public List<String> lRange(String key, long start, long end) {
+    public static List<String> lRange(String key, long start, long end) {
         return listOps().range(key, start, end);
     }
 
@@ -1128,7 +1117,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lrem/">LRem Command</a>
      */
-    public long lRem(String key, long count, String value) {
+    public static long lRem(String key, long count, String value) {
         return listOps().remove(key, count, value);
     }
 
@@ -1141,7 +1130,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/lset/">LSet Command</a>
      */
-    public void lSet(String key, long index, String value) {
+    public static void lSet(String key, long index, String value) {
         listOps().set(key, index, value);
     }
 
@@ -1154,7 +1143,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/ltrim/">LTrim Command</a>
      */
-    public void lTrim(String key, long start, long end) {
+    public static void lTrim(String key, long start, long end) {
         listOps().trim(key, start, end);
     }
 
@@ -1169,7 +1158,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/rpop/">RPOP Command</a>
      */
-    public String rPop(String key) {
+    public static String rPop(String key) {
         return listOps().rightPop(key);
     }
 
@@ -1184,7 +1173,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/rpop/">RPOP Command</a>
      * @since Redis 6.2.0
      */
-    public List<String> rPop(String key, long count) {
+    public static List<String> rPop(String key, long count) {
         return listOps().rightPop(key, count);
     }
 
@@ -1198,7 +1187,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/rpush/">RPush Command</a>
      */
-    public long rPush(String key, String... values) {
+    public static long rPush(String key, String... values) {
         return listOps().rightPushAll(key, values);
     }
 
@@ -1212,12 +1201,9 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/rpush/">RPush Command</a>
      */
-    public long rPush(String key, List<String> values) {
+    public static long rPush(String key, List<String> values) {
         return listOps().rightPushAll(key, values);
     }
-
-    // endregion
-    // region Set command
 
     /**
      * 将指定的 member 添加到 Set 中，如果 Set 中已有该 member 则忽略。如果 Set 不存在，则先创建一个新的 Set，再进行添加
@@ -1231,7 +1217,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/sadd/">SAdd Command</a>
      */
-    public long sAdd(String key, String... members) {
+    public static long sAdd(String key, String... members) {
         return setOps().add(key, members);
     }
 
@@ -1247,9 +1233,12 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/sadd/">SAdd Command</a>
      */
-    public long sAdd(String key, List<String> members) {
+    public static long sAdd(String key, List<String> members) {
         return setOps().add(key, members.toArray(new String[0]));
     }
+
+    // endregion
+    // region Set command
 
     /**
      * 返回 Set 中的元素数，如果 set 不存在则返回 0
@@ -1260,7 +1249,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/scard/">SCard Command</a>
      */
-    public long sCard(String key) {
+    public static long sCard(String key) {
         return setOps().size(key);
     }
 
@@ -1276,7 +1265,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/sismember/">SIsMember Command</a>
      */
-    public boolean sIsMember(String key, String value) {
+    public static boolean sIsMember(String key, String value) {
         return setOps().isMember(key, value);
     }
 
@@ -1291,7 +1280,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/smembers/">SMembers Command</a>
      */
-    public Set<String> sMembers(String key) {
+    public static Set<String> sMembers(String key) {
         return setOps().members(key);
     }
 
@@ -1308,7 +1297,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/smismember/">SMIsMember Command</a>
      * @since Redis 6.2.0
      */
-    public Map<Object, Boolean> sMIsMember(String key, String... values) {
+    public static Map<Object, Boolean> sMIsMember(String key, String... values) {
         return setOps().isMember(key, (Object[]) values);
     }
 
@@ -1323,7 +1312,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/spop/">SPop Command</a>
      */
-    public String sPop(String key) {
+    public static String sPop(String key) {
         return setOps().pop(key);
     }
 
@@ -1338,7 +1327,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/srandmember/">SRandMember Command</a>
      */
-    public String sRandMember(String key) {
+    public static String sRandMember(String key) {
         return setOps().randomMember(key);
     }
 
@@ -1354,7 +1343,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/srandmember/">SRandMember Command</a>
      */
-    public Set<String> sRandMember(String key, long count) {
+    public static Set<String> sRandMember(String key, long count) {
         return setOps().distinctRandomMembers(key, count);
     }
 
@@ -1371,7 +1360,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/srem/">SRem Command</a>
      */
-    public long sRem(String key, String... members) {
+    public static long sRem(String key, String... members) {
         return setOps().remove(key, (Object[]) members);
     }
 
@@ -1384,12 +1373,9 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/sscan/">SScan Command</a>
      */
-    public Cursor<String> sScan(String key, ScanOptions scanOptions) {
+    public static Cursor<String> sScan(String key, ScanOptions scanOptions) {
         return setOps().scan(key, scanOptions);
     }
-
-    // endregion
-    // region Sorted Set command
 
     /**
      * 添加拥有指定 score 的 member 到 Sorted Set 中。如果 member 在 Sorted Set 中已存在，则更新 score，并进行重排序。
@@ -1405,7 +1391,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zadd/">ZAdd Command</>
      */
-    public boolean zAdd(String key, double score, String member) {
+    public static boolean zAdd(String key, double score, String member) {
         return zSetOps().add(key, member, score);
     }
 
@@ -1422,10 +1408,13 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zadd/">ZAdd Command</a>
      */
-    public long zAdd(String key, Map<String, Double> scoreMembers) {
+    public static long zAdd(String key, Map<String, Double> scoreMembers) {
         Set<ZSetOperations.TypedTuple<String>> tuples = scoreMembers.entrySet().stream().map(x -> ZSetOperations.TypedTuple.of(x.getKey(), x.getValue())).collect(Collectors.toSet());
         return zSetOps().add(key, tuples);
     }
+
+    // endregion
+    // region Sorted Set command
 
     /**
      * 返回 Sorted Set 的元素数量，若 key 不存在则返回 0
@@ -1438,7 +1427,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zcard/">ZCard Command</a>
      */
-    public long zCard(String key) {
+    public static long zCard(String key) {
         return zSetOps().size(key);
     }
 
@@ -1457,7 +1446,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zincrby/">ZIncrBy Command</a>
      */
-    public double zIncrBy(String key, double increment, String member) {
+    public static double zIncrBy(String key, double increment, String member) {
         return zSetOps().incrementScore(key, member, increment);
     }
 
@@ -1473,7 +1462,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zpopmax/">ZPopMax Command</a>
      * @since Redis 5.0.0
      */
-    public ZSetOperations.TypedTuple<String> zPopMax(String key) {
+    public static ZSetOperations.TypedTuple<String> zPopMax(String key) {
         return zSetOps().popMax(key);
     }
 
@@ -1490,7 +1479,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zpopmax/">ZPopMax Command</a>
      * @since Redis 5.0.0
      */
-    public Set<ZSetOperations.TypedTuple<String>> zPopMax(String key, long count) {
+    public static Set<ZSetOperations.TypedTuple<String>> zPopMax(String key, long count) {
         return zSetOps().popMax(key, count);
     }
 
@@ -1506,7 +1495,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zpopmin/">ZPopMin Command</a>
      * @since Redis 5.0.0
      */
-    public ZSetOperations.TypedTuple<String> zPopMin(String key) {
+    public static ZSetOperations.TypedTuple<String> zPopMin(String key) {
         return zSetOps().popMin(key);
     }
 
@@ -1523,7 +1512,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zpopmin/">ZPopMin Command</a>
      * @since Redis 5.0.0
      */
-    public Set<ZSetOperations.TypedTuple<String>> zPopMin(String key, long count) {
+    public static Set<ZSetOperations.TypedTuple<String>> zPopMin(String key, long count) {
         return zSetOps().popMin(key, count);
     }
 
@@ -1539,7 +1528,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zrandmember/">ZRandMember Command</a>
      * @since Redis 6.2.0
      */
-    public String zRandMember(String key) {
+    public static String zRandMember(String key) {
         return zSetOps().randomMember(key);
     }
 
@@ -1557,7 +1546,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrange/">ZRange Command</a>
      */
-    public Set<String> zRange(String key, long start, long end) {
+    public static Set<String> zRange(String key, long start, long end) {
         return zSetOps().range(key, start, end);
     }
 
@@ -1575,7 +1564,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
-    public Set<String> zRangeByScore(String key, double min, double max) {
+    public static Set<String> zRangeByScore(String key, double min, double max) {
         return zSetOps().rangeByScore(key, min, max);
     }
 
@@ -1592,7 +1581,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
-    public Set<String> zRangeByScore(String key, double min, double max, long offset, long count) {
+    public static Set<String> zRangeByScore(String key, double min, double max, long offset, long count) {
         return zSetOps().rangeByScore(key, min, max, offset, count);
     }
 
@@ -1607,7 +1596,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrangebyscore/">ZRangeByScore Command</a>
      */
-    public Set<ZSetOperations.TypedTuple<String>> zRangeByScoreWithScores(String key, double min, double max) {
+    public static Set<ZSetOperations.TypedTuple<String>> zRangeByScoreWithScores(String key, double min, double max) {
         return zSetOps().rangeByScoreWithScores(key, min, max);
     }
 
@@ -1623,7 +1612,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrank/">ZRank Command</a>
      */
-    public Long zRank(String key, String member) {
+    public static Long zRank(String key, String member) {
         return zSetOps().rank(key, member);
     }
 
@@ -1639,7 +1628,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrem/">ZRem Command</a>
      */
-    public long zRem(String key, String... members) {
+    public static long zRem(String key, String... members) {
         return zSetOps().remove(key, (Object[]) members);
     }
 
@@ -1659,7 +1648,7 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zrevrange/">ZRevRange Commad</a>
      */
-    public Set<String> zRevRange(String key, long start, long end) {
+    public static Set<String> zRevRange(String key, long start, long end) {
         return zSetOps().reverseRange(key, start, end);
     }
 
@@ -1682,7 +1671,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/zrevrangebyscore/">ZRevRangeByScore
      * Commad</a>
      */
-    public Set<String> zRevRangeByScore(String key, double min, double max) {
+    public static Set<String> zRevRangeByScore(String key, double min, double max) {
         return zSetOps().reverseRangeByScore(key, min, max);
     }
 
@@ -1698,12 +1687,9 @@ public class RedisUtil {
      *
      * @see <a href="https://redis.io/commands/zscore/">ZSCORE Commad</a>
      */
-    public Double zScore(String key, String member) {
+    public static Double zScore(String key, String member) {
         return zSetOps().score(key, member);
     }
-
-    // endregion
-    // region Lua 脚本
 
     /**
      * 执行 lua 脚本
@@ -1712,71 +1698,74 @@ public class RedisUtil {
      *
      * @return T
      */
-    public <T> T execute(RedisCallback<T> action) {
+    public static <T> T execute(RedisCallback<T> action) {
         return getRedisTemplate().execute(action);
     }
 
-    public <T> T execute(RedisCallback<T> action, boolean exposeConnection) {
+    public static <T> T execute(RedisCallback<T> action, boolean exposeConnection) {
         return execute(action, exposeConnection, false);
     }
 
-    public <T> T execute(RedisCallback<T> action, boolean exposeConnection, boolean pipeline) {
+    // endregion
+    // region Lua 脚本
+
+    public static <T> T execute(RedisCallback<T> action, boolean exposeConnection, boolean pipeline) {
         return getRedisTemplate().execute(action, exposeConnection, pipeline);
     }
 
-    public <T> T execute(SessionCallback<T> session) {
+    public static <T> T execute(SessionCallback<T> session) {
         return getRedisTemplate().execute(session);
     }
 
-    public <T> T execute(RedisScript<T> script, List<String> keys, String... args) {
+    public static <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
         return getRedisTemplate().execute(script, keys, args);
     }
 
-    public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<String> keys, String... args) {
+    public static <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<String> keys, Object... args) {
         return getRedisTemplate().execute(script, argsSerializer, resultSerializer, keys, args);
+    }
+
+    public static List<Object> executePipelined(SessionCallback<?> session) {
+        return getRedisTemplate().executePipelined(session);
+    }
+
+    public static List<Object> executePipelined(SessionCallback<?> session, RedisSerializer<?> resultSerializer) {
+        return getRedisTemplate().executePipelined(session, resultSerializer);
     }
 
     // endregion
     // region pipelined 操作
 
-    public List<Object> executePipelined(SessionCallback<?> session) {
-        return getRedisTemplate().executePipelined(session);
-    }
-
-    public List<Object> executePipelined(SessionCallback<?> session, RedisSerializer<?> resultSerializer) {
-        return getRedisTemplate().executePipelined(session, resultSerializer);
-    }
-
-    public List<Object> executePipelined(RedisCallback<?> action) {
+    public static List<Object> executePipelined(RedisCallback<?> action) {
         return getRedisTemplate().executePipelined(action);
     }
 
-    public List<Object> executePipelined(RedisCallback<?> action, RedisSerializer<?> resultSerializer) {
+    public static List<Object> executePipelined(RedisCallback<?> action, RedisSerializer<?> resultSerializer) {
         return getRedisTemplate().executePipelined(action, resultSerializer);
+    }
+
+    /**
+     * 发布通道消息
+     *
+     * @param channel 渠道
+     * @param message 消息
+     */
+    public static void publish(String channel, String message) {
+        getRedisTemplate().convertAndSend(channel, message);
+    }
+
+    /**
+     * 发布通道消息
+     *
+     * @param channel 渠道
+     * @param message 消息
+     */
+    public static void publish(String channel, byte[] message) {
+        getRedisTemplate().convertAndSend(channel, message);
     }
 
     // endregion
     // region PUB/SUB command
-
-    /**
-     * 发布通道消息
-     *
-     * @param channel 渠道
-     * @param message 消息
-     */
-    public void publish(String channel, String message) {
-        getRedisTemplate().convertAndSend(channel, message);
-    }
-
-    /**
-     * 发布通道消息
-     *
-     * @param channel 渠道
-     * @param message 消息
-     */
-    public void publish(String channel, byte[] message) {
-        getRedisTemplate().convertAndSend(channel, message);
-    }
 
     /**
      * 订阅通道接收消息
@@ -1785,7 +1774,7 @@ public class RedisUtil {
      * @param clazz      消息类型
      * @param consumer   自定义处理
      */
-    public <T> void subscribe(String channelKey, Class<T> clazz, java.util.function.Consumer<T> consumer) {
+    public static <T> void subscribe(String channelKey, Class<T> clazz, java.util.function.Consumer<T> consumer) {
         MessageListener listener = (message, pattern) -> consumer.accept(JsonUtil.readObj(message.getBody(), clazz));
         SpringUtil.getBean(RedisMessageListenerContainer.class).addMessageListener(listener, new ChannelTopic(channelKey));
     }
@@ -1795,12 +1784,9 @@ public class RedisUtil {
      *
      * @param listener 消息监听器
      */
-    public void subscribe(String channelKey, MessageListener listener) {
+    public static void subscribe(String channelKey, MessageListener listener) {
         SpringUtil.getBean(RedisMessageListenerContainer.class).addMessageListener(listener, new ChannelTopic(channelKey));
     }
-
-    // endregion
-    // region Stream command
 
     /**
      * XACK key group ID [ID ...]
@@ -1812,13 +1798,16 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xack/">XACK Command</a>
      * @since Redis 5.0.0
      */
-    public long xAck(String key, String group, String... ids) {
+    public static long xAck(String key, String group, String... ids) {
         return streamOps().acknowledge(key, group, ids);
     }
 
-    public long xAck(String key, String group, RecordId... ids) {
+    public static long xAck(String key, String group, RecordId... ids) {
         return streamOps().acknowledge(key, group, ids);
     }
+
+    // endregion
+    // region Stream command
 
     /**
      * XADD key ID field string [field string ...]
@@ -1831,15 +1820,15 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xadd/">XADD Command</a>
      * @since Redis 5.0.0
      */
-    public RecordId xAdd(String key, Map<String, String> content) {
+    public static RecordId xAdd(String key, Map<String, String> content) {
         return streamOps().add(StreamRecords.newRecord().in(key).ofMap(content));
     }
 
-    public RecordId xAdd(String key, Map<String, String> content, RedisStreamCommands.XAddOptions xAddOptions) {
+    public static RecordId xAdd(String key, Map<String, String> content, RedisStreamCommands.XAddOptions xAddOptions) {
         return xAdd(Record.of(content).withStreamKey(key), xAddOptions);
     }
 
-    public RecordId xAdd(MapRecord<String, String, String> mapRecord, RedisStreamCommands.XAddOptions xAddOptions) {
+    public static RecordId xAdd(MapRecord<String, String, String> mapRecord, RedisStreamCommands.XAddOptions xAddOptions) {
         RedisSerializer<String> keySerializer = getKeySerializer();
         RedisSerializer<String> valueSerializer = getValueSerializer();
 
@@ -1864,11 +1853,11 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xdel/">XDEL Command</a>
      * @since Redis 5.0.0
      */
-    public long xDel(String key, String... ids) {
+    public static long xDel(String key, String... ids) {
         return streamOps().delete(key, ids);
     }
 
-    public long xDel(String key, RecordId... ids) {
+    public static long xDel(String key, RecordId... ids) {
         return streamOps().delete(key, ids);
     }
 
@@ -1881,14 +1870,14 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xgroup-create/">XGROUP CREATE Command</a>
      * @since Redis 5.0.0
      */
-    public String xGroupCreate(String key, String groupName, ReadOffset readOffset, boolean makeStream) {
+    public static String xGroupCreate(String key, String groupName, ReadOffset readOffset, boolean makeStream) {
         RedisSerializer<String> keySerializer = getKeySerializer();
         byte[] rawKey = keySerializer.serialize(key);
 
         return getRedisTemplate().execute((RedisConnection conn) -> conn.streamCommands().xGroupCreate(rawKey, groupName, readOffset, makeStream));
     }
 
-    public String xGroupCreate(String key, String groupName) {
+    public static String xGroupCreate(String key, String groupName) {
         return xGroupCreate(key, groupName, ReadOffset.latest(), true);
     }
 
@@ -1902,7 +1891,7 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xlen/">XLEN Command</a>
      * @since Redis 5.0.0
      */
-    public long xLen(String key) {
+    public static long xLen(String key) {
         return streamOps().size(key);
     }
 
@@ -1917,11 +1906,11 @@ public class RedisUtil {
      * @see <a href="https://redis.io/commands/xrange/">XRANGE Command</a>
      * @since Redis 5.0.0
      */
-    public List<MapRecord<String, String, String>> xRange(String key, Range<String> range) {
+    public static List<MapRecord<String, String, String>> xRange(String key, Range<String> range) {
         return streamOps().range(key, range);
     }
 
-    public List<MapRecord<String, String, String>> xRange(String key, Range<String> range, Limit limit) {
+    public static List<MapRecord<String, String, String>> xRange(String key, Range<String> range, Limit limit) {
         return streamOps().range(key, range, limit);
     }
 
@@ -1932,12 +1921,12 @@ public class RedisUtil {
      * @since Redis 5.0.0
      */
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xRead(StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xRead(StreamOffset<String>... streams) {
         return streamOps().read(streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xRead(StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xRead(StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(streamReadOptions, streams);
     }
 
@@ -1949,23 +1938,33 @@ public class RedisUtil {
      * @since Redis 5.0.0
      */
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamOffset<String>... streams) {
         return streamOps().read(consumer, streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xReadGroup(Consumer consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(consumer, streamReadOptions, streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamOffset<String>... streams) {
         return streamOps().read(Consumer.from(group, consumer), streams);
     }
 
     @SafeVarargs
-    public List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
+    public static List<MapRecord<String, String, String>> xReadGroup(String group, String consumer, StreamReadOptions streamReadOptions, StreamOffset<String>... streams) {
         return streamOps().read(Consumer.from(group, consumer), streamReadOptions, streams);
+    }
+
+    @SuppressWarnings("all")
+    private static RedisSerializer<String> getKeySerializer() {
+        return (RedisSerializer<String>) getRedisTemplate().getKeySerializer();
+    }
+
+    @SuppressWarnings("all")
+    private static RedisSerializer<String> getValueSerializer() {
+        return (RedisSerializer<String>) getRedisTemplate().getValueSerializer();
     }
     // endregion
 
