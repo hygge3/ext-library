@@ -1,17 +1,13 @@
 package ext.library.json.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +16,6 @@ import java.util.Objects;
  */
 public class JsonNodeUtil {
     private static final Logger log = LoggerFactory.getLogger(JsonNodeUtil.class);
-
 
     // region JsonNode 与对象互转
 
@@ -33,30 +28,14 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    public static <T> T treeToObj(JsonNode jsonNode, Class<T> valueType) {
+    public static <T> T toObj(JsonNode jsonNode, Class<T> valueType) {
         try {
-            return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
-        } catch (JsonProcessingException e) {
-            throw Exceptions.unchecked(e);
+            return JsonUtil.mapper.treeToValue(jsonNode, valueType);
+        } catch (JacksonException e) {
+            throw new ToolException(e);
         }
     }
 
-    /**
-     * tree 转对象
-     *
-     * @param jsonNode  JSON 节点
-     * @param valueType valueType
-     * @param <T>       泛型标记
-     *
-     * @return 转换结果
-     */
-    public static <T> T treeToObj(JsonNode jsonNode, JavaType valueType) {
-        try {
-            return CustomizeMapper.MAPPER.treeToValue(jsonNode, valueType);
-        } catch (JsonProcessingException e) {
-            throw Exceptions.unchecked(e);
-        }
-    }
 
     /**
      * tree 转带泛型的集合
@@ -67,11 +46,11 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    public static <T> List<T> treeToList(JsonNode jsonNode, Class<T> elementType) {
+    public static <T> List<T> toList(JsonNode jsonNode, Class<T> elementType) {
         try {
-            return CustomizeMapper.MAPPER.readerForListOf(elementType).readValue(jsonNode);
-        } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            return JsonUtil.mapper.readerForListOf(elementType).readValue(jsonNode);
+        } catch (JacksonException e) {
+            throw new ToolException(e);
         }
     }
 
@@ -83,13 +62,44 @@ public class JsonNodeUtil {
      *
      * @return 转换结果
      */
-    public static <T extends JsonNode> T objToTree(Object fromValue) {
-        return CustomizeMapper.MAPPER.valueToTree(fromValue);
+    public static <T extends JsonNode> T toNode(Object fromValue) {
+        return JsonUtil.mapper.valueToTree(fromValue);
     }
 
     // endregion
 
     // region JsonNode 操作
+
+    /**
+     * 从 JsonNode 中提取特定字段
+     */
+    public static <T> T getNodeValue(JsonNode node, String fieldName, Class<T> clazz) {
+        JsonNode valueNode = node.get(fieldName);
+        try {
+            return JsonUtil.mapper.treeToValue(valueNode, clazz);
+        } catch (JacksonException e) {
+            throw new ToolException(e);
+        }
+    }
+
+    /**
+     * 修改 JsonNode 并转换为 JSON 字符串
+     */
+    public static String modifyNode(String json, String fieldName, Object newValue) {
+        try {
+            ObjectNode node = (ObjectNode) JsonUtil.mapper.readTree(json);
+            switch (newValue) {
+                case String s -> node.put(fieldName, s);
+                case Integer i -> node.put(fieldName, i);
+                case Boolean b -> node.put(fieldName, b);
+                case Double v -> node.put(fieldName, v);
+                default -> node.putPOJO(fieldName, newValue);
+            }
+            return node.toString();
+        } catch (JacksonException e) {
+            throw new ToolException(e);
+        }
+    }
 
     /**
      * 将 json 字符串转成 JsonNode
@@ -98,56 +108,11 @@ public class JsonNodeUtil {
      *
      * @return jsonString json 字符串
      */
-    public static JsonNode readTree(String json) {
+    public static JsonNode toNode(String json) {
         try {
-            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(json, "jsonString is null"));
-        } catch (JsonProcessingException e) {
-            throw Exceptions.unchecked(e);
-        }
-    }
-
-    /**
-     * 将 InputStream 转成 JsonNode
-     *
-     * @param in InputStream
-     *
-     * @return jsonString json 字符串
-     */
-    public static JsonNode readTree(InputStream in) {
-        try {
-            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(in, "InputStream in is null"));
-        } catch (IOException e) {
-            throw Exceptions.unchecked(e);
-        }
-    }
-
-    /**
-     * 将 java.io.Reader 转成 JsonNode
-     *
-     * @param reader java.io.Reader
-     *
-     * @return jsonString json 字符串
-     */
-    public static JsonNode readTree(Reader reader) {
-        try {
-            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(reader, "Reader in is null"));
-        } catch (IOException e) {
-            throw Exceptions.unchecked(e);
-        }
-    }
-
-    /**
-     * 将 json 字符串转成 JsonNode
-     *
-     * @param content content
-     *
-     * @return jsonString json 字符串
-     */
-    public static JsonNode readTree(byte[] content) {
-        try {
-            return CustomizeMapper.MAPPER.readTree(Objects.requireNonNull(content, "byte[] content is null"));
-        } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            return JsonUtil.mapper.readTree(Objects.requireNonNull(json, "jsonString is null"));
+        } catch (JacksonException e) {
+            throw new ToolException(e);
         }
     }
 
@@ -157,7 +122,7 @@ public class JsonNodeUtil {
      * @return {@code ObjectNode }
      */
     public static ObjectNode createObjectNode() {
-        return CustomizeMapper.MAPPER.createObjectNode();
+        return JsonUtil.mapper.createObjectNode();
     }
 
     /**
@@ -166,7 +131,7 @@ public class JsonNodeUtil {
      * @return {@code ArrayNode }
      */
     public static ArrayNode createArrayNode() {
-        return CustomizeMapper.MAPPER.createArrayNode();
+        return JsonUtil.mapper.createArrayNode();
     }
 
     // endregion

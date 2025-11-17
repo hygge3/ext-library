@@ -1,6 +1,7 @@
 package ext.library.core.util;
 
 import ext.library.tool.holder.Lazy;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -10,7 +11,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
 
-import jakarta.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
  *
  * @since 2025.08.19
  */
-public class MethodUtil extends org.springframework.util.ClassUtils {
+public final class MethodUtil extends org.springframework.util.ClassUtils {
 
     private static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
@@ -61,7 +61,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public static <A extends Annotation> A getAnnotation(@Nonnull Method method, Class<A> annotationType) {
+    public static <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
         Class<?> targetClass = method.getDeclaringClass();
         // The method may be on an interface, but we need attributes from the target
         // class.
@@ -88,7 +88,7 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public static <A extends Annotation> A getAnnotation(@Nonnull HandlerMethod handlerMethod, Class<A> annotationType) {
+    public static <A extends Annotation> @Nullable A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
         // 先找方法，再找方法上的类
         A annotation = handlerMethod.getMethodAnnotation(annotationType);
         if (null != annotation) {

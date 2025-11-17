@@ -2,7 +2,6 @@ package ext.library.captcha.draw;
 
 import ext.library.captcha.core.CaptchaUtil;
 
-import jakarta.annotation.Nonnull;
 import java.util.Random;
 
 /**
@@ -23,7 +22,7 @@ class Expression {
      *
      * @return 结果，-1 为 expr 表达式不合法
      */
-    public static int eval(@Nonnull String expr) {
+    public static int eval(String expr) {
         char[] chars = expr.toCharArray();
         int length = expr.length();
         for (int i = 0; i < chars.length; i++) {
@@ -51,7 +50,7 @@ class Expression {
      *
      * @return 表达式
      */
-    public static String randomExpr(@Nonnull Random random) {
+    public static String randomExpr(Random random) {
         char[] chars = new char[]{PLUS, MINUS, MULTIPLY};
         char operator = chars[random.nextInt(chars.length)];
         int num1;
@@ -73,7 +72,7 @@ class Expression {
         return String.valueOf(num1) + operator + num2;
     }
 
-    private static int findInt(@Nonnull String expr, int start, int end) {
+    private static int findInt(String expr, int start, int end) {
         return Integer.parseInt(expr.substring(start, end));
     }
 

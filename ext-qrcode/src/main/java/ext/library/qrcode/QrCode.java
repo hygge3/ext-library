@@ -18,8 +18,8 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.ImageUtil;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -83,7 +83,7 @@ public class QrCode {
     /**
      * 需要添加的图片
      */
-    private BufferedImage logo;
+    private @Nullable BufferedImage logo;
 
     /**
      * 创建一个带有默认值的 QRCode 生成器的格式。默认值如下
@@ -220,7 +220,7 @@ public class QrCode {
      *
      * @return QRCode 中的内容
      */
-    public static String read(BufferedImage qrCodeImage, Map<DecodeHintType, ?> hints) {
+    public static String read(BufferedImage qrCodeImage, @Nullable Map<DecodeHintType, ?> hints) {
         LuminanceSource source = new BufferedImageLuminanceSource(qrCodeImage);
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         try {
@@ -286,7 +286,7 @@ public class QrCode {
         }
     }
 
-    private static void addLogo(@Nonnull BufferedImage qrCodeImage, @Nonnull BufferedImage logoImage, @Nonnull QrCode qrCode) {
+    private static void addLogo(BufferedImage qrCodeImage, BufferedImage logoImage, QrCode qrCode) {
         int baseWidth = qrCodeImage.getWidth();
         int baseHeight = qrCodeImage.getHeight();
         // 计算 icon 的最大边长
@@ -319,7 +319,7 @@ public class QrCode {
         gc.dispose();
     }
 
-    private static Color getColor(@Nonnull String hexString) {
+    private static Color getColor(String hexString) {
         if ('#' == hexString.charAt(0)) {
             return new Color(Long.decode(hexString).intValue());
         } else {
@@ -327,7 +327,7 @@ public class QrCode {
         }
     }
 
-    private static BitMatrix deleteWhite(@Nonnull BitMatrix matrix) {
+    private static BitMatrix deleteWhite(BitMatrix matrix) {
         int[] rec = matrix.getEnclosingRectangle();
         int resWidth = rec[2] + 1;
         int resHeight = rec[3] + 1;
@@ -363,9 +363,7 @@ public class QrCode {
      * @return QRCode
      */
     public QrCode encode(Charset encode) {
-        if (null != encode) {
-            this.encode = encode;
-        }
+        this.encode = encode;
         return this;
     }
 
@@ -473,9 +471,7 @@ public class QrCode {
      * @return QRCode
      */
     public QrCode imageFormat(String imageFormat) {
-        if (imageFormat != null) {
-            this.imageFormat = imageFormat.toLowerCase();
-        }
+        this.imageFormat = imageFormat.toLowerCase();
         return this;
     }
 
@@ -590,7 +586,7 @@ public class QrCode {
      *
      * @return 文件
      */
-    public File toFile(@Nonnull File qrCodeFile) {
+    public File toFile(File qrCodeFile) {
         if (!qrCodeFile.exists()) {
             qrCodeFile.getParentFile().mkdirs();
         }
@@ -653,9 +649,7 @@ public class QrCode {
                 image.setRGB(x, y, matrix.get(x, y) ? fgColor : bgColor);
             }
         }
-        if (null != this.logo) {
-            addLogo(image, this.logo, this);
-        }
+        addLogo(image, this.logo, this);
         return image;
     }
 

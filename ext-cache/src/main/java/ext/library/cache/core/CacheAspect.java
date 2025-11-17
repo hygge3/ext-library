@@ -56,7 +56,7 @@ public class CacheAspect {
             return cache;
         }
 
-        log.debug("[💾] get data from database");
+        log.debug("[💾] 从数据库获取数据");
         Object object = point.proceed();
         if (Objects.nonNull(object)) {
             cacheStrategy.put(cacheName, key, object, DateUtil.convert(annotation.timeout(), TimeUnit.SECONDS));

@@ -1,6 +1,6 @@
 package ext.library.crypto;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class AESUtil {
             keyGenerator = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 AES 密钥失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         // 设置密钥长度和随机源
         keyGenerator.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());

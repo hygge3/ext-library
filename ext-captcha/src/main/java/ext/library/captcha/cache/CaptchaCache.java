@@ -7,13 +7,7 @@ import java.util.Objects;
 /**
  * 验证码缓存
  */
-public class CaptchaCache {
-
-    private final CacheStrategy cacheStrategy;
-
-    public CaptchaCache(CacheStrategy cacheStrategy) {
-        this.cacheStrategy = cacheStrategy;
-    }
+public record CaptchaCache(CacheStrategy cacheStrategy) {
 
     /**
      * 保存缓存

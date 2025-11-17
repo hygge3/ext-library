@@ -10,7 +10,6 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -23,13 +22,13 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
-    public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
-                             @Nonnull Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+                             Object handler) throws Exception {
 
         // 打印请求参数
         if (isJsonRequest(request)) {
             String jsonParam = Symbol.EMPTY;
-            ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
+            ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request, 0);
             // 处理请求数据
             byte[] body = requestWrapper.getContentAsByteArray();
             if (ObjectUtil.isNotEmpty(body)) {
@@ -53,8 +52,8 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
-                                @Nonnull Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) throws Exception {
         StopWatch stopWatch = KEY_CACHE.get();
         stopWatch.stop();
         log.info("[🌐] {}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
@@ -68,7 +67,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
      *
      * @return boolean
      */
-    private boolean isJsonRequest(@Nonnull HttpServletRequest request) {
+    private boolean isJsonRequest(HttpServletRequest request) {
         String contentType = request.getContentType();
         if (contentType != null) {
             return contentType.startsWith(MediaType.APPLICATION_JSON_VALUE);

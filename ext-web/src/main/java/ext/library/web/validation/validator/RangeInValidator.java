@@ -1,6 +1,7 @@
 package ext.library.web.validation.validator;
 
-import ext.library.tool.util.CollectionUtil;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.CollUtil;
 import ext.library.web.validation.constraints.RangeIn;
 import org.springframework.util.StringUtils;
 
@@ -31,28 +32,28 @@ public class RangeInValidator implements ConstraintValidator<RangeIn, Object> {
         if (value == null) {
             return true;
         }
-        String[] ranges = StringUtils.delimitedListToStringArray(rangeIn.value(), ",", " \t\n\n\f");
+        String[] ranges = StringUtils.delimitedListToStringArray(rangeIn.value(), Symbol.COMMA, " \t\n\n\f");
         switch (value) {
             case CharSequence obj -> {
-                return CollectionUtil.contains(ranges, obj);
+                return CollUtil.contains(ranges, obj);
             }
             case Number obj -> {
-                return CollectionUtil.contains(ranges, obj.toString());
+                return CollUtil.contains(ranges, obj.toString());
             }
             case Collection obj -> {
-                return obj.stream().allMatch(it -> CollectionUtil.contains(ranges, it.toString()));
+                return obj.stream().allMatch(it -> CollUtil.contains(ranges, it.toString()));
             }
             case Iterable obj -> {
                 AtomicBoolean flag = new AtomicBoolean(true);
                 obj.forEach(it -> {
-                    if (!CollectionUtil.contains(ranges, it.toString())) {
+                    if (!CollUtil.contains(ranges, it.toString())) {
                         flag.set(false);
                     }
                 });
                 return flag.get();
             }
             case Object[] obj -> {
-                return Arrays.stream(obj).allMatch(it -> CollectionUtil.contains(ranges, it.toString()));
+                return Arrays.stream(obj).allMatch(it -> CollUtil.contains(ranges, it.toString()));
             }
             default -> {
                 return false;

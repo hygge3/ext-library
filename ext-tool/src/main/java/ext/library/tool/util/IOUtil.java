@@ -2,8 +2,9 @@ package ext.library.tool.util;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+import ext.library.tool.constant.Symbol;
 import ext.library.tool.core.Exceptions;
-import org.springframework.util.Assert;
+import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -18,7 +19,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-public class IOUtil {
+public final class IOUtil {
     /**
      * The default buffer size used when copying bytes.
      */
@@ -30,9 +31,6 @@ public class IOUtil {
      * @param closeable 自动关闭
      */
     public static void closeQuietly(Closeable closeable) {
-        if (closeable == null) {
-            return;
-        }
         if (closeable instanceof Flushable flushable) {
             try {
                 flushable.flush();
@@ -104,7 +102,7 @@ public class IOUtil {
      *
      * @return the file contents, never {@code null}
      */
-    public static String readToString(final File file) {
+    public static String readToString(File file) {
         try {
             return new String(Files.toByteArray(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -168,7 +166,7 @@ public class IOUtil {
      */
     public static File toTempDir(String subDirFile) {
         String tempDirPath = System.getProperty("java.io.tmpdir");
-        if (subDirFile.startsWith("/")) {
+        if (subDirFile.startsWith(Symbol.SLASH)) {
             subDirFile = subDirFile.substring(1);
         }
         String fullPath = tempDirPath.concat(subDirFile);
@@ -191,9 +189,7 @@ public class IOUtil {
      * @throws IOException in case of I/O errors
      */
     public static int copy(InputStream in, OutputStream out) throws IOException {
-        Assert.notNull(in, "No InputStream specified");
-        Assert.notNull(out, "No OutputStream specified");
-        try {
+        try (in; out) {
             int byteCount = 0;
             byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead;
@@ -203,9 +199,6 @@ public class IOUtil {
             }
             out.flush();
             return byteCount;
-        } finally {
-            close(in);
-            close(out);
         }
     }
 
@@ -218,12 +211,8 @@ public class IOUtil {
      * @throws IOException in case of I/O errors
      */
     public static void copy(byte[] in, OutputStream out) throws IOException {
-        Assert.notNull(in, "No input byte array specified");
-        Assert.notNull(out, "No OutputStream specified");
-        try {
+        try (out) {
             out.write(in);
-        } finally {
-            close(out);
         }
     }
 
@@ -238,10 +227,6 @@ public class IOUtil {
      * @throws IOException in case of I/O errors
      */
     public static byte[] copyToBytes(InputStream in) throws IOException {
-        if (in == null) {
-            return new byte[0];
-        }
-
         ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
         copy(in, out);
         return out.toByteArray();
@@ -257,22 +242,13 @@ public class IOUtil {
      *
      */
     public static String copyToStr(InputStream in, Charset charset) throws IOException {
-        if (in == null) {
-            return "";
-        }
-
         StringBuilder out = new StringBuilder(BUFFER_SIZE);
-        InputStreamReader reader = null;
-        try {
-            reader = new InputStreamReader(in, charset);
+        try (in; InputStreamReader reader = new InputStreamReader(in, charset)) {
             char[] buffer = new char[BUFFER_SIZE];
             int charsRead;
             while ((charsRead = reader.read(buffer)) != -1) {
                 out.append(buffer, 0, charsRead);
             }
-        } finally {
-            close(in);
-            close(reader);
         }
         return out.toString();
     }
@@ -281,7 +257,7 @@ public class IOUtil {
     /*
      * Write the given collection to the given output as lines.
      */
-    public static void writeLines(final Collection<?> lines, final OutputStream output) throws IOException {
+    public static void writeLines(Collection<?> lines, OutputStream output) throws IOException {
         writeLines(lines, null, output, null);
     }
 
@@ -296,10 +272,7 @@ public class IOUtil {
      *
      * @throws IOException in case of I/O errors
      */
-    public static void writeLines(final Collection<?> lines, String lineEnding, final OutputStream output, Charset charset) throws IOException {
-        if (lines == null) {
-            return;
-        }
+    public static void writeLines(Collection<?> lines, @Nullable String lineEnding, OutputStream output, @Nullable Charset charset) throws IOException {
         if (lineEnding == null) {
             lineEnding = System.lineSeparator();
         }
@@ -311,11 +284,9 @@ public class IOUtil {
             charset = StandardCharsets.UTF_8;
         }
 
-        final byte[] eolBytes = lineEnding.getBytes(charset);
-        for (final Object line : lines) {
-            if (line != null) {
-                writeStr(line.toString(), output, charset);
-            }
+        byte[] eolBytes = lineEnding.getBytes(charset);
+        for (Object line : lines) {
+            writeStr(line.toString(), output, charset);
             output.write(eolBytes);
         }
     }
@@ -324,7 +295,7 @@ public class IOUtil {
     /**
      * Write the given string to the given output as a byte array using the UTF-8 charset.
      */
-    public static void writeStr(final String data, final OutputStream output) throws IOException {
+    public static void writeStr(String data, OutputStream output) throws IOException {
         writeStr(data, output, StandardCharsets.UTF_8);
     }
 
@@ -337,14 +308,7 @@ public class IOUtil {
      *
      * @throws IOException in case of I/O errors
      */
-    public static void writeStr(final String data, final OutputStream output, Charset charset) throws IOException {
-        if (data == null) {
-            return;
-        }
-        if (charset == null) {
-            charset = StandardCharsets.UTF_8;
-        }
-
+    public static void writeStr(String data, OutputStream output, Charset charset) throws IOException {
         // Use Charset#encode(String), since calling String#getBytes(Charset) might result in
         // NegativeArraySizeException or OutOfMemoryError.
         // The underlying OutputStream should not be closed, so the channel is not closed.

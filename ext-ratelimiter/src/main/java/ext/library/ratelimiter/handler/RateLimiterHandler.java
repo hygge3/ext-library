@@ -5,7 +5,6 @@ import ext.library.ratelimiter.annotation.RateLimit;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 
-import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +22,7 @@ public class RateLimiterHandler implements IRateLimitHandler {
     private final Map<String, RateLimiter> rateLimiterMap = new ConcurrentHashMap<>();
 
     @Override
-    public boolean proceed(@Nonnull RateLimit rateLimit, JoinPoint point) {
+    public boolean proceed(RateLimit rateLimit, JoinPoint point) {
         String key = getCombineKey(rateLimit, point);
         Duration interval = DurationStyle.detectAndParse(rateLimit.interval());
         RateLimiter rateLimiter;

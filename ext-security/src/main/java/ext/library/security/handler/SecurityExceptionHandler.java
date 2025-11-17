@@ -2,11 +2,11 @@ package ext.library.security.handler;
 
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.exception.UnauthorizedException;
-import ext.library.tool.biz.exception.BizCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -41,7 +41,7 @@ public class SecurityExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public Map<String, Object> forbiddenException(ForbiddenException e, HttpServletRequest request) {
         printLog(request, "权限校验失败", e);
-        return Map.of("code", BizCode.FORBIDDEN.getCode(), "msg", "没有访问权限，请联系管理员授权");
+        return Map.of("code", HttpStatus.FORBIDDEN.value(), "msg", "没有访问权限，请联系管理员授权");
     }
 
     /**
@@ -50,7 +50,7 @@ public class SecurityExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public Map<String, Object> unauthorizedException(UnauthorizedException e, HttpServletRequest request) {
         printLog(request, "认证校验失败", e);
-        return Map.of("code", BizCode.UNAUTHORIZED.getCode(), "msg", "认证失败，无法访问系统资源");
+        return Map.of("code", HttpStatus.UNAUTHORIZED.value(), "msg", "认证失败，无法访问系统资源");
     }
 
 }

@@ -14,7 +14,7 @@ import java.util.Objects;
  * <p>
  * ##不完整模式 Version.of("v0.1").incomplete().eq("v0.1.2"); // true
  */
-public class Version {
+public final class Version {
 
     private static final String DELIMITER = "\\.";
 

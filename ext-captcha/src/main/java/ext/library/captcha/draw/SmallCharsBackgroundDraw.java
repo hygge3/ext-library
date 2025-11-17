@@ -2,7 +2,6 @@ package ext.library.captcha.draw;
 
 import ext.library.captcha.core.CaptchaUtil;
 
-import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.util.Random;
 
@@ -22,7 +21,7 @@ public enum SmallCharsBackgroundDraw implements BackgroundDraw {
     private static final char[] CHAR_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     @Override
-    public void draw(@Nonnull Graphics2D g, int width, int height, @Nonnull Font[] fonts, @Nonnull Random random) {
+    public void draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
         // 设定字体，每次随机
         Font fontTemp = fonts[random.nextInt(fonts.length)];
         // 设定背景色，淡色

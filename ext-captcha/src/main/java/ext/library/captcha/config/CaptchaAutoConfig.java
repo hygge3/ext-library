@@ -12,8 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import jakarta.annotation.Nonnull;
-
 /**
  * 验证码自动配置
  */
@@ -24,20 +22,20 @@ public class CaptchaAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public Captcha imageCaptcha(@Nonnull CaptchaProperties captchaProperties) {
+    public Captcha imageCaptcha(CaptchaProperties captchaProperties) {
         return new Captcha(captchaProperties.getCaptchaType());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ICaptchaService imageCaptchaService(@Nonnull CaptchaProperties captchaProperties, CaptchaCache captchaCache, Captcha captcha) {
+    public ICaptchaService imageCaptchaService(CaptchaProperties captchaProperties, CaptchaCache captchaCache, Captcha captcha) {
         log.info("[🔢] 验证码模块载入成功");
         return new CaptchaServiceImpl(captchaProperties, captchaCache, captcha);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CaptchaCache captchaCache(@Nonnull CaptchaProperties captchaProperties) {
+    public CaptchaCache captchaCache(CaptchaProperties captchaProperties) {
         return new CaptchaCache(captchaProperties.getCacheStorage().getCacheStrategy());
     }
 

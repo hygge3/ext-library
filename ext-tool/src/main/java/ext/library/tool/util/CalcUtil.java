@@ -1,6 +1,6 @@
 package ext.library.tool.util;
 
-import com.google.common.base.Preconditions;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,7 +10,7 @@ import java.math.RoundingMode;
  * <p>
  * 由于 Java 的简单类型不能够精确的对浮点数进行运算，这个工具类提供精确的浮点数运算，包括加减乘除和四舍五入。
  */
-public class CalcUtil {
+public final class CalcUtil {
 
     /**
      * 默认精确到小数点以后 10 位
@@ -26,9 +26,9 @@ public class CalcUtil {
      * @return 参数的和
      */
     public static BigDecimal add(Object augend, Object... addends) {
-        BigDecimal bdAugend = GeneralTypeCastUtil.getAsBigDecimal(augend);
+        BigDecimal bdAugend = TypeCastUtil.getAsBigDecimal(augend);
         for (Object addend : addends) {
-            BigDecimal bdAddend = GeneralTypeCastUtil.getAsBigDecimal(addend);
+            BigDecimal bdAddend = TypeCastUtil.getAsBigDecimal(addend);
             bdAugend = bdAugend.add(bdAddend);
         }
         return bdAugend;
@@ -43,9 +43,9 @@ public class CalcUtil {
      * @return 参数的差
      */
     public static BigDecimal sub(Object minuend, Object... subtrahends) {
-        BigDecimal bdMinuend = GeneralTypeCastUtil.getAsBigDecimal(minuend);
+        BigDecimal bdMinuend = TypeCastUtil.getAsBigDecimal(minuend);
         for (Object subtrahend : subtrahends) {
-            BigDecimal bdSubtrahend = GeneralTypeCastUtil.getAsBigDecimal(subtrahend);
+            BigDecimal bdSubtrahend = TypeCastUtil.getAsBigDecimal(subtrahend);
             bdMinuend = bdMinuend.subtract(bdSubtrahend);
         }
         return bdMinuend;
@@ -60,8 +60,8 @@ public class CalcUtil {
      * @return 两个参数的积
      */
     public static BigDecimal mul(Object v1, Object v2) {
-        BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
-        BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
+        BigDecimal b1 = TypeCastUtil.getAsBigDecimal(v1);
+        BigDecimal b2 = TypeCastUtil.getAsBigDecimal(v2);
         return b1.multiply(b2);
     }
 
@@ -100,9 +100,9 @@ public class CalcUtil {
      * @return 两个参数的商
      */
     public static BigDecimal div(Object v1, Object v2, int scale, RoundingMode roundingMode) {
-        Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
-        BigDecimal b1 = GeneralTypeCastUtil.getAsBigDecimal(v1);
-        BigDecimal b2 = GeneralTypeCastUtil.getAsBigDecimal(v2);
+        Assert.isTrue(scale >= 0, "精确度不能小于 0");
+        BigDecimal b1 = TypeCastUtil.getAsBigDecimal(v1);
+        BigDecimal b2 = TypeCastUtil.getAsBigDecimal(v2);
         return b1.divide(b2, scale, roundingMode);
     }
 
@@ -128,9 +128,9 @@ public class CalcUtil {
      * @return 舍入后的结果
      */
     public static BigDecimal roundingMode(Object v, int scale, RoundingMode roundingMode) {
-        Preconditions.checkArgument(scale >= 0, "精确度不能小于 0");
-        BigDecimal b = GeneralTypeCastUtil.getAsBigDecimal(v);
-        BigDecimal one = GeneralTypeCastUtil.getAsBigDecimal("1");
+        Assert.isTrue(scale >= 0, "精确度不能小于 0");
+        BigDecimal b = TypeCastUtil.getAsBigDecimal(v);
+        BigDecimal one = TypeCastUtil.getAsBigDecimal("1");
         return b.divide(one, scale, roundingMode);
     }
 
@@ -143,10 +143,7 @@ public class CalcUtil {
      * @return {@code BigDecimal }
      */
     public static BigDecimal percentage(Object dividend, int scale) {
-        if (dividend == null) {
-            return null;
-        }
-        return GeneralTypeCastUtil.getAsBigDecimal(dividend).multiply(new BigDecimal(100)).setScale(scale, RoundingMode.HALF_UP);
+        return TypeCastUtil.getAsBigDecimal(dividend).multiply(new BigDecimal(100)).setScale(scale, RoundingMode.HALF_UP);
     }
 
     /**

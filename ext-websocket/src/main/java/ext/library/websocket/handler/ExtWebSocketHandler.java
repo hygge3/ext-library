@@ -17,7 +17,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -36,19 +35,17 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * 连接成功后
      */
     @Override
-    public void afterConnectionEstablished(@Nonnull WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         // 实现 session 支持并发，可参考 https://blog.csdn.net/abu935009066/article/details/131218149
-        session = new ConcurrentWebSocketSessionDecorator(session,
-                properties.get().getSendTimeLimit(),
-                properties.get().getBufferSizeLimit());
+        session = new ConcurrentWebSocketSessionDecorator(session, properties.get().getSendTimeLimit(), properties.get().getBufferSizeLimit());
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
-            log.info("[⛓️][connect] 无效的 token. sessionId: {}", session.getId());
+            log.info("[⛓️][连接] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.addSession(loginUser.getLoginId(), session);
-        log.info("[⛓️][connect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        log.info("[⛓️][连接] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**
@@ -60,7 +57,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
-    protected void handleTextMessage(@Nonnull WebSocketSession session, @Nonnull TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         // 从 WebSocket 会话中获取登录用户信息
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
 
@@ -80,7 +77,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
-    protected void handleBinaryMessage(@Nonnull WebSocketSession session, @Nonnull BinaryMessage message) throws Exception {
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         super.handleBinaryMessage(session, message);
     }
 
@@ -93,7 +90,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
-    protected void handlePongMessage(@Nonnull WebSocketSession session, @Nonnull PongMessage message) throws Exception {
+    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         WebSocketUtil.sendPongMessage(session);
     }
 
@@ -106,8 +103,8 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @throws Exception 处理过程中可能抛出的异常
      */
     @Override
-    public void handleTransportError(@Nonnull WebSocketSession session, @Nonnull Throwable exception) throws Exception {
-        log.error("[⛓️][transport error] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        log.error("[⛓️][传输错误] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
     }
 
     /**
@@ -117,14 +114,14 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      * @param status  关闭状态信息
      */
     @Override
-    public void afterConnectionClosed(@Nonnull WebSocketSession session, @Nonnull CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
-            log.info("[⛓️][disconnect] 无效的 token. sessionId: {}", session.getId());
+            log.info("[⛓️][断开] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.removeSession(loginUser.getLoginId());
-        log.info("[⛓️][disconnect] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        log.info("[⛓️][断开] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**

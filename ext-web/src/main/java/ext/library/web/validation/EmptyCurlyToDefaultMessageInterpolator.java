@@ -2,8 +2,8 @@ package ext.library.web.validation;
 
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -25,7 +25,7 @@ public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessag
     }
 
     @Override
-    public String interpolate(@Nonnull String message, Context context, Locale locale) {
+    public String interpolate(@NonNull String message, Context context, Locale locale) {
 
         // 如果包含花括号占位符
         if (message.contains(EMPTY_CURLY_BRACES)) {

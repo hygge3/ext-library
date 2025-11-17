@@ -3,7 +3,7 @@ package ext.library.security.domain;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.repository.SecurityRepository;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -122,7 +122,7 @@ public class SecurityToken implements Serializable {
 
         boolean result = repository.saveToken(this);
         if (!result) {
-            throw Exceptions.throwOut("[🛡️] 保存 token 认证数据失败");
+            throw new ExtException("[🛡️] 保存 token 认证数据失败");
         }
     }
 

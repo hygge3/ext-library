@@ -1,8 +1,9 @@
 package ext.library.web.response;
 
-import ext.library.tool.biz.exception.BizCode;
-import ext.library.tool.biz.response.ResponseCode;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -31,7 +32,7 @@ public class R<T> implements Serializable {
     /**
      * 业务数据
      */
-    @Schema(title = "数据", nullable = true, defaultValue = "null")
+    @Schema(title = "数据", nullable = true, defaultValue = Symbol.NULL)
     private T data;
 
     public R(int code, String msg, T data) {
@@ -48,11 +49,11 @@ public class R<T> implements Serializable {
     }
 
     public static <T> R<T> ok(T data) {
-        return ok(data, BizCode.SUCCESS.getMsg());
+        return ok(data, HttpStatus.OK.getReasonPhrase());
     }
 
     public static <T> R<T> ok(T data, String message) {
-        return new R<>(BizCode.SUCCESS.getCode(), message, data);
+        return new R<>(HttpStatus.OK.value(), message, data);
     }
 
     public static <T> R<T> failed(int code, String message) {

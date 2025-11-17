@@ -1,6 +1,6 @@
 package ext.library.crypto;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class SM4Util {
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 加密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -81,7 +81,7 @@ public class SM4Util {
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 ECB 解密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -101,7 +101,7 @@ public class SM4Util {
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 加密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -121,7 +121,7 @@ public class SM4Util {
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] SM4 CBC 解密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 }

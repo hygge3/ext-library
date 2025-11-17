@@ -5,8 +5,8 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
-import ext.library.tool.constant.Holder;
 import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.IDUtil;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -144,7 +144,7 @@ public class SecurityLoginParams implements Serializable {
     public SecurityToken convert(String loginId) {
         SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
         SecurityToken securityToken = new SecurityToken();
-        securityToken.setToken(Holder.ULID.nextULID());
+        securityToken.setToken(IDUtil.getUUIDv7());
         securityToken.setLoginId(loginId);
         securityToken.setDeviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN));
         securityToken.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());

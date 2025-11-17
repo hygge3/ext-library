@@ -1,6 +1,6 @@
 package ext.library.crypto;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class DESUtil {
             keyGen = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 DES 密钥失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         keyGen.init(Objects.requireNonNullElse(keySize, 56));// 初始化密钥生成器
         SecretKey secretKey = keyGen.generateKey();// 生成密钥
@@ -62,7 +62,7 @@ public class DESUtil {
             encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("[🔐] DES 加密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         return Base64Util.encodeUrlSafeToStr(encryptedBytes);
     }
@@ -88,7 +88,7 @@ public class DESUtil {
             decryptedBytes = cipher.doFinal(Base64Util.decodeUrlSafe(cipherText));
         } catch (Exception e) {
             log.error("[🔐] DES 解密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }

@@ -1,6 +1,7 @@
 package ext.library.http.useragent;
 
 import com.google.common.collect.Lists;
+import ext.library.tool.constant.Symbol;
 
 import java.io.Serial;
 import java.util.List;
@@ -106,7 +107,7 @@ public class OS extends UserAgentInfo {
         if (m.find()) {
             return m.group(1);
         }
-        return "";
+        return Symbol.EMPTY;
     }
 
     /**

@@ -5,6 +5,7 @@ import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -24,7 +25,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
@@ -44,7 +44,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
         this.webMvcProperties = webMvcProperties;
     }
 
-    private static CorsConfiguration getCorsConfiguration(@Nonnull WebMvcProperties.CorsConfig corsConfig) {
+    private static CorsConfiguration getCorsConfiguration(WebMvcProperties.@NonNull CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
         corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());
@@ -54,15 +54,6 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
         corsConfiguration.setAllowCredentials(corsConfig.getAllowCredentials());
         corsConfiguration.setMaxAge(corsConfig.getMaxAge());
         return corsConfiguration;
-    }
-
-    /**
-     * 注册自定义的 Body 参数解析器
-     */
-    @Override
-    public void addArgumentResolvers(@Nonnull List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
-        WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
     }
 
     /**
@@ -77,7 +68,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addFormatters(@Nonnull FormatterRegistry registry) {
+    public void addFormatters(@NonNull FormatterRegistry registry) {
         DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
         registrar.setTimeFormatter(DateUtil.FORMATTER_HMS);
         registrar.setDateFormatter(DateUtil.FORMATTER_YMD);
@@ -86,7 +77,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addInterceptors(@Nonnull InterceptorRegistry registry) {
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
         if (webMvcProperties.getInvokeTimeEnabled()) {
             log.info("[⏱️] 请求调用时间统计模块载入成功");
             // 全局访问性能拦截
@@ -100,12 +91,17 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
      * @param registry 注册表
      */
     @Override
-    public void addResourceHandlers(@Nonnull ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/favicon.ico")
-                .addResourceLocations("classpath*:/static/")
-                .addResourceLocations("classpath*:/resources/")
-                .addResourceLocations("classpath*:/public/")
-                .addResourceLocations("classpath*:/META-INF/resources/");
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath*:/static/").addResourceLocations("classpath*:/resources/").addResourceLocations("classpath*:/public/").addResourceLocations("classpath*:/META-INF/resources/");
+    }
+
+    /**
+     * 注册自定义的 Body 参数解析器
+     */
+    @Override
+    public void addArgumentResolvers(@NonNull List<HandlerMethodArgumentResolver> argumentResolvers) {
+        argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
+        WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
     }
 
     /**
@@ -115,7 +111,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
      */
     @Bean
     @ConditionalOnProperty(prefix = WebMvcProperties.PREFIX + ".cors", name = "enabled", havingValue = "true")
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean() {
+    public FilterRegistrationBean<@NonNull CorsFilter> corsFilterRegistrationBean() {
         log.info("[🔛] CORS 模块载入成功");
         // 获取 CORS 配置
         WebMvcProperties.CorsConfig corsConfig = webMvcProperties.getCorsConfig();
@@ -128,7 +124,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration(corsConfig.getUrlPattern(), corsConfiguration);
 
         // 注册 CORS 过滤器，设置最高优先级 + 1 (在 traceId 之后)
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+        FilterRegistrationBean<@NonNull CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1000);
 
         return bean;

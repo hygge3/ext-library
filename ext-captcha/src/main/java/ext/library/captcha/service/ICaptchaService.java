@@ -1,9 +1,7 @@
 package ext.library.captcha.service;
 
 import ext.library.captcha.vo.CaptchaVO;
-import java.io.OutputStream;
-import java.util.Base64;
-import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FastByteArrayOutputStream;
+
+import java.io.OutputStream;
+import java.util.Base64;
+import java.util.UUID;
 
 /**
  * 验证码服务
@@ -29,6 +31,7 @@ public interface ICaptchaService {
      * 生成验证码
      *
      * @param uuid 自定义缓存的 uuid
+     *
      * @return bytes
      */
     default byte[] generateBytes(String uuid) {
@@ -41,6 +44,7 @@ public interface ICaptchaService {
      * 生成验证码
      *
      * @param uuid 自定义缓存的 uuid
+     *
      * @return ByteArrayResource
      */
     default ByteArrayResource generateByteResource(String uuid) {
@@ -51,6 +55,7 @@ public interface ICaptchaService {
      * 生成验证码 base64 字符串
      *
      * @param uuid 自定义缓存的 uuid
+     *
      * @return base64 图片
      */
     default String generateBase64(String uuid) {
@@ -72,6 +77,7 @@ public interface ICaptchaService {
      * 生成验证码 base64 CaptchaVo
      *
      * @param uuid 自定义缓存的 uuid
+     *
      * @return CaptchaVo
      */
     default CaptchaVO generateBase64Vo(String uuid) {
@@ -82,9 +88,10 @@ public interface ICaptchaService {
      * 生成验证码
      *
      * @param uuid captcha uuid
+     *
      * @return {ResponseEntity}
      */
-    default ResponseEntity<Resource> generateResponseEntity(String uuid) {
+    default ResponseEntity<@NonNull Resource> generateResponseEntity(String uuid) {
         return new ResponseEntity<>(this.generateByteResource(uuid), this.getCaptchaHeaders(), HttpStatus.OK);
     }
 
@@ -107,6 +114,7 @@ public interface ICaptchaService {
      *
      * @param uuid             自定义缓存的 uuid
      * @param userInputCaptcha 用户输入的图形验证码
+     *
      * @return 是否校验成功
      */
     boolean validate(String uuid, String userInputCaptcha);

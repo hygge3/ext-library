@@ -12,9 +12,10 @@ import java.util.Enumeration;
 /**
  * INet 相关工具
  */
-public class INetUtil {
+public final class INetUtil {
 
     private static final String LOCAL_HOST = "127.0.0.1";
+    private static final String LOCAL_HOST_IPv6 = "[::1]";
 
     /**
      * 获取 服务器 hostname
@@ -92,8 +93,7 @@ public class INetUtil {
         try {
             InetAddress candidateAddress = null;
             // Iterate all NICs (network interface cards)...
-            for (Enumeration<NetworkInterface> iFaces = NetworkInterface.getNetworkInterfaces(); iFaces
-                    .hasMoreElements(); ) {
+            for (Enumeration<NetworkInterface> iFaces = NetworkInterface.getNetworkInterfaces(); iFaces.hasMoreElements(); ) {
                 NetworkInterface iFace = iFaces.nextElement();
                 // Iterate all IP addresses assigned to each card...
                 for (Enumeration<InetAddress> inetAdders = iFace.getInetAddresses(); inetAdders.hasMoreElements(); ) {
@@ -129,12 +129,11 @@ public class INetUtil {
             // Fall back to returning whatever InetAddress.getLocalHost() returns...
             InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
             if (jdkSuppliedAddress == null) {
-                throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
+                throw new UnknownHostException("JDK InetAddress.getLocalHost() 方法意外返回 null");
             }
             return jdkSuppliedAddress;
         } catch (Exception e) {
-            UnknownHostException unknownHostException = new UnknownHostException(
-                    "Failed to determine LAN address: " + e);
+            UnknownHostException unknownHostException = new UnknownHostException("无法确定局域网地址：" + e);
             unknownHostException.initCause(e);
             throw unknownHostException;
         }

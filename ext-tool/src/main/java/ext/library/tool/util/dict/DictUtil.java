@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.function.Function;
 /**
  * 字典工具
  */
-public class DictUtil {
+public final class DictUtil {
     private static final Logger log = LoggerFactory.getLogger(DictUtil.class);
 
     /**
@@ -28,10 +27,11 @@ public class DictUtil {
      * @return {@code @NotNull List<Map<String, Object>> }
      */
     @SafeVarargs
-    public static <D extends IDict> List<Map<String, Object>> getDictionaryList(@Nonnull Class<D> clazz, Function<D, Object>... lambdas) {
-        List<Map<String, Object>> mapList = new ArrayList<>();
+    public static <D extends IDict> List<Map<String, Object>> getDictionaryList(Class<D> clazz, Function<D, Object>... lambdas) {
+        D[] enumConstants = clazz.getEnumConstants();
+        List<Map<String, Object>> mapList = new ArrayList<>(enumConstants.length);
         // 取出所有枚举类型
-        Arrays.stream(clazz.getEnumConstants()).forEach(enumItem -> {
+        Arrays.stream(enumConstants).forEach(enumItem -> {
             Map<String, Object> item = new HashMap<>(lambdas.length);
             // 依次取出参数的值
             Arrays.stream(lambdas).forEach(lambda -> {

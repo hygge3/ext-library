@@ -3,7 +3,7 @@ package ext.library.tool.core;
 import com.google.common.base.Joiner;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.constant.Symbol;
-import ext.library.tool.util.GeneralTypeCastUtil;
+import ext.library.tool.util.TypeCastUtil;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 运行时工具类
  */
-public class Runtimes {
+public final class Runtimes {
 
     private static volatile int pId = -1;
 
@@ -32,7 +32,7 @@ public class Runtimes {
         final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
         final int index = jvmName.indexOf('@');
         if (index > 0) {
-            pId = GeneralTypeCastUtil.getAsInteger(jvmName.substring(0, index), -1);
+            pId = TypeCastUtil.getAsInteger(jvmName.substring(0, index), -1);
             return pId;
         }
         return pId;

@@ -1,6 +1,7 @@
 package ext.library.translation.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import ext.library.translation.annotation.TranslationType;
 import ext.library.translation.handler.TranslationBeanSerializerModifier;
 import ext.library.translation.handler.TranslationHandler;
@@ -23,11 +24,11 @@ public class TranslationAutoConfig {
 
     private final List<TranslationInterface<?>> list;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public TranslationAutoConfig(List<TranslationInterface<?>> list, ObjectMapper objectMapper) {
+    public TranslationAutoConfig(List<TranslationInterface<?>> list, JsonMapper jsonMapper) {
         this.list = list;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @PostConstruct
@@ -43,8 +44,7 @@ public class TranslationAutoConfig {
         }
         TranslationHandler.TRANSLATION_MAPPER.putAll(map);
         // 设置 Bean 序列化修改器
-        objectMapper.setSerializerFactory(
-                objectMapper.getSerializerFactory().withSerializerModifier(new TranslationBeanSerializerModifier()));
+        jsonMapper.setSerializerFactory(jsonMapper.getSerializerFactory().withSerializerModifier(new TranslationBeanSerializerModifier()));
         log.info("[📚] 翻译模块载入成功");
 
     }

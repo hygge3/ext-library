@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Validator 校验框架工具
  */
-public class ValidatorUtil {
+public final class ValidatorUtil {
 
     /**
      * 通过正则表达式验证
@@ -18,11 +18,7 @@ public class ValidatorUtil {
      *
      * @return 是否匹配正则
      */
-    public static boolean isMatchRegex(final Pattern pattern, final CharSequence value) {
-        if (value == null || pattern == null) {
-            // 提供 null 的字符串为不匹配
-            return false;
-        }
+    public static boolean isMatchRegex(Pattern pattern, CharSequence value) {
         return pattern.matcher(value).matches();
     }
 

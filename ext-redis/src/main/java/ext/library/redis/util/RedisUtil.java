@@ -2,7 +2,7 @@ package ext.library.redis.util;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class RedisUtil {
         try (Cursor<String> cursor = scan(pattern)) {
             cursor.forEachRemaining(RedisUtil::unlink);
         } catch (Exception e) {
-            throw Exceptions.throwOut(e, "Failed to unlink keys with pattern:{} ", pattern);
+            throw new ToolException(e, "删除所有匹配指定前缀：{}失败", pattern);
         }
     }
 
@@ -1775,7 +1775,7 @@ public class RedisUtil {
      * @param consumer   自定义处理
      */
     public static <T> void subscribe(String channelKey, Class<T> clazz, java.util.function.Consumer<T> consumer) {
-        MessageListener listener = (message, pattern) -> consumer.accept(JsonUtil.readObj(message.getBody(), clazz));
+        MessageListener listener = (message, pattern) -> consumer.accept(JsonUtil.readObj(new String(message.getBody()), clazz));
         SpringUtil.getBean(RedisMessageListenerContainer.class).addMessageListener(listener, new ChannelTopic(channelKey));
     }
 

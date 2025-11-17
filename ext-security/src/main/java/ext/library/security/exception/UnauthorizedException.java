@@ -1,19 +1,16 @@
 package ext.library.security.exception;
 
-import ext.library.tool.biz.exception.BizCode;
-import ext.library.tool.biz.exception.BizException;
-
 /**
  * 未经授权
  */
-public class UnauthorizedException extends BizException {
+public class UnauthorizedException extends RuntimeException {
 
     public UnauthorizedException() {
-        super(BizCode.UNAUTHORIZED);
+        super("身份未验证");
     }
 
     public UnauthorizedException(String msg) {
-        super(BizCode.UNAUTHORIZED, msg);
+        super(msg);
     }
 
 }

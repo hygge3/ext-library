@@ -3,7 +3,7 @@ package ext.library.idempotent.aspect;
 import ext.library.idempotent.annotation.Idempotent;
 import ext.library.idempotent.key.generator.IdempotentKeyGenerator;
 import ext.library.idempotent.key.store.IdempotentKeyStore;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -15,16 +15,7 @@ import org.springframework.util.Assert;
  * 幂等切面
  */
 @Aspect
-public class IdempotentAspect {
-
-    private final IdempotentKeyStore idempotentKeyStore;
-
-    private final IdempotentKeyGenerator idempotentKeyGenerator;
-
-    public IdempotentAspect(IdempotentKeyStore idempotentKeyStore, IdempotentKeyGenerator idempotentKeyGenerator) {
-        this.idempotentKeyStore = idempotentKeyStore;
-        this.idempotentKeyGenerator = idempotentKeyGenerator;
-    }
+public record IdempotentAspect(IdempotentKeyStore idempotentKeyStore, IdempotentKeyGenerator idempotentKeyGenerator) {
 
     @Around("@annotation(idempotentAnnotation)")
     public Object around(ProceedingJoinPoint joinPoint, Idempotent idempotentAnnotation) throws Throwable {
@@ -34,7 +25,7 @@ public class IdempotentAspect {
         // 校验当前请求是否重复请求
         boolean saveSuccess = this.idempotentKeyStore.saveIfAbsent(idempotentKey, DateUtil.convert(idempotentAnnotation.duration(), idempotentAnnotation.timeUnit()));
         Assert.isTrue(saveSuccess, () -> {
-            throw Exceptions.throwOut(idempotentAnnotation.message());
+            throw new ExtException(idempotentAnnotation.message());
         });
 
         try {

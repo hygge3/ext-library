@@ -3,7 +3,7 @@ package ext.library.encrypt.handler;
 import ext.library.encrypt.annotation.RequestDecrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,13 +41,12 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
     }
 
     @Override
-    public boolean supports(@Nonnull MethodParameter methodParameter, @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
         return methodParameter.hasMethodAnnotation(RequestDecrypt.class);
     }
 
-    @Nonnull
     @Override
-    public HttpInputMessage beforeBodyRead(@Nonnull HttpInputMessage inputMessage, @Nonnull MethodParameter parameter, @Nonnull Type targetType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
+    public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
         String decryptStr = StreamUtils.copyToString(inputMessage.getBody(), Charset.defaultCharset());
 
         try {
@@ -56,13 +54,11 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
             Algorithm algo = cryptoProperties.getAlgo();
             String decrypt = algo.getCryptoStrategy().decrypt(secretKey, decryptStr, cryptoProperties.getSalt());
             return new HttpInputMessage() {
-                @Nonnull
                 @Override
                 public InputStream getBody() throws IOException {
                     return new ByteArrayInputStream(decrypt.getBytes(StandardCharsets.UTF_8));
                 }
 
-                @Nonnull
                 @Override
                 public HttpHeaders getHeaders() {
                     return inputMessage.getHeaders();
@@ -70,7 +66,7 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
             };
         } catch (Exception e) {
             log.error("[🔓] 请求解密异常", e);
-            throw Exceptions.unchecked(e);
+            throw new ExtException(e);
         }
 
     }

@@ -1,7 +1,7 @@
 package ext.library.mybatis.handler;
 
 import com.mybatisflex.core.exception.MybatisFlexException;
-import ext.library.tool.biz.exception.BizCode;
+import ext.library.tool.exception.BizCode;
 import org.mybatis.spring.MyBatisSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class MybatisExceptionHandler {
      * @param message 消息
      * @param e       e
      */
-    private static void printLog(@Nonnull HttpServletRequest request, String message, Exception e) {
+    private static void printLog(HttpServletRequest request, String message, Exception e) {
         log.error("[🐦] URI:{},{}", request.getRequestURI(), message, e);
     }
 
@@ -53,7 +53,7 @@ public class MybatisExceptionHandler {
      */
     @ExceptionHandler(SQLSyntaxErrorException.class)
     public Map<String, Object> sqlSyntaxErrorException(SQLSyntaxErrorException e, HttpServletRequest request) {
-        printLog(request, "SQl error", e);
+        printLog(request, "SQL 语法错误", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "SQl 执行错误，请联系管理员");
     }
 
@@ -62,7 +62,7 @@ public class MybatisExceptionHandler {
      */
     @ExceptionHandler(BadSqlGrammarException.class)
     public Map<String, Object> badSqlGrammarException(BadSqlGrammarException e, HttpServletRequest request) {
-        printLog(request, "SQl error", e);
+        printLog(request, "错误的 SQL 语法", e);
         return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "SQl 执行错误，请联系管理员");
     }
 
@@ -70,23 +70,23 @@ public class MybatisExceptionHandler {
      * Mybatis 系统异常 通用处理
      */
     @ExceptionHandler(MyBatisSystemException.class)
-    public Map<String, Object> myBatisSystemException(@Nonnull MyBatisSystemException e, HttpServletRequest request) {
+    public Map<String, Object> myBatisSystemException(MyBatisSystemException e, HttpServletRequest request) {
         String message = e.getMessage();
         if ("CannotFindDataSourceException".contains(message)) {
             printLog(request, "未找到数据源", e);
             return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "找不到数据源，请联系管理员确认");
         }
-        printLog(request, "Mybatis exception", e);
-        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis exception");
+        printLog(request, "Mybatis 异常", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis 异常");
     }
 
     /**
      * Mybatis Flex 系统异常 通用处理
      */
     @ExceptionHandler(MybatisFlexException.class)
-    public Map<String, Object> mybatisFlexException(@Nonnull MybatisFlexException e, HttpServletRequest request) {
-        printLog(request, "Mybatis Flex exception", e);
-        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis Flex exception");
+    public Map<String, Object> mybatisFlexException(MybatisFlexException e, HttpServletRequest request) {
+        printLog(request, "Mybatis Flex 异常", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis Flex 异常");
     }
 
     /**
@@ -94,8 +94,8 @@ public class MybatisExceptionHandler {
      */
     @ExceptionHandler(SQLException.class)
     public Map<String, Object> sQLException(@Nonnull SQLException e, HttpServletRequest request) {
-        printLog(request, "Mybatis Flex exception", e);
-        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Mybatis Flex exception");
+        printLog(request, "数据库访问异常", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "数据库访问异常");
     }
 
     /**
@@ -103,8 +103,8 @@ public class MybatisExceptionHandler {
      */
     @ExceptionHandler(DataAccessException.class)
     public Map<String, Object> dataAccessException(DataAccessException e, HttpServletRequest request) {
-        printLog(request, "Data access exception", e);
-        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "Data access exception");
+        printLog(request, "数据访问异常", e);
+        return Map.of("code", BizCode.DATABASE_ERROR.getCode(), "msg", "数据访问异常");
     }
 
 }

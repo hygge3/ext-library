@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.html.HtmlEscapers;
 import ext.library.tool.constant.Symbol;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -12,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class StringUtil {
+public final class StringUtil {
 
     /**
      * 首字母变小写
@@ -96,7 +97,7 @@ public class StringUtil {
      *
      * @return boolean
      */
-    public static boolean isEmpty(String str) {
+    public static boolean isEmpty(@Nullable String str) {
         return str == null || str.isEmpty();
     }
 
@@ -135,7 +136,7 @@ public class StringUtil {
      *
      * @see Character#isWhitespace
      */
-    public static boolean isBlank(String str) {
+    public static boolean isBlank(@Nullable String str) {
         if (str == null) {
             return true;
         }
@@ -170,7 +171,7 @@ public class StringUtil {
      * @return boolean
      */
     public static boolean isAnyBlank(String... strs) {
-        if (null == strs || Array.getLength(strs) == 0) {
+        if (Array.getLength(strs) == 0) {
             return true;
         }
         return Stream.of(strs).anyMatch(StringUtil::isBlank);
@@ -184,7 +185,7 @@ public class StringUtil {
      * @return boolean
      */
     public static boolean isAnyBlank(Collection<String> strs) {
-        if (null == strs || strs.isEmpty()) {
+        if (strs.isEmpty()) {
             return true;
         }
         return strs.stream().anyMatch(StringUtil::isBlank);
@@ -220,7 +221,7 @@ public class StringUtil {
      * @return boolean
      */
     public static boolean isAnyNotBlank(String... strs) {
-        if (null == strs || Array.getLength(strs) == 0) {
+        if (Array.getLength(strs) == 0) {
             return false;
         }
         return Stream.of(strs).anyMatch(StringUtil::isNotBlank);
@@ -292,16 +293,12 @@ public class StringUtil {
      * @return 转换后的字符串
      */
     public static String format(String message, Map<String, ?> params) {
-        // message 为 null 返回空字符串
-        if (message == null) {
-            return Symbol.EMPTY;
-        }
-        // 参数为 null 或者为空
-        if (params == null || params.isEmpty()) {
+        // 参数为空
+        if (params.isEmpty()) {
             return message;
         }
         // 使用正则表达式匹配占位符
-        Pattern pattern = Pattern.compile("\\$\\{([^}]*)\\}");
+        Pattern pattern = Pattern.compile("\\$\\{([^}]*)}");
         Matcher matcher = pattern.matcher(message);
         StringBuilder sb = new StringBuilder((int) (message.length() * 1.5));
         int lastEnd = 0;
@@ -336,17 +333,13 @@ public class StringUtil {
      * @return 转换后的字符串
      */
     public static String format(String message, Object... arguments) {
-        // message 为 null 返回空字符串
-        if (message == null) {
-            return Symbol.EMPTY;
-        }
-        // 参数为 null 或者为空
-        if (arguments == null || arguments.length == 0) {
+        // 参数为空
+        if (arguments.length == 0) {
             return message;
         }
 
         // 使用正则表达式匹配所有的 {}
-        Pattern pattern = Pattern.compile("\\{\\}");
+        Pattern pattern = Pattern.compile("\\{}");
         Matcher matcher = pattern.matcher(message);
 
         // 初始化 StringBuilder，预期转换后的字符串长度为原长度的 1.5 倍
@@ -357,7 +350,7 @@ public class StringUtil {
 
         while (matcher.find()) {
             if (index >= arguments.length) {
-                throw new IllegalArgumentException("Not enough arguments for placeholders in the message");
+                throw new IllegalArgumentException("消息中占位符的参数不足");
             }
             // 将当前光标到找到的 {} 之间的字符串添加到 sb 中
             sb.append(message, lastEnd, matcher.start());
@@ -374,8 +367,8 @@ public class StringUtil {
 
         String result = sb.toString();
         // 检查是否有未匹配的 {}
-        if (result.contains("{") || result.contains("}")) {
-            throw new IllegalArgumentException("Unmatched placeholder in the message");
+        if (result.contains(Symbol.LEFT_BRACES) || result.contains(Symbol.RIGHT_BRACES)) {
+            throw new IllegalArgumentException("消息中不匹配的占位符");
         }
 
         // 返回转换后的字符串
@@ -390,9 +383,6 @@ public class StringUtil {
      * @return {String}
      */
     public static String cleanText(String txt) {
-        if (txt == null) {
-            return null;
-        }
         return Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]").matcher(txt).replaceAll(Symbol.EMPTY);
     }
 
@@ -404,9 +394,6 @@ public class StringUtil {
      * @return 清理后的标识符
      */
     public static String cleanIdentifier(String param) {
-        if (param == null) {
-            return null;
-        }
         StringBuilder paramBuilder = new StringBuilder();
         for (int i = 0; i < param.length(); i++) {
             char c = param.charAt(i);
@@ -533,48 +520,43 @@ public class StringUtil {
      */
     public static boolean simpleMatch(String pattern, String str) {
         // 检查参数是否为空
-        if (pattern != null && str != null) {
-            // 查找表达式中第一个通配符'*'的位置
-            int firstIndex = pattern.indexOf('*');
-            // 如果没有通配符，直接比较字符串和表达式是否相等
-            if (firstIndex == -1) {
-                return pattern.equals(str);
-                // 如果通配符在表达式开头
-            } else if (firstIndex == 0) {
-                // 如果通配符是表达式的唯一字符，返回 true
-                if (pattern.length() == 1) {
-                    return true;
+        // 查找表达式中第一个通配符'*'的位置
+        int firstIndex = pattern.indexOf('*');
+        // 如果没有通配符，直接比较字符串和表达式是否相等
+        if (firstIndex == -1) {
+            return pattern.equals(str);
+            // 如果通配符在表达式开头
+        } else if (firstIndex == 0) {
+            // 如果通配符是表达式的唯一字符，返回 true
+            if (pattern.length() == 1) {
+                return true;
+            } else {
+                // 查找下一个通配符的位置
+                int nextIndex = pattern.indexOf('*', 1);
+                // 如果没有更多的通配符，检查字符串是否以表达式的一部分结尾
+                if (nextIndex == -1) {
+                    return str.endsWith(pattern.substring(1));
                 } else {
-                    // 查找下一个通配符的位置
-                    int nextIndex = pattern.indexOf('*', 1);
-                    // 如果没有更多的通配符，检查字符串是否以表达式的一部分结尾
-                    if (nextIndex == -1) {
-                        return str.endsWith(pattern.substring(1));
+                    // 提取两个通配符之间的部分
+                    String part = pattern.substring(1, nextIndex);
+                    // 如果这部分为空，递归匹配剩余的表达式和字符串
+                    if (part.isEmpty()) {
+                        return simpleMatch(pattern.substring(nextIndex), str);
                     } else {
-                        // 提取两个通配符之间的部分
-                        String part = pattern.substring(1, nextIndex);
-                        // 如果这部分为空，递归匹配剩余的表达式和字符串
-                        if (part.isEmpty()) {
-                            return simpleMatch(pattern.substring(nextIndex), str);
-                        } else {
-                            // 遍历字符串中所有出现的 part，尝试递归匹配
-                            for (int partIndex = str.indexOf(part); partIndex != -1; partIndex = str.indexOf(part, partIndex + 1)) {
-                                if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) {
-                                    return true;
-                                }
+                        // 遍历字符串中所有出现的 part，尝试递归匹配
+                        for (int partIndex = str.indexOf(part); partIndex != -1; partIndex = str.indexOf(part, partIndex + 1)) {
+                            if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) {
+                                return true;
                             }
-                            return false;
                         }
+                        return false;
                     }
                 }
-                // 如果通配符不在表达式开头
-            } else {
-                // 检查字符串是否以表达式的非通配符部分开头，如果是，递归匹配剩余部分
-                return str.length() >= firstIndex && pattern.startsWith(str.substring(0, firstIndex)) && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
             }
+            // 如果通配符不在表达式开头
         } else {
-            // 如果参数为空，返回 false
-            return false;
+            // 检查字符串是否以表达式的非通配符部分开头，如果是，递归匹配剩余部分
+            return str.length() >= firstIndex && pattern.startsWith(str.substring(0, firstIndex)) && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
         }
     }
 
@@ -591,11 +573,9 @@ public class StringUtil {
      * @return 是否匹配
      */
     public static boolean simpleMatch(String[] patterns, String str) {
-        if (patterns != null) {
-            for (String pattern : patterns) {
-                if (simpleMatch(pattern, str)) {
-                    return true;
-                }
+        for (String pattern : patterns) {
+            if (simpleMatch(pattern, str)) {
+                return true;
             }
         }
 
@@ -656,7 +636,7 @@ public class StringUtil {
      * @return boolean
      */
     public boolean isAnyNotBlank(Collection<String> strs) {
-        if (null == strs || Array.getLength(strs) == 0) {
+        if (Array.getLength(strs) == 0) {
             return false;
         }
         return strs.stream().anyMatch(StringUtil::isNotBlank);

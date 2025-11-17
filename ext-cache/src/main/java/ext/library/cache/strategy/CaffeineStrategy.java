@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.Objects;
 
 /**
- * 咖啡因策略
+ * Caffeine 策略
  *
  * @since 2025.08.29
  */

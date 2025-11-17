@@ -1,14 +1,14 @@
 package ext.library.tool.util;
 
-import com.google.common.base.Preconditions;
 import ext.library.tool.constant.Holder;
-import ext.library.tool.domain.ObjectId;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.domain.MongoObjectId;
+import org.springframework.util.Assert;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.UUID;
 
-public class IDUtil {
+public final class IDUtil {
 
     /**
      * 生成 uuid
@@ -17,7 +17,7 @@ public class IDUtil {
      * @return {@code String }
      */
     public static String getUUID() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
+        return UUID.randomUUID().toString().replaceAll(Symbol.DASHED, Symbol.EMPTY);
     }
 
     /**
@@ -48,17 +48,7 @@ public class IDUtil {
         ByteBuffer buf = ByteBuffer.wrap(value);
         long high = buf.getLong();
         long low = buf.getLong();
-        return new UUID(high, low).toString().replaceAll("-", "");
-    }
-
-    /**
-     * 生成 ULID
-     * 长度：26
-     *
-     * @return {@code String }
-     */
-    public static String getULID() {
-        return Holder.ULID.nextULID();
+        return new UUID(high, low).toString().replaceAll(Symbol.DASHED, Symbol.EMPTY);
     }
 
     /**
@@ -68,7 +58,7 @@ public class IDUtil {
      * @return {@code String }
      */
     public static String getObjectId() {
-        return ObjectId.get().toHexString();
+        return MongoObjectId.next();
     }
 
     /**
@@ -78,29 +68,7 @@ public class IDUtil {
      * @return {@code String }
      */
     public static String getSnowflakeId() {
-        return java.lang.String.valueOf(Holder.SNOWFLAKE_ID.nextId());
-    }
-
-    /**
-     * Sqids 编码
-     *
-     * @param numbers 数字
-     *
-     * @return {@code String }
-     */
-    public static String sqidsEncode(List<Long> numbers) {
-        return Holder.SQIDS.encode(numbers);
-    }
-
-    /**
-     * Sqids 解码
-     *
-     * @param sqids SQIDS
-     *
-     * @return {@code List<Long> }
-     */
-    public static List<Long> sqidsDecode(String sqids) {
-        return Holder.SQIDS.decode(sqids);
+        return String.valueOf(Holder.SNOWFLAKE_ID.nextId());
     }
 
     /**
@@ -112,9 +80,9 @@ public class IDUtil {
      */
     public static String random(int count) {
         if (count == 0) {
-            return "";
+            return Symbol.EMPTY;
         }
-        Preconditions.checkArgument(count > 0, "Requested random string length %s is less than 0.", count);
+        Assert.isTrue(count > 0, StringUtil.format("请求的随机字符串长度 {} 小于 0", count));
         final byte[] buffer = new byte[5];
         Holder.RANDOM.nextBytes(buffer);
         return Base64Util.encodeToStr(buffer); // or base32()

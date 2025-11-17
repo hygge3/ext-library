@@ -2,8 +2,8 @@ package ext.library.web.validation.validator;
 
 import ext.library.core.util.BeanUtil;
 import ext.library.web.validation.constraints.Mutual;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class MutualValidator implements ConstraintValidator<Mutual, Object> {
     private String[] mutuals;
 
     @Override
-    public void initialize(@Nonnull Mutual constraintAnnotation) {
+    public void initialize(@NonNull Mutual constraintAnnotation) {
         this.mutuals = constraintAnnotation.value();
     }
 

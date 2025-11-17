@@ -1,6 +1,5 @@
 package ext.library.redis.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ext.library.redis.config.properties.RedisProperties;
 import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.IRedisPrefixConverter;
@@ -11,19 +10,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Redis 自动配置类
  */
-@AutoConfiguration(before = RedisAutoConfiguration.class)
+@AutoConfiguration(before = DataRedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisAutoConfig {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -49,14 +49,14 @@ public class RedisAutoConfig {
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)
     @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(IRedisPrefixConverter redisPrefixConverter, ObjectMapper objectMapper, RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<Object, Object> redisTemplate(IRedisPrefixConverter redisPrefixConverter, JsonMapper jsonMapper, RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         // 设置  key 的序列化方式为 自定义 String Key 序列化
         template.setKeySerializer(new PrefixJdkRedisSerializer(redisPrefixConverter));
         // 设置 hash key 的序列化方式为 自定义 String Key 序列化
         template.setHashKeySerializer(new PrefixJdkRedisSerializer(redisPrefixConverter));
-        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJacksonJsonRedisSerializer valueSerializer = new GenericJacksonJsonRedisSerializer(jsonMapper);
         // 设置 value 的序列化方式为 JSON
         template.setValueSerializer(valueSerializer);
         // 设置 hash value 的序列化方式为 JSON

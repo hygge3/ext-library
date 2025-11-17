@@ -2,6 +2,7 @@ package ext.library.core.config;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         if (SpringUtil.isVirtual()) {
-            return new VirtualThreadTaskExecutor("async-task-");
+            return new VirtualThreadTaskExecutor("异步任务-");
         }
         return SpringUtil.getBean("scheduledExecutorService");
     }
@@ -41,11 +42,11 @@ public class AsyncConfig implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> {
             Exceptions.log(throwable);
-            String str = StringUtil.format("Exception message:{}, Method name:{}", throwable.getMessage(), method.getName());
+            String str = StringUtil.format("异常消息：{}，方法名称：{}", throwable.getMessage(), method.getName());
             if (ObjectUtil.isNotEmpty(objects)) {
-                str = str.concat(", Parameter value:[").concat(Arrays.toString(objects)).concat("]");
+                str = str.concat(", 参数值:[").concat(Arrays.toString(objects)).concat("]");
             }
-            throw new RuntimeException(str);
+            throw new ExtException(str);
         };
     }
 

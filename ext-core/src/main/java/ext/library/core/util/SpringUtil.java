@@ -1,14 +1,15 @@
 package ext.library.core.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.ObjectUtil;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
-import org.springframework.boot.autoconfigure.thread.Threading;
+import org.springframework.boot.thread.Threading;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -17,7 +18,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Nonnull;
 import java.util.Map;
 
 /**
@@ -49,7 +49,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     public static ListableBeanFactory getBeanFactory() {
         final ListableBeanFactory factory = ObjectUtil.defaultIfNull(beanFactory, context);
         if (null == factory) {
-            throw Exceptions.throwOut("[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
+            throw new ToolException("[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
         }
         return factory;
     }
@@ -66,7 +66,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         } else if (context instanceof ConfigurableApplicationContext) {
             factory = ((ConfigurableApplicationContext) context).getBeanFactory();
         } else {
-            throw Exceptions.throwOut("[🫛] 上下文中没有可配置的 BeanFactory！");
+            throw new ToolException("[🫛] 上下文中没有可配置的 BeanFactory！");
         }
         return factory;
     }
@@ -175,7 +175,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @return 属性值
      */
-    public static String getProperty(String key) {
+    public static @Nullable String getProperty(String key) {
         return context.getEnvironment().getProperty(key);
     }
 
@@ -210,7 +210,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      *
      * @return 应用程序名称
      */
-    public static String getApplicationName() {
+    public static @Nullable String getApplicationName() {
         return getProperty("spring.application.name");
     }
 
@@ -265,7 +265,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         if (factory instanceof DefaultSingletonBeanRegistry registry) {
             registry.destroySingleton(beanName);
         } else {
-            throw Exceptions.throwOut("[🫛] 无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
+            throw new ToolException("[🫛] 无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
         }
     }
 
@@ -293,12 +293,12 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     }
 
     @Override
-    public void setApplicationContext(@Nonnull ApplicationContext context) throws BeansException {
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
         setContext(context);
     }
 
     @Override
-    public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         SpringUtil.beanFactory = beanFactory;
     }
 

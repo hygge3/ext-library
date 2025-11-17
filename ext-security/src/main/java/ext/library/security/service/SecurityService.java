@@ -12,7 +12,8 @@ import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.ObjectUtil;
@@ -43,7 +44,7 @@ public interface SecurityService {
         if (ObjectUtil.isEmpty(token)) {
             return null;
         }
-        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, "");
+        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, Symbol.EMPTY);
     }
 
     /**
@@ -85,7 +86,7 @@ public interface SecurityService {
     default String createLoginByLoginId(String loginId, SecurityLoginParams loginModel) {
         SecuritySession currentSession = getCurrentSecuritySession();
         if (currentSession.getLoginId().equals(loginId)) {
-            throw Exceptions.throwOut("[🛡️] 创建指定账号的登录 Id 不能与当前登录 Id 相同");
+            throw new ExtException("[🛡️] 创建指定账号的登录 Id 不能与当前登录 Id 相同");
         }
         // 检查并设置 SecuritySession 信息
         SecuritySession session = checkAndSetSecuritySession(loginId, loginModel);

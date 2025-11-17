@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import jakarta.annotation.Nonnull;
 import java.io.Serializable;
 
 /**
@@ -39,12 +38,12 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
         this.mybatisProperties = mybatisProperties;
     }
 
-    private static String formatSQL(@Nonnull String sql) {
+    private static String formatSQL(String sql) {
         return sql.replaceAll("\\s+", Symbol.SPACE).replace("\\r", Symbol.SPACE).replace("\\n", Symbol.SPACE);
     }
 
     @Override
-    public void customize(@Nonnull FlexGlobalConfig globalConfig) {
+    public void customize(FlexGlobalConfig globalConfig) {
         // 全局配置逻辑删除字段
         globalConfig.setLogicDeleteColumn(mybatisProperties.getDeleteField());
         if (mybatisProperties.getSqlPrint()) {

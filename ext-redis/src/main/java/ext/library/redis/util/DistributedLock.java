@@ -3,6 +3,7 @@ package ext.library.redis.util;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.core.Threads;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.INetUtil;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -100,7 +101,7 @@ public class DistributedLock implements Lock {
     public void lock() {
         try {
             if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
-                throw Exceptions.throwOut("[🔐] 尝试加锁超时，key: {}", lockKey);
+                throw new ToolException("[🔐] 尝试加锁超时，key: {}", lockKey);
             }
         } catch (InterruptedException e) {
             throw Exceptions.unchecked(e);
@@ -115,7 +116,7 @@ public class DistributedLock implements Lock {
     @Override
     public void lockInterruptibly() throws InterruptedException {
         if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
-            throw Exceptions.throwOut("[🔐] 尝试加锁超时，key: {}", this.lockKey);
+            throw new ToolException("[🔐] 尝试加锁超时，key: {}", this.lockKey);
         }
     }
 
@@ -152,37 +153,6 @@ public class DistributedLock implements Lock {
     }
 
     /**
-     * 使用 lua 脚本的方式实现 setIfAbsent, 因为当业务应用使用了 redisson 时，直接使用 template 的 setIfAbsent 返回值为 null
-     *
-     * @param key     key
-     * @param value   值
-     * @param timeout 超时时间
-     *
-     * @return 是否成功设值
-     */
-    private Boolean setIfAbsent(String key, String value, Duration timeout) {
-        // language=Redis
-        String script = "local val,ttl=ARGV[1],ARGV[2] if redis.call('EXISTS', KEYS[1])==1 then return false else redis.call('SET', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return true end";
-        DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
-        redisScript.setResultType(Boolean.class);
-        redisScript.setScriptText(script);
-        return RedisUtil.execute(redisScript, List.of(key), value, String.valueOf(timeout.toSeconds()));
-    }
-
-    /**
-     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
-     *
-     * @param time 等待锁的时间
-     *
-     * @return 是否成功获取锁
-     *
-     * @throws InterruptedException 被中断
-     */
-    public boolean tryLock(Duration time) throws InterruptedException {
-        return tryLock(time.toMillis(), TimeUnit.MILLISECONDS, false);
-    }
-
-    /**
      * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
      *
      * @param time 等待锁的时间
@@ -195,57 +165,6 @@ public class DistributedLock implements Lock {
     @Override
     public boolean tryLock(long time, @NonNull TimeUnit unit) throws InterruptedException {
         return tryLock(time, unit, false);
-    }
-
-    /**
-     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
-     *
-     * @param time          等待锁的时间
-     * @param interruptibly 等待是否可被中断
-     *
-     * @return 是否成功获取锁
-     *
-     * @throws InterruptedException 被中断
-     */
-    private boolean tryLock(Duration time, boolean interruptibly) {
-        long millis = time.toMillis();
-        long current = System.currentTimeMillis();
-        do {
-            if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("[🔐] 尝试加锁定中断");
-            }
-            if (tryLock()) {
-                return true;
-            }
-            Threads.sleep(loopInterval);
-        } while (System.currentTimeMillis() - current < millis);
-        return false;
-    }
-
-    /**
-     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
-     *
-     * @param time          等待锁的时间
-     * @param unit          time 的单位
-     * @param interruptibly 等待是否可被中断
-     *
-     * @return 是否成功获取锁
-     *
-     * @throws InterruptedException 被中断
-     */
-    private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) {
-        long millis = unit.convert(time, TimeUnit.MILLISECONDS);
-        long current = System.currentTimeMillis();
-        do {
-            if (interruptibly && Thread.interrupted()) {
-                throw Exceptions.throwOut("[🔐] 尝试加锁中断");
-            }
-            if (tryLock()) {
-                return true;
-            }
-            Threads.sleep(loopInterval);
-        } while (System.currentTimeMillis() - current < millis);
-        return false;
     }
 
     /**
@@ -282,6 +201,88 @@ public class DistributedLock implements Lock {
     @NonNull
     public Condition newCondition() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 使用 lua 脚本的方式实现 setIfAbsent, 因为当业务应用使用了 redisson 时，直接使用 template 的 setIfAbsent 返回值为 null
+     *
+     * @param key     key
+     * @param value   值
+     * @param timeout 超时时间
+     *
+     * @return 是否成功设值
+     */
+    private Boolean setIfAbsent(String key, String value, Duration timeout) {
+        // language=Redis
+        String script = "local val,ttl=ARGV[1],ARGV[2] if redis.call('EXISTS', KEYS[1])==1 then return false else redis.call('SET', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return true end";
+        DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
+        redisScript.setResultType(Boolean.class);
+        redisScript.setScriptText(script);
+        return RedisUtil.execute(redisScript, List.of(key), value, String.valueOf(timeout.toSeconds()));
+    }
+
+    /**
+     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
+     *
+     * @param time 等待锁的时间
+     *
+     * @return 是否成功获取锁
+     *
+     * @throws InterruptedException 被中断
+     */
+    public boolean tryLock(Duration time) throws InterruptedException {
+        return tryLock(time.toMillis(), TimeUnit.MILLISECONDS, false);
+    }
+
+    /**
+     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
+     *
+     * @param time          等待锁的时间
+     * @param interruptibly 等待是否可被中断
+     *
+     * @return 是否成功获取锁
+     *
+     * @throws InterruptedException 被中断
+     */
+    private boolean tryLock(Duration time, boolean interruptibly) {
+        long millis = time.toMillis();
+        long current = System.currentTimeMillis();
+        do {
+            if (interruptibly && Thread.interrupted()) {
+                throw new ToolException("[🔐] 尝试加锁定中断");
+            }
+            if (tryLock()) {
+                return true;
+            }
+            Threads.sleep(loopInterval);
+        } while (System.currentTimeMillis() - current < millis);
+        return false;
+    }
+
+    /**
+     * 尝试获取锁，如果锁被占用，则持续尝试获取，直到超过指定的 time 时间
+     *
+     * @param time          等待锁的时间
+     * @param unit          time 的单位
+     * @param interruptibly 等待是否可被中断
+     *
+     * @return 是否成功获取锁
+     *
+     * @throws InterruptedException 被中断
+     */
+    private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) {
+        long millis = unit.convert(time, TimeUnit.MILLISECONDS);
+        long current = System.currentTimeMillis();
+        do {
+            if (interruptibly && Thread.interrupted()) {
+                throw new ToolException("[🔐] 尝试加锁中断");
+            }
+            if (tryLock()) {
+                return true;
+            }
+            Threads.sleep(loopInterval);
+        } while (System.currentTimeMillis() - current < millis);
+        return false;
     }
 
     public String getLockKey() {

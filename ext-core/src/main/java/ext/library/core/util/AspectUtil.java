@@ -2,8 +2,8 @@ package ext.library.core.util;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.jspecify.annotations.Nullable;
 
-import jakarta.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -19,7 +19,7 @@ public final class AspectUtil {
      *
      * @return java.lang.reflect.Method
      */
-    public static Method getMethod(@Nonnull ProceedingJoinPoint point) {
+    public static @Nullable Method getMethod(ProceedingJoinPoint point) {
         if (point.getSignature() instanceof MethodSignature ms) {
             return ms.getMethod();
         }

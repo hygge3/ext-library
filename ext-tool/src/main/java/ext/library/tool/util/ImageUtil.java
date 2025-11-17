@@ -18,7 +18,7 @@ import java.net.URL;
 /**
  * image 工具
  */
-public class ImageUtil {
+public final class ImageUtil {
 
     /**
      * 读取图片
@@ -115,11 +115,10 @@ public class ImageUtil {
      * @param formatName a String containing the informal name of the format.
      * @param output     an ImageOutputStream to be written to.
      *
-     * @return false if no appropriate writer is found.
      */
-    public static boolean write(RenderedImage im, String formatName, File output) {
+    public static void write(RenderedImage im, String formatName, File output) {
         try {
-            return ImageIO.write(im, formatName, output);
+            ImageIO.write(im, formatName, output);
         } catch (IOException e) {
             throw Exceptions.unchecked(e);
         }
@@ -155,7 +154,7 @@ public class ImageUtil {
             if (ImageIO.write(im, formatName, output)) {
                 return output.toByteArray();
             }
-            throw new IllegalArgumentException("ImageWriter formatName " + formatName + " writer is null.");
+            throw new IllegalArgumentException("ImageWriter 格式名称" + formatName + " writer 为 null");
         } catch (IOException e) {
             throw Exceptions.unchecked(e);
         }

@@ -22,7 +22,6 @@
         <module>ext-crypto</module>
         <module>ext-desensitize</module>
         <module>ext-interface-crypto</module>
-        <module>ext-holidays</module>
         <module>ext-http</module>
         <module>ext-idempotent</module>
         <module>ext-mail</module>
@@ -54,14 +53,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies.version -->
-        <revision>3.5.0</revision>
-        <spring-boot.version>3.5.7</spring-boot.version>
+        <revision>4.0.0</revision>
+        <spring-boot.version>4.0.0-RC2</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <swagger.version>2.2.39</swagger.version>
-        <mybatis-flex.version>1.11.3</mybatis-flex.version>
+        <swagger.version>2.2.40</swagger.version>
+        <mybatis-flex.version>1.11.4</mybatis-flex.version>
         <bcprov.version>1.82</bcprov.version>
         <oshi.version>6.9.1</oshi.version>
-        <springdoc.version>2.8.13</springdoc.version>
+        <springdoc.version>3.0.0-RC1</springdoc.version>
         <zxing-core.version>3.5.3</zxing-core.version>
         <guava.version>33.5.0-jre</guava.version>
 
@@ -123,7 +122,7 @@
             <!-- oshi -->
             <dependency>
                 <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java11</artifactId>
+                <artifactId>oshi-core-java25</artifactId>
                 <version>${oshi.version}</version>
             </dependency>
             <!-- springdoc -->

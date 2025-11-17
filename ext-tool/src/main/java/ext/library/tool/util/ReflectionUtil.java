@@ -1,8 +1,9 @@
 package ext.library.tool.util;
 
+import ext.library.tool.constant.Symbol;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
-import jakarta.annotation.Nonnull;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public class ReflectionUtil {
+public final class ReflectionUtil {
 
     // ---------------------- Info ----------------------
 
@@ -40,7 +41,7 @@ public class ReflectionUtil {
      */
     public static String getPackageName(String classFullName) {
         int lastDot = classFullName.lastIndexOf('.');
-        return (lastDot < 0) ? "" : classFullName.substring(0, lastDot);
+        return (lastDot < 0) ? Symbol.EMPTY : classFullName.substring(0, lastDot);
     }
 
     // ---------------------- Method ----------------------
@@ -54,9 +55,7 @@ public class ReflectionUtil {
      *
      * @return the Method object, or {@code null} if none found
      */
-    public static Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
-        Assert.notNull(clazz, "Class must not be null");
-        Assert.notNull(name, "Method name must not be null");
+    public static @Nullable Method findMethod(Class<?> clazz, String name, Class<?> @Nullable ... paramTypes) {
         Class<?> searchType = clazz;
         while (searchType != null) {
             Method[] methods = (searchType.isInterface() ? searchType.getMethods() : getDeclaredMethods(searchType, false));
@@ -81,7 +80,6 @@ public class ReflectionUtil {
      * get declared methods
      */
     private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
-        Assert.notNull(clazz, "Class must not be null");
         Method[] result;
         try {
             Method[] declaredMethods = clazz.getDeclaredMethods();
@@ -98,7 +96,7 @@ public class ReflectionUtil {
                 result = declaredMethods;
             }
         } catch (Throwable ex) {
-            throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() + "] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
+            throw new IllegalStateException(StringUtil.format("无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader()), ex);
         }
         return (result.length == 0 || !defensive) ? result : result.clone();
     }
@@ -106,7 +104,7 @@ public class ReflectionUtil {
     /**
      * find concrete（default） methods on interfaces
      */
-    private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
+    private static @Nullable List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
         List<Method> result = null;
         for (Class<?> ifc : clazz.getInterfaces()) {
             for (Method ifcMethod : ifc.getMethods()) {
@@ -141,7 +139,7 @@ public class ReflectionUtil {
      *
      * @return method invoke result
      */
-    public static Object invokeMethod(Method method, Object target, Object... args) {
+    public static Object invokeMethod(Method method, Object target, Object @Nullable ... args) {
         try {
             if (args != null) {
                 return method.invoke(target, args);
@@ -149,7 +147,7 @@ public class ReflectionUtil {
                 return method.invoke(target);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to invoke method [" + method + "]", ex);
+            throw new RuntimeException("无法调用方法 [" + method + "]", ex);
         }
     }
 
@@ -164,7 +162,7 @@ public class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public static Field findField(Class<?> clazz, String name) {
+    public static @Nullable Field findField(Class<?> clazz, String name) {
         return findField(clazz, name, null);
     }
 
@@ -177,9 +175,8 @@ public class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public static Field findField(Class<?> clazz, String name, Class<?> type) {
-        Assert.notNull(clazz, "Class must not be null");
-        Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
+    public static @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
+        Assert.isTrue(name != null || type != null, "必须指定字段的名称或类型");
         Class<?> searchType = clazz;
         while (Object.class != searchType && searchType != null) {
             Field[] fields = getDeclaredFields(searchType);
@@ -201,12 +198,11 @@ public class ReflectionUtil {
      * @return fields
      */
     private static Field[] getDeclaredFields(Class<?> clazz) {
-        Assert.notNull(clazz, "Class must not be null");
         Field[] result;
         try {
             result = clazz.getDeclaredFields();
         } catch (Throwable ex) {
-            throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() + "] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
+            throw new IllegalStateException(StringUtil.format("无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader()), ex);
         }
         return result;
     }
@@ -233,7 +229,7 @@ public class ReflectionUtil {
         try {
             field.set(target, value);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Failed to set value to field [" + field + "]", ex);
+            throw new RuntimeException("无法将值设置为字段 [" + field + "]", ex);
         }
     }
 
@@ -249,7 +245,7 @@ public class ReflectionUtil {
         try {
             return field.get(target);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Failed to get value from field [" + field + "]", ex);
+            throw new RuntimeException("无法从字段获取值 [" + field + "]", ex);
         }
     }
 
@@ -260,11 +256,11 @@ public class ReflectionUtil {
      *
      * @return 函数名
      */
-    public static String getLambdaFunctionName(@Nonnull Function<?, ?> lambda) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static String getLambdaFunctionName(Function<?, ?> lambda) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
         replaceMethod.setAccessible(true);
         SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);
-        return serializedLambda.getImplMethodName().replace("get", "");
+        return serializedLambda.getImplMethodName().replace("get", Symbol.EMPTY);
     }
 
     /**
@@ -294,7 +290,7 @@ public class ReflectionUtil {
                 try {
                     fc.doWith(field);
                 } catch (IllegalAccessException ex) {
-                    throw new IllegalStateException("Not allowed to access field '" + field.getName() + "': " + ex);
+                    throw new IllegalStateException("不允许访问字段 '" + field.getName() + "': " + ex);
                 }
             }
             targetClass = targetClass.getSuperclass();
@@ -311,9 +307,7 @@ public class ReflectionUtil {
      * @return a proxy instance
      */
     public static <T> T newProxy(Class<T> interfaceType, InvocationHandler handler) {
-        Assert.notNull(interfaceType, "Interface type must not be null");
-        Assert.notNull(handler, "InvocationHandler must not be null");
-        Assert.isTrue(interfaceType.isInterface(), interfaceType + "is not an interface");
+        Assert.isTrue(interfaceType.isInterface(), interfaceType + " 不是接口");
         Object object = Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class<?>[]{interfaceType}, handler);
         return interfaceType.cast(object);
     }

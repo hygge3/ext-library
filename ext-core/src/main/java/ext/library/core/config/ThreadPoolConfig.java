@@ -38,7 +38,7 @@ public class ThreadPoolConfig {
     @Bean(name = "threadPoolTaskExecutor")
     public ThreadPoolTaskExecutor threadPoolTaskExecutor(ThreadPoolProperties threadPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("ThreadPool-");
+        executor.setThreadNamePrefix("线程池-");
         executor.setCorePoolSize(threadPoolProperties.getCorePoolSize());
         executor.setMaxPoolSize(threadPoolProperties.getMaxPoolSize());
         executor.setQueueCapacity(threadPoolProperties.getQueueCapacity());
@@ -56,7 +56,7 @@ public class ThreadPoolConfig {
      */
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core, new ThreadFactoryBuilder().setNameFormat("Scheduling-%d").setDaemon(true).build(), new ThreadPoolExecutor.CallerRunsPolicy()) {
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core, new ThreadFactoryBuilder().setNameFormat("调度线程-%d").setDaemon(true).build(), new ThreadPoolExecutor.CallerRunsPolicy()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);

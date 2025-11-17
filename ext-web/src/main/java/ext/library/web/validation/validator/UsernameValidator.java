@@ -1,10 +1,11 @@
 package ext.library.web.validation.validator;
 
 import ext.library.core.util.ValidatorUtil;
+import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.validation.constraints.Username;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -16,7 +17,7 @@ public class UsernameValidator implements ConstraintValidator<Username, String> 
     private boolean notNull;
 
     @Override
-    public void initialize(@Nonnull Username constraintAnnotation) {
+    public void initialize(@NonNull Username constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 
@@ -26,7 +27,7 @@ public class UsernameValidator implements ConstraintValidator<Username, String> 
             if (value.length() < 5) {
                 return false;
             }
-            if (value.contains("@")) {
+            if (value.contains(Symbol.AT)) {
                 return false;
             }
 

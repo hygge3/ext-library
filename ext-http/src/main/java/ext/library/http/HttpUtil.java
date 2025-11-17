@@ -1,6 +1,8 @@
 package ext.library.http;
 
+import ext.library.tool.constant.Symbol;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -490,7 +492,7 @@ public class HttpUtil {
             return httpResponse.body();
         } catch (IOException | InterruptedException e) {
             log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -512,7 +514,7 @@ public class HttpUtil {
             return client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
         } catch (IOException | InterruptedException e) {
             log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -918,7 +920,7 @@ public class HttpUtil {
             return t;
         } catch (IOException | InterruptedException e) {
             log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -938,7 +940,7 @@ public class HttpUtil {
             return response;
         } catch (IOException | InterruptedException e) {
             log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -961,15 +963,15 @@ public class HttpUtil {
     }
 
     public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        StringJoiner sj = new StringJoiner("&");
+        StringJoiner sj = new StringJoiner(Symbol.AND);
         form.forEach((k, v) -> sj.add(k + "=" + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPostRequest(url, headerMap, bodyPublisher, timeout);
     }
 
     public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        StringJoiner sj = new StringJoiner("&");
-        form.forEach((k, v) -> sj.add(k + "=" + v));
+        StringJoiner sj = new StringJoiner(Symbol.AND);
+        form.forEach((k, v) -> sj.add(k + Symbol.EQUAL + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPutRequest(url, headerMap, bodyPublisher, timeout);
     }
@@ -1064,11 +1066,6 @@ public class HttpUtil {
         public HttpClientProps() {
             TrustManager[] trustAllCertificates = new TrustManager[]{new X509TrustManager() {
                 @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null; // Not relevant.
-                }
-
-                @Override
                 public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
                     // TODO Auto-generated method stub
                 }
@@ -1077,9 +1074,14 @@ public class HttpUtil {
                 public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
                     // TODO Auto-generated method stub
                 }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null; // Not relevant.
+                }
             }};
             SSLParameters sslParameters = new SSLParameters();
-            sslParameters.setEndpointIdentificationAlgorithm("");
+            sslParameters.setEndpointIdentificationAlgorithm(Symbol.EMPTY);
 
             try {
                 SSLContext sslContext = SSLContext.getInstance("TLS");

@@ -7,6 +7,7 @@ import ext.library.tool.util.ObjectUtil;
 import ext.library.web.annotation.RestWrapper;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.response.R;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -18,7 +19,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import jakarta.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -40,7 +40,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * 判断是否要执行 beforeBodyWrite 方法.true 为执行，false 不执行，有注解标记的时候处理返回值
      */
     @Override
-    public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         // 需要包装的：指定包下；RestWrapper 注解
 
         // 不需要包装
@@ -78,7 +78,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      * @return {@link Object }
      */
     @Override
-    public Object beforeBodyWrite(Object body, @Nonnull MethodParameter returnType, @Nonnull MediaType selectedContentType, @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
+    public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         if (Objects.isNull(body)) {
             return R.ok();
         }

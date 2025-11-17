@@ -1,6 +1,7 @@
 package ext.library.json.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.Symbol;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class XmlUtil {
         try {
             return new XmlUtil(inputSource, unsafe);
         } catch (Exception e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -140,7 +141,7 @@ public class XmlUtil {
         try {
             return path.evaluate(expression, item, returnType);
         } catch (XPathExpressionException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -284,8 +285,8 @@ public class XmlUtil {
             // but looks like there's no other choice.
             df.setXIncludeAware(false);
             df.setExpandEntityReferences(false);
-            df.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            df.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            df.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, Symbol.EMPTY);
+            df.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, Symbol.EMPTY);
             setDocumentBuilderFactoryFeature(df, XMLConstants.FEATURE_SECURE_PROCESSING, true);
             setDocumentBuilderFactoryFeature(df, FEATURE_HTTP_XML_ORG_SAX_FEATURES_EXTERNAL_GENERAL_ENTITIES, false);
             setDocumentBuilderFactoryFeature(df, FEATURE_HTTP_XML_ORG_SAX_FEATURES_EXTERNAL_PARAMETER_ENTITIES, false);

@@ -1,6 +1,7 @@
 package ext.library.tool.util;
 
 import ext.library.tool.core.Exceptions;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
 import java.beans.IntrospectionException;
@@ -26,7 +27,7 @@ import java.util.Set;
  *
  * @since 2025.08.19
  */
-public class ClassUtil {
+public final class ClassUtil {
 
 
     // ---------------------- judge ----------------------
@@ -45,7 +46,7 @@ public class ClassUtil {
         primitiveWrapper2TypeMap.put(Short.class, short.class);
         primitiveWrapper2TypeMap.put(Void.class, void.class);
 
-        // Map entry iteration is less expensive to initialize than forEach with lambdas
+        // 映射条目迭代的初始化成本低于使用 lambda 的 forEach
         for (Map.Entry<Class<?>, Class<?>> entry : primitiveWrapper2TypeMap.entrySet()) {
             primitiveType2WrapperMap.put(entry.getValue(), entry.getKey());
         }
@@ -61,8 +62,8 @@ public class ClassUtil {
      * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
      */
     public static boolean isAssignable(Class<?> superType, Class<?> subType) {
-        Assert.notNull(superType, "Left-hand side type must not be null");
-        Assert.notNull(subType, "Right-hand side type must not be null");
+        Assert.notNull(superType, "左侧类型不得为 null");
+        Assert.notNull(subType, "右侧类型不得为 null");
         if (superType.isAssignableFrom(subType)) {
             return true;
         }
@@ -85,37 +86,42 @@ public class ClassUtil {
      * @return true if subType is assignable to superType
      */
     public static boolean isAssignable(Type superType, Type subType) {
-        Assert.notNull(superType, "Left-hand side type must not be null");
-        Assert.notNull(subType, "Right-hand side type must not be null");
+        Assert.notNull(superType, "左侧类型不得为 null");
+        Assert.notNull(subType, "右侧类型不得为 null");
 
-        // all types are assignable to themselves and to class Object
+        // 所有类型都可以分配给自身和 Object
         if (superType.equals(subType) || Object.class == superType) {
             return true;
         }
 
         if (superType instanceof Class<?> lhsClass) {
 
-            // just comparing two classes
-            if (subType instanceof Class) {
-                return isAssignable(lhsClass, (Class<?>) subType);
-            }
-
-            // parameterized types are only assignable to other parameterized types
-            if (subType instanceof ParameterizedType) {
-                Type rhsRaw = ((ParameterizedType) subType).getRawType();
-
-                // a parameterized type is always assignable to its raw class type
-                if (rhsRaw instanceof Class) {
-                    return isAssignable(lhsClass, (Class<?>) rhsRaw);
+            // 只是比较两个类
+            switch (subType) {
+                case Class<?> aClass -> {
+                    return isAssignable(lhsClass, aClass);
                 }
-            } else if (lhsClass.isArray() && subType instanceof GenericArrayType) {
-                Type rhsComponent = ((GenericArrayType) subType).getGenericComponentType();
+                // 参数化类型只能分配给其他参数化类型
+                case ParameterizedType parameterizedType -> {
+                    Type rhsRaw = parameterizedType.getRawType();
 
-                return isAssignable(lhsClass.getComponentType(), rhsComponent);
+                    // 参数化类型始终可分配给其原始类类型
+                    if (rhsRaw instanceof Class) {
+                        return isAssignable(lhsClass, (Class<?>) rhsRaw);
+                    }
+                }
+                case GenericArrayType genericArrayType when lhsClass.isArray() -> {
+                    Type rhsComponent = genericArrayType.getGenericComponentType();
+
+                    return isAssignable(lhsClass.getComponentType(), rhsComponent);
+                }
+                default -> {
+                }
             }
+
         }
 
-        // parameterized types are only assignable to other parameterized types and class types
+        // 参数化类型只能分配给其他参数化类型和类类型
         if (superType instanceof ParameterizedType) {
             if (subType instanceof Class) {
                 Type lhsRaw = ((ParameterizedType) superType).getRawType();
@@ -164,9 +170,7 @@ public class ClassUtil {
      *
      * @return the method, or {@code null} if not found
      */
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
-        Assert.notNull(clazz, "Class must not be null");
-        Assert.notNull(methodName, "Method name must not be null");
+    public static @Nullable Method getMethod(Class<?> clazz, String methodName, Class<?> @Nullable ... paramTypes) {
         if (paramTypes != null) {
             return getMethodOrNull(clazz, methodName, paramTypes);
         } else {
@@ -178,7 +182,7 @@ public class ClassUtil {
         }
     }
 
-    private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+    private static @Nullable Method getMethodOrNull(Class<?> clazz, String methodName, Class<?> @Nullable [] paramTypes) {
         try {
             return clazz.getMethod(methodName, paramTypes);
         } catch (NoSuchMethodException ex) {
@@ -245,8 +249,12 @@ public class ClassUtil {
      * @return {Annotation}
      */
 
-    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
-        return ObjectUtil.defaultIfNull(method.getAnnotation(annotationType), method.getDeclaringClass().getAnnotation(annotationType));
+    public static @Nullable <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
+        A annotation = method.getAnnotation(annotationType);
+        if (annotation != null) {
+            return annotation;
+        }
+        return method.getDeclaringClass().getAnnotation(annotationType);
     }
 
     /**
@@ -333,7 +341,7 @@ public class ClassUtil {
      */
 
     @SuppressWarnings("unchecked")
-    public static <T> T clone(T source) {
+    public static <T> @Nullable T clone(@Nullable T source) {
         if (source == null) {
             return null;
         }
@@ -370,7 +378,7 @@ public class ClassUtil {
 
             } else {
                 // 引用数据类型
-                os[i] = null;
+                os[i] = new Object();
             }
         }
         try {

@@ -5,7 +5,6 @@ import ext.library.mail.model.MailSendInfo;
 import org.springframework.mail.MailSendException;
 import org.springframework.util.StringUtils;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -63,7 +62,7 @@ public interface MailSender {
      *
      * @return MailSendInfo
      */
-    default MailSendInfo sendTextMail(String subject, String content, @Nonnull List<String> to) {
+    default MailSendInfo sendTextMail(String subject, String content, List<String> to) {
         return sendMail(subject, content, false, to.toArray(new String[0]));
     }
 
@@ -89,7 +88,7 @@ public interface MailSender {
      *
      * @return MailSendInfo 邮件发送结果信息
      */
-    default MailSendInfo sendHtmlMail(String subject, String content, @Nonnull List<String> to) {
+    default MailSendInfo sendHtmlMail(String subject, String content, List<String> to) {
         return sendHtmlMail(subject, content, to.toArray(new String[0]));
     }
 
@@ -98,7 +97,7 @@ public interface MailSender {
      *
      * @param mailDetails 邮件信息
      */
-    default void checkMail(@Nonnull MailDetails mailDetails) {
+    default void checkMail(MailDetails mailDetails) {
         boolean noTo = mailDetails.getTo() == null || mailDetails.getTo().length == 0;
         boolean noCc = mailDetails.getCc() == null || mailDetails.getCc().length == 0;
         boolean noBcc = mailDetails.getBcc() == null || mailDetails.getBcc().length == 0;

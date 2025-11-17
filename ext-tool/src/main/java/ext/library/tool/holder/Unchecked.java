@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * href=https://github.com/jOOQ/jOOL>jOOλ</a>
  * </p>
  */
-public class Unchecked {
+public final class Unchecked {
 
     /**
      * 构造受检的 function

@@ -22,14 +22,14 @@ public class L2Strategy implements CacheStrategy {
         // 读写，查询 Caffeine
         T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(caffeineCache)) {
-            log.debug("[💾] get data from caffeine");
+            log.debug("[💾] 从 Caffeine 中获取数据");
             return clazz.cast(caffeineCache);
         }
 
         // 查询 Redis
         T redisCache = redisStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(redisCache)) {
-            log.debug("[💾] get data from redis");
+            log.debug("[💾] 从 Redis 获取数据");
             redisStrategy.put(cacheName, key, redisCache);
             return redisCache;
         }

@@ -132,8 +132,8 @@ public interface Symbol {
     String BACKSLASH = "\\";
 
     /** 空 */
-    String EMPTY = "";
 
+    String EMPTY = "";
     /** 回车 */
     String CR = "\r";
 

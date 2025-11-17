@@ -11,7 +11,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
 
-import jakarta.annotation.Nonnull;
 import jakarta.mail.MessagingException;
 import java.io.File;
 import java.time.LocalDateTime;
@@ -72,7 +71,7 @@ public class MailSenderImpl implements MailSender {
      *
      * @param mailDetails 邮件发送设置
      */
-    private void sendMimeMail(@Nonnull MailDetails mailDetails) throws MessagingException {
+    private void sendMimeMail(MailDetails mailDetails) throws MessagingException {
         // true 表示支持复杂类型
         MimeMessageHelper messageHelper = new MimeMessageHelper(mailSender.createMimeMessage(), true);
         String from = StringUtils.hasText(mailDetails.getFrom()) ? mailDetails.getFrom() : this.defaultFrom;

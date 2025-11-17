@@ -2,7 +2,7 @@ package ext.library.tool.util;
 
 import java.util.HexFormat;
 
-public class HexUtil {
+public final class HexUtil {
 
     /**
      * 字节流转成十六进制表示

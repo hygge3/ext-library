@@ -2,14 +2,13 @@ package ext.library.ratelimiter.aspect;
 
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,18 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * 速率限制拦截切面处理类
  */
 @Aspect
-public class RateLimiterAspect {
+public record RateLimiterAspect(IRateLimitHandler rateLimitHandler) {
 
     /**
      * 缓存方法上的源注解信息。减少反射的开销
      */
     private static final Map<String, RateLimit> RATE_LIMIT_MAP = new ConcurrentHashMap<>();
-
-    private final IRateLimitHandler rateLimitHandler;
-
-    public RateLimiterAspect(IRateLimitHandler rateLimitHandler) {
-        this.rateLimitHandler = rateLimitHandler;
-    }
 
     /**
      * 限流注解切面
@@ -41,14 +34,14 @@ public class RateLimiterAspect {
      * @throws Throwable 限流异常
      */
     @Around("@annotation(ext.library.ratelimiter.annotation.RateLimit)")
-    public Object interceptor(@Nonnull ProceedingJoinPoint pjp) throws Throwable {
+    public Object interceptor(ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
         RateLimit rateLimit = getRateLimit(signature.getMethod(), method.getName());
         if (rateLimitHandler.proceed(rateLimit, pjp)) {
             return pjp.proceed();
         } else {
-            throw Exceptions.throwOut(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
+            throw new ExtException(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
         }
     }
 

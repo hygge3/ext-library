@@ -3,8 +3,8 @@ package ext.library.web.validation.validator;
 import ext.library.core.util.ValidatorUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.validation.constraints.Chinese;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -17,7 +17,7 @@ public class ChineseValidator implements ConstraintValidator<Chinese, Object> {
     private boolean notNull;
 
     @Override
-    public void initialize(@Nonnull Chinese constraintAnnotation) {
+    public void initialize(@NonNull Chinese constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

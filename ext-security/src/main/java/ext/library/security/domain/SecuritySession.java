@@ -5,8 +5,9 @@ import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
+import ext.library.tool.util.IDUtil;
 import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * <p>
@@ -94,7 +94,7 @@ public class SecuritySession implements Serializable {
      * 创建 SecuritySession
      */
     public void createdSecuritySession() {
-        this.securitySessionId = UUID.randomUUID().toString();
+        this.securitySessionId = IDUtil.getUUIDv7();
         this.createTime = DateUtil.format(LocalDateTime.now());
         // 创建通知
         SecurityEventPublishManager.doCreatedSecuritySession(this.securitySessionId);
@@ -283,11 +283,7 @@ public class SecuritySession implements Serializable {
         if (!this.getTokenInfoList().isEmpty()) {
             this.getTokenInfoList().forEach(securityToken -> {
                 // 非可用状态的，且时间超过 48 小时，视为无效 token，进行清理
-                if (StringUtil.isNotBlank(securityToken.getUpdateTime())
-                        && (!SecurityConstant.TOKEN_STATE_NORMAL.equals(securityToken.getState())
-                        && DateUtil.parse(securityToken.getUpdateTime())
-                        .plusHours(maxTimeoutHour)
-                        .isBefore(LocalDateTime.now()))) {
+                if (StringUtil.isNotBlank(securityToken.getUpdateTime()) && (!SecurityConstant.TOKEN_STATE_NORMAL.equals(securityToken.getState()) && DateUtil.parse(securityToken.getUpdateTime()).plusHours(maxTimeoutHour).isBefore(LocalDateTime.now()))) {
                     invalidTokenInfoList.add(securityToken);
 
                 }
@@ -307,7 +303,7 @@ public class SecuritySession implements Serializable {
 
         boolean result = repository.saveSecuritySession(this);
         if (!result) {
-            throw Exceptions.throwOut("[🛡️] 保存 session 认证数据失败");
+            throw new ExtException("[🛡️] 保存 session 认证数据失败");
         }
         // 移除无效的 token
         invalidTokenInfoList.forEach(item -> {

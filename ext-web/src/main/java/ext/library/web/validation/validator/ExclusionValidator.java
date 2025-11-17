@@ -2,8 +2,8 @@ package ext.library.web.validation.validator;
 
 import ext.library.core.util.BeanUtil;
 import ext.library.web.validation.constraints.Exclusion;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class ExclusionValidator implements ConstraintValidator<Exclusion, Object
     private String[] exclusions;
 
     @Override
-    public void initialize(@Nonnull Exclusion constraintAnnotation) {
+    public void initialize(@NonNull Exclusion constraintAnnotation) {
         this.exclusions = constraintAnnotation.value();
     }
 

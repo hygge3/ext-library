@@ -3,7 +3,6 @@ package ext.library.captcha.draw;
 import ext.library.captcha.core.CaptchaUtil;
 import ext.library.tool.util.StringUtil;
 
-import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.util.Random;
 
@@ -13,7 +12,7 @@ import java.util.Random;
 public class MathCaptchaDraw implements CaptchaDraw {
 
     @Override
-    public String draw(@Nonnull Graphics2D g, int width, int height, @Nonnull Font[] fonts, @Nonnull Random random) {
+    public String draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
         // 设定字体，每次随机
         Font fontTemp = fonts[random.nextInt(fonts.length)];
         // 深色

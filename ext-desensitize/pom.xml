@@ -12,6 +12,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-tool</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>

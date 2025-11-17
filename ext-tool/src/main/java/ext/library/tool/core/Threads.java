@@ -1,6 +1,7 @@
 package ext.library.tool.core;
 
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 线程相关工具类。
  */
-public class Threads {
+public final class Threads {
     /** 原始堆栈索引位置，用于获取调用方法的堆栈信息 */
     private static final int ORIGIN_STACK_INDEX = 2;
     private static final Logger log = LoggerFactory.getLogger(Threads.class);
@@ -46,13 +47,13 @@ public class Threads {
      * Pending 的任务，并中断所有阻塞函数。如果仍然超時，則強制退出。另对在 shutdown 时线程本身被调用中断做了处理。
      */
     public static void shutdownAndAwaitTermination(ExecutorService pool) {
-        if (pool != null && !pool.isShutdown()) {
+        if (!pool.isShutdown()) {
             pool.shutdown();
             try {
                 if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
                     pool.shutdownNow();
                     if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
-                        log.info("[🛠️] Pool did not terminate");
+                        log.info("[🛠️] 线程池未停止");
                     }
                 }
             } catch (InterruptedException ie) {
@@ -65,7 +66,7 @@ public class Threads {
     /**
      * 打印线程异常信息
      */
-    public static void printException(Runnable r, Throwable t) {
+    public static void printException(@Nullable Runnable r, @Nullable Throwable t) {
         if (t == null && r instanceof Future<?> future) {
             try {
                 if (future.isDone()) {
@@ -84,7 +85,7 @@ public class Threads {
         }
     }
 
-    public static String getFileName() {
+    public static @Nullable String getFileName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getFileName();
     }
 

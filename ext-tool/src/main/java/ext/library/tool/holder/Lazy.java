@@ -4,27 +4,28 @@ import java.util.function.Supplier;
 
 
 /**
- * Holder of a value that is computed lazy.
+ * 懒加载
  */
-public class Lazy<T> implements Supplier<T> {
+public final class Lazy<T> implements Supplier<T> {
 
     private transient Supplier<? extends T> supplier;
 
     private T value;
+
+    private Lazy(Supplier<T> supplier) {
+        this.supplier = supplier;
+    }
 
     /**
      * Creates new instance of Lazy.
      *
      * @param supplier Supplier
      * @param <T>      泛型标记
+     *
      * @return Lazy
      */
-    public static <T> Lazy<T> of(final Supplier<T> supplier) {
+    public static <T> Lazy<T> of(Supplier<T> supplier) {
         return new Lazy<>(supplier);
-    }
-
-    private Lazy(final Supplier<T> supplier) {
-        this.supplier = supplier;
     }
 
     /**

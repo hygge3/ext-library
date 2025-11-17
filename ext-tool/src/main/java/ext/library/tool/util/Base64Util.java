@@ -5,10 +5,8 @@ import java.util.Base64;
 
 /**
  * base64 编解码工具
- *
- * @since 2025.08.19
  */
-public class Base64Util {
+public final class Base64Util {
 
     // region UrlEncode withoutPadding
 

@@ -1,5 +1,6 @@
 package ext.library.web.body.resolver;
 
+import ext.library.tool.constant.Symbol;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.ValueConstants;
 
@@ -22,13 +23,13 @@ public @interface BodyParam {
      * Alias for {@link #name}.
      */
     @AliasFor("name")
-    String value() default "";
+    String value() default Symbol.EMPTY;
 
     /**
      * The name of the request parameter to bind to.
      */
     @AliasFor("value")
-    String name() default "";
+    String name() default Symbol.EMPTY;
 
     /**
      * Whether the parameter is required.

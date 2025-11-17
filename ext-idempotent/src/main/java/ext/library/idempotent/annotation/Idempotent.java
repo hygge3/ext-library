@@ -1,5 +1,7 @@
 package ext.library.idempotent.annotation;
 
+import ext.library.tool.constant.Symbol;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -32,7 +34,7 @@ public @interface Idempotent {
      *
      * @return Spring-EL expression
      */
-    String uniqueExpression() default "";
+    String uniqueExpression() default Symbol.EMPTY;
 
     /**
      * <p>

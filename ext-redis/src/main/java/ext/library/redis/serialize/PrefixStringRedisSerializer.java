@@ -1,6 +1,7 @@
 package ext.library.redis.serialize;
 
 import ext.library.redis.prefix.IRedisPrefixConverter;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -21,15 +22,15 @@ public class PrefixStringRedisSerializer extends StringRedisSerializer {
     }
 
     @Override
-    public String deserialize(byte[] bytes) {
-        byte[] unwrap = this.iRedisPrefixConverter.unwrap(bytes);
-        return super.deserialize(unwrap);
+    public byte @NonNull [] serialize(String key) {
+        byte[] originBytes = super.serialize(key);
+        return this.iRedisPrefixConverter.wrap(originBytes);
     }
 
     @Override
-    public byte[] serialize(String key) {
-        byte[] originBytes = super.serialize(key);
-        return this.iRedisPrefixConverter.wrap(originBytes);
+    public String deserialize(byte @NonNull [] bytes) {
+        byte[] unwrap = this.iRedisPrefixConverter.unwrap(bytes);
+        return super.deserialize(unwrap);
     }
 
 }

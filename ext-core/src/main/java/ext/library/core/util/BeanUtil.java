@@ -2,10 +2,13 @@ package ext.library.core.util;
 
 import com.google.common.collect.Maps;
 import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
 import io.github.linpeilie.Converter;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -34,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * bean 工具类
  */
-public class BeanUtil {
+public final class BeanUtil {
     private static final Logger log = LoggerFactory.getLogger(BeanUtil.class);
 
     private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
@@ -48,8 +51,8 @@ public class BeanUtil {
      *
      * @return {@code Map<String, Object> }
      */
-    public static Map<String, Object> beanToMap(@Nonnull Object obj) {
-        Map<String, Object> map = Maps.newHashMap();
+    public static Map<String, @Nullable Object> beanToMap(Object obj) {
+        Map<String, @Nullable Object> map = Maps.newHashMap();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
@@ -63,7 +66,7 @@ public class BeanUtil {
                 map.put(key, value);
             }
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(e);
         }
         return map;
     }
@@ -88,7 +91,7 @@ public class BeanUtil {
                 }
             }
         } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(e);
         }
         return object;
     }
@@ -101,10 +104,7 @@ public class BeanUtil {
      *
      * @return 属性值
      */
-    public static Object getProperty(Object bean, String propertyName) {
-        if (bean == null) {
-            return null;
-        }
+    public static @Nullable Object getProperty(Object bean, String propertyName) {
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
         return beanWrapper.getPropertyValue(propertyName);
     }
@@ -117,7 +117,7 @@ public class BeanUtil {
      * @param value        属性值
      */
     public static void setProperty(Object bean, String propertyName, Object value) {
-        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean could not null"));
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean 不能为 null"));
         beanWrapper.setPropertyValue(propertyName, value);
     }
 
@@ -131,20 +131,17 @@ public class BeanUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T deepClone(T source) {
-        if (source == null) {
-            return null;
-        }
         FastByteArrayOutputStream fBos = new FastByteArrayOutputStream(1024);
         try (ObjectOutputStream oos = new ObjectOutputStream(fBos)) {
             oos.writeObject(source);
             oos.flush();
         } catch (IOException ex) {
-            throw new IllegalArgumentException("未能序列化类型为" + source.getClass() + "的对象", ex);
+            throw new ExtException("未能序列化类型为" + source.getClass() + "的对象", ex);
         }
         try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream())) {
             return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException ex) {
-            throw new IllegalArgumentException("未能反序列化对象", ex);
+            throw new ExtException("未能反序列化对象", ex);
         }
     }
 
@@ -236,7 +233,7 @@ public class BeanUtil {
         return mapToBean(map, targetType);
     }
 
-    private static void copyByCopier(@Nonnull Object source, @Nonnull Object target) {
+    private static void copyByCopier(Object source, Object target) {
         Class<?> sourceType = source.getClass();
         Class<?> targetType = target.getClass();
         String beanKey = sourceType.getName() + targetType.getName();
@@ -254,20 +251,19 @@ public class BeanUtil {
         }
     }
 
-    private static <T> T copyByCopier(Object source, @Nonnull Class<T> targetType) {
+    private static <T> T copyByCopier(Object source, Class<T> targetType) {
         T t;
         try {
             t = targetType.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw Exceptions.throwOut(e, "创建 {} 的新实例失败：｛｝", targetType, e.getMessage());
+            throw new ToolException(e, "创建 {} 的新实例失败：｛｝", targetType, e.getMessage());
         }
         org.springframework.beans.BeanUtils.copyProperties(source, t);
         return t;
     }
 
-    @Nonnull
-    private static <S, T> List<T> copyListByCopier(@Nonnull List<S> sourceList, Class<T> targetType) {
+    private static <S, T> List<T> copyListByCopier(List<S> sourceList, Class<T> targetType) {
         List<T> resultList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
             T target;

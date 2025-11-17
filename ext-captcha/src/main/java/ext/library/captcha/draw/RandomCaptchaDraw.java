@@ -10,7 +10,7 @@ import java.util.Random;
 /**
  * 随机字符串验证码
  */
-public class RandomCaptchaDraw implements CaptchaDraw {
+public record RandomCaptchaDraw(int codeSize) implements CaptchaDraw {
 
     /**
      * 默认的验证码数量，由于字体大小定死，后期再扩展自动一数量
@@ -22,14 +22,8 @@ public class RandomCaptchaDraw implements CaptchaDraw {
      */
     private static final char[] CHAR_ARRAY = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    private final int codeSize;
-
     public RandomCaptchaDraw() {
         this(CODE_SIZE);
-    }
-
-    public RandomCaptchaDraw(int codeSize) {
-        this.codeSize = codeSize;
     }
 
     /**

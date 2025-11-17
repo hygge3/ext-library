@@ -1,8 +1,8 @@
 package ext.library.web.validation.validator;
 
 import ext.library.web.validation.constraints.OneOfInts;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -17,7 +17,7 @@ public class EnumValueValidatorOfInt implements ConstraintValidator<OneOfInts, I
     private boolean allowNull;
 
     @Override
-    public void initialize(@Nonnull OneOfInts constraintAnnotation) {
+    public void initialize(@NonNull OneOfInts constraintAnnotation) {
         this.ints = constraintAnnotation.value();
         this.allowNull = constraintAnnotation.allowNull();
     }

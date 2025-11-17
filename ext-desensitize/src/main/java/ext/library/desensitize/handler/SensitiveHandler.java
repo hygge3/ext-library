@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
+import ext.library.tool.exception.ExtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
                     this.strategy = rule.getDeclaredConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                          NoSuchMethodException e) {
-                    throw new RuntimeException(e);
+                    throw new ExtException(e);
                 }
                 return this;
             }

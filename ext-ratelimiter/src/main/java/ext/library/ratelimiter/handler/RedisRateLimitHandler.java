@@ -6,7 +6,6 @@ import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.core.script.RedisScript;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
 
 /**
@@ -15,7 +14,7 @@ import java.util.Collections;
 public class RedisRateLimitHandler implements IRateLimitHandler {
 
     @Override
-    public boolean proceed(@Nonnull RateLimit rateLimit, JoinPoint point) {
+    public boolean proceed(RateLimit rateLimit, JoinPoint point) {
         long interval = DurationStyle.detectAndParse(rateLimit.interval()).getSeconds();
         return rateLimiter(getCombineKey(rateLimit, point), rateLimit.count(), interval);
     }

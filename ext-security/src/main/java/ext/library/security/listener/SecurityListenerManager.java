@@ -1,6 +1,6 @@
 package ext.library.security.listener;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class SecurityListenerManager {
      */
     public static void registerListener(SecurityListener listener) {
         if (null == listener) {
-            throw Exceptions.throwOut("[🛡️] 注册监听器不能为空");
+            throw new ExtException("[🛡️] 注册监听器不能为空");
         }
         LISTENER_LIST.add(listener);
     }
@@ -47,7 +47,7 @@ public class SecurityListenerManager {
      */
     public static void removeListener(SecurityListener listener) {
         if (null == listener) {
-            throw Exceptions.throwOut("[🛡️] 移除监听器不能为空");
+            throw new ExtException("[🛡️] 移除监听器不能为空");
         }
         LISTENER_LIST.remove(listener);
     }

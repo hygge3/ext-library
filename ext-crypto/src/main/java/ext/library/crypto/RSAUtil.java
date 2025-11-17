@@ -1,6 +1,6 @@
 package ext.library.crypto;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class RSAUtil {
             generator = KeyPairGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             log.error("[🔐] 生成 RSA 密钥对失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         generator.initialize(1024);
         return generator.generateKeyPair();
@@ -73,7 +73,7 @@ public class RSAUtil {
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
             log.error("[🔐] RSA 公钥转换失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -92,7 +92,7 @@ public class RSAUtil {
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
             log.error("[🔐] RSA 私钥转换失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -132,7 +132,7 @@ public class RSAUtil {
             return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (Exception e) {
             log.error("[🔐] RSA 加密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -171,7 +171,7 @@ public class RSAUtil {
             return out.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("[🔐] RSA 解密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -196,7 +196,7 @@ public class RSAUtil {
             return Base64Util.encodeUrlSafeToStr(signature.sign());
         } catch (Exception e) {
             log.error("[🔐] RSA 加签失败", e);
-            throw Exceptions.throwOut("RSA 加签失败");
+            throw new ToolException(e);
         }
     }
 
@@ -221,7 +221,7 @@ public class RSAUtil {
             return signature.verify(Base64Util.decodeUrlSafe(sign.getBytes()));
         } catch (Exception e) {
             log.error("[🔐] RSA 验签失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 

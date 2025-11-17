@@ -1,5 +1,7 @@
 package ext.library.http.useragent;
 
+import ext.library.tool.constant.Symbol;
+
 import java.io.Serial;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -51,7 +53,7 @@ public class Engine extends UserAgentInfo {
         if (m.find()) {
             return m.group(1);
         }
-        return "";
+        return Symbol.EMPTY;
     }
 
 }

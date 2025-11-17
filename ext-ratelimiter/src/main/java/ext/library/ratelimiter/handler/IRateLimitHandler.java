@@ -18,7 +18,6 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
@@ -62,7 +61,7 @@ public interface IRateLimitHandler {
      *
      * @return {@code String }
      */
-    default String getCombineKey(@Nonnull RateLimit rateLimit, JoinPoint point) {
+    default String getCombineKey(RateLimit rateLimit, JoinPoint point) {
         String key = rateLimit.key();
         if (StringUtil.isNotBlank(key)) {
             MethodSignature signature = (MethodSignature) point.getSignature();

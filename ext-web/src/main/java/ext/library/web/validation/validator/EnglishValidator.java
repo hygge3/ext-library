@@ -3,8 +3,8 @@ package ext.library.web.validation.validator;
 import ext.library.core.util.ValidatorUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.validation.constraints.English;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -17,7 +17,7 @@ public class EnglishValidator implements ConstraintValidator<English, String> {
     private boolean notNull;
 
     @Override
-    public void initialize(@Nonnull English constraintAnnotation) {
+    public void initialize(@NonNull English constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

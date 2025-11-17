@@ -1,13 +1,9 @@
 package ext.library.tool.core;
 
 
-import ext.library.tool.biz.exception.BizException;
-import ext.library.tool.util.ObjectUtil;
-import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +12,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 /**
  * 异常处理工具类
  */
-public class Exceptions {
+public final class Exceptions {
     private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
 
     /**
@@ -52,36 +48,6 @@ public class Exceptions {
             Thread.currentThread().interrupt();
         }
         return runtime(e);
-    }
-
-    /**
-     * 主动抛出异常
-     *
-     * @param message 错误消息模板
-     * @param args    参数
-     *
-     * @return {RuntimeException}
-     */
-    public static BizException throwOut(@Nonnull String message, Object... args) {
-        if (ObjectUtil.isEmpty(args)) {
-            return new BizException(message);
-        }
-        return new BizException(StringUtil.format(message, args));
-    }
-
-    /**
-     * 主动抛出异常
-     *
-     * @param message the pattern string
-     * @param args    object(s) to format
-     *
-     * @return {RuntimeException}
-     */
-    public static BizException throwOut(Exception e, @Nonnull String message, Object... args) {
-        if (ObjectUtil.isEmpty(args)) {
-            return new BizException(message);
-        }
-        return new BizException(StringUtil.format(message, args), e);
     }
 
     /**
@@ -124,7 +90,7 @@ public class Exceptions {
      *
      * @param e 异常
      */
-    public static void log(@Nonnull Throwable e) {
+    public static void log(Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
         log.error(e.getCause().getMessage());
     }

@@ -1,6 +1,5 @@
 package ext.library.captcha.core;
 
-import jakarta.annotation.Nonnull;
 import java.awt.*;
 import java.util.Random;
 
@@ -12,7 +11,7 @@ public class CaptchaUtil {
     /**
      * 生成指定范围的随机数
      */
-    public static int randNum(@Nonnull Random random, int min, int max) {
+    public static int randNum(Random random, int min, int max) {
         int diff = max - min;
         int rand = random.nextInt(diff);
         return min + rand;

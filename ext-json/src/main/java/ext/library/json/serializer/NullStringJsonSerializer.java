@@ -1,21 +1,19 @@
 package ext.library.json.serializer;
 
-import jakarta.annotation.Nonnull;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import ext.library.tool.constant.Symbol;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * jackson NULL 值序列化为 ""
  */
-public class NullStringJsonSerializer extends JsonSerializer<Object> {
+public class NullStringJsonSerializer extends ValueSerializer<Object> {
 
     @Override
-    public void serialize(Object value, @Nonnull JsonGenerator jsonGenerator, SerializerProvider provider) throws IOException {
-        jsonGenerator.writeString(Symbol.EMPTY);
-    }
+    public void serialize(Object value, JsonGenerator gen, SerializationContext ctxt) throws JacksonException {
+        gen.writeString(Symbol.EMPTY);
 
+    }
 }

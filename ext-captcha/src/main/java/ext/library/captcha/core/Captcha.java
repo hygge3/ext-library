@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import jakarta.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -46,7 +45,7 @@ public class Captcha implements ICaptcha {
         this(new RandomCaptchaDraw());
     }
 
-    public Captcha(@Nonnull CaptchaType type) {
+    public Captcha(CaptchaType type) {
         this(type.getCaptchaDraw());
     }
 
@@ -62,7 +61,7 @@ public class Captcha implements ICaptcha {
         this.fonts = loadAndRegisterFont();
     }
 
-    private static Graphics2D initGraphics(@Nonnull BufferedImage image) {
+    private static Graphics2D initGraphics(BufferedImage image) {
         // 获取图形上下文
         Graphics2D graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
@@ -87,7 +86,7 @@ public class Captcha implements ICaptcha {
         return fontList.toArray(new Font[0]);
     }
 
-    private static Font loadFont(@Nonnull ClassPathResource resource) {
+    private static Font loadFont(ClassPathResource resource) {
         try {
             return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
         } catch (FontFormatException | IOException e) {
@@ -96,19 +95,19 @@ public class Captcha implements ICaptcha {
     }
 
     public void setBackgroundDraw(BackgroundDraw backgroundDraw) {
-        this.backgroundDraw = Objects.requireNonNull(backgroundDraw, "BackgroundDraw is null.");
+        this.backgroundDraw = Objects.requireNonNull(backgroundDraw, "BackgroundDraw 为 null");
     }
 
     public void setCaptchaDraw(CaptchaDraw captchaDraw) {
-        this.captchaDraw = Objects.requireNonNull(captchaDraw, "CaptchaDraw is null.");
+        this.captchaDraw = Objects.requireNonNull(captchaDraw, "CaptchaDraw 为 null");
     }
 
     public void setInterferenceDraw(InterferenceDraw interferenceDraw) {
-        this.interferenceDraw = Objects.requireNonNull(interferenceDraw, "InterferenceDraw is null.");
+        this.interferenceDraw = Objects.requireNonNull(interferenceDraw, "InterferenceDraw 为 null");
     }
 
     public void setRandom(Random random) {
-        this.random = Objects.requireNonNull(random, "Random is null.");
+        this.random = Objects.requireNonNull(random, "Random 为 null");
     }
 
     @Override

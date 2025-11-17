@@ -3,6 +3,7 @@ package ext.library.tool.util;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import ext.library.tool.constant.Symbol;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class ObjectUtil {
+public final class ObjectUtil {
 
     private static final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
 
@@ -77,7 +78,7 @@ public class ObjectUtil {
      * @return {@code true} 如果提供的引用为 {@code null}，否则 {@code false}
      *
      */
-    public static boolean isNull(Object object) {
+    public static boolean isNull(@Nullable Object object) {
         return Objects.isNull(object);
     }
 
@@ -89,7 +90,7 @@ public class ObjectUtil {
      * @return {@code true} 如果提供的引用不是 {@code null}，否则 {@code false}
      *
      */
-    public static boolean isNotNull(Object object) {
+    public static boolean isNotNull(@Nullable Object object) {
         return Objects.nonNull(object);
     }
 
@@ -102,7 +103,7 @@ public class ObjectUtil {
      *
      * @return 对象的元素数量或长度如果对象为 null，则返回 0
      */
-    public static int size(Object obj) {
+    public static int size(@Nullable Object obj) {
         // 检查对象是否为 null，null 对象返回大小为 0
         if (null == obj) {
             return 0;
@@ -138,7 +139,7 @@ public class ObjectUtil {
      *
      * @return 是否数组
      */
-    public static boolean isArray(Object obj) {
+    public static boolean isArray(@Nullable Object obj) {
         return (obj != null && obj.getClass().isArray());
     }
 
@@ -149,7 +150,7 @@ public class ObjectUtil {
      *
      * @return 数组是否为空
      */
-    public static boolean isEmpty(Object obj) {
+    public static boolean isEmpty(@Nullable Object obj) {
         if (null == obj) {
             return true;
         }
@@ -193,7 +194,7 @@ public class ObjectUtil {
      * @see Object#equals(Object)
      * @see Arrays#equals
      */
-    public static boolean equalsSafe(Object o1, Object o2) {
+    public static boolean equalsSafe(@Nullable Object o1, @Nullable Object o2) {
         if (o1 == o2) {
             return true;
         } else if (o1 != null && o2 != null) {
@@ -224,7 +225,7 @@ public class ObjectUtil {
      *
      * @return Object
      */
-    public static <T> T defaultIfNull(T object, T defaultValue) {
+    public static <T> @Nullable T defaultIfNull(@Nullable T object, @Nullable T defaultValue) {
         return isNull(object) ? defaultValue : object;
     }
 
@@ -247,7 +248,7 @@ public class ObjectUtil {
      *
      * @return a String representation of {@code array}
      */
-    public static String toString(Object[] array) {
+    public static String toString(Object @Nullable [] array) {
         if (array == null) {
             return Symbol.NULL;
         }

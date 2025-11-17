@@ -110,7 +110,7 @@ public class WebSocketUtil {
      * @param message 要发送的 WebSocket 消息对象
      */
     private static synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
-        VirtualThreadPools.execute("WebSocket Send", () -> {
+        VirtualThreadPools.execute("WebSocket 发送", () -> {
             if (session == null || !session.isOpen()) {
                 log.warn("[⛓️][send] session 会话已经关闭");
             } else {

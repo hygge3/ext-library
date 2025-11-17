@@ -6,12 +6,13 @@ import ext.library.security.constants.SecurityConstant;
 import ext.library.security.constants.SecurityRedisConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
+import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class SecurityRedisRepository implements SecurityRepository {
     }
 
     @Override
-    public boolean saveSecuritySession(@Nonnull SecuritySession session) {
+    public boolean saveSecuritySession(@NonNull SecuritySession session) {
         String redisKey = StringUtil.format(SecurityRedisConstant.SESSION_INFO_KEY, session.getLoginId());
         String sessionJson = JsonUtil.toJson(session);
         if (null == session.getTimeout() || SecurityConstant.NON_EXPIRING.equals(session.getTimeout())) {
@@ -162,7 +163,7 @@ public class SecurityRedisRepository implements SecurityRepository {
      * @return boolean
      */
     @Override
-    public boolean saveToken(@Nonnull SecurityToken token) {
+    public boolean saveToken(@NonNull SecurityToken token) {
         String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY, token.getToken());
         String tokenJson = JsonUtil.toJson(token);
         if (null == token.getTimeout() || SecurityConstant.NON_EXPIRING.equals(token.getTimeout())) {
@@ -220,11 +221,11 @@ public class SecurityRedisRepository implements SecurityRepository {
     @Override
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
         String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
-                StringUtil.isNotBlank(tokenValue) ? tokenValue + "*" : "*");
+                StringUtil.isNotBlank(tokenValue) ? tokenValue + Symbol.ASTERISK : Symbol.ASTERISK);
         Set<String> setList = RedisUtil.keys(redisKey);
         List<String> list = null == setList ? new ArrayList<>()
                 : setList.stream()
-                .map(key -> key.substring(key.lastIndexOf(":") + 1))
+                .map(key -> key.substring(key.lastIndexOf(Symbol.COLON) + 1))
                 .sorted(Comparator.comparing(String::toString))
                 .collect(Collectors.toList());
         if (sortedDesc) {

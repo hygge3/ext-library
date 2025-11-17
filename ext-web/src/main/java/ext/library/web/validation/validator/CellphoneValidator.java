@@ -3,8 +3,8 @@ package ext.library.web.validation.validator;
 import ext.library.core.util.ValidatorUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.validation.constraints.Cellphone;
+import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -16,7 +16,7 @@ public class CellphoneValidator implements ConstraintValidator<Cellphone, String
     private boolean notNull;
 
     @Override
-    public void initialize(@Nonnull Cellphone constraintAnnotation) {
+    public void initialize(@NonNull Cellphone constraintAnnotation) {
         this.notNull = constraintAnnotation.notNull();
     }
 

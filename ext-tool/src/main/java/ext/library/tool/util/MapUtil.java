@@ -1,7 +1,7 @@
 package ext.library.tool.util;
 
-import com.google.common.collect.Maps;
 import ext.library.tool.core.Exceptions;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Map 工具
  */
-public class MapUtil {
+public final class MapUtil {
 
     private static final Logger log = LoggerFactory.getLogger(MapUtil.class);
 
@@ -156,7 +156,7 @@ public class MapUtil {
      *
      * @return Map 数组==null 或长度==0 或第一个元素为空（true）
      */
-    public static boolean isEmptys(Map<?, ?>[] paramMaps) {
+    public static boolean isEmptys(Map<?, ?> @Nullable [] paramMaps) {
         return null == paramMaps || paramMaps.length == 0 || paramMaps[0].isEmpty();
     }
 
@@ -172,7 +172,7 @@ public class MapUtil {
             return true;
         }
         for (Object value : paramMap.values()) {
-            if (value == null || (value instanceof String str && ObjectUtil.isEmpty(str))) {
+            if (value instanceof String str && ObjectUtil.isEmpty(str)) {
                 return true;
             }
         }
@@ -277,12 +277,10 @@ public class MapUtil {
      *
      * @return 结果
      */
-    public static <K, T> T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
-        if (paramMap != null) {
-            Object answer = paramMap.get(key);
-            if (answer != null) {
-                return GeneralTypeCastUtil.cast(answer, clazz);
-            }
+    public static <K, T> @Nullable T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
+        Object answer = paramMap.get(key);
+        if (answer != null) {
+            return TypeCastUtil.cast(answer, clazz);
         }
         return null;
     }
@@ -302,9 +300,7 @@ public class MapUtil {
      * <p>
      * 处理后返回结果为一个 map，值为一个 list,json 表示为：
      * <p>
-     * {"man":[{"key":"1","name":"张三","sex":"man"},{"key":"3","name":"王五","sex":"man"}],
-     * <p>
-     * "woman":[{"key":"2","name":"李四","sex":"woman"}]}
+     * {"man":[{"key":"1","name":"张三","sex":"man"},{"key":"3","name":"王五","sex":"man"}],"woman":[{"key":"2","name":"李四","sex":"woman"}]}
      *
      * @param objectList    对象 list
      * @param keyClassifier 需要提取的 key
@@ -399,15 +395,15 @@ public class MapUtil {
     /**
      * 获取
      */
-    private static <T> T getValue(Object obj, String name, Class<T> calzz) {
+    private static <T> @Nullable T getValue(Object obj, String name, Class<T> calzz) {
         if (obj instanceof Map<?, ?> map) {
-            return GeneralTypeCastUtil.cast(map.get(name), calzz);
+            return TypeCastUtil.cast(map.get(name), calzz);
         }
         BeanInfo beanInfo;
         try {
             beanInfo = Introspector.getBeanInfo(obj.getClass());
         } catch (IntrospectionException e) {
-            log.warn("[🛠️] Getting entity is incorrect", e);
+            log.warn("[🛠️] 获取实体不正确", e);
             return null;
         }
         // 获取所有属性
@@ -421,9 +417,9 @@ public class MapUtil {
             }
             try {
                 // 执行 get 方法拿到值
-                return GeneralTypeCastUtil.cast(readMethod.invoke(obj), calzz);
+                return TypeCastUtil.cast(readMethod.invoke(obj), calzz);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                log.warn("[🛠️] An error occurred to get the value", e);
+                log.warn("[🛠️] 获取值时发生错误", e);
                 return null;
             }
         }
@@ -438,9 +434,6 @@ public class MapUtil {
      * @return {Map}
      */
     public static Map<String, Object> toMap(Object bean) {
-        if (bean == null) {
-            return Maps.newHashMap();
-        }
         Map<String, Object> map = new HashMap<>();
         Field[] declaredFields = bean.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
@@ -464,9 +457,6 @@ public class MapUtil {
      * @return {T}
      */
     public static <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
-        if (beanMap == null) {
-            return null;
-        }
         try {
             T object = valueType.getDeclaredConstructor().newInstance();
             Field[] fields = valueType.getDeclaredFields();

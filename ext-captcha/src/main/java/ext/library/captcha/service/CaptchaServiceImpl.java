@@ -31,12 +31,12 @@ public class CaptchaServiceImpl implements ICaptchaService {
     public void generate(String uuid, OutputStream outputStream) {
         String generate = captcha.generate(() -> outputStream);
         captchaCache.put(properties.getCacheName(), uuid, generate);
-        log.debug("[🔢] captcha uuid is {}, generate captcha is {}", uuid, generate);
+        log.debug("[🔢] 验证码 UUID 是 {}，生成验证码是 {}", uuid, generate);
     }
 
     @Override
     public boolean validate(String uuid, String userInputCaptcha) {
-        log.debug("[🔢] validate captcha uuid is {}, input captcha is {}", uuid, userInputCaptcha);
+        log.debug("[🔢] 验证验证码 uuid 是 {}，输入验证码是 {}", uuid, userInputCaptcha);
         String code = captchaCache.getAndRemove(properties.getCacheName(), uuid);
         if (ObjectUtil.isEmpty(code)) {
             return false;

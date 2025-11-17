@@ -1,7 +1,7 @@
 package ext.library.crypto;
 
 import ext.library.tool.constant.Holder;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -103,7 +103,7 @@ public class SM2Util {
             return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 加密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
 
     }
@@ -137,7 +137,7 @@ public class SM2Util {
             return new String(decryptedData, StandardCharsets.UTF_8);
         } catch (InvalidCipherTextException e) {
             log.error("[🔐] SM2 解密失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -169,7 +169,7 @@ public class SM2Util {
             return Base64Util.encodeUrlSafeToStr(signature);
         } catch (CryptoException e) {
             log.error("[🔐] SM2 签名失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
     }
 
@@ -217,21 +217,21 @@ public class SM2Util {
             certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (Exception e) {
             log.error("[🔐] SM2 使用证书验签失败", e);
-            throw Exceptions.unchecked(e);
+            throw new ToolException(e);
         }
         // 获取证书中的公钥
         PublicKey publicKey = certificate.getPublicKey();
 
         // 检查是否为 EC 公钥
         if (!(publicKey instanceof BCECPublicKey ecPublicKey)) {
-            throw new IllegalArgumentException("证书中的公钥不是 EC 公钥");
+            throw new ToolException("证书中的公钥不是 EC 公钥");
         }
 
         ECParameterSpec parameterSpec = ecPublicKey.getParameters();
 
         // 检查是否为 SM2 曲线
         if (!isSM2Curve(parameterSpec)) {
-            throw new IllegalArgumentException("证书中的公钥不是 SM2 曲线");
+            throw new ToolException("证书中的公钥不是 SM2 曲线");
         }
 
         // 转换为 BC 的参数格式

@@ -4,8 +4,9 @@ import ext.library.encrypt.annotation.ResponseEncrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.json.util.JsonUtil;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -37,12 +38,12 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return returnType.hasMethodAnnotation(ResponseEncrypt.class);
     }
 
     @Override
-    public Object beforeBodyWrite(Object body, @Nonnull MethodParameter returnType, @Nonnull MediaType selectedContentType, @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
+    public @Nullable Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
         // NULL 值不做加密处理
         if (body == null) {
             return null;
@@ -54,7 +55,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
             return algo.getCryptoStrategy().encrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
             log.error("[🔒] 响应加密异常", e);
-            throw Exceptions.unchecked(e);
+            throw new ExtException(e);
         }
     }
 

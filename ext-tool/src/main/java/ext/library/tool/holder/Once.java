@@ -9,7 +9,7 @@ import java.util.function.Function;
 /**
  * 加载一次
  */
-public class Once {
+public final class Once {
 
     private final AtomicBoolean value;
 
@@ -61,6 +61,7 @@ public class Once {
      * @param argument 参数
      * @param <T>      泛型
      * @param <R>      泛型
+     *
      * @return 返回值，不可执行返回 null
      */
     public <T, R> R run(Function<T, R> function, T argument) {

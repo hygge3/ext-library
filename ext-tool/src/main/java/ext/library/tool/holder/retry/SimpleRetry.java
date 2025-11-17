@@ -49,7 +49,7 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
                 return retryCallback.call();
             } catch (Throwable e) {
                 retryCount = i + 1;
-                log.warn("[🛠️] retry on {} times error{}.", retryCount, e.getMessage());
+                log.warn("[🛠️] 重试 {} 次", retryCount, e);
                 lastThrowable = e;
                 if (sleepMillis > 0 && retryCount < maxAttempts) {
                     Threads.sleep(sleepMillis);
@@ -57,7 +57,7 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
             }
         }
         if (lastThrowable == null) {
-            lastThrowable = new IOException(StringUtil.format("retry on {} times,still fail.", maxAttempts));
+            lastThrowable = new IOException(StringUtil.format("重试 {} 次，仍然失败", maxAttempts));
         }
         throw Exceptions.unchecked(lastThrowable);
     }
