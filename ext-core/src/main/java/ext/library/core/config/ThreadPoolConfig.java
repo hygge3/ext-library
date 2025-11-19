@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import jakarta.annotation.PreDestroy;
-import jakarta.annotation.Resource;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -29,10 +28,7 @@ public class ThreadPoolConfig {
      * 核心线程数 = cpu 核心数 + 1
      */
     private final int core = Holder.CPU_CORE_NUM + 1;
-    @Resource
     private ScheduledExecutorService scheduledExecutorService;
-    @Resource
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")
     @Bean(name = "threadPoolTaskExecutor")
@@ -46,7 +42,6 @@ public class ThreadPoolConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
-        this.threadPoolTaskExecutor = executor;
         log.info("[🌊] Spring 线程池模块载入成功");
         return executor;
     }
