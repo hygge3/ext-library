@@ -1,22 +1,26 @@
 package ext.library.json.util;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.databind.type.CollectionLikeType;
+import com.fasterxml.jackson.databind.type.MapType;
+import com.fasterxml.jackson.databind.type.TypeBase;
 import ext.library.json.module.CustomModule;
 import ext.library.tool.constant.Symbol;
 import ext.library.tool.exception.ToolException;
+import ext.library.tool.util.DateUtil;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.ser.FilterProvider;
-import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
-import tools.jackson.databind.ser.std.SimpleFilterProvider;
-import tools.jackson.databind.type.CollectionLikeType;
-import tools.jackson.databind.type.MapType;
-import tools.jackson.databind.type.TypeBase;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,8 +30,15 @@ import java.util.Objects;
  */
 public class JsonUtil {
     protected static final JsonMapper mapper = JsonMapper.builder()
-            // 注册自定义模块
-            .addModule(new CustomModule()).build();
+            // 序列化时，对象为 null，是否抛异常
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            // 禁止将 java.util.Date, Calendar 序列化为数字 (时间戳)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            // 设置 java.util.Date, Calendar 序列化、反序列化的格式
+            .defaultDateFormat(new SimpleDateFormat(DateUtil.STRING_FORMATTER_YMD_HMS))
+            .findAndAddModules()
+            .addModule(new CustomModule())
+            .build();
 
     // region java 类型转换获取
 
@@ -136,7 +147,7 @@ public class JsonUtil {
     private static <T> T readValue(String json, TypeBase toValueType) {
         try {
             return mapper.readValue(json, toValueType);
-        } catch (JacksonException e) {
+        } catch (JsonProcessingException e) {
             throw new ToolException(e);
         }
     }
@@ -168,11 +179,7 @@ public class JsonUtil {
      * @return {@link List}<{@link T}>
      */
     public static <T> List<T> readList(String json, Class<T> elementClass) {
-        try {
-            return readValue(json, getListType(elementClass));
-        } catch (JacksonException e) {
-            throw new ToolException(e);
-        }
+        return readValue(json, getListType(elementClass));
     }
 
     /**
@@ -212,11 +219,7 @@ public class JsonUtil {
      * @return {@link Map}<{@link String}, {@link Object}>
      */
     public static <K, V> Map<K, V> readMap(String json, Class<?> keyClass, Class<?> valueClass) {
-        try {
-            return readValue(json, getMapType(keyClass, valueClass));
-        } catch (JacksonException e) {
-            throw new ToolException(e);
-        }
+        return readValue(json, getMapType(keyClass, valueClass));
     }
 
     /**

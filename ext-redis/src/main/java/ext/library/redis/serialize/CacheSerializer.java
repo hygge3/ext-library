@@ -1,7 +1,8 @@
 package ext.library.redis.serialize;
 
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.type.TypeFactory;
+
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;

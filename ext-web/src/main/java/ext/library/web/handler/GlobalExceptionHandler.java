@@ -335,7 +335,7 @@ public class GlobalExceptionHandler {
         long maxUploadSize = e.getMaxUploadSize();
         String message = StringUtil.format("超出最大上传大小，最大：{}", maxUploadSize);
         printLog(request, message, e);
-        return R.failed(HttpStatus.CONTENT_TOO_LARGE.value(), message);
+        return R.failed(HttpStatus.PAYLOAD_TOO_LARGE.value(), message);
     }
 
 }

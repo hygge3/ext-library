@@ -29,7 +29,7 @@ public class AsyncConfig implements AsyncConfigurer {
      */
     @Override
     public Executor getAsyncExecutor() {
-        if (SpringUtil.isVirtual()) {
+        if (ObjectUtil.isTrue(SpringUtil.getProperty("spring.threads.virtual.enabled"))) {
             return new VirtualThreadTaskExecutor("异步任务-");
         }
         return SpringUtil.getBean("scheduledExecutorService");

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
-import org.springframework.boot.thread.Threading;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -286,10 +285,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     @SuppressWarnings("unchecked")
     public static <T> T getCurrentProxy() {
         return (T) AopContext.currentProxy();
-    }
-
-    public static boolean isVirtual() {
-        return Threading.VIRTUAL.isActive(getBean(Environment.class));
     }
 
     @Override

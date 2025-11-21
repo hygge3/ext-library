@@ -1,11 +1,12 @@
 package ext.library.json.serializer;
 
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.SerializationContext;
-import tools.jackson.databind.annotation.JacksonStdImpl;
-import tools.jackson.databind.ser.jdk.NumberSerializer;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
+import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
+
+import java.io.IOException;
 
 /**
  * 超出 JS 最大最小值 处理
@@ -28,7 +29,7 @@ public class BigNumberSerializer extends NumberSerializer {
     }
 
     @Override
-    public void serialize(Number value, JsonGenerator g, SerializationContext provider) throws JacksonException {
+    public void serialize(Number value, JsonGenerator g, SerializerProvider provider) throws IOException {
         // 超出范围 序列化位字符串
         if (value.longValue() > MIN_SAFE_INTEGER && value.longValue() < MAX_SAFE_INTEGER) {
             super.serialize(value, g, provider);
