@@ -54,13 +54,13 @@
 
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
-        <spring-boot.version>4.0.0-RC2</spring-boot.version>
+        <spring-boot.version>4.0.0</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.40</swagger.version>
         <mybatis-flex.version>1.11.4</mybatis-flex.version>
         <bcprov.version>1.82</bcprov.version>
         <oshi.version>6.9.1</oshi.version>
-        <springdoc.version>3.0.0-RC1</springdoc.version>
+        <springdoc.version>3.0.0</springdoc.version>
         <zxing-core.version>3.5.3</zxing-core.version>
         <guava.version>33.5.0-jre</guava.version>
 
