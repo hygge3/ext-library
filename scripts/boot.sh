@@ -26,31 +26,39 @@
 JAVA="${JAVA_HOME}"
 # ------ 文件路径
 DIR_PATH=$(
-  cd $(dirname $0)
+  cd "$(dirname "$0")" || exit
   pwd
 )
 # ------ 服务文件名（默认使用目录下最新的.jar或者.war文件）
-SERVER_FILE_NAME=$(ls -t ${DIR_PATH} | egrep '\.jar|\.war' | head -1)
+SERVER_FILE_NAME=$(find "${DIR_PATH}" -maxdepth 1 -type f \( -name "*.jar" -o -name "*.war" \) -printf "%T@ %p\n" | sort -n | tail -1 | cut -d' ' -f2- | xargs -n1 basename)
 # ------ Java 参数
 JAVA_OPT="${JAVA_OPT} -server -Djava.security.egd=file:/dev/./urandom"
 # 调整堆大小：通过 -Xms 和 -Xmx 参数来调整堆大小。合理的堆大小设置可以减少垃圾回收的频率，从而提高性能。
 JAVA_OPT="${JAVA_OPT} -Xms4g -Xmx4g"
-# 异步日志
-JAVA_OPT="${JAVA_OPT} -Xlog:async"
+# 异步日志配置，使用JDK 25的统一日志框架
+JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=./logs/gc.log:time,uptime,level,tags -Xlog:async"
 # 启用启动优化：启用应用程序类数据共享，以加速应用程序的启动时间。
 JAVA_OPT="${JAVA_OPT} -XX:+UseAppCDS"
 # 启用编译优化：启用分层编译，这将在运行时进行更多的 JIT 编译，提高应用程序的性能
 JAVA_OPT="${JAVA_OPT} -XX:+TieredCompilation"
 # 启用多线程处理器：来启用非一致性内存访问 (NUMA) 支持，以提高多核系统上的性能。
 JAVA_OPT="${JAVA_OPT} -XX:+UseNUMA"
+# 启用动态GC线程数，根据系统负载自动调整
+JAVA_OPT="${JAVA_OPT} -XX:+UseDynamicNumberOfGCThreads"
+# 启用字符串去重，减少内存占用
+JAVA_OPT="${JAVA_OPT} -XX:+UseStringDeduplication"
 # 当 JVM 发生 OOM 时，自动生成 DUMP 文件
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError"
 # 生成DUMP文件的路径
 JAVA_OPT="${JAVA_OPT} -XX:HeapDumpPath=./logs/dump/"
 # 开启分代ZGC
-JAVA_OPT="${JAVA_OPT} -XX:+UseZGC -XX:+ZGenerational"
+JAVA_OPT="${JAVA_OPT} -XX:+UseZGC"
 #关闭主动GC周期，在主动回收模式下，ZGC 会在系统空闲时自动执行垃圾回收，以减少垃圾回收在应用程序忙碌时所造成的影响。如果未指定此参数（默认情况），ZGC 会在需要时（即堆内存不足以满足分配请求时）执行垃圾回收。
 JAVA_OPT="${JAVA_OPT} -XX:-ZProactive"
+# 设置ZGC的线程数为CPU核心数的一半，平衡性能和资源消耗
+JAVA_OPT="${JAVA_OPT} -XX:ParallelGCThreads=$(($(nproc)/2))"
+# 设置ZGC的最大暂停时间目标为10ms
+JAVA_OPT="${JAVA_OPT} -XX:MaxGCPauseMillis=10"
 # ------ Spring 参数
 SPRING_OPT="${SPRING_OPT}"
 # ------ 控制台文件
@@ -81,9 +89,9 @@ resolve_server_pid() {
     # pid 文件存在则读取文件
     _SERVER_PID=$(cat "${_LOG_PATH}/server.pid")
     # 判断是否真的存在这个 pid
-    if test $(ps -ef | awk '{print $2}' | grep -w ${_SERVER_PID} | wc -l) -eq 0; then
+    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
       # 没有找到文件记录的 pid, 删除这个文件
-      rm -rf ${_LOG_PATH}/server.pid
+      rm -rf "${_LOG_PATH}/server.pid"
       sleep 0.2
       _SERVER_PID=0
       # 重新解析服务的 pid
@@ -110,17 +118,17 @@ retry_resolve_server_port() {
   # 检测5分钟(300秒)
   for ((i = 0; i <= 300; i++)); do
     # 判断 pid 是否存在
-    if test $(ps -ef | awk '{print $2}' | grep -w ${_SERVER_PID} | wc -l) -eq 0; then
-      rm -rf ${_LOG_PATH}/server.pid
+    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
+      rm -rf "${_LOG_PATH}/server.pid"
       _SERVER_PID=0
       break
     fi
     # 判断 pid 的 port 是否绑定
-    if test $(netstat -tulnp | grep "${_SERVER_PID}/" | wc -l) -gt 0; then
+    if test "$(netstat -tulnp | grep "${_SERVER_PID}/" | wc -l)" -gt 0; then
       _SERVER_PORT=$(netstat -tulnp | grep "${_SERVER_PID}/" | head -1 | awk '{print $4}' | awk -F ":" '{print $NF}')
       break
     fi
-    [[ $i%5 -eq 0 ]] && echo "观察服务器端口使用情况 ${i}s"
+    [[ $((i%5)) -eq 0 ]] && echo "观察服务器端口使用情况 ${i}s"
     sleep 1
   done
 }
@@ -154,10 +162,10 @@ start() {
   if [[ "$_P2" == "c" ]]; then
     # 如果第二个参数是c, 删除日志文件
     echo -e "\033[33m删除 ${SERVER_FILE_NAME} 的日志文件(${DIR_PATH}/logs/*)\033[0m"
-    rm -rf ${DIR_PATH}/logs/*
+    rm -rf "${DIR_PATH}"/logs/*
   fi
   # 检查日志目录
-  test -d ${DIR_PATH}/logs/ || mkdir -p ${DIR_PATH}/logs/
+  test -d "${DIR_PATH}/logs/" || mkdir -p "${DIR_PATH}/logs/"
   # 执行脚本
   # nohup java -Xmx128m -jar /home/app/server.jar --spring.profiles.active=prod >> /home/app/logs/console.log 2>&1 & echo $! > /home/app/logs/server.pid
   #
@@ -167,9 +175,9 @@ start() {
   [ -n "${SPRING_OPT}" ] && RUN_OPT="${RUN_OPT} ${SPRING_OPT}"
   #
   echo "$JAVA ${RUN_OPT}"
-  echo "$JAVA ${RUN_OPT}" >${CONSOLE_FILE}
-  nohup $JAVA ${RUN_OPT} >>${CONSOLE_FILE} 2>&1 &
-  echo $! >${_LOG_PATH}/server.pid
+  echo "$JAVA ${RUN_OPT}" >"${CONSOLE_FILE}"
+  nohup "$JAVA" ${RUN_OPT} >>"${CONSOLE_FILE}" 2>&1 &
+  echo $! >"${_LOG_PATH}/server.pid"
   #
   echo "${SERVER_FILE_NAME} 正在运行"
   echo -e "你可以查看日志文件 \033[36m${CONSOLE_FILE}\033[0m 或者执行下面的命令"
@@ -214,33 +222,33 @@ stop() {
   fi
   echo "停止 ${SERVER_FILE_NAME} 中..."
   # 进行优雅停机
-  kill -15 ${_SERVER_PID}
+  kill -15 "${_SERVER_PID}"
   # 当前等待秒数
   _wait_seconds=0
   #
   while true; do
-    if test $(ps -ef | awk '{print $2}' | grep -w ${_SERVER_PID} | wc -l) -eq 0; then
+    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
       echo "${SERVER_FILE_NAME} 已停止"
       break
     fi
     if [ "${_wait_seconds}" -ge "${STOP_TIMEOUT}" ]; then
       # 强制终止进程
       echo -e "\033[31m等待超时(${_wait_seconds}s), 强制关机 [kill -9 ${SERVER_FILE_NAME}].\033[0m"
-      sudo kill -9 ${_SERVER_PID}
+      sudo kill -9 "${_SERVER_PID}"
       break
     fi
     sleep 1
-    let _wait_seconds++
+    ((_wait_seconds++))
     echo "请稍等 ${_wait_seconds}s"
   done
   if [ $? -eq 0 ]; then
     echo "${SERVER_FILE_NAME} 停止成功"
-    rm -rf ${_LOG_PATH}/server.pid
+    rm -rf "${_LOG_PATH}/server.pid"
   else
     echo "${SERVER_FILE_NAME} 停止失败"
   fi
   echo "---------- 停止  [end] ----------"
-  sleep 1s
+  sleep 1
 }
 #
 # =======================================
@@ -251,7 +259,7 @@ status() {
   # 解析服务的 pid
   resolve_server_pid
   if [ "${_SERVER_PID}" -eq 0 ]; then
-    echo -e "\033[33m$SERVER_FILE_NAME 已停止\033[0m"
+    echo -e "\033[33m${SERVER_FILE_NAME} 已停止\033[0m"
   else
     _SERVER_PORT_TEXT=$(netstat -tulnp | grep "${_SERVER_PID}/" | awk 'BEGIN{ORS=" "}{print $4}')
     [ -z "$_SERVER_PORT_TEXT" ] && _SERVER_PORT_TEXT="unknown "
@@ -266,7 +274,7 @@ status() {
 # 日志
 # =======================================
 logs() {
-  tail -f -n 200 ${CONSOLE_FILE}
+  tail -f -n 200 "${CONSOLE_FILE}"
 }
 #
 # ================================================ 方法 end   ================================================
