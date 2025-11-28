@@ -63,3 +63,6 @@ build/
 
 ### fake u code ###
 /report.md
+
+### Qoder ###
+.qoder/

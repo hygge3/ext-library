@@ -190,12 +190,3 @@ compile("ext.library:ext-tool:${version}")
 | Invokable  | 简化了常见的反射代码的使用                     |
 | Reflection | 反射工具类                             |
 | ClassPath  | 提供类路径扫描                           |
-
-## 其他工具推荐
-
-| 名称                                           | 描述                                                 | 
-|----------------------------------------------|----------------------------------------------------|
-| [FastExcel](https://idev.cn/fastexcel/zh-CN) | FastExcel 是一个基于 Java 的、快速、简洁、解决大文件内存溢出的 Excel 处理工具 |    
-| [Forest](https://forest.dtflyx.com/)         | 声明式与编程式双修，让天下没有难以发送的 HTTP 请求                       |    
-| [LiteFlow](https://liteflow.cc/)             | 轻量，快速，稳定可编排的组件式规则引擎                                |
-| [Easy-Es](https://www.easy-es.cn/)           | 傻瓜级 ElasticSearch 搜索引擎 ORM 框架                      |
