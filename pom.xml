@@ -34,7 +34,6 @@
         <module>ext-trans</module>
         <module>ext-web</module>
         <module>ext-websocket</module>
-        <module>ext-ai</module>
     </modules>
 
     <licenses>
@@ -265,11 +264,6 @@
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-websocket</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-ai</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>
