@@ -10,7 +10,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 /**
@@ -39,7 +38,6 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
         String osName = System.getProperty("os.name");
         String osArch = System.getProperty("os.arch");
         LocalDateTime startTime = LocalDateTime.now();
-        String startTimeFormatted = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         String sslEnable = environment.getProperty("server.ssl.enabled", "false");
         String scheme = ObjectUtil.isTrue(sslEnable) ? "https" : "http";

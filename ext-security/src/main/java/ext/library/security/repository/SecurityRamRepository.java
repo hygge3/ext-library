@@ -6,8 +6,6 @@ import ext.library.security.domain.SecurityToken;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -41,7 +39,6 @@ public class SecurityRamRepository implements SecurityRepository {
      */
     private static final AtomicReference<Map<String, Long>> versionMap = new AtomicReference<>(
             new ConcurrentHashMap<>());
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public SecuritySession getSecuritySessionByLoginId(String loginId) {

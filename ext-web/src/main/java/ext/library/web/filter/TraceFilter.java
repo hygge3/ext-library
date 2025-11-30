@@ -4,8 +4,6 @@ import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.IDUtil;
 import ext.library.web.config.properties.WebMvcProperties;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,8 +19,7 @@ import java.io.IOException;
  */
 @AutoConfiguration
 public class TraceFilter extends OncePerRequestFilter {
-    private final ScopedValue<String> TRACE_ID = ScopedValue.newInstance();
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final ThreadLocal<String> TRACE_ID = new InheritableThreadLocal<>();
     private final WebMvcProperties properties;
 
     public TraceFilter(WebMvcProperties properties) {
@@ -33,18 +30,17 @@ public class TraceFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String traceIdHeaderName = properties.getTraceIdHeaderName();
         // 生成并设置 TraceID
+        String traceId = IDUtil.getObjectId();
         // 在作用域中设置值
-        ScopedValue.where(TRACE_ID, IDUtil.getObjectId()).run(() -> {
-            MDC.put(traceIdHeaderName, TRACE_ID.get());
-            response.setHeader(traceIdHeaderName, TRACE_ID.get());
-            try {
-                filterChain.doFilter(request, response);
-            } catch (IOException | ServletException e) {
-                throw Exceptions.unchecked(e);
-            } finally {
-                MDC.remove(traceIdHeaderName);
-            }
-        });
+        TRACE_ID.set(traceId);
+        MDC.put(traceIdHeaderName, traceId);
+        response.setHeader(traceIdHeaderName, traceId);
+        try {
+            filterChain.doFilter(request, response);
+        } catch (IOException | ServletException e) {
+            throw Exceptions.unchecked(e);
+        } finally {
+            MDC.remove(traceIdHeaderName);
+        }
     }
-
 }

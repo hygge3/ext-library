@@ -21,6 +21,9 @@ public class XssValidator implements ConstraintValidator<Xss, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
+        if (value == null) {
+            return this.notNull;
+        }
         return ValidatorUtil.hasXss(value);
     }
 

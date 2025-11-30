@@ -9,8 +9,6 @@ import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.imageio.ImageIO;
@@ -34,7 +32,6 @@ public class Captcha implements ICaptcha {
     private static final int WIDTH = 130;
     private static final int HEIGHT = 48;
     private static final String[] FONT_NAMES = new String[]{"marker.ttf", "american.ttf", "papyrus.ttf",};
-    private final Logger log = LoggerFactory.getLogger(getClass());
     private final Font[] fonts;
     private BackgroundDraw backgroundDraw;
     private CaptchaDraw captchaDraw;

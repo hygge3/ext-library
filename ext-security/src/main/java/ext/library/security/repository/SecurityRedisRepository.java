@@ -10,8 +10,6 @@ import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -30,7 +28,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public class SecurityRedisRepository implements SecurityRepository {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 根据登录 Id 查询 SecuritySession

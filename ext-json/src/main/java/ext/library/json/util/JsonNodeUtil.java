@@ -1,8 +1,6 @@
 package ext.library.json.util;
 
 import ext.library.tool.exception.ToolException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -15,7 +13,6 @@ import java.util.Objects;
  * JsonNode 工具类
  */
 public class JsonNodeUtil {
-    private static final Logger log = LoggerFactory.getLogger(JsonNodeUtil.class);
 
     // region JsonNode 与对象互转
 

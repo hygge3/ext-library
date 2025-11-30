@@ -23,7 +23,7 @@ public class EnumValueValidatorOfClass implements ConstraintValidator<OneOfClass
     }
 
     @Override
-    public boolean isValid(Class value, ConstraintValidatorContext context) {
+    public boolean isValid(Class<?> value, ConstraintValidatorContext context) {
         if (value == null) {
             return this.allowNull;
         }

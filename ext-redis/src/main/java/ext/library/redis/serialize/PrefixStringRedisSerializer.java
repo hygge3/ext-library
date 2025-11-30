@@ -2,8 +2,6 @@ package ext.library.redis.serialize;
 
 import ext.library.redis.prefix.IRedisPrefixConverter;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.nio.charset.StandardCharsets;
@@ -12,7 +10,6 @@ import java.nio.charset.StandardCharsets;
  * 自定义 String Key 序列化工具，添加全局 key 前缀
  */
 public class PrefixStringRedisSerializer extends StringRedisSerializer {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final IRedisPrefixConverter iRedisPrefixConverter;
 
@@ -28,7 +25,7 @@ public class PrefixStringRedisSerializer extends StringRedisSerializer {
     }
 
     @Override
-    public String deserialize(byte @NonNull [] bytes) {
+    public String deserialize(byte[] bytes) {
         byte[] unwrap = this.iRedisPrefixConverter.unwrap(bytes);
         return super.deserialize(unwrap);
     }

@@ -5,8 +5,6 @@ import ext.library.tool.core.Exceptions;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
@@ -22,7 +20,6 @@ import java.util.concurrent.Executor;
  */
 @AutoConfiguration
 public class AsyncConfig implements AsyncConfigurer {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 自定义 @Async 注解使用系统线程池

@@ -4,8 +4,6 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.connection.MessageListener;
@@ -67,7 +65,6 @@ public class RedisUtil {
     // language=redis
     private static final DefaultRedisScript<Long> INCR_BY_EXPIRE_LUA_SCRIPT = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
     private static final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
-    private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
     /**
      * 删除指定的 key

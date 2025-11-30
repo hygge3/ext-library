@@ -8,8 +8,6 @@ import ext.library.web.annotation.RestWrapper;
 import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.response.R;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -28,7 +26,6 @@ import java.util.Objects;
  */
 @RestControllerAdvice
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final WebMvcProperties webMvcProperties;
 

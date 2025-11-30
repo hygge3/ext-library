@@ -98,7 +98,8 @@ public class JsonUtil {
      */
     public static String toJsonWithFilter(Object obj, String filterName, String... fieldsToExclude) {
         try {
-            FilterProvider filters = new SimpleFilterProvider().addFilter(filterName, SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude));
+            FilterProvider filters = new SimpleFilterProvider().addFilter(filterName,
+                    SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude));
             return mapper.writer(filters).writeValueAsString(obj);
         } catch (JacksonException e) {
             throw new ToolException(e);
@@ -185,7 +186,6 @@ public class JsonUtil {
     public static Map<String, Object> readMap(String json) {
         return readMap(json, String.class, Object.class);
     }
-
 
     /**
      * 将 json 反序列化成 Map 集合
