@@ -1,9 +1,9 @@
 package ext.library.web.validation.constraints;
 
+import ext.library.web.validation.validator.EnumValueValidatorOfInt;
+
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
-import ext.library.web.validation.validator.EnumValueValidatorOfInt;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
@@ -20,33 +20,33 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * 整数之一
  */
-@Target({ METHOD, FIELD, CONSTRUCTOR, PARAMETER, TYPE_USE })
+@Target({METHOD, FIELD, CONSTRUCTOR, PARAMETER, TYPE_USE, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Repeatable(OneOfInts.List.class)
 @Documented
-@Constraint(validatedBy = { EnumValueValidatorOfInt.class })
+@Constraint(validatedBy = {EnumValueValidatorOfInt.class})
 public @interface OneOfInts {
 
-	String message() default "{validation.annotation.OneOfInts.message}";
+    String message() default "{validation.annotation.OneOfInts.message}";
 
-	int[] value();
+    int[] value();
 
-	/**
-	 * 允许值为 null, 默认不允许
-	 */
-	boolean allowNull() default false;
+    /**
+     * 允许值为 null, 默认不允许
+     */
+    boolean allowNull() default false;
 
-	Class<?>[] groups() default {};
+    Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 
-	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
-	@Retention(RUNTIME)
-	@Documented
-	@interface List {
+    @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
+    @Retention(RUNTIME)
+    @Documented
+    @interface List {
 
-		OneOfInts[] value();
+        OneOfInts[] value();
 
-	}
+    }
 
 }
