@@ -3,7 +3,6 @@ package ext.library.web.filter;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.util.IDUtil;
 import ext.library.web.config.properties.WebMvcProperties;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,7 +26,7 @@ public class TraceFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String traceIdHeaderName = properties.getTraceIdHeaderName();
         // 生成并设置 TraceID
         String traceId = IDUtil.getObjectId();
