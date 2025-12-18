@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.1.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
 
     <groupId>ext.library</groupId>
     <artifactId>ext-parent</artifactId>
@@ -11,30 +11,6 @@
     <description>Parent</description>
     <url>https://hygge.eu.org</url>
 
-    <modules>
-        <module>ext-tool</module>
-        <module>ext-core</module>
-        <module>ext-json</module>
-        <module>ext-redis</module>
-        <module>ext-cache</module>
-        <module>ext-security</module>
-        <module>ext-captcha</module>
-        <module>ext-crypto</module>
-        <module>ext-desensitize</module>
-        <module>ext-interface-crypto</module>
-        <module>ext-http</module>
-        <module>ext-idempotent</module>
-        <module>ext-mail</module>
-        <module>ext-monitor</module>
-        <module>ext-mybatis</module>
-        <module>ext-openapi</module>
-        <module>ext-qrcode</module>
-        <module>ext-ratelimiter</module>
-        <module>ext-sse</module>
-        <module>ext-trans</module>
-        <module>ext-web</module>
-        <module>ext-websocket</module>
-    </modules>
 
     <licenses>
         <license>
@@ -47,28 +23,19 @@
         <!-- maven 配置 -->
         <java.version>25</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
         <spring-boot.version>4.0.0</spring-boot.version>
         <spring-ai.version>1.1.0</spring-ai.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <swagger.version>2.2.40</swagger.version>
+        <swagger.version>2.2.41</swagger.version>
         <mybatis-flex.version>1.11.4</mybatis-flex.version>
         <bcprov.version>1.82</bcprov.version>
         <oshi.version>6.9.1</oshi.version>
         <springdoc.version>3.0.0</springdoc.version>
         <zxing-core.version>3.5.3</zxing-core.version>
         <guava.version>33.5.0-jre</guava.version>
-
-        <!-- plugins.version -->
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -88,13 +55,6 @@
                 <groupId>com.mybatis-flex</groupId>
                 <artifactId>mybatis-flex-dependencies</artifactId>
                 <version>${mybatis-flex.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -145,127 +105,6 @@
                 <artifactId>javase</artifactId>
                 <version>${zxing-core.version}</version>
             </dependency>
-            <!-- ======================= Ext 依赖 ===================== -->
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-captcha</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-crypto</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-desensitize</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-interface-crypto</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-holidays</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-http</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-idempotent</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-json</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-mail</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-monitor</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-mybatis</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-openapi</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-qrcode</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-ratelimiter</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-redis</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-cache</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-satoken</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-sse</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-tool</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-trans</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-web</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-websocket</artifactId>
-                <version>${revision}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -281,17 +120,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
             <scope>provided</scope>
@@ -301,119 +129,57 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- 注解处理器 -->
+        <dependency>
+            <groupId>io.github.linpeilie</groupId>
+            <artifactId>mapstruct-plus-processor</artifactId>
+            <version>${mapstruct-plus.version}</version>
+            <scope>provided</scope>
+            <type>processor</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.therapi</groupId>
+            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+            <version>0.15.0</version>
+            <scope>provided</scope>
+            <type>processor</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>provided</scope>
+            <type>processor</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>provided</scope>
+            <type>processor</type>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>nexus-163</id>
-            <name>Nexus 163</name>
-            <url>http://mirrors.163.com/maven/repository/maven-public/</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>nexus-163</id>
-            <name>Nexus 163</name>
-            <url>http://mirrors.163.com/maven/repository/maven-public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-        </plugins>
-
         <pluginManagement>
             <plugins>
-                <!-- 版本管理 -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>flatten-maven-plugin</artifactId>
-                    <version>${flatten-maven-plugin.version}</version>
-                    <configuration>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                        <updatePomFile>true</updatePomFile>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>flatten</goal>
-                            </goals>
-                            <id>flatten</id>
-                            <phase>process-resources</phase>
-                        </execution>
-                        <execution>
-                            <goals>
-                                <goal>clean</goal>
-                            </goals>
-                            <id>flatten.clean</id>
-                            <phase>clean</phase>
-                        </execution>
-                    </executions>
-                </plugin>
                 <!-- 编译插件 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <encoding>${project.build.sourceEncoding}</encoding>
                         <parameters>true</parameters>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>io.github.linpeilie</groupId>
-                                <artifactId>mapstruct-plus-processor</artifactId>
-                                <version>${mapstruct-plus.version}</version>
-                            </path>
-                            <path>
-                                <groupId>com.github.therapi</groupId>
-                                <artifactId>therapi-runtime-javadoc-scribe</artifactId>
-                                <version>0.15.0</version>
-                            </path>
-                            <path>
-                                <groupId>org.springframework.boot</groupId>
-                                <artifactId>spring-boot-configuration-processor</artifactId>
-                                <version>${spring-boot.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.springframework.boot</groupId>
-                                <artifactId>spring-boot-autoconfigure-processor</artifactId>
-                                <version>${spring-boot.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <!-- 源文件打包 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
