@@ -1,7 +1,6 @@
 package ext.library.tool.domain;
 
 import ext.library.tool.constant.Holder;
-import ext.library.tool.constant.Symbol;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
@@ -25,7 +24,7 @@ public final class MongoObjectId {
     private static final byte[] RANDOM_VALUE = new byte[5];
 
     /** 用于将字节转换为十六进制字符串的字符数组，包含小写字母 */
-    private static final char[] HEX = Symbol.HEX_CHAR_STRING_LOWER.toCharArray();
+    private static final char[] HEX = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     static {
         Holder.SECURE_RANDOM.nextBytes(RANDOM_VALUE);

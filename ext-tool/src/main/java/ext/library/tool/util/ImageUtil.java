@@ -1,6 +1,7 @@
 package ext.library.tool.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -31,7 +32,7 @@ public final class ImageUtil {
         try {
             return ImageIO.read(input);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -46,7 +47,7 @@ public final class ImageUtil {
         try {
             return ImageIO.read(input);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -72,7 +73,7 @@ public final class ImageUtil {
         try {
             return ImageIO.read(URI.create(url).toURL());
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -87,7 +88,7 @@ public final class ImageUtil {
         try {
             return ImageIO.read(url);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -104,7 +105,7 @@ public final class ImageUtil {
         try {
             return ImageIO.write(im, formatName, output);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -120,7 +121,7 @@ public final class ImageUtil {
         try {
             ImageIO.write(im, formatName, output);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -137,7 +138,7 @@ public final class ImageUtil {
         try {
             return ImageIO.write(im, formatName, output);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -154,9 +155,9 @@ public final class ImageUtil {
             if (ImageIO.write(im, formatName, output)) {
                 return output.toByteArray();
             }
-            throw new IllegalArgumentException("ImageWriter 格式名称" + formatName + " writer 为 null");
+            throw new ToolException(EmojiSymbol.TOOL, "ImageWriter 格式名称{} writer 为 null", formatName);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 

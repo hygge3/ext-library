@@ -1,6 +1,7 @@
 package ext.library.tool.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
@@ -28,7 +29,6 @@ import java.util.Set;
  * @since 2025.08.19
  */
 public final class ClassUtil {
-
 
     // ---------------------- judge ----------------------
 
@@ -271,7 +271,7 @@ public final class ClassUtil {
             return (T) clazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -287,7 +287,7 @@ public final class ClassUtil {
         try {
             return newInstance(Class.forName(clazzStr));
         } catch (ClassNotFoundException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -307,7 +307,7 @@ public final class ClassUtil {
             Method getMethod = pd.getReadMethod();
             return getMethod.invoke(bean);
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -327,7 +327,7 @@ public final class ClassUtil {
             // 修改属性值
             declaredField.set(bean, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -400,7 +400,7 @@ public final class ClassUtil {
             // 返回新对象
             return o;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 

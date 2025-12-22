@@ -1,7 +1,17 @@
 package ext.library.cache.enums;
 
 public enum CacheType {
-    FULL,   // 存取
-    PUT,    // 只存
-    DELETE  // 删除
+    /**
+     * 存取
+     */
+    FULL,
+    /**
+     * 只存
+     */
+    PUT,
+    /**
+     * 删除
+     */
+    DELETE,
+    ;
 }

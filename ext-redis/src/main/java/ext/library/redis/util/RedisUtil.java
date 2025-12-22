@@ -2,6 +2,7 @@ package ext.library.redis.util;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.DateUtil;
 import org.springframework.data.domain.Range;
@@ -58,12 +59,7 @@ import java.util.stream.Collectors;
  * Redis 操作的辅助类
  */
 @SuppressWarnings("ConstantConditions")
-public class RedisUtil {
-    /**
-     * 自增并设置过期时间的 lua 脚本
-     */
-    // language=redis
-    private static final DefaultRedisScript<Long> INCR_BY_EXPIRE_LUA_SCRIPT = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
+public final class RedisUtil {
     private static final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
 
     /**
@@ -98,7 +94,7 @@ public class RedisUtil {
         try (Cursor<String> cursor = scan(pattern)) {
             cursor.forEachRemaining(RedisUtil::unlink);
         } catch (Exception e) {
-            throw new ToolException(e, "删除所有匹配指定前缀：{}失败", pattern);
+            throw new ToolException(EmojiSymbol.REDIS,e);
         }
     }
 
@@ -543,7 +539,10 @@ public class RedisUtil {
      * @return 自增后的 value 值
      */
     public static long incrByAndExpire(String key, long delta, long timeout) {
-        return getRedisTemplate().execute(INCR_BY_EXPIRE_LUA_SCRIPT, Collections.singletonList(key), String.valueOf(delta), String.valueOf(timeout));
+        // 自增并设置过期时间的 lua 脚本
+        // language=Redis
+        DefaultRedisScript<Long> incrByExpireLua = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
+        return getRedisTemplate().execute(incrByExpireLua, Collections.singletonList(key), String.valueOf(delta), String.valueOf(timeout));
     }
 
     /**

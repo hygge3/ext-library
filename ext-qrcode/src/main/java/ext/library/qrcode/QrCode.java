@@ -16,7 +16,8 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ImageUtil;
 import org.jspecify.annotations.Nullable;
 
@@ -227,7 +228,7 @@ public class QrCode {
             Result result = new QRCodeReader().decode(bitmap, hints);
             return result.getText();
         } catch (NotFoundException | ChecksumException | FormatException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.QRCODE, e);
         } finally {
             qrCodeImage.getGraphics().dispose();
         }
@@ -280,7 +281,7 @@ public class QrCode {
             Result result = new QRCodeReader().decode(bitmap);
             return result.getRawBytes();
         } catch (NotFoundException | ChecksumException | FormatException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.QRCODE, e);
         } finally {
             qrCodeImage.getGraphics().dispose();
         }
@@ -634,7 +635,7 @@ public class QrCode {
         try {
             matrix = new QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, this.size, this.size, this.getHints());
         } catch (WriterException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.QRCODE, e);
         }
         if (this.deleteMargin) {
             matrix = deleteWhite(matrix);

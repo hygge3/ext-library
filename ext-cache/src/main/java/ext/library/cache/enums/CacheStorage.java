@@ -6,9 +6,12 @@ import ext.library.cache.strategy.L2Strategy;
 import ext.library.cache.strategy.RedisStrategy;
 
 public enum CacheStorage {
-    /** redis */ REDIS(new RedisStrategy()),
-    /** caffeine 内存 */ CAFFEINE(new CaffeineStrategy()),
-    /** 二级缓存 caffeine+redis */ L2(new L2Strategy()),
+    /** redis */
+    REDIS(new RedisStrategy()),
+    /** caffeine 内存 */
+    CAFFEINE(new CaffeineStrategy()),
+    /** 二级缓存 caffeine+redis */
+    L2(new L2Strategy()),
     ;
 
     private final CacheStrategy cacheStrategy;

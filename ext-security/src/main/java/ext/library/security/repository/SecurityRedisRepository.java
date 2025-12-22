@@ -6,7 +6,6 @@ import ext.library.security.constants.SecurityConstant;
 import ext.library.security.constants.SecurityRedisConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.NonNull;
@@ -218,11 +217,11 @@ public class SecurityRedisRepository implements SecurityRepository {
     @Override
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
         String redisKey = StringUtil.format(SecurityRedisConstant.TOKEN_REL_LOGIN_ID_KEY,
-                StringUtil.isNotBlank(tokenValue) ? tokenValue + Symbol.ASTERISK : Symbol.ASTERISK);
+                StringUtil.isNotBlank(tokenValue) ? tokenValue + "*" : "*");
         Set<String> setList = RedisUtil.keys(redisKey);
         List<String> list = null == setList ? new ArrayList<>()
                 : setList.stream()
-                .map(key -> key.substring(key.lastIndexOf(Symbol.COLON) + 1))
+                .map(key -> key.substring(key.lastIndexOf(":") + 1))
                 .sorted(Comparator.comparing(String::toString))
                 .collect(Collectors.toList());
         if (sortedDesc) {

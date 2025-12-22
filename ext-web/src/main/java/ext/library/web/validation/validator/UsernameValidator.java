@@ -1,8 +1,7 @@
 package ext.library.web.validation.validator;
 
-import ext.library.core.util.ValidatorUtil;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
+import ext.library.tool.util.ValidatorUtil;
 import ext.library.web.validation.constraints.Username;
 import org.jspecify.annotations.NonNull;
 
@@ -27,7 +26,7 @@ public class UsernameValidator implements ConstraintValidator<Username, String> 
             if (value.length() < 5) {
                 return false;
             }
-            if (value.contains(Symbol.AT)) {
+            if (value.contains("@")) {
                 return false;
             }
 

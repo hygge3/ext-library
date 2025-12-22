@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @since 2025.08.19
  */
-public class DigestUtil {
+public final class DigestUtil {
 
     /**
      * Calculates the MD5 digest.
@@ -106,7 +106,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha256(String data) {
+    public byte[] sha256(String data) {
         return Hashing.sha256().hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -117,7 +117,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha256(final byte[] bytes) {
+    public byte[] sha256(final byte[] bytes) {
         return Hashing.sha256().hashBytes(bytes).asBytes();
     }
 
@@ -128,7 +128,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha256Hex(String data) {
+    public String sha256Hex(String data) {
         return Hashing.sha256().hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -139,7 +139,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha256Hex(final byte[] bytes) {
+    public String sha256Hex(final byte[] bytes) {
         return Hashing.sha256().hashBytes(bytes).toString();
     }
 
@@ -150,7 +150,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha384(String data) {
+    public byte[] sha384(String data) {
         return Hashing.sha384().hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -161,7 +161,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha384(final byte[] bytes) {
+    public byte[] sha384(final byte[] bytes) {
         return Hashing.sha384().hashBytes(bytes).asBytes();
     }
 
@@ -172,7 +172,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha384Hex(String data) {
+    public String sha384Hex(String data) {
         return Hashing.sha384().hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -183,7 +183,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha384Hex(final byte[] bytes) {
+    public String sha384Hex(final byte[] bytes) {
         return Hashing.sha384().hashBytes(bytes).toString();
     }
 
@@ -194,7 +194,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha512(String data) {
+    public byte[] sha512(String data) {
         return Hashing.sha512().hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -205,7 +205,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] sha512(final byte[] bytes) {
+    public byte[] sha512(final byte[] bytes) {
         return Hashing.sha512().hashBytes(bytes).asBytes();
     }
 
@@ -216,7 +216,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha512Hex(String data) {
+    public String sha512Hex(String data) {
         return Hashing.sha512().hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -227,7 +227,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String sha512Hex(final byte[] bytes) {
+    public String sha512Hex(final byte[] bytes) {
         return Hashing.sha512().hashBytes(bytes).toString();
     }
 
@@ -239,7 +239,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacMd5(String data, String key) {
+    public byte[] hmacMd5(String data, String key) {
         return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -251,7 +251,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacMd5(final byte[] bytes, String key) {
+    public byte[] hmacMd5(final byte[] bytes, String key) {
         return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).asBytes();
     }
 
@@ -263,7 +263,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacMd5Hex(String data, String key) {
+    public String hmacMd5Hex(String data, String key) {
         return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -275,7 +275,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacMd5Hex(final byte[] bytes, String key) {
+    public String hmacMd5Hex(final byte[] bytes, String key) {
         return Hashing.hmacMd5(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).toString();
     }
 
@@ -287,7 +287,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacSha1(String data, String key) {
+    public byte[] hmacSha1(String data, String key) {
         return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -299,7 +299,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacSha1(final byte[] bytes, String key) {
+    public byte[] hmacSha1(final byte[] bytes, String key) {
         return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).asBytes();
     }
 
@@ -311,7 +311,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacSha1Hex(String data, String key) {
+    public String hmacSha1Hex(String data, String key) {
         return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -323,7 +323,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacSha1Hex(final byte[] bytes, String key) {
+    public String hmacSha1Hex(final byte[] bytes, String key) {
         return Hashing.hmacSha1(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).toString();
     }
 
@@ -335,7 +335,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static byte[] hmacSha256(String data, String key) {
+    public byte[] hmacSha256(String data, String key) {
         return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -347,7 +347,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacSha256(final byte[] bytes, String key) {
+    public byte[] hmacSha256(final byte[] bytes, String key) {
         return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).asBytes();
     }
 
@@ -359,7 +359,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static String hmacSha256Hex(String data, String key) {
+    public String hmacSha256Hex(String data, String key) {
         return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -371,7 +371,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacSha256Hex(final byte[] bytes, String key) {
+    public String hmacSha256Hex(final byte[] bytes, String key) {
         return Hashing.hmacSha256(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).toString();
     }
 
@@ -383,7 +383,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacSha512(String data, String key) {
+    public byte[] hmacSha512(String data, String key) {
         return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).asBytes();
     }
 
@@ -395,7 +395,7 @@ public class DigestUtil {
      *
      * @return digest as a byte array
      */
-    public static byte[] hmacSha512(final byte[] bytes, String key) {
+    public byte[] hmacSha512(final byte[] bytes, String key) {
         return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).asBytes();
     }
 
@@ -407,7 +407,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacSha512Hex(String data, String key) {
+    public String hmacSha512Hex(String data, String key) {
         return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashString(data, StandardCharsets.UTF_8).toString();
     }
 
@@ -419,7 +419,7 @@ public class DigestUtil {
      *
      * @return digest as a hex string
      */
-    public static String hmacSha512Hex(final byte[] bytes, String key) {
+    public String hmacSha512Hex(final byte[] bytes, String key) {
         return Hashing.hmacSha512(key.getBytes(StandardCharsets.UTF_8)).hashBytes(bytes).toString();
     }
 }

@@ -1,14 +1,14 @@
 package ext.library.idempotent.config;
 
 import ext.library.idempotent.aspect.IdempotentAspect;
-import ext.library.idempotent.config.properties.IdempotentProperties;
 import ext.library.idempotent.key.generator.DefaultIdempotentKeyGenerator;
 import ext.library.idempotent.key.generator.IdempotentKeyGenerator;
 import ext.library.idempotent.key.store.IdempotentKeyStore;
 import ext.library.idempotent.key.store.InMemoryIdempotentKeyStore;
 import ext.library.idempotent.key.store.RedisIdempotentKeyStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.idempotent.properties.IdempotentProperties;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties(IdempotentProperties.class)
 public class IdempotentAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 默认的幂等前缀生成器
@@ -60,7 +59,7 @@ public class IdempotentAutoConfig {
      */
     @Bean
     public IdempotentAspect idempotentAspect(IdempotentKeyStore idempotentKeyStore, IdempotentKeyGenerator idempotentKeyGenerator) {
-        log.info("[🟰] 幂等模块载入成功");
+        Logs.info(EmojiSymbol.IDEMPOTENT, "幂等模块载入");
         return new IdempotentAspect(idempotentKeyStore, idempotentKeyGenerator);
     }
 

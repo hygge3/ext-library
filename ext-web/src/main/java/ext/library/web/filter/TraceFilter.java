@@ -1,8 +1,9 @@
 package ext.library.web.filter;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.IDUtil;
-import ext.library.web.config.properties.WebMvcProperties;
+import ext.library.web.properties.WebMvcProperties;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,7 +38,7 @@ public class TraceFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (IOException | ServletException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.WEB, e);
         } finally {
             MDC.remove(traceIdHeaderName);
         }

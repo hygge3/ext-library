@@ -1,9 +1,8 @@
 package ext.library.crypto;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.encrypt.Encryptors;
 
 import javax.crypto.KeyGenerator;
@@ -12,9 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Objects;
 
-public class AESUtil {
+public final class AESUtil {
     private static final String ALGO = "AES";
-    private static final Logger log = LoggerFactory.getLogger(AESUtil.class);
 
     /**
      * 生成密钥对
@@ -29,8 +27,7 @@ public class AESUtil {
         try {
             keyGenerator = KeyGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
-            log.error("[🔐] 生成 AES 密钥失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
         // 设置密钥长度和随机源
         keyGenerator.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());

@@ -1,12 +1,10 @@
 package ext.library.core.util;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Maps;
-import com.google.common.net.HttpHeaders;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import ext.library.tool.util.TypeCastUtil;
 import org.jspecify.annotations.Nullable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.ObjectUtils;
@@ -31,6 +29,7 @@ import java.util.stream.Stream;
 /**
  * 客户端工具类
  */
+
 public final class ServletUtil {
 
     /**
@@ -51,7 +50,7 @@ public final class ServletUtil {
     /**
      * 获取 response
      */
-    public static HttpServletResponse getResponse() {
+    public static @Nullable HttpServletResponse getResponse() {
         return getRequestAttributes().getResponse();
     }
 
@@ -118,9 +117,9 @@ public final class ServletUtil {
      */
     public static Map<String, String> getParamMap(ServletRequest request) {
         Map<String, String[]> paramsMap = getParams(request);
-        Map<String, String> params = Maps.newHashMapWithExpectedSize(paramsMap.size());
+        Map<String, String> params = new HashMap<>(paramsMap.size());
         for (Map.Entry<String, String[]> entry : paramsMap.entrySet()) {
-            params.put(entry.getKey(), Joiner.on(Symbol.C_COMMA).skipNulls().join(entry.getValue()));
+            params.put(entry.getKey(), StringUtil.join(entry.getValue()));
         }
         return params;
     }
@@ -163,7 +162,7 @@ public final class ServletUtil {
     }
 
     public static String getHeader(HttpServletRequest request, String name) {
-        return ObjectUtil.defaultIfEmpty(request.getHeader(name), Symbol.EMPTY);
+        return ObjectUtil.defaultIfEmpty(request.getHeader(name), "");
     }
 
     public static String getHeader(String name) {
@@ -232,7 +231,7 @@ public final class ServletUtil {
 
     public static void addCookie(String name, @Nullable String value, Integer maxAge) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setPath(Symbol.SLASH);
+        cookie.setPath("/");
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(true);
         getResponse().addCookie(cookie);
@@ -312,10 +311,10 @@ public final class ServletUtil {
      * @return 真实 ip
      */
     private static String getMultistageReverseProxyIp(String ip) {
-        if (ip.indexOf(Symbol.COMMA) <= 0) {
+        if (ip.indexOf(",") <= 0) {
             return ip;
         }
-        String[] ips = ip.trim().split(Symbol.COMMA);
+        String[] ips = ip.trim().split(",");
         for (String subIp : ips) {
             if (checkNotUnknown(subIp)) {
                 return subIp;

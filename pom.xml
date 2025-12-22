@@ -26,11 +26,11 @@
 
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
-        <spring-boot.version>4.0.0</spring-boot.version>
-        <spring-ai.version>1.1.0</spring-ai.version>
+        <spring-boot.version>4.0.1</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.41</swagger.version>
         <mybatis-flex.version>1.11.4</mybatis-flex.version>
+        <xbatis.version>1.9.5-M2-spring-boot4</xbatis.version>
         <bcprov.version>1.82</bcprov.version>
         <oshi.version>6.9.1</oshi.version>
         <springdoc.version>3.0.0</springdoc.version>
@@ -55,6 +55,13 @@
                 <groupId>com.mybatis-flex</groupId>
                 <artifactId>mybatis-flex-dependencies</artifactId>
                 <version>${mybatis-flex.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>cn.xbatis</groupId>
+                <artifactId>xbatis-spring-boot-parent</artifactId>
+                <version>${xbatis.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -110,24 +117,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <scope>provided</scope>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- 注解处理器 -->

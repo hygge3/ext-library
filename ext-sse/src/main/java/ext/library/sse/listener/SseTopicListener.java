@@ -1,9 +1,9 @@
 package ext.library.sse.listener;
 
 import ext.library.sse.manager.SseEmitterManager;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.ObjectUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -15,7 +15,6 @@ import jakarta.annotation.Resource;
  */
 @Order(-1)
 public class SseTopicListener implements ApplicationRunner {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Resource
     private SseEmitterManager sseEmitterManager;
@@ -30,7 +29,7 @@ public class SseTopicListener implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         sseEmitterManager.subscribeMessage((message) -> {
-            log.info("[📨] SSE 主题订阅收到消息，session keys:{},message:{}", message.getUserIds(), message.getMessage());
+            Logs.info(EmojiSymbol.SSE,"SSE 主题订阅收到消息，session keys:{},message:{}", message.getUserIds(), message.getMessage());
             // 如果 key 不为空就按照 key 发消息 如果为空就群发
             if (ObjectUtil.isNotEmpty(message.getUserIds())) {
                 message.getUserIds().forEach(key -> sseEmitterManager.sendMessage(key, message.getMessage()));
@@ -38,7 +37,7 @@ public class SseTopicListener implements ApplicationRunner {
                 sseEmitterManager.sendMessage(message.getMessage());
             }
         });
-        log.info("[📨] 初始化 SSE 主题订阅监听器成功");
+        Logs.info(EmojiSymbol.SSE,"初始化 SSE 主题订阅监听器成功");
     }
 
 }

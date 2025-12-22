@@ -1,12 +1,10 @@
 package ext.library.http;
 
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Exceptions;
-import ext.library.tool.exception.ToolException;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -44,8 +42,7 @@ import java.util.concurrent.Executors;
  *
  * @since jdk11
  */
-public class HttpUtil {
-    private static final Logger log = LoggerFactory.getLogger(HttpUtil.class);
+public final class HttpUtil {
     /**
      * 获取 Http 客户端
      */
@@ -491,8 +488,7 @@ public class HttpUtil {
             HttpResponse<Path> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
             return httpResponse.body();
         } catch (IOException | InterruptedException e) {
-            log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
-            throw new ToolException(e);
+            throw new ExtException(EmojiSymbol.HTTP, e);
         }
     }
 
@@ -513,8 +509,7 @@ public class HttpUtil {
         try {
             return client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
         } catch (IOException | InterruptedException e) {
-            log.error("[🌐] HTTP 下载异常:{}", httpRequest.uri().toString());
-            throw new ToolException(e);
+            throw new ExtException(EmojiSymbol.HTTP, e);
         }
     }
 
@@ -919,8 +914,7 @@ public class HttpUtil {
             }
             return t;
         } catch (IOException | InterruptedException e) {
-            log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
-            throw new ToolException(e);
+            throw new ExtException(EmojiSymbol.HTTP, e);
         }
     }
 
@@ -939,8 +933,7 @@ public class HttpUtil {
             }
             return response;
         } catch (IOException | InterruptedException e) {
-            log.error("[🌐] HTTP 请求异常:{}", httpRequest.uri().toString());
-            throw new ToolException(e);
+            throw new ExtException(EmojiSymbol.HTTP, e);
         }
     }
 
@@ -963,15 +956,15 @@ public class HttpUtil {
     }
 
     public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        StringJoiner sj = new StringJoiner(Symbol.AND);
+        StringJoiner sj = new StringJoiner("&");
         form.forEach((k, v) -> sj.add(k + "=" + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPostRequest(url, headerMap, bodyPublisher, timeout);
     }
 
     public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        StringJoiner sj = new StringJoiner(Symbol.AND);
-        form.forEach((k, v) -> sj.add(k + Symbol.EQUAL + v));
+        StringJoiner sj = new StringJoiner("&");
+        form.forEach((k, v) -> sj.add(k + "=" + v));
         HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
         return buildPutRequest(url, headerMap, bodyPublisher, timeout);
     }
@@ -1081,7 +1074,7 @@ public class HttpUtil {
                 }
             }};
             SSLParameters sslParameters = new SSLParameters();
-            sslParameters.setEndpointIdentificationAlgorithm(Symbol.EMPTY);
+            sslParameters.setEndpointIdentificationAlgorithm("");
 
             try {
                 SSLContext sslContext = SSLContext.getInstance("TLS");

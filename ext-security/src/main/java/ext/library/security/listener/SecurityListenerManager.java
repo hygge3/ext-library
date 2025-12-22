@@ -1,5 +1,6 @@
 package ext.library.security.listener;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class SecurityListenerManager {
      */
     public static void registerListener(SecurityListener listener) {
         if (null == listener) {
-            throw new ExtException("[🛡️] 注册监听器不能为空");
+            throw new ExtException(EmojiSymbol.SECURITY, "要注册的监听器不能为 null");
         }
         LISTENER_LIST.add(listener);
     }
@@ -47,7 +48,7 @@ public class SecurityListenerManager {
      */
     public static void removeListener(SecurityListener listener) {
         if (null == listener) {
-            throw new ExtException("[🛡️] 移除监听器不能为空");
+            throw new ExtException(EmojiSymbol.SECURITY, "要移除的监听器不能为 null");
         }
         LISTENER_LIST.remove(listener);
     }

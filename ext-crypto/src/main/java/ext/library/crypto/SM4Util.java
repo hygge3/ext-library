@@ -1,5 +1,6 @@
 package ext.library.crypto;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -17,7 +18,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Objects;
 
-public class SM4Util {
+public final class SM4Util {
     private static final Logger log = LoggerFactory.getLogger(SM4Util.class);
 
     private static final String ALGORITHM = "SM4";
@@ -60,8 +61,7 @@ public class SM4Util {
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            log.error("[🔐] SM4 加密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -80,8 +80,7 @@ public class SM4Util {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("[🔐] SM4 ECB 解密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -100,8 +99,7 @@ public class SM4Util {
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            log.error("[🔐] SM4 CBC 加密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -120,8 +118,7 @@ public class SM4Util {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("[🔐] SM4 CBC 解密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 }

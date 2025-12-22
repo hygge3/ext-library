@@ -3,6 +3,7 @@ package ext.library.security.repository;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.StringUtil;
@@ -83,7 +84,7 @@ public class SecurityRamRepository implements SecurityRepository {
         Long version = versionMap.get().get(session.getLoginId());
         version = null == version ? 0L : version;
         if (null != session.getVersion() && !session.getVersion().equals(version)) {
-            throw new ExtException("[🛡️] 版本验证异常");
+            throw new ExtException(EmojiSymbol.SECURITY, "版本验证异常");
         }
         versionMap.get().put(session.getLoginId(), ++version);
         sessionMap.get().put(session.getLoginId(), session);

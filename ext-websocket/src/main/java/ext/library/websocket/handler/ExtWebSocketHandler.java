@@ -2,13 +2,13 @@ package ext.library.websocket.handler;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.security.domain.SecuritySession;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.holder.Lazy;
-import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.domain.WebSocketMessage;
 import ext.library.websocket.holder.WebSocketSessionHolder;
+import ext.library.websocket.properties.WebSocketProperties;
 import ext.library.websocket.util.WebSocketUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
@@ -27,7 +27,6 @@ import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
  * WebSocketHandler 实现类
  */
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final Lazy<WebSocketProperties> properties = Lazy.of(() -> SpringUtil.getBean(WebSocketProperties.class));
 
@@ -41,11 +40,11 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
-            log.info("[⛓️][连接] 无效的 token. sessionId: {}", session.getId());
+            Logs.info(EmojiSymbol.WEBSOCKET, "[连接] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.addSession(loginUser.getLoginId(), session);
-        log.info("[⛓️][连接] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        Logs.info(EmojiSymbol.WEBSOCKET, "[连接] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**
@@ -104,7 +103,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("[⛓️][传输错误] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
+        Logs.error(EmojiSymbol.WEBSOCKET, exception, "[传输错误] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
     }
 
     /**
@@ -117,11 +116,11 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
-            log.info("[⛓️][断开] 无效的 token. sessionId: {}", session.getId());
+            Logs.info(EmojiSymbol.WEBSOCKET, "[断开] 无效的 token. sessionId: {}", session.getId());
             return;
         }
         WebSocketSessionHolder.removeSession(loginUser.getLoginId());
-        log.info("[⛓️][断开] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        Logs.info(EmojiSymbol.WEBSOCKET, "[断开] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
     }
 
     /**

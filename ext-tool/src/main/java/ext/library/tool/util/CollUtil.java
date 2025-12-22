@@ -1,10 +1,5 @@
 package ext.library.tool.util;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
@@ -18,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class CollUtil {
     /**
@@ -109,32 +106,6 @@ public final class CollUtil {
     }
 
     /**
-     * 不可变 Set
-     *
-     * @param es  对象
-     * @param <E> 泛型
-     *
-     * @return 集合
-     */
-    @SafeVarargs
-    public static <E> Set<E> ofImmutableSet(E... es) {
-        return ImmutableSet.copyOf(es);
-    }
-
-    /**
-     * 不可变 List
-     *
-     * @param es  对象
-     * @param <E> 泛型
-     *
-     * @return 集合
-     */
-    @SafeVarargs
-    public static <E> List<E> ofImmutableList(E... es) {
-        return ImmutableList.copyOf(es);
-    }
-
-    /**
      * Iterable 转换为 List 集合
      *
      * @param elements Iterable
@@ -187,8 +158,10 @@ public final class CollUtil {
      * @return List 分片
      */
     public static <T> List<List<T>> partition(List<T> list, int size) {
-        Assert.isTrue(size > 0, "列表到分片大小必须大于零");
-        return Lists.partition(list, size);
+        Assert.isTrue(size > 0, "列表的分片大小必须大于零");
+        return IntStream.range(0, (list.size() + size - 1) / size)
+                .mapToObj(i -> list.subList(i * size, Math.min((i + 1) * size, list.size())))
+                .toList();
     }
 
     /**
@@ -196,10 +169,11 @@ public final class CollUtil {
      *
      * @param coll coll
      *
-     * @return {@link Multiset }<{@link T }>
+     * @return {@link Map }<{@link T }>
      */
-    public static <T> Multiset<T> counting(final Collection<T> coll) {
-        return HashMultiset.create(coll);
+    public static <T> Map<T, Long> counting(final Collection<T> coll) {
+        return coll.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
     }
 
 }

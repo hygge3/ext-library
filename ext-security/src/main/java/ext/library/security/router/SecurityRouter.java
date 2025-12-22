@@ -7,9 +7,9 @@ import ext.library.security.annotion.SecurityIgnore;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.ClassUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -26,7 +26,6 @@ import java.util.function.BooleanSupplier;
  * </p>
  */
 public class SecurityRouter {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 忽略路由匹配列表
@@ -83,7 +82,7 @@ public class SecurityRouter {
         String path = ServletUtil.getRequest().getRequestURI();
         // 判断路由是否匹配
         boolean pathMatchResult = routePathMatch(pattern, path);
-        log.debug("[🛡️] 路由匹配 pattern:{},path:{},result：{}", pattern, path, pathMatchResult);
+        Logs.info(EmojiSymbol.SECURITY, "路由匹配 pattern:{},path:{},result：{}", pattern, path, pathMatchResult);
         if (pathMatchResult && !supplier.getAsBoolean()) {
             throw new ForbiddenException("路由方法权限验证不通过");
         }

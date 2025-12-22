@@ -2,7 +2,7 @@ package ext.library.security.service;
 
 import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
-import ext.library.security.config.properties.SecurityProperties;
+import ext.library.security.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
@@ -12,7 +12,7 @@ import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.DateUtil;
@@ -44,7 +44,7 @@ public interface SecurityService {
         if (ObjectUtil.isEmpty(token)) {
             return null;
         }
-        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, Symbol.EMPTY);
+        return token.replaceAll(SecurityConstant.AUTHORIZATION_PREFIX, "");
     }
 
     /**
@@ -86,7 +86,7 @@ public interface SecurityService {
     default String createLoginByLoginId(String loginId, SecurityLoginParams loginModel) {
         SecuritySession currentSession = getCurrentSecuritySession();
         if (currentSession.getLoginId().equals(loginId)) {
-            throw new ExtException("[🛡️] 创建指定账号的登录 Id 不能与当前登录 Id 相同");
+            throw new ExtException(EmojiSymbol.SECURITY, "创建指定账号的登录 ID:{} 不能与当前登录 ID:{} 相同", loginId, currentSession.getLoginId());
         }
         // 检查并设置 SecuritySession 信息
         SecuritySession session = checkAndSetSecuritySession(loginId, loginModel);
@@ -676,7 +676,7 @@ public interface SecurityService {
                                     tokenInfo.getDeviceType());
                         });
             }
-            if (Boolean.TRUE.equals(PROPERTIES.get().getConcurrentLogin())) {
+            if (Boolean.TRUE.equals(PROPERTIES.get().getIsConcurrentLogin())) {
                 // 允许并发，验证登录设备数量
                 if (!SecurityConstant.NON_LIMIT.equals(PROPERTIES.get().getMaxLoginLimit())
                         && availableTokenInfoList.size() >= PROPERTIES.get().getMaxLoginLimit()) {

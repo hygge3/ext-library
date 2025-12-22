@@ -1,8 +1,7 @@
 package ext.library.tool.core;
 
-import com.google.common.base.Joiner;
 import ext.library.tool.constant.Holder;
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.util.StringUtil;
 import ext.library.tool.util.TypeCastUtil;
 
 import java.lang.management.ManagementFactory;
@@ -13,9 +12,8 @@ import java.util.List;
 /**
  * 运行时工具类
  */
-public final class Runtimes {
 
-    private static volatile int pId = -1;
+public final class Runtimes {
 
     /**
      * 获得当前进程的 PID
@@ -25,17 +23,13 @@ public final class Runtimes {
      * @return pid
      */
     public static int getPId() {
-        if (pId > 0) {
-            return pId;
-        }
         // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
         final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
         final int index = jvmName.indexOf('@');
         if (index > 0) {
-            pId = TypeCastUtil.getAsInteger(jvmName.substring(0, index), -1);
-            return pId;
+            return TypeCastUtil.getAsInteger(jvmName.substring(0, index), -1);
         }
-        return pId;
+        return -1;
     }
 
     /**
@@ -63,7 +57,7 @@ public final class Runtimes {
      */
     public static String getJvmArguments() {
         List<String> vmArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        return Joiner.on(Symbol.C_SPACE).skipNulls().join(vmArguments);
+        return StringUtil.join(vmArguments, " ");
     }
 
     /**

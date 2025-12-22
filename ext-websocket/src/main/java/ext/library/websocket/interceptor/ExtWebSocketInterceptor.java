@@ -2,8 +2,8 @@ package ext.library.websocket.interceptor;
 
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.util.SecurityUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -17,7 +17,6 @@ import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
  * WebSocket 握手请求的拦截器
  */
 public class ExtWebSocketInterceptor implements HandshakeInterceptor {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * WebSocket 握手之前执行的前置处理方法
@@ -37,7 +36,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
             attributes.put(LOGIN_USER_KEY, SecurityUtil.getCurrentSecuritySession());
             return true;
         } catch (UnauthorizedException e) {
-            log.error("[⛓️] WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
+            Logs.error(EmojiSymbol.WEBSOCKET, e, "WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
             return false;
         }
     }
@@ -53,7 +52,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
         // 在这个方法中可以执行一些握手成功后的后续处理逻辑，比如记录日志或者其他操作
-        log.info("[⛓️] WebSocket 连接成功 '{}'", SecurityUtil.getCurrentLoginId());
+        Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 连接成功 '{}'", SecurityUtil.getCurrentLoginId());
     }
 
 }

@@ -1,23 +1,20 @@
 package ext.library.core.util;
 
 import com.google.common.collect.Maps;
-import ext.library.tool.core.Exceptions;
-import ext.library.tool.exception.ExtException;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
 import io.github.linpeilie.Converter;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.ObjectUtils;
 
-import jakarta.annotation.Nonnull;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,10 +32,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * bean 工具类
+ * Bean 工具类
  */
-public final class BeanUtil {
-    private static final Logger log = LoggerFactory.getLogger(BeanUtil.class);
+
+public class BeanUtil {
 
     private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
 
@@ -66,7 +63,7 @@ public final class BeanUtil {
                 map.put(key, value);
             }
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
-            throw new ExtException(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
         return map;
     }
@@ -91,7 +88,7 @@ public final class BeanUtil {
                 }
             }
         } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-            throw new ExtException(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
         return object;
     }
@@ -136,12 +133,12 @@ public final class BeanUtil {
             oos.writeObject(source);
             oos.flush();
         } catch (IOException ex) {
-            throw new ExtException("未能序列化类型为" + source.getClass() + "的对象", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex);
         }
         try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream())) {
             return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException ex) {
-            throw new ExtException("未能反序列化对象", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex);
         }
     }
 
@@ -164,7 +161,7 @@ public final class BeanUtil {
         try {
             return CONVERTER.get().convert(source, targetType);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
         return copyByCopier(source, targetType);
     }
@@ -176,14 +173,14 @@ public final class BeanUtil {
      * @param target 转换后的对象
      */
     @SuppressWarnings("unchecked")
-    public static <S, T> void convert(@Nonnull S source, @Nonnull T target) {
+    public static <S, T> void convert(S source, T target) {
         if (target.getClass().equals(source.getClass())) {
             target = (T) source;
         }
         try {
             target = CONVERTER.get().convert(source, target);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
         copyByCopier(source, target);
     }
@@ -208,7 +205,7 @@ public final class BeanUtil {
         try {
             return CONVERTER.get().convert(sourceList, targetType);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
         return copyListByCopier(sourceList, targetType);
     }
@@ -228,7 +225,7 @@ public final class BeanUtil {
         try {
             return CONVERTER.get().convert(map, targetType);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
         return mapToBean(map, targetType);
     }
@@ -257,7 +254,7 @@ public final class BeanUtil {
             t = targetType.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new ToolException(e, "创建 {} 的新实例失败：｛｝", targetType, e.getMessage());
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
         org.springframework.beans.BeanUtils.copyProperties(source, t);
         return t;
@@ -275,7 +272,7 @@ public final class BeanUtil {
                     org.springframework.beans.BeanUtils.copyProperties(source, target);
                 }
             } catch (Exception e) {
-                throw Exceptions.unchecked(e);
+                throw new ToolException(EmojiSymbol.TOOL, e);
             }
             resultList.add(target);
         }

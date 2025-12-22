@@ -5,12 +5,12 @@ import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.IDUtil;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,7 +29,6 @@ import java.util.Objects;
 public class SecuritySession implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 挂载数据
      */
@@ -69,6 +68,159 @@ public class SecuritySession implements Serializable {
      * 版本号
      */
     private Long version;
+
+    /**
+     * 获取挂载数据
+     *
+     * @return 挂载数据
+     */
+    public Map<String, Object> getMountData() {
+        return mountData;
+    }
+
+    /**
+     * 获取 sessionId
+     *
+     * @return sessionId
+     */
+    public String getSecuritySessionId() {
+        return securitySessionId;
+    }
+
+    /**
+     * 设置 sessionId
+     *
+     * @param securitySessionId sessionId
+     */
+    public void setSecuritySessionId(String securitySessionId) {
+        this.securitySessionId = securitySessionId;
+    }
+
+    /**
+     * 获取登录 Id
+     *
+     * @return 登录 Id
+     */
+    public String getLoginId() {
+        return loginId;
+    }
+
+    /**
+     * 设置登录 Id
+     *
+     * @param loginId 登录 Id
+     */
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    /**
+     * 获取过期时间 单位秒
+     *
+     * @return 过期时间
+     */
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * 设置过期时间 单位秒
+     *
+     * @param timeout 过期时间
+     */
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+    /**
+     * 获取当前的 SecurityToken
+     *
+     * @return 当前的 SecurityToken
+     */
+    public SecurityToken getCurrentSecurityToken() {
+        return currentSecurityToken;
+    }
+
+    /**
+     * 设置当前的 SecurityToken
+     *
+     * @param currentSecurityToken 当前的 SecurityToken
+     */
+    public void setCurrentSecurityToken(SecurityToken currentSecurityToken) {
+        this.currentSecurityToken = currentSecurityToken;
+    }
+
+    /**
+     * 获取创建时间 格式 yyyy-MM-dd HH:mm:ss
+     *
+     * @return 创建时间
+     */
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间 格式 yyyy-MM-dd HH:mm:ss
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * 获取更新时间 格式 yyyy-MM-dd HH:mm:ss
+     *
+     * @return 更新时间
+     */
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    /**
+     * 设置更新时间 格式 yyyy-MM-dd HH:mm:ss
+     *
+     * @param updateTime 更新时间
+     */
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    /**
+     * 获取登录的 token 列表
+     *
+     * @return 登录的 token 列表
+     */
+    public List<SecurityToken> getTokenInfoList() {
+        return tokenInfoList;
+    }
+
+    /**
+     * 设置登录的 token 列表
+     *
+     * @param tokenInfoList 登录的 token 列表
+     */
+    public void setTokenInfoList(List<SecurityToken> tokenInfoList) {
+        this.tokenInfoList = tokenInfoList;
+    }
+
+    /**
+     * 获取版本号
+     *
+     * @return 版本号
+     */
+    public Long getVersion() {
+        return version;
+    }
+
+    /**
+     * 设置版本号
+     *
+     * @param version 版本号
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
     public SecuritySession(boolean isCreate) {
         if (isCreate) {
@@ -170,7 +322,7 @@ public class SecuritySession implements Serializable {
     public SecuritySession renewalToken(String token) {
         SecurityRepository repository = SpringUtil.getBean(SecurityRepository.class);
         if (repository.renewalTokenByTokenValue(token)) {
-            log.debug("[🛡️] 续约成功：{}", token);
+            Logs.debug(EmojiSymbol.SECURITY, "续约成功：{}", token);
         }
         return this;
     }
@@ -303,7 +455,7 @@ public class SecuritySession implements Serializable {
 
         boolean result = repository.saveSecuritySession(this);
         if (!result) {
-            throw new ExtException("[🛡️] 保存 session 认证数据失败");
+            throw new ExtException(EmojiSymbol.SECURITY, "保存 session 认证数据失败");
         }
         // 移除无效的 token
         invalidTokenInfoList.forEach(item -> {
@@ -311,73 +463,5 @@ public class SecuritySession implements Serializable {
                 SecurityEventPublishManager.doRemove(this.getLoginId(), item.getToken(), item.getDeviceType());
             }
         });
-    }
-
-    public Map<String, Object> getMountData() {
-        return mountData;
-    }
-
-    public String getSecuritySessionId() {
-        return securitySessionId;
-    }
-
-    public void setSecuritySessionId(String securitySessionId) {
-        this.securitySessionId = securitySessionId;
-    }
-
-    public String getLoginId() {
-        return loginId;
-    }
-
-    public void setLoginId(String loginId) {
-        this.loginId = loginId;
-    }
-
-    public Long getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Long timeout) {
-        this.timeout = timeout;
-    }
-
-    public SecurityToken getCurrentSecurityToken() {
-        return currentSecurityToken;
-    }
-
-    public void setCurrentSecurityToken(SecurityToken currentSecurityToken) {
-        this.currentSecurityToken = currentSecurityToken;
-    }
-
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public List<SecurityToken> getTokenInfoList() {
-        return tokenInfoList;
-    }
-
-    public void setTokenInfoList(List<SecurityToken> tokenInfoList) {
-        this.tokenInfoList = tokenInfoList;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 }

@@ -1,6 +1,7 @@
 package ext.library.tool.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -12,6 +13,7 @@ import java.util.Enumeration;
 /**
  * INet 相关工具
  */
+
 public final class INetUtil {
 
     private static final String LOCAL_HOST = "127.0.0.1";
@@ -165,7 +167,7 @@ public final class INetUtil {
         try {
             return InetAddress.getByName(ip);
         } catch (UnknownHostException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 

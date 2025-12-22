@@ -1,7 +1,5 @@
 package ext.library.ratelimiter.annotation;
 
-import ext.library.tool.constant.Symbol;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,7 +17,7 @@ public @interface RateLimit {
     /**
      * 限流 key，支持使用 Spring EL 表达式来动态获取方法上的参数值 格式类似于 #code.id #{#code}
      */
-    String key() default Symbol.EMPTY;
+    String key() default "";
 
     /**
      * 限定阈值

@@ -1,8 +1,7 @@
 package ext.library.web.validation;
 
+import ext.library.tool.core.Logs;
 import org.hibernate.validator.HibernateValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -27,7 +26,6 @@ import java.util.Properties;
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
 public class ValidationAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
@@ -61,7 +59,7 @@ public class ValidationAutoConfig {
             factoryBean.setValidationProperties(properties);
             // 加载配置
             factoryBean.afterPropertiesSet();
-            log.info("[🛂] 校验模块载入成功");
+            Logs.info("🛂", "载入模块：校验扩展");
             return factoryBean.getValidator();
         }
     }

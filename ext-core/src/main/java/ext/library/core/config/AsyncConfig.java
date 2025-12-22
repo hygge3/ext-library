@@ -1,6 +1,7 @@
 package ext.library.core.config;
 
 import ext.library.core.util.SpringUtil;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Exceptions;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
@@ -43,7 +44,7 @@ public class AsyncConfig implements AsyncConfigurer {
             if (ObjectUtil.isNotEmpty(objects)) {
                 str = str.concat(", 参数值:[").concat(Arrays.toString(objects)).concat("]");
             }
-            throw new ExtException(str);
+            throw new ExtException(EmojiSymbol.CORE, str);
         };
     }
 

@@ -1,7 +1,6 @@
 package ext.library.tool.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
 import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 
@@ -23,7 +22,6 @@ public final class VirtualThreadPools {
     private static final String DEFAULT_NAME = "虚拟线程任务";
     /** 单例模式的线程池实例，每个任务分配一个虚拟线程执行 */
     private static final ExecutorService INSTANCE = Executors.newVirtualThreadPerTaskExecutor();
-    private static final Logger log = LoggerFactory.getLogger(VirtualThreadPools.class);
 
     /**
      * 线程池是否运行中
@@ -63,7 +61,7 @@ public final class VirtualThreadPools {
             try {
                 runnable.run();
             } catch (Throwable throwable) {
-                log.error("[🛠️] 线程池内线程异常！", throwable);
+                Logs.info(EmojiSymbol.TOOL, "线程池内线程异常！", throwable);
             } finally {
                 thread.setName(oldName);
                 MDC.clear();
@@ -126,7 +124,7 @@ public final class VirtualThreadPools {
             try {
                 return callable.call();
             } catch (Exception e) {
-                log.error("[🛠️] 线程池内线程异常！", e);
+                Logs.info(EmojiSymbol.TOOL, "线程池内线程异常", e);
                 throw e;
             } finally {
                 thread.setName(oldName);

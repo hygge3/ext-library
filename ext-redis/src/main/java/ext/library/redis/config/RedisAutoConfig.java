@@ -1,12 +1,12 @@
 package ext.library.redis.config;
 
-import ext.library.redis.config.properties.RedisProperties;
 import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.IRedisPrefixConverter;
+import ext.library.redis.properties.RedisProperties;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,7 +26,6 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfiguration(before = DataRedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnBean(IRedisPrefixConverter.class)
@@ -35,7 +34,7 @@ public class RedisAutoConfig {
         StringRedisTemplate template = new StringRedisTemplate();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(redisPrefixConverter));
-        log.info("[♦️] Redis 模块载入成功");
+        Logs.info(EmojiSymbol.REDIS, "载入模块:Redis");
         return template;
     }
 

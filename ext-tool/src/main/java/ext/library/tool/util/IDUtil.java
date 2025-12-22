@@ -1,7 +1,6 @@
 package ext.library.tool.util;
 
 import ext.library.tool.constant.Holder;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.domain.MongoObjectId;
 import org.springframework.util.Assert;
 
@@ -17,7 +16,7 @@ public final class IDUtil {
      * @return {@code String }
      */
     public static String getUUID() {
-        return UUID.randomUUID().toString().replaceAll(Symbol.DASHED, Symbol.EMPTY);
+        return UUID.randomUUID().toString().replaceAll(",", "");
     }
 
     /**
@@ -48,7 +47,7 @@ public final class IDUtil {
         ByteBuffer buf = ByteBuffer.wrap(value);
         long high = buf.getLong();
         long low = buf.getLong();
-        return new UUID(high, low).toString().replaceAll(Symbol.DASHED, Symbol.EMPTY);
+        return new UUID(high, low).toString().replaceAll("-", "");
     }
 
     /**
@@ -80,7 +79,7 @@ public final class IDUtil {
      */
     public static String random(int count) {
         if (count == 0) {
-            return Symbol.EMPTY;
+            return "";
         }
         Assert.isTrue(count > 0, StringUtil.format("请求的随机字符串长度 {} 小于 0", count));
         final byte[] buffer = new byte[5];

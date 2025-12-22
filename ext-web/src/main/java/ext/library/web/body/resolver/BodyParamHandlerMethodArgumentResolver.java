@@ -1,6 +1,7 @@
 package ext.library.web.body.resolver;
 
 import ext.library.json.util.JsonNodeUtil;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
@@ -44,7 +45,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
         String contentType = Objects.requireNonNull(request).getContentType();
 
         if (ObjectUtil.isNotEqual(contentType, MimeTypeUtils.APPLICATION_JSON_VALUE)) {
-            throw new ExtException("[🌐] 解析参数异常，ContentType 需为 application/json");
+            throw new ExtException(EmojiSymbol.WEB, "解析参数异常，ContentType 需为 application/json");
         }
 
         // 解析字段

@@ -1,10 +1,10 @@
 package ext.library.sse.controller;
 
 import ext.library.security.util.SecurityUtil;
-import ext.library.sse.config.properties.SseProperties;
+import ext.library.sse.properties.SseProperties;
 import ext.library.sse.domain.SseMessage;
 import ext.library.sse.manager.SseEmitterManager;
-import ext.library.web.annotation.RestWrapper;
+import ext.library.web.annotation.IgnoreRestWrapper;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ public class SseController implements DisposableBean {
     /**
      * 关闭 SSE 连接
      */
-    @RestWrapper
+    @IgnoreRestWrapper
     @GetMapping("${ext.sse.path}/close")
     public void close() {
         String tokenValue = SecurityUtil.getCurrentTokenValue();
@@ -56,7 +56,7 @@ public class SseController implements DisposableBean {
      * @param msg    要发送的消息内容
      */
     @GetMapping("${ext.sse.path}/send")
-    @RestWrapper
+    @IgnoreRestWrapper
     public void send(@RequestParam String userId, @RequestParam String msg) {
         SseMessage dto = new SseMessage();
         dto.setUserIds(List.of(userId));
@@ -70,7 +70,7 @@ public class SseController implements DisposableBean {
      * @param msg 要发送的消息内容
      */
     @GetMapping("${ext.sse.path}/sendAll")
-    @RestWrapper
+    @IgnoreRestWrapper
     public void send(@RequestParam String msg) {
         sseEmitterManager.publishAll(msg);
     }

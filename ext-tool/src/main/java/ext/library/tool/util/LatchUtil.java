@@ -1,5 +1,6 @@
 package ext.library.tool.util;
 
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -16,9 +17,11 @@ import java.util.concurrent.TimeUnit;
  * <p/>
  * 2.执行并等待：当并行任务都提交完毕后，只需调用一次 LatchUtils.waitFor()。该方法会立即触发所有已注册任务执行，并阻塞等待所有任务执行完成或超时。
  */
+
 public final class LatchUtil {
+
     // 使用 ThreadLocal 存储每个线程的任务信息列表，避免线程间的数据共享问题
-    private static final ThreadLocal<List<TaskInfo>> THREADLOCAL = ThreadLocal.withInitial(LinkedList::new);
+    private final ThreadLocal<List<TaskInfo>> THREADLOCAL = ThreadLocal.withInitial(LinkedList::new);
 
     /**
      * 提交一个任务到线程池执行
@@ -26,7 +29,7 @@ public final class LatchUtil {
      * @param executor 用于执行任务的执行器
      * @param runnable 要执行的任务
      */
-    public static void submitTask(Executor executor, Runnable runnable) {
+    public void submitTask(Executor executor, Runnable runnable) {
         THREADLOCAL.get().add(new TaskInfo(executor, runnable));
     }
 
@@ -35,7 +38,7 @@ public final class LatchUtil {
      *
      * @return 当前线程的任务信息列表
      */
-    private static List<TaskInfo> popTask() {
+    private List<TaskInfo> popTask() {
         List<TaskInfo> taskInfos = THREADLOCAL.get();
         THREADLOCAL.remove();
         return taskInfos;
@@ -49,7 +52,7 @@ public final class LatchUtil {
      *
      * @return 如果所有任务都完成则返回 true，否则返回 false
      */
-    public static boolean waitFor(long timeout, TimeUnit timeUnit) {
+    public boolean waitFor(long timeout, TimeUnit timeUnit) {
         List<TaskInfo> taskInfos = popTask();
         if (taskInfos.isEmpty()) {
             return true;

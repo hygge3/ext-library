@@ -1,7 +1,7 @@
 package ext.library.json.util;
 
 import ext.library.json.module.CustomModule;
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
@@ -24,10 +24,18 @@ import java.util.Objects;
 /**
  * JSON 工具类
  */
-public class JsonUtil {
-    protected static final JsonMapper mapper = JsonMapper.builder()
+public final class JsonUtil {
+    private static final JsonMapper MAPPER = JsonMapper.builder()
             // 注册自定义模块
             .addModule(new CustomModule()).build();
+
+    /**
+     * 获取 JsonMapper 实例
+     * @return JsonMapper
+     */
+    public static JsonMapper getMapper() {
+        return MAPPER;
+    }
 
     // region java 类型转换获取
 
@@ -39,7 +47,7 @@ public class JsonUtil {
      * @return MapType
      */
     private static JavaType getType(Class<?> clazz) {
-        return mapper.getTypeFactory().constructType(clazz);
+        return MAPPER.getTypeFactory().constructType(clazz);
     }
 
     /**
@@ -51,7 +59,7 @@ public class JsonUtil {
      * @return MapType
      */
     private static MapType getMapType(Class<?> keyClass, Class<?> valueClass) {
-        return mapper.getTypeFactory().constructMapType(Map.class, keyClass, valueClass);
+        return MAPPER.getTypeFactory().constructMapType(Map.class, keyClass, valueClass);
     }
 
     /**
@@ -62,7 +70,7 @@ public class JsonUtil {
      * @return CollectionLikeType
      */
     private static CollectionLikeType getListType(Class<?> elementClass) {
-        return mapper.getTypeFactory().constructCollectionLikeType(List.class, elementClass);
+        return MAPPER.getTypeFactory().constructCollectionLikeType(List.class, elementClass);
     }
 
     // endregion
@@ -78,7 +86,7 @@ public class JsonUtil {
      */
     public static String toJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
-            return Symbol.EMPTY;
+            return "";
         }
         if (obj instanceof String str) {
             return str;
@@ -87,9 +95,9 @@ public class JsonUtil {
             return bd.toPlainString();
         }
         try {
-            return mapper.writeValueAsString(obj);
+            return MAPPER.writeValueAsString(obj);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -100,9 +108,9 @@ public class JsonUtil {
         try {
             FilterProvider filters = new SimpleFilterProvider().addFilter(filterName,
                     SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude));
-            return mapper.writer(filters).writeValueAsString(obj);
+            return MAPPER.writer(filters).writeValueAsString(obj);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -115,7 +123,7 @@ public class JsonUtil {
      */
     public static String toPrettyJson(@Nullable Object obj) {
         if (Objects.isNull(obj)) {
-            return Symbol.EMPTY;
+            return "";
         }
         if (obj instanceof String str) {
             return str;
@@ -124,9 +132,9 @@ public class JsonUtil {
             return bd.toPlainString();
         }
         try {
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+            return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -136,9 +144,9 @@ public class JsonUtil {
 
     private static <T> T readValue(String json, TypeBase toValueType) {
         try {
-            return mapper.readValue(json, toValueType);
+            return MAPPER.readValue(json, toValueType);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -153,9 +161,9 @@ public class JsonUtil {
      */
     public static <T> T readObj(String json, Class<T> valueType) {
         try {
-            return mapper.readValue(json, valueType);
+            return MAPPER.readValue(json, valueType);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -172,7 +180,7 @@ public class JsonUtil {
         try {
             return readValue(json, getListType(elementClass));
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -215,7 +223,7 @@ public class JsonUtil {
         try {
             return readValue(json, getMapType(keyClass, valueClass));
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -224,9 +232,9 @@ public class JsonUtil {
      */
     public static <T> T toComplexObject(String json, TypeReference<T> typeReference) {
         try {
-            return mapper.readValue(json, typeReference);
+            return MAPPER.readValue(json, typeReference);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -244,7 +252,7 @@ public class JsonUtil {
      * @return 转换结果
      */
     public static <T> T convert(Object fromValue, Class<T> toValueType) {
-        return mapper.convertValue(fromValue, toValueType);
+        return MAPPER.convertValue(fromValue, toValueType);
     }
 
     // endregion
@@ -262,7 +270,7 @@ public class JsonUtil {
         if (!StringUtils.hasText(json)) {
             return false;
         }
-        try (var parser = mapper.createParser(json)) {
+        try (var parser = MAPPER.createParser(json)) {
             // 读取一个 token 来验证基本结构
             parser.nextToken();
             return true;

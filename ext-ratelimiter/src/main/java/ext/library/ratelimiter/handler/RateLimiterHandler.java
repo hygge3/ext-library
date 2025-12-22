@@ -2,6 +2,8 @@ package ext.library.ratelimiter.handler;
 
 import com.google.common.util.concurrent.RateLimiter;
 import ext.library.ratelimiter.annotation.RateLimit;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 
@@ -37,15 +39,9 @@ public class RateLimiterHandler implements IRateLimitHandler {
         // 获取令牌
         boolean acquire = rateLimiter.tryAcquire(interval);
         if (acquire) {
-            if (log.isDebugEnabled()) {
-                log.debug("[🚥] {}", rateLimiter);
-            }
             return true;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("[🚥] 限流规则已触发");
-        }
-
+        Logs.debug(EmojiSymbol.RATELIMITER, "限流规则已触发");
         return false;
     }
 

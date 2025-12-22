@@ -15,7 +15,8 @@ import java.util.List;
 /**
  * EL 工具类
  */
-public class SpelUtil {
+
+public final class SpelUtil {
 
     /**
      * SpEL 解析器

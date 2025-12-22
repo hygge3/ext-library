@@ -1,8 +1,5 @@
 package ext.library.tool.util;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import ext.library.tool.constant.Symbol;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Array;
@@ -13,7 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.StringJoiner;
+import java.util.stream.StreamSupport;
+
 
 public final class ObjectUtil {
 
@@ -118,11 +119,14 @@ public final class ObjectUtil {
         }
         // 如果对象是 Iterable 类型，将其转换为 List 后返回大小
         else if (obj instanceof Iterable<?> iter) {
-            return Lists.newArrayList(iter).size();
+            return Math.toIntExact(StreamSupport.stream(iter.spliterator(), false).count());
         }
         // 如果对象是 Iterator 类型，使用 Iterators 工具类的 size 方法返回大小
         else if (obj instanceof Iterator<?> iter) {
-            return Iterators.size(iter);
+            return Math.toIntExact(StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED),
+                    false
+            ).count());
         }
         // 如果对象是数组类型，使用 Array 类的 getLength 方法返回数组长度
         else if (obj.getClass().isArray()) {
@@ -250,13 +254,13 @@ public final class ObjectUtil {
      */
     public static String toString(Object @Nullable [] array) {
         if (array == null) {
-            return Symbol.NULL;
+            return "null";
         }
         int length = array.length;
         if (length == 0) {
-            return Symbol.LEFT_BRACKET + Symbol.RIGHT_BRACKET;
+            return "[]";
         }
-        StringJoiner stringJoiner = new StringJoiner(Symbol.COMMA, Symbol.LEFT_BRACKET, Symbol.RIGHT_BRACKET);
+        StringJoiner stringJoiner = new StringJoiner(",", "[", "]");
         for (Object o : array) {
             stringJoiner.add(String.valueOf(o));
         }

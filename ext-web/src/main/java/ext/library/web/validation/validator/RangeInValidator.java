@@ -1,6 +1,5 @@
 package ext.library.web.validation.validator;
 
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.CollUtil;
 import ext.library.web.validation.constraints.RangeIn;
 import org.springframework.util.StringUtils;
@@ -32,7 +31,7 @@ public class RangeInValidator implements ConstraintValidator<RangeIn, Object> {
         if (value == null) {
             return true;
         }
-        String[] ranges = StringUtils.delimitedListToStringArray(rangeIn.value(), Symbol.COMMA, " \t\n\n\f");
+        String[] ranges = StringUtils.delimitedListToStringArray(rangeIn.value(), ",", " \t\n\n\f");
         switch (value) {
             case CharSequence obj -> {
                 return CollUtil.contains(ranges, obj);

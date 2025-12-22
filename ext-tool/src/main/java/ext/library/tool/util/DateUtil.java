@@ -1,5 +1,6 @@
 package ext.library.tool.util;
 
+
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
@@ -16,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * 时间工具类
  */
-public final class DateUtil {
+
+public  class DateUtil {
 
     // region Common
     /** 默认时区 */

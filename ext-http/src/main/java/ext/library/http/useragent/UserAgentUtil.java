@@ -3,7 +3,7 @@ package ext.library.http.useragent;
 /**
  * User-Agent 工具类
  */
-public class UserAgentUtil {
+public final class UserAgentUtil {
 
     /**
      * 解析 User-Agent

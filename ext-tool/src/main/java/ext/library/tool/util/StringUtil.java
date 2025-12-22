@@ -1,17 +1,17 @@
 package ext.library.tool.util;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.html.HtmlEscapers;
-import ext.library.tool.constant.Symbol;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 public final class StringUtil {
 
@@ -284,6 +284,11 @@ public final class StringUtil {
     /**
      * 将字符串中特定模式的字符转换成 map 中对应的值
      * <p>
+     * 支持：
+     * <p>
+     * - ${key} 变量替换
+     * - \${key} 转义
+     * - ${key:default} 默认值
      * use: format("my name is ${name}, and i like ${like}!", {"name":"L.cm", "like":
      * "Java"})
      *
@@ -293,28 +298,37 @@ public final class StringUtil {
      * @return 转换后的字符串
      */
     public static String format(String message, Map<String, ?> params) {
-        // 参数为空
-        if (params.isEmpty()) {
-            return message;
-        }
-        // 使用正则表达式匹配占位符
-        Pattern pattern = Pattern.compile("\\$\\{([^}]*)}");
-        Matcher matcher = pattern.matcher(message);
-        StringBuilder sb = new StringBuilder((int) (message.length() * 1.5));
-        int lastEnd = 0;
-        while (matcher.find()) {
-            sb.append(message, lastEnd, matcher.start());
-            String key = matcher.group(1).trim();
-            Object value = params.get(key);
-            if (value == null) {
-                // 处理无效占位符，可以选择保留原样或者替换为空字符串
-                sb.append(matcher.group(0));
-            } else {
-                sb.append(value);
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+
+        while (i < message.length()) {
+            // 转义处理
+            if (message.startsWith("\\${", i)) {
+                sb.append("${");
+                i += 3;
+                continue;
             }
-            lastEnd = matcher.end();
+
+            // 变量替换
+            if (message.startsWith("${", i)) {
+                int end = message.indexOf('}', i);
+                if (end != -1) {
+                    String expr = message.substring(i + 2, end);
+                    String[] parts = expr.split(":", 2);
+                    String key = parts[0];
+                    String defaultValue = parts.length > 1 ? parts[1] : "";
+
+                    Object value = params.get(key);
+                    sb.append(value != null ? value :
+                            (defaultValue.isEmpty() ? "${" + expr + "}" : defaultValue));
+                    i = end + 1;
+                    continue;
+                }
+            }
+
+            sb.append(message.charAt(i));
+            i++;
         }
-        sb.append(message.substring(lastEnd));
         return sb.toString();
     }
 
@@ -323,9 +337,7 @@ public final class StringUtil {
      * <p>
      * use: format("my name is {}, and i like {}!", "L.cm", "Java")
      * <p>
-     * 注意：
-     * 在循环结束后检查是否还有未匹配的 {}，如果有则抛出 IllegalArgumentException
-     * 如果 arguments 数组长度小于 message 中的占位符数量，抛出 IllegalArgumentException
+     * 用 SLF4J/Log4j 的 MessageFormatter 实现
      *
      * @param message   需要转换的字符串
      * @param arguments 需要替换的变量
@@ -333,46 +345,7 @@ public final class StringUtil {
      * @return 转换后的字符串
      */
     public static String format(String message, Object... arguments) {
-        // 参数为空
-        if (arguments.length == 0) {
-            return message;
-        }
-
-        // 使用正则表达式匹配所有的 {}
-        Pattern pattern = Pattern.compile("\\{}");
-        Matcher matcher = pattern.matcher(message);
-
-        // 初始化 StringBuilder，预期转换后的字符串长度为原长度的 1.5 倍
-        StringBuilder sb = new StringBuilder((int) (message.length() * 1.5));
-
-        int index = 0;
-        int lastEnd = 0;
-
-        while (matcher.find()) {
-            if (index >= arguments.length) {
-                throw new IllegalArgumentException("消息中占位符的参数不足");
-            }
-            // 将当前光标到找到的 {} 之间的字符串添加到 sb 中
-            sb.append(message, lastEnd, matcher.start());
-            // 将 arguments 中对应的值添加到 sb 中
-            sb.append(arguments[index]);
-            // 更新光标位置
-            lastEnd = matcher.end();
-            // 更新 arguments 索引
-            index++;
-        }
-
-        // 将剩余的 message 部分添加到 sb 中
-        sb.append(message.substring(lastEnd));
-
-        String result = sb.toString();
-        // 检查是否有未匹配的 {}
-        if (result.contains(Symbol.LEFT_BRACES) || result.contains(Symbol.RIGHT_BRACES)) {
-            throw new IllegalArgumentException("消息中不匹配的占位符");
-        }
-
-        // 返回转换后的字符串
-        return result;
+        return MessageFormatter.arrayFormat(message, arguments).getMessage();
     }
 
     /**
@@ -383,7 +356,7 @@ public final class StringUtil {
      * @return {String}
      */
     public static String cleanText(String txt) {
-        return Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]").matcher(txt).replaceAll(Symbol.EMPTY);
+        return Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]").matcher(txt).replaceAll("");
     }
 
     /**
@@ -432,7 +405,7 @@ public final class StringUtil {
      * @return the delimited {@code String}
      */
     public static String join(Collection<?> coll) {
-        return Joiner.on(Symbol.C_COMMA).join(coll);
+        return join(coll, ",");
     }
 
     /**
@@ -444,7 +417,10 @@ public final class StringUtil {
      * @return the delimited {@code String}
      */
     public static String join(Collection<?> coll, String delim) {
-        return Joiner.on(delim).join(coll);
+        return coll.stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.joining(delim));
     }
 
     /**
@@ -455,7 +431,7 @@ public final class StringUtil {
      * @return the delimited {@code String}
      */
     public static String join(Object[] arr) {
-        return Joiner.on(Symbol.C_COMMA).join(arr);
+        return join(arr, ",");
     }
 
     /**
@@ -467,7 +443,9 @@ public final class StringUtil {
      * @return the delimited {@code String}
      */
     public static String join(Object[] arr, String delim) {
-        return Joiner.on(delim).join(arr);
+        return Arrays.stream(arr)
+                .map(String::valueOf)
+                .collect(Collectors.joining(delim));
     }
 
     /**
@@ -479,19 +457,7 @@ public final class StringUtil {
      * @return the delimited {@code String}
      */
     public static String join(String delim, Object... arr) {
-        return Joiner.on(delim).join(arr);
-    }
-
-    /**
-     * 分割 字符串
-     *
-     * @param str       字符串
-     * @param delimiter 分割符
-     *
-     * @return 字符串数组
-     */
-    public static String[] split(String str, String delimiter) {
-        return Splitter.on(delimiter).splitToStream(str).toArray(String[]::new);
+        return join(arr, delim);
     }
 
     /**
@@ -503,7 +469,9 @@ public final class StringUtil {
      * @return 字符串数组
      */
     public static String[] splitTrim(String str, String delimiter) {
-        return Splitter.on(delimiter).trimResults().splitToStream(str).toArray(String[]::new);
+        return Arrays.stream(str.split(delimiter))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty()).toArray(String[]::new);
     }
 
     /**
@@ -590,7 +558,21 @@ public final class StringUtil {
      * @return {String}
      */
     public static String escapeHtml(String html) {
-        return HtmlEscapers.htmlEscaper().escape(html);
+        Map<String, String> escapeMap = Map.of(
+                "&", "&amp;",
+                "<", "&lt;",
+                ">", "&gt;",
+                "\"", "&quot;",
+                "'", "&#39;"
+        );
+        if (isBlank(html)) return "";
+
+        StringBuilder sb = new StringBuilder(html.length());
+        for (char c : html.toCharArray()) {
+            String replacement = escapeMap.get(String.valueOf(c));
+            sb.append(replacement != null ? replacement : c);
+        }
+        return sb.toString();
     }
 
     /**
@@ -635,7 +617,7 @@ public final class StringUtil {
      *
      * @return boolean
      */
-    public boolean isAnyNotBlank(Collection<String> strs) {
+    public static boolean isAnyNotBlank(Collection<String> strs) {
         if (Array.getLength(strs) == 0) {
             return false;
         }

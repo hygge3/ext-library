@@ -30,10 +30,15 @@ public class OshiMonitor {
     /**
      * 获取系统信息
      */
-    SystemInfo systemInfo;
+    private SystemInfo systemInfo;
 
     public OshiMonitor(SystemInfo systemInfo) {
         this.systemInfo = systemInfo;
+    }
+
+    // Getter method
+    public SystemInfo getSystemInfo() {
+        return systemInfo;
     }
 
     /**
@@ -252,7 +257,4 @@ public class OshiMonitor {
         return new BigDecimal(str).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    public SystemInfo getSystemInfo() {
-        return systemInfo;
-    }
 }

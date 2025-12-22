@@ -4,14 +4,14 @@ import ext.library.cache.annotion.Cache;
 import ext.library.cache.enums.CacheType;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.DateUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 @Aspect
 public class CacheAspect {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CacheStrategy cacheStrategy;
 
@@ -56,7 +55,7 @@ public class CacheAspect {
             return cache;
         }
 
-        log.debug("[💾] 从数据库获取数据");
+        Logs.debug(EmojiSymbol.CACHE,"从数据库获取数据");
         Object object = point.proceed();
         if (Objects.nonNull(object)) {
             cacheStrategy.put(cacheName, key, object, DateUtil.convert(annotation.timeout(), TimeUnit.SECONDS));

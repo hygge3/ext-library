@@ -1,8 +1,7 @@
 package ext.library.cache.strategy;
 
-import ext.library.cache.config.properties.CacheProperties;
+import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
 
 import java.time.Duration;
@@ -64,7 +63,7 @@ public interface CacheStrategy {
      * @return {@code String }
      */
     default String genKey(String cacheName, String key) {
-        return StringUtil.join(Symbol.COLON, SpringUtil.getBean(CacheProperties.class).getKeyPrefix(), cacheName, key);
+        return StringUtil.join(":", SpringUtil.getBean(CacheProperties.class).getKeyPrefix(), cacheName, key);
     }
 
     /**

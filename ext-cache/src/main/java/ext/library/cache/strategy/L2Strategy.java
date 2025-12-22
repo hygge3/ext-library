@@ -1,8 +1,8 @@
 package ext.library.cache.strategy;
 
 import ext.library.json.util.JsonUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -15,21 +15,20 @@ import java.util.Objects;
 public class L2Strategy implements CacheStrategy {
     final CacheStrategy redisStrategy = new RedisStrategy();
     final CacheStrategy caffeineStrategy = new CaffeineStrategy();
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {
         // 读写，查询 Caffeine
         T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(caffeineCache)) {
-            log.debug("[💾] 从 Caffeine 中获取数据");
+            Logs.debug(EmojiSymbol.CACHE,"从 Caffeine 中获取数据");
             return clazz.cast(caffeineCache);
         }
 
         // 查询 Redis
         T redisCache = redisStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(redisCache)) {
-            log.debug("[💾] 从 Redis 获取数据");
+            Logs.debug(EmojiSymbol.CACHE,"从 Redis 获取数据");
             redisStrategy.put(cacheName, key, redisCache);
             return redisCache;
         }

@@ -2,10 +2,8 @@ package ext.library.web.handler;
 
 
 import ext.library.json.util.JsonUtil;
-import ext.library.tool.constant.Symbol;
-import ext.library.tool.util.ObjectUtil;
-import ext.library.web.annotation.RestWrapper;
-import ext.library.web.config.properties.WebMvcProperties;
+import ext.library.web.annotation.IgnoreRestWrapper;
+import ext.library.web.properties.WebMvcProperties;
 import ext.library.web.response.R;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
@@ -13,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
@@ -38,28 +35,14 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      */
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        // 需要包装的：指定包下；RestWrapper 注解
-
-        // 不需要包装
-        if (!returnType.hasMethodAnnotation(RestWrapper.class) && !returnType.getContainingClass().isAnnotationPresent(RestWrapper.class)) {
-            String restPackage = webMvcProperties.getRestPackage();
-            if (StringUtils.hasText(restPackage)) {
-                if (restPackage.equals(Symbol.ASTERISK)) {
-                    return true;
-                }
-                // 不含注解但是是指定包获取包名
-                String packageName = returnType.getParameterType().getPackage().getName();
-                return packageName.matches(restPackage);
-            } else {
-                return false;
-            }
-        }
-        RestWrapper wrapper = returnType.getMethodAnnotation(RestWrapper.class);
-        wrapper = ObjectUtil.defaultIfNull(wrapper, returnType.getContainingClass().getAnnotation(RestWrapper.class));
-        if (Objects.isNull(wrapper)) {
+        // 需要包装的：开启且没有 IgnoreRestWrapper 注解
+        if (!webMvcProperties.getRestWrapper()) {
             return false;
         }
-        return wrapper.wrap() && wrapper.value();
+        if (returnType.hasMethodAnnotation(IgnoreRestWrapper.class)) {
+            return false;
+        }
+        return !returnType.getContainingClass().isAnnotationPresent(IgnoreRestWrapper.class);
     }
 
     /**

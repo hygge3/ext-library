@@ -4,11 +4,10 @@ import ext.library.encrypt.annotation.ResponseEncrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
 import ext.library.json.util.JsonUtil;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -29,7 +28,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @ConditionalOnClass(HttpServletRequest.class)
 @EnableConfigurationProperties(CryptoProperties.class)
 public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CryptoProperties cryptoProperties;
 
@@ -54,8 +52,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
             Algorithm algo = cryptoProperties.getAlgo();
             return algo.getCryptoStrategy().encrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
-            log.error("[🔒] 响应加密异常", e);
-            throw new ExtException(e);
+            throw new ExtException(EmojiSymbol.INTERFACE_CRYPTO, e);
         }
     }
 

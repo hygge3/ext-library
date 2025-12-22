@@ -1,8 +1,8 @@
 package ext.library.tool.util.dict;
 
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.ReflectionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import java.util.function.Function;
  * 字典工具
  */
 public final class DictUtil {
-    private static final Logger log = LoggerFactory.getLogger(DictUtil.class);
 
     /**
      * 获取词典列表
@@ -40,7 +39,7 @@ public final class DictUtil {
                     String prop = StringUtils.uncapitalize(ReflectionUtil.getLambdaFunctionName(lambda));
                     item.put(prop, lambda.apply(enumItem));
                 } catch (Exception exception) {
-                    log.error(exception.getMessage(), exception);
+                    Logs.error(EmojiSymbol.TOOL, exception, exception.getMessage());
                 }
             });
             mapList.add(item);

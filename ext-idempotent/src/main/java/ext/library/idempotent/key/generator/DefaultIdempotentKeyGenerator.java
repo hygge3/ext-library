@@ -1,17 +1,16 @@
 package ext.library.idempotent.key.generator;
 
-import jakarta.annotation.Nonnull;
-
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.idempotent.annotation.Idempotent;
-import ext.library.tool.constant.Symbol;
-import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.annotation.Nonnull;
+import java.lang.reflect.Method;
 
 /**
  * 默认幂等 key 生成器
@@ -29,7 +28,7 @@ public class DefaultIdempotentKeyGenerator implements IdempotentKeyGenerator {
     public String generate(JoinPoint joinPoint,  @Nonnull Idempotent idempotentAnnotation) {
         String uniqueExpression = idempotentAnnotation.uniqueExpression();
         // 如果没有填写表达式，直接返回 prefix
-        if (Symbol.EMPTY.equals(uniqueExpression)) {
+        if ("".equals(uniqueExpression)) {
             return idempotentAnnotation.prefix();
         }
 
@@ -49,7 +48,7 @@ public class DefaultIdempotentKeyGenerator implements IdempotentKeyGenerator {
         // 解析出唯一标识
         String uniqueStr = SpelUtil.parseValueToString(spelContext, uniqueExpression);
         // 和 prefix 拼接获得完整的 key
-        return idempotentAnnotation.prefix() + Symbol.COLON + uniqueStr;
+        return idempotentAnnotation.prefix() + ":" + uniqueStr;
     }
 
 }

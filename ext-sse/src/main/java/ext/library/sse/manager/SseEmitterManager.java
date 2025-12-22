@@ -3,10 +3,10 @@ package ext.library.sse.manager;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
 import ext.library.sse.domain.SseMessage;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.core.VirtualThreadPools;
 import ext.library.tool.util.ObjectUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import jakarta.annotation.Nonnull;
@@ -26,7 +26,6 @@ public class SseEmitterManager {
      */
     private final static String SSE_TOPIC = "ext:sse";
     private final static Map<String, Map<String, SseEmitter>> USER_TOKEN_EMITTERS = new ConcurrentHashMap<>();
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 建立与指定用户的 SSE 连接
@@ -141,7 +140,7 @@ public class SseEmitterManager {
             SseMessage broadcastMessage = new SseMessage();
             broadcastMessage.setMessage(sseMessage.getMessage());
             broadcastMessage.setUserIds(unsentUserIds);
-            log.info("[📨] SSE 发送主题订阅消息，topic:{},session keys:{},message:{}", SSE_TOPIC, unsentUserIds, sseMessage.getMessage());
+            Logs.info(EmojiSymbol.SSE,"SSE 发送主题订阅消息，topic:{},session keys:{},message:{}", SSE_TOPIC, unsentUserIds, sseMessage.getMessage());
             RedisUtil.publish(SSE_TOPIC, JsonUtil.toJson(broadcastMessage));
         }
     }
@@ -154,7 +153,7 @@ public class SseEmitterManager {
     public void publishAll(String message) {
         SseMessage broadcastMessage = new SseMessage();
         broadcastMessage.setMessage(message);
-        log.info("[📨] SSE 发送主题订阅消息，topic:{},message:{}", SSE_TOPIC, message);
+        Logs.info(EmojiSymbol.SSE,"SSE 发送主题订阅消息，topic:{},message:{}", SSE_TOPIC, message);
         RedisUtil.publish(SSE_TOPIC, JsonUtil.toJson(broadcastMessage));
     }
 

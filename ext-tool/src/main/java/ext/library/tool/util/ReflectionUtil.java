@@ -1,6 +1,5 @@
 package ext.library.tool.util;
 
-import ext.library.tool.constant.Symbol;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+
 
 public final class ReflectionUtil {
 
@@ -41,7 +41,7 @@ public final class ReflectionUtil {
      */
     public static String getPackageName(String classFullName) {
         int lastDot = classFullName.lastIndexOf('.');
-        return (lastDot < 0) ? Symbol.EMPTY : classFullName.substring(0, lastDot);
+        return (lastDot < 0) ? "" : classFullName.substring(0, lastDot);
     }
 
     // ---------------------- Method ----------------------
@@ -162,7 +162,7 @@ public final class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public static @Nullable Field findField(Class<?> clazz, String name) {
+    public @Nullable Field findField(Class<?> clazz, String name) {
         return findField(clazz, name, null);
     }
 
@@ -175,7 +175,7 @@ public final class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public static @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
+    public @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
         Assert.isTrue(name != null || type != null, "必须指定字段的名称或类型");
         Class<?> searchType = clazz;
         while (Object.class != searchType && searchType != null) {
@@ -260,15 +260,15 @@ public final class ReflectionUtil {
         Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
         replaceMethod.setAccessible(true);
         SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);
-        return serializedLambda.getImplMethodName().replace("get", Symbol.EMPTY);
+        return serializedLambda.getImplMethodName().replace("get", "");
     }
 
     /**
-     * check field is public static final
+     * check field is public final
      *
      * @param field field to check
      *
-     * @return true if field is public static final
+     * @return true if field is public final
      */
     public static boolean isPublicStaticFinal(Field field) {
         int modifiers = field.getModifiers();

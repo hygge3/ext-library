@@ -1,9 +1,8 @@
 package ext.library.crypto;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -22,8 +21,7 @@ import java.security.spec.X509EncodedKeySpec;
 /**
  * RSA 加解密
  */
-public class RSAUtil {
-    private static final Logger log = LoggerFactory.getLogger(RSAUtil.class);
+public final class RSAUtil {
 
     private static final String ALGO = "RSA";
     /**
@@ -50,8 +48,7 @@ public class RSAUtil {
         try {
             generator = KeyPairGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
-            log.error("[🔐] 生成 RSA 密钥对失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
         generator.initialize(1024);
         return generator.generateKeyPair();
@@ -72,8 +69,7 @@ public class RSAUtil {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            log.error("[🔐] RSA 公钥转换失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -91,8 +87,7 @@ public class RSAUtil {
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
-            log.error("[🔐] RSA 私钥转换失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -131,8 +126,7 @@ public class RSAUtil {
             // 加密后的字符串
             return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (Exception e) {
-            log.error("[🔐] RSA 加密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -170,8 +164,7 @@ public class RSAUtil {
             // 解密后的内容
             return out.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("[🔐] RSA 解密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -195,8 +188,7 @@ public class RSAUtil {
             signature.update(plainText.getBytes());
             return Base64Util.encodeUrlSafeToStr(signature.sign());
         } catch (Exception e) {
-            log.error("[🔐] RSA 加签失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -220,8 +212,7 @@ public class RSAUtil {
             signature.update(plainText.getBytes());
             return signature.verify(Base64Util.decodeUrlSafe(sign.getBytes()));
         } catch (Exception e) {
-            log.error("[🔐] RSA 验签失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 

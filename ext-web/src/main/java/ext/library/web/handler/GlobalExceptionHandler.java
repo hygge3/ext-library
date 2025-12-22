@@ -1,14 +1,13 @@
 package ext.library.web.handler;
 
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.exception.BizCode;
 import ext.library.tool.exception.BizException;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.annotation.Order;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
@@ -46,7 +46,6 @@ import java.util.Set;
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * 打印日志
@@ -56,7 +55,7 @@ public class GlobalExceptionHandler {
      * @param e       e
      */
     private static void printLog(HttpServletRequest request, String message, Exception e) {
-        log.error("[🌐] URI:{},{}", request.getRequestURI(), message, e);
+        Logs.error(EmojiSymbol.WEB, e, "URI:{},{}", request.getRequestURI(), message);
     }
 
     /**
@@ -68,7 +67,7 @@ public class GlobalExceptionHandler {
      */
     private static R<Void> handleBindingResult(BindingResult result) {
         FieldError error = result.getFieldError();
-        String message = Symbol.EMPTY;
+        String message = "";
         if (error != null) {
             message = StringUtil.format("{}:{}", error.getField(), error.getDefaultMessage());
         } else {
@@ -77,7 +76,7 @@ public class GlobalExceptionHandler {
                 message = globalError.getDefaultMessage();
             }
         }
-        return R.failed(HttpStatus.BAD_REQUEST.value(), message);
+        return R.failed(HttpStatus.BAD_REQUEST, message);
     }
 
     /**
@@ -91,15 +90,16 @@ public class GlobalExceptionHandler {
         ConstraintViolation<?> violation = violations.iterator().next();
         String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
         String message = StringUtil.format("{}:{}", path, violation.getMessage());
-        return R.failed(HttpStatus.BAD_REQUEST.value(), message);
+        return R.failed(HttpStatus.BAD_REQUEST, message);
     }
 
     /**
      * 业务异常
      */
     @ExceptionHandler(BizException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
-        log.error("[⚠️] URI:{},{}", request.getRequestURI(), e.getMessage());
+        printLog(request, "内部错误", e);
         return R.failed(e.getCode(), e.getMessage());
     }
 
@@ -107,6 +107,7 @@ public class GlobalExceptionHandler {
      * 应用内部异常
      */
     @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> otherException(RuntimeException e, HttpServletRequest request) {
         printLog(request, "未知错误", e);
         return R.failed(BizCode.WARN, BizCode.WARN.getMsg());
@@ -116,6 +117,7 @@ public class GlobalExceptionHandler {
      * 内部参数异常
      */
     @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         String message = StringUtil.format("参数异常:{}", e.getMessage());
         printLog(request, message, e);
@@ -126,32 +128,35 @@ public class GlobalExceptionHandler {
      * 请求方式不支持
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public R<Void> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e,
                                                           HttpServletRequest request) {
         String message = StringUtil.format("({}) 未支持", e.getMethod());
         printLog(request, message, e);
-        return R.failed(HttpStatus.METHOD_NOT_ALLOWED.value(), message);
+        return R.failed(HttpStatus.METHOD_NOT_ALLOWED, message);
     }
 
     /**
      * 请求路径中缺少必需的路径变量
      */
     @ExceptionHandler(MissingPathVariableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> missingPathVariableException(MissingPathVariableException e, HttpServletRequest request) {
         String message = StringUtil.format("缺少 path 变量：{}", e.getVariableName());
         printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), message);
+        return R.failed(HttpStatus.BAD_REQUEST, message);
     }
 
     /**
      * 请求参数类型不匹配
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
                                                        HttpServletRequest request) {
         String message = StringUtil.format("方法参数类型不匹配：{}", e.getMessage());
         printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), StringUtil.format("方法参数类型不匹配，参数 [{}] 要求类型为：'{}'，但输入值为：'{}'",
+        return R.failed(HttpStatus.BAD_REQUEST, StringUtil.format("方法参数类型不匹配，参数 [{}] 要求类型为：'{}'，但输入值为：'{}'",
                 e.getName(), e.getRequiredType().getName(), e.getValue()));
     }
 
@@ -163,10 +168,11 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> missingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
         String message = StringUtil.format("缺少请求参数：{}", e.getParameterName());
         printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), message);
+        return R.failed(HttpStatus.BAD_REQUEST, message);
     }
 
     /**
@@ -177,17 +183,18 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handlerMethodValidationException(HandlerMethodValidationException e,
                                                     HttpServletRequest request) {
         String param = StreamUtil.join(e.getParameterValidationResults(), (allValidationResult) -> {
             String parameterName = allValidationResult.getMethodParameter().getParameterName();
             String defaultMessage = allValidationResult.getResolvableErrors().getFirst().getDefaultMessage();
-            return parameterName + Symbol.COLON + defaultMessage;
-        }, Symbol.SEMICOLON);
+            return parameterName + ":" + defaultMessage;
+        }, ";");
 
         String message = StringUtil.format("参数校验未通过：{}", param);
         printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), message);
+        return R.failed(HttpStatus.BAD_REQUEST, message);
     }
 
     /**
@@ -199,9 +206,10 @@ public class GlobalExceptionHandler {
      * @return {@code R<Void> }
      */
     @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public R<Void> noHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.NOT_FOUND.value(), e.getMessage());
+        return R.failed(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     /**
@@ -213,9 +221,10 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Object> httpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     /**
@@ -227,9 +236,10 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageConversionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Object> httpMessageConversionException(HttpMessageConversionException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     /**
@@ -241,10 +251,11 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(MethodArgumentConversionNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Object> methodArgumentConversionNotSupportedException(
             MethodArgumentConversionNotSupportedException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     /**
@@ -256,9 +267,10 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public R<Object> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.METHOD_NOT_ALLOWED.value(), e.getMessage());
+        return R.failed(HttpStatus.METHOD_NOT_ALLOWED, e.getMessage());
     }
 
     /**
@@ -270,10 +282,11 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public R<Object> httpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        String message = e.getMessage() + Symbol.EMPTY + StringUtil.join(e.getSupportedMediaTypes());
-        return R.failed(HttpStatus.METHOD_NOT_ALLOWED.value(), message);
+        String message = e.getMessage() + "，支持的媒体类型：" + StringUtil.join(e.getSupportedMediaTypes());
+        return R.failed(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
     }
 
     /**
@@ -285,6 +298,7 @@ public class GlobalExceptionHandler {
      * @return {@code R<Void> }
      */
     @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> bindException(BindException e, HttpServletRequest request) {
         // String message = StreamUtils.join(e.getAllErrors(),
         // DefaultMessageSourceResolvable::getDefaultMessage, ", ");
@@ -301,6 +315,7 @@ public class GlobalExceptionHandler {
      * @return {@code R<Void> }
      */
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> constraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
         // String message = StreamUtils.join(e.getConstraintViolations(),
@@ -317,6 +332,7 @@ public class GlobalExceptionHandler {
      * @return {@code R<Void> }
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> methodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
         return handleBindingResult(e.getBindingResult());
@@ -331,11 +347,12 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
     public R<Void> maxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
         long maxUploadSize = e.getMaxUploadSize();
         String message = StringUtil.format("超出最大上传大小，最大：{}", maxUploadSize);
         printLog(request, message, e);
-        return R.failed(HttpStatus.CONTENT_TOO_LARGE.value(), message);
+        return R.failed(HttpStatus.CONTENT_TOO_LARGE, message);
     }
 
 }

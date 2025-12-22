@@ -2,7 +2,7 @@
 
 本文件为 Claude Code (claude.ai/code) 在处理此代码库时提供指导。
 
-## 概述
+## 项目愿景
 
 **ext-library** 是一个全面的 Spring Boot 扩展库（当前版本 4.0.0），基于 **Spring Boot 4.0.0** 和 **JDK 25** 构建。它提供模块化组件来解决常见的开发挑战，遵循自动配置和注解驱动的设计模式。
 
@@ -13,11 +13,120 @@
 - **构建工具**: Maven（多模块）
 - **主要依赖**: Google Guava、MapStruct Plus、MyBatis-Flex、SpringDoc 3.0.0
 
-## 架构与模块结构
+## 模块结构图
+
+```mermaid
+graph TD
+    A["(根) ext-library"] --> B["核心模块"];
+    A --> C["功能模块"];
+    A --> D["增强模块"];
+
+    B --> B1["ext-tool<br/>基础工具类"];
+    B --> B2["ext-core<br/>Spring 基础"];
+    B --> B3["ext-redis<br/>Redis 集成"];
+    B --> B4["ext-json<br/>JSON 处理"];
+
+    C --> C1["ext-cache<br/>缓存解决方案"];
+    C --> C2["ext-crypto<br/>加密操作"];
+    C --> C3["ext-captcha<br/>验证码生成"];
+    C --> C4["ext-http<br/>HTTP 客户端"];
+    C --> C5["ext-idempotent<br/>幂等性支持"];
+    C --> C6["ext-interface-crypto<br/>接口加密"];
+    C --> C7["ext-qrcode<br/>二维码生成"];
+    C --> C8["ext-trans<br/>分布式事务"];
+
+    D --> D1["ext-web<br/>Web 层工具"];
+    D --> D2["ext-websocket<br/>WebSocket 支持"];
+    D --> D3["ext-sse<br/>Server-Sent Events"];
+    D --> D4["ext-security<br/>安全组件"];
+    D --> D5["ext-ratelimiter<br/>限流"];
+    D --> D6["ext-openapi<br/>API 文档"];
+    D --> D7["ext-mail<br/>邮件发送"];
+    D --> D8["ext-monitor<br/>系统监控"];
+    D --> D9["ext-mybatis<br/>MyBatis 集成"];
+    D --> D10["ext-desensitize<br/>数据脱敏"];
+    D --> D11["ext-ai<br/>AI 集成(开发中)"];
+
+    click B1 "./ext-tool/CLAUDE.md" "查看 ext-tool 模块文档"
+    click B2 "./ext-core/CLAUDE.md" "查看 ext-core 模块文档"
+    click B3 "./ext-redis/CLAUDE.md" "查看 ext-redis 模块文档"
+    click B4 "./ext-json/CLAUDE.md" "查看 ext-json 模块文档"
+    click C1 "./ext-cache/CLAUDE.md" "查看 ext-cache 模块文档"
+    click C2 "./ext-crypto/CLAUDE.md" "查看 ext-crypto 模块文档"
+    click C3 "./ext-captcha/CLAUDE.md" "查看 ext-captcha 模块文档"
+    click C4 "./ext-http/CLAUDE.md" "查看 ext-http 模块文档"
+    click C5 "./ext-idempotent/CLAUDE.md" "查看 ext-idempotent 模块文档"
+    click C6 "./ext-interface-crypto/CLAUDE.md" "查看 ext-interface-crypto 模块文档"
+    click C7 "./ext-qrcode/CLAUDE.md" "查看 ext-qrcode 模块文档"
+    click C8 "./ext-trans/CLAUDE.md" "查看 ext-trans 模块文档"
+    click D1 "./ext-web/CLAUDE.md" "查看 ext-web 模块文档"
+    click D2 "./ext-websocket/CLAUDE.md" "查看 ext-websocket 模块文档"
+    click D3 "./ext-sse/CLAUDE.md" "查看 ext-sse 模块文档"
+    click D4 "./ext-security/CLAUDE.md" "查看 ext-security 模块文档"
+    click D5 "./ext-ratelimiter/CLAUDE.md" "查看 ext-ratelimiter 模块文档"
+    click D6 "./ext-openapi/CLAUDE.md" "查看 ext-openapi 模块文档"
+    click D7 "./ext-mail/CLAUDE.md" "查看 ext-mail 模块文档"
+    click D8 "./ext-monitor/CLAUDE.md" "查看 ext-monitor 模块文档"
+    click D9 "./ext-mybatis/CLAUDE.md" "查看 ext-mybatis 模块文档"
+    click D10 "./ext-desensitize/CLAUDE.md" "查看 ext-desensitize 模块文档"
+```
+
+## 模块索引
+
+| 模块 | 类型 | 职责 | 状态 | 测试 |
+|------|------|------|------|------|
+| ext-tool | 基础 | 通用工具类，基于 Guava | ✅ 稳定 | ✅ 6个测试 |
+| ext-core | 核心 | Spring 基础集成 | ✅ 稳定 | ❌ 待补充 |
+| ext-redis | 核心 | Redis 集成和工具 | ✅ 稳定 | ❌ 待补充 |
+| ext-json | 核心 | JSON 处理增强 | ✅ 稳定 | ❌ 待补充 |
+| ext-cache | 功能 | 注解驱动缓存解决方案 | ✅ 稳定 | ❌ 待补充 |
+| ext-crypto | 功能 | 加密算法工具类 | ✅ 稳定 | ✅ 6个测试 |
+| ext-captcha | 功能 | 验证码生成服务 | ✅ 稳定 | ❌ 待补充 |
+| ext-http | 功能 | HTTP 客户端增强 | ✅ 稳定 | ❌ 待补充 |
+| ext-idempotent | 功能 | 请求幂等性支持 | ✅ 稳定 | ❌ 待补充 |
+| ext-interface-crypto | 功能 | 接口请求/响应加密 | ✅ 稳定 | ❌ 待补充 |
+| ext-web | 增强 | Web 层工具和增强 | ✅ 稳定 | ❌ 待补充 |
+| ext-websocket | 增强 | WebSocket 支持 | ✅ 稳定 | ❌ 待补充 |
+| ext-sse | 增强 | Server-Sent Events | ✅ 稳定 | ❌ 待补充 |
+| ext-security | 增强 | 安全认证和授权 | ✅ 稳定 | ❌ 待补充 |
+| ext-ratelimiter | 增强 | API 限流实现 | ✅ 稳定 | ❌ 待补充 |
+| ext-openapi | 增强 | OpenAPI 文档生成 | ✅ 稳定 | ❌ 待补充 |
+| ext-mail | 增强 | 邮件发送服务 | ✅ 稳定 | ❌ 待补充 |
+| ext-monitor | 增强 | 系统监控指标 | ✅ 稳定 | ❌ 待补充 |
+| ext-mybatis | 增强 | MyBatis-Flex 集成 | ✅ 稳定 | ❌ 待补充 |
+| ext-desensitize | 增强 | 敏感数据脱敏 | ✅ 稳定 | ❌ 待补充 |
+| ext-qrcode | 功能 | 二维码生成 | ✅ 稳定 | ❌ 待补充 |
+| ext-trans | 功能 | 数据翻译和转换 | ✅ 稳定 | ❌ 待补充 |
+| ext-ai | 开发 | AI 模型集成 | 🚧 开发中 | ❌ 待补充 |
+
+## 架构总览
 
 代码库采用 **Maven 多模块架构**，每个 `ext-*` 模块都可以独立部署，专注于特定领域：
 
-### 核心模块（基础）
+### 核心设计模式
+
+1. **自动配置模式**
+   - 使用 `@AutoConfiguration` 注解
+   - 通过 `@EnableConfigurationProperties` 绑定配置
+   - 基于 `@ConditionalOnProperty` 控制模块启用
+
+2. **AOP 驱动的注解**
+   - `@Cache` - 方法级缓存
+   - `@Idempotent` - 幂等性强制
+   - `@RequestDecrypt/@ResponseEncrypt` - 加密处理
+   - `@RateLimit` - API 限流
+   - `@Sensitive` - 数据脱敏
+
+3. **策略模式**
+   - 缓存策略（Caffeine、Redis、L2）
+   - 加密策略（AES、RSA、SM2、SM4、DES）
+   - 验证码绘制策略
+
+4. **SpEL 集成**
+   - 动态键生成和表达式解析
+   - 支持方法参数、返回值、bean 属性访问
+
+### 核心模块详解
 
 #### `ext-tool` - 基础工具类
 - **包路径**: `ext.library.tool.*`
@@ -40,138 +149,9 @@
   - 基于 Spring 的 `ThreadPoolTaskExecutor` 和 `ScheduledExecutorService`
   - 集成 `MapStruct`（通过 `BeanUtil`）和 CGLIB `BeanCopier` 优化 bean 操作
 
-### 功能模块（特性）
+## 运行与开发
 
-#### `ext-crypto` - 加密操作
-- **算法支持**: AES、RSA、SM2、SM4、DES、Digest
-- **工具类**: `PasswordEncoder`, `DigestUtil`
-- **结构**: 纯工具类，无自动配置
-- **测试覆盖**: 每种算法都有 `*-UtilTest.java` 测试类
-
-#### `ext-cache` - 缓存解决方案
-- **架构**: 注解驱动的 AOP 缓存（`@Around` 通知）
-- **核心类**:
-  - `@Cache` 注解: `cacheName`, `key`（SpEL）, `timeout`, `timeUnit`, `type`（FULL/PUT/DELETE）
-  - `CacheAspect`: 处理缓存操作的中心切面
-  - **策略模式**: `CacheStrategy` 接口及实现：
-    - `CaffeineStrategy`: 本地缓存
-    - `RedisStrategy`: 分布式缓存（依赖 `ext-redis`）
-    - `L2Strategy`: 混合缓存
-- **集成**: 支持 Spring Boot 自动配置，配合 `CacheProperties`
-
-#### `ext-captcha` - 验证码生成
-- **组件**:
-  - `CaptchaService`: 主服务接口
-  - `CaptchaDraw`: 不同验证码类型的基类
-  - `MathCaptchaDraw`, `RandomCaptchaDraw`: 具体实现
-  - `BackgroundDraw`, `InterferenceDraw`: 视觉增强
-- **特性**: 数学表达式、随机字符、可自定义字体/背景
-- **缓存集成**: 需要 `ICaptchaCache` bean（支持内存/Redis）
-
-#### `ext-http` - HTTP 客户端增强
-- **核心**: `HttpUtil` - JDK 11+ `HttpClient` 包装器
-- **子包**: `useragent/` - 浏览器/OS 检测解析器
-  - `UserAgentUtil`, `UserAgentParser`
-  - 模型: `Browser`, `OS`, `Engine`, `Platform`
-
-#### `ext-interface-crypto` - 请求/响应加密
-- **基于 AOP**: 面向切面的加密/解密
-- **处理器**: `RequestDecryptHandler`, `ResponseEncryptHandler`
-- **策略**: `Base64Strategy`, `RSAStrategy`
-- **注解**: `@RequestDecrypt`, `@ResponseEncrypt`
-- **配置**: 需要在配置中提供 RSA 公钥/私钥
-
-#### `ext-idempotent` - 幂等性支持
-- **目的**: 防止重复请求
-- **组件**:
-  - `@Idempotent` 注解
-  - `IdempotentAspect`: AOP 强制执行
-  - `KeyGenerator`: `DefaultIdempotentKeyGenerator`（基于 SpEL）
-  - `KeyStore`: `RedisIdempotentKeyStore`, `InMemoryIdempotentKeyStore`
-
-#### `ext-monitor` - 系统监控
-- **依赖**: OSHI（操作系统和硬件信息）
-- **使用场景**: 运行时指标、系统资源监控
-
-#### `ext-mybatis` - MyBatis 集成
-- **依赖**: MyBatis-Flex
-- **配置**: 基于 YAML（参见 `application-ext-mybatis.yml`）
-
-#### `ext-json` - JSON 处理
-- **工具类**: `JsonUtils`, `JsonPathUtils`
-
-#### `ext-web` - Web 层工具
-- **配置**: `application-ext-web.yml`
-- 包含 Web 特定的自动配置
-
-#### `ext-websocket` - WebSocket 支持
-- 实时双向通信
-
-#### `ext-sse` - Server-Sent Events
-- 流式响应支持
-
-#### `ext-security` - 安全组件
-- 认证/授权工具
-
-#### `ext-ratelimiter` - 限流
-- API 限流实现
-
-#### `ext-qrcode` - 二维码生成
-- 使用 ZXing 库
-
-#### `ext-trans` - 分布式事务
-- 事务管理工具
-
-#### `ext-openapi` - API 文档
-- SpringDoc 集成
-
-#### `ext-mail` - 邮件发送
-- 邮件工具服务
-
-#### `ext-desensitize` - 数据脱敏
-- `@Sensitive` 注解用于数据脱敏
-- 不同脱敏规则的策略模式
-
-#### `ext-ai` - AI 集成（开发中）
-- **依赖**: Spring AI 1.1.0
-- **目标**: AI 模型集成、提示工程、向量搜索等
-- **状态**: 适配 Spring Boot 4.0.0 中
-
-## 核心设计模式与原则
-
-### 1. **自动配置模式**
-每个 Spring 集成模块都遵循：
-```java
-@AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-@ConditionalOnProperty(prefix = "module", name = "enabled", havingValue = "true")
-public class ModuleConfig {
-    @Bean
-    public SomeComponent someComponent(Properties props) { ... }
-}
-```
-
-### 2. **AOP 驱动的注解**
-- `@Cache` - 方法级缓存
-- `@Idempotent` - 幂等性强制
-- `@RequestDecrypt/@ResponseEncrypt` - 加密处理
-- 切面处理所有横切关注点
-
-### 3. **策略模式**
-广泛用于扩展性：
-- 缓存策略
-- 加密策略
-- 验证码绘制策略
-
-### 4. **SpEL（Spring 表达式语言）集成**
-- 动态键生成: `SpelUtil.parseValueToString()`
-- 支持方法参数、返回值、bean 属性
-
-### 5. **函数式编程**
-- `ext-tool.holder.function`: 函数式接口的异常包装
-- `Lazy`, `Once` 用于延迟/一次性初始化
-
-## 构建与开发命令
+### 构建命令
 
 ```bash
 # 安装依赖并构建所有模块
@@ -180,153 +160,104 @@ mvn clean install
 # 构建特定模块
 mvn clean install -pl ext-core -am
 
-# 运行测试（所有模块）
+# 运行测试
 mvn test
-
-# 运行特定模块的测试
-mvn test -pl ext-crypto
 
 # 生成源码 JAR
 mvn clean package source:jar
-
-# 查看依赖树
-mvn dependency:tree
 ```
 
-### 属性配置
-模块支持 YAML/Properties 配置：
+### 快速使用
+
+```xml
+<dependency>
+    <groupId>ext.library</groupId>
+    <artifactId>ext-core</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+### 配置示例
+
 ```yaml
-# 线程池
+# 线程池配置
 thread-pool:
   enabled: true
   core-pool-size: 8
   max-pool-size: 20
-  queue-capacity: 1000
 
-# 缓存
+# 缓存配置
 ext:
   cache:
     type: L2  # FULL, PARTIAL, PUT, DELETE
-
-# 验证码
-ext:
-  captcha:
-    captcha-type: RANDOM  # 或 MATH
-    cache-name: captcha:cache#5m
-
-# 接口加密
-ext:
-  crypto:
-    public-key: <RSA公钥>
-    secret-key: <RSA私钥>
 ```
 
-## 测试方法
-- **单元测试**: 使用 JUnit（位于 `src/test/java`）
-- **控制台输出**: 许多测试使用 `System.out.println` 进行验证
-- **测试分组**: 加密模块有完整的算法测试
+## 测试策略
 
-## 代码风格与约定
+- **单元测试**: 使用 JUnit 5，位于 `src/test/java`
+- **当前覆盖**: 12 个测试类（主要在 ext-tool 和 ext-crypto）
+- **需要补充**: 大部分模块缺少单元测试
+- **测试模式**: 控制台输出验证为主
 
-### 包结构
+## 编码规范
+
+### 包结构约定
 ```
 ext.<模块名>
-  ├── config           // 自动配置类
-  ├── config/properties // 配置属性类
-  ├── annotation       // 自定义注解
-  ├── aspect           // AOP 切面
-  ├── util             // 静态工具类
-  ├── core             // 核心业务逻辑
-  ├── strategy         // 策略实现
-  ├── enums            // 枚举
-  └── vo/dto           // 视图对象
+  ├── config              // 自动配置类
+  ├── config/properties   // 配置属性类
+  ├── annotation          // 自定义注解
+  ├── aspect              // AOP 切面
+  ├── util                // 静态工具类
+  ├── core                // 核心业务逻辑
+  ├── strategy            // 策略实现
+  ├── enums               // 枚举
+  └── vo/dto              // 视图对象
 ```
 
-### 常见实践
-1. **使用 Spring 工具类**: `BeanUtils`, `ObjectUtils`, `StringUtils`
-2. **空安全**: `@Nullable`, `@Nonnull`（来自 JSpecify）
-3. **异常处理**: `ext-tool.exception` 中的自定义异常
-   - `ExtException`: 通用运行时异常
-   - `BizException`: 带业务码的异常
-4. **装饰器模式**: 日志使用 `[🌊]` emoji 前缀
-5. **延迟初始化**: `Lazy.of()` 模式
+### 命名约定
+- 类名：使用清晰的功能性命名
+- 日志：使用 `[🌊]` emoji 前缀标识
+- 异常：继承自 `ExtException` 或 `BizException`
+- 常量：使用 `Holder` 类存储
 
-### 模块依赖关系（关键）
-```
-ext-parent (BOM)
-├── ext-tool (基础)
-├── ext-core (依赖 tool)
-├── ext-redis (依赖 core + json)
-├── ext-cache (依赖 core，可选 redis)
-├── ext-captcha (可选 redis 用于缓存)
-└── 其他模块根据需要依赖 core/tool
-```
+## AI 使用指引
 
-## 常见开发任务
+### 代码生成建议
+1. 遵循现有的包结构约定
+2. 使用 `@AutoConfiguration` 进行 Spring 集成
+3. 优先使用策略模式实现可扩展性
+4. 利用 SpEL 表达式支持动态配置
 
-### 添加新模块
-1. 创建 `ext-newmodule/pom.xml` 继承父 POM
-2. 在父 `pom.xml` 的 `<modules>` 中添加模块
-3. 遵循包命名: `ext.library.newmodule.*`
-4. 如需 Spring 集成，提供自动配置
-5. 添加 `README.md` 说明依赖配置
-
-### 实现缓存策略
-1. 实现 `CacheStrategy` 接口
-2. 如需添加策略枚举
-3. 在 `CacheConfig` 中用 `@ConditionalOnProperty` 配置
-4. 使用 `@Cache` 注解测试
-
-### 使用 BeanUtil 转换
-```java
-// Map Struct + Cglib 回退
-Target target = BeanUtil.convert(source, Target.class);
-
-// 列表转换
-List<Target> targets = BeanUtil.convert(sourceList, Target.class);
-
-// 配合 MapStruct Plus 的方法引用映射
-@Mapper
-public interface CustomMapper {
-    Target toTarget(Source source);
-}
-```
+### 常见任务
+- 添加新模块：参考现有模块结构
+- 实现缓存策略：实现 `CacheStrategy` 接口
+- 添加注解功能：使用 AOP 切面处理
+- 集成外部库：通过自动配置类管理 Bean
 
 ## 重要注意事项
 
 ### JDK 25 兼容性
 - 使用最新的 Java 特性
-- 定期检查已弃用的 API
-- OSHI 依赖需要 `oshi-core-java25`
+- OSHI 依赖使用 `oshi-core-java25`
+- 注意已弃用的 API
 
-### Spring Boot 3.x/4.x 迁移
-- 使用 Jakarta EE 命名空间（`jakarta.*`）
-- 使用 `@AutoConfiguration` 替代旧的 `@Configuration`
-- Spring Boot 4.0.0 适配中，部分 API 可能发生变化
+### Spring Boot 4.0.0 适配
+- 使用 Jakarta EE 命名空间
+- 部分 API 可能有变化，正在适配中
 
-### Maven 构建警告说明
-构建时可能出现以下警告：
-```
-WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
-WARNING: sun.misc.Unsafe::staticFieldBase has been called by ...
-```
-
-**原因**: Guice (Google Inject) 库内部使用了已弃用的 `sun.misc.Unsafe` API。这是一个第三方依赖问题，不影响项目功能。
-
-**解决方案**:
-- 忽略此警告（当前阶段可接受）
-- 等待 Guice 发布兼容 JDK 25+ 的版本
-- 或使用 `--add-opens` JVM 参数（不推荐）
-
-### Spring AI 适配状态
-- **依赖**: Spring AI 1.1.0
-- **目标**: 集成 AI 模型、提示工程、向量搜索
-- **状态**: 适配 Spring Boot 4.0.0 进行中
+### Maven 构建警告
+- Guice 库的 `sun.misc.Unsafe` 警告可忽略
+- 这是第三方依赖问题，不影响功能
 
 ### 模块独立性
 每个模块都可以独立使用 - 无需包含所有模块。根据需求选择。
 
-## 资源
-- **文档**: 每个模块都有 `README.md` 说明具体用法
-- **额外文档**: 查看 `docs/` 目录获取图片/参考
-- **父 POM**: 版本和依赖的唯一事实来源
+## 变更记录 (Changelog)
+
+### 2025-12-19
+- 🆕 新增：完整的模块架构文档
+- 🆕 新增：Mermaid 模块结构图
+- 🆕 新增：.claude/index.json 索引文件
+- 📊 统计：22 个模块，305 个 Java 文件
+- 📝 更新：版本信息至 4.0.0

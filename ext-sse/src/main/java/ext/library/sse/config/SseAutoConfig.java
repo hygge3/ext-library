@@ -1,11 +1,11 @@
 package ext.library.sse.config;
 
-import ext.library.sse.config.properties.SseProperties;
 import ext.library.sse.controller.SseController;
 import ext.library.sse.listener.SseTopicListener;
 import ext.library.sse.manager.SseEmitterManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.sse.properties.SseProperties;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(value = SseProperties.PREFIX + ".enabled", havingValue = "true")
 @EnableConfigurationProperties(SseProperties.class)
 public class SseAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     public SseEmitterManager sseEmitterManager() {
@@ -32,7 +31,7 @@ public class SseAutoConfig {
 
     @Bean
     public SseController sseController(SseEmitterManager sseEmitterManager) {
-        log.info("[📨] SSE 模块载入成功");
+        Logs.info(EmojiSymbol.SSE, "载入模块:SSE");
         return new SseController(sseEmitterManager);
     }
 

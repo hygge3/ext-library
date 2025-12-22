@@ -6,7 +6,7 @@ import java.util.Random;
 /**
  * 验证码工具类
  */
-public class CaptchaUtil {
+public final class CaptchaUtil {
 
     /**
      * 生成指定范围的随机数

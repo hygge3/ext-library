@@ -7,8 +7,9 @@ import ext.library.captcha.draw.InterferenceDraw;
 import ext.library.captcha.draw.RandomCaptchaDraw;
 import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.constant.Holder;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.exception.ExtException;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.imageio.ImageIO;
@@ -87,7 +88,7 @@ public class Captcha implements ICaptcha {
         try {
             return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
         } catch (FontFormatException | IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.CAPTCHA, "加载字体失败");
         }
     }
 
@@ -122,7 +123,7 @@ public class Captcha implements ICaptcha {
             ImageIO.write(image, "JPEG", os);
             return captcha;
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.CAPTCHA, "生成验证码失败");
         } finally {
             graphics.dispose();
         }

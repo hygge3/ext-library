@@ -1,8 +1,8 @@
 package ext.library.tool.util;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
@@ -27,9 +27,8 @@ import java.util.stream.Collectors;
 /**
  * Map 工具
  */
-public final class MapUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(MapUtil.class);
+public final class MapUtil {
 
     /**
      * 去掉 Map 中指定 key 的键值对，修改原 Map
@@ -60,7 +59,6 @@ public final class MapUtil {
      *
      * @return 是否满足条件
      */
-    @SafeVarargs
     public static <K> boolean isKeys(Map<K, ?> paramMap, K[] mustContainKeys, K... canContainKeys) {
         // 1. 必传参数校验
         for (K key : mustContainKeys) {
@@ -186,7 +184,7 @@ public final class MapUtil {
      */
     public static <K> void trimStringValues(Map<K, String> paramMap) {
         for (K key : paramMap.keySet()) {
-            String str = MapUtil.getObject(paramMap, key, String.class);
+            String str = getObject(paramMap, key, String.class);
             String value = str.trim();
             if (!Objects.equals(str, value)) {
                 paramMap.replace(key, value);
@@ -403,7 +401,7 @@ public final class MapUtil {
         try {
             beanInfo = Introspector.getBeanInfo(obj.getClass());
         } catch (IntrospectionException e) {
-            log.warn("[🛠️] 获取实体不正确", e);
+            LoggerFactory.getLogger(MapUtil.class).warn("[🛠️] 获取实体不正确", e);
             return null;
         }
         // 获取所有属性
@@ -419,7 +417,7 @@ public final class MapUtil {
                 // 执行 get 方法拿到值
                 return TypeCastUtil.cast(readMethod.invoke(obj), calzz);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                log.warn("[🛠️] 获取值时发生错误", e);
+                LoggerFactory.getLogger(MapUtil.class).warn("[🛠️] 获取值时发生错误", e);
                 return null;
             }
         }
@@ -441,7 +439,7 @@ public final class MapUtil {
             try {
                 map.put(field.getName(), field.get(bean));
             } catch (IllegalAccessException e) {
-                throw Exceptions.unchecked(e);
+                throw new ToolException(EmojiSymbol.TOOL, e);
             }
         }
         return map;
@@ -471,7 +469,7 @@ public final class MapUtil {
             return object;
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
                  IllegalAccessException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 

@@ -1,6 +1,6 @@
 package ext.library.web.validation.validator;
 
-import ext.library.core.util.ValidatorUtil;
+import ext.library.tool.util.ValidatorUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.validation.constraints.English;
 import org.jspecify.annotations.NonNull;

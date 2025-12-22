@@ -1,7 +1,5 @@
 package ext.library.tool.exception;
 
-import ext.library.tool.response.ResponseCode;
-
 /**
  * http 状态码
  */
@@ -10,100 +8,100 @@ public enum BizCode implements ResponseCode {
     // region 6xx Custom Error
 
     /** 自定义错误消息 */
-    WARN(600, "系统内部异常"),
+    WARN("600", "系统内部异常"),
 
     /** 工具异常，表示在执行工具操作过程中发生的异常情况 */
-    TOOL_EXCEPTION(610, "工具异常"),
+    TOOL_EXCEPTION("610", "工具异常"),
 
     /** 非法参数 */
-    ILLEGAL_ARGUMENT(601, "不符合预期或不合法的参数"),
+    ILLEGAL_ARGUMENT("601", "不符合预期或不合法的参数"),
 
     /**
      * 数据库执行异常
      */
-    DATABASE_ERROR(602, "数据库错误"),
+    DATABASE_ERROR("602", "数据库错误"),
 
     /**
      * 加/脱密异常
      */
-    SENSITIVE_ERROR(603, "Sensitive Error"),
+    SENSITIVE_ERROR("603", "加解密错误"),
 
     /**
      * 国际化异常
      */
-    I18N_ERROR(604, "Internationalization Error"),
+    I18N_ERROR("604", "国际化异常"),
 
     /**
      * 幂等异常
      */
-    IDEMPOTENT_ERROR(605, "Idempotent Error"),
+    IDEMPOTENT_ERROR("605", "幂等异常"),
 
     /**
      * IP 定位异常
      */
-    IP_LOCATION_ERROR(606, "IP Location Error"),
+    IP_LOCATION_ERROR("606", "IP 定位异常"),
 
     /**
      * json 解析错误
      */
-    JSON_PARSE_ERROR(607, "Json Serialization Error"),
+    JSON_PARSE_ERROR("607", "JSON 序列化 错误"),
 
     /**
      * 执行日志异常
      */
-    OPERATION_LOG_ERROR(608, "Operation Log Error"),
+    OPERATION_LOG_ERROR("608", "执行日志异常"),
 
     /**
      * 邮件发送异常
      */
-    MAIL_SEND_ERROR(609, "Mail Send Error"),
+    MAIL_SEND_ERROR("609", "邮件发送异常"),
 
     /**
      * Redis 操作异常
      */
-    REDIS_ERROR(610, "Redis Error"),
+    REDIS_ERROR("610", "Redis 操作异常"),
 
     /**
      * 通用的逻辑校验异常
      */
-    LOGIC_CHECK_ERROR(611, "Logic Check Error"),
+    LOGIC_CHECK_ERROR("611", "通用的逻辑校验异常"),
 
     /**
      * 恶意请求
      */
-    MALICIOUS_REQUEST(612, "Malicious Request"),
+    MALICIOUS_REQUEST("612", "恶意请求"),
 
     /**
      * 重复执行
      */
-    REPEATED_EXECUTE(613, "Repeated execute"),
+    REPEATED_EXECUTE("613", "重复执行"),
 
     /**
      * IP 定位失败
      */
-    IP_LOCATION_FAIL(614, "Ip location fail"),
+    IP_LOCATION_FAIL("614", "IP 定位失败"),
 
     /** 调用第三方服务失败 */
-    CELL_THIRD_ERROR(615, "Failed to call third-party service"),
+    CELL_THIRD_ERROR("615", "调用第三方服务失败"),
 
     /**
      * 接口未实现
      */
-    NOT_IMPLEMENTED(650, "Not Implemented");
+    NOT_IMPLEMENTED("650", "接口未实现");
 
     // endregion
 
-    private final int code;
+    private final String code;
 
     private final String msg;
 
-    BizCode(int code, String msg) {
+    BizCode(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
     @Override
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 

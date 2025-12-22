@@ -4,13 +4,12 @@ import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.ratelimiter.annotation.RateLimit;
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.ExpressionParser;
@@ -26,7 +25,6 @@ import java.lang.reflect.Method;
  */
 
 public interface IRateLimitHandler {
-    Logger log = LoggerFactory.getLogger(IRateLimitHandler.class);
     /**
      * 定义 spel 表达式解析器
      */
@@ -70,10 +68,8 @@ public interface IRateLimitHandler {
             key = SpelUtil.parseValueToString(point, targetMethod, args, key);
         }
         HttpServletRequest request = ServletUtil.getRequest();
-        String finalKey = String.join(Symbol.COLON, RATE_LIMIT_KEY.get(), request.getRequestURI(), ServletUtil.getIpAddr(request), key);
-        if (log.isDebugEnabled()) {
-            log.debug("[🚥] rate.limit.key:{}", finalKey);
-        }
+        String finalKey = String.join(":", RATE_LIMIT_KEY.get(), request.getRequestURI(), ServletUtil.getIpAddr(request), key);
+        Logs.debug(EmojiSymbol.RATELIMITER, "rate.limit.key:{}", finalKey);
         return finalKey;
     }
 }

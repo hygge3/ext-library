@@ -1,9 +1,7 @@
 package ext.library.tool.util;
 
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
-import ext.library.tool.constant.Symbol;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -17,9 +15,12 @@ import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collection;
 
+
 public final class IOUtil {
+
     /**
      * The default buffer size used when copying bytes.
      */
@@ -55,11 +56,7 @@ public final class IOUtil {
      * @throws NullPointerException if the input is null
      */
     public static String readToString(InputStream input) {
-        try (input) {
-            return new String(ByteStreams.toByteArray(input));
-        } catch (IOException e) {
-            throw Exceptions.unchecked(e);
-        }
+        return readToString(input, StandardCharsets.UTF_8);
     }
 
     /**
@@ -73,10 +70,10 @@ public final class IOUtil {
      * @throws NullPointerException if the input is null
      */
     public static String readToString(InputStream input, Charset charset) {
-        try (input) {
-            return new String(ByteStreams.toByteArray(input), charset);
+        try {
+            return new String(input.readAllBytes(), charset);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -88,10 +85,10 @@ public final class IOUtil {
      * @return the requested byte array
      */
     public static byte[] readToByteArray(InputStream input) {
-        try (input) {
-            return ByteStreams.toByteArray(input);
+        try {
+            return input.readAllBytes();
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -104,9 +101,9 @@ public final class IOUtil {
      */
     public static String readToString(File file) {
         try {
-            return new String(Files.toByteArray(file), StandardCharsets.UTF_8);
+            return Files.readString(file.toPath());
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -120,9 +117,9 @@ public final class IOUtil {
      */
     public static String readToString(File file, Charset encoding) {
         try {
-            return new String(Files.toByteArray(file), encoding);
+            return Files.readString(file.toPath(),encoding);
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -135,9 +132,9 @@ public final class IOUtil {
      */
     public static byte[] readToByteArray(File file) {
         try {
-            return Files.toByteArray(file);
+            return Files.readAllBytes(file.toPath());
         } catch (IOException e) {
-            throw Exceptions.unchecked(e);
+            throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
@@ -166,7 +163,7 @@ public final class IOUtil {
      */
     public static File toTempDir(String subDirFile) {
         String tempDirPath = System.getProperty("java.io.tmpdir");
-        if (subDirFile.startsWith(Symbol.SLASH)) {
+        if (subDirFile.startsWith("/")) {
             subDirFile = subDirFile.substring(1);
         }
         String fullPath = tempDirPath.concat(subDirFile);

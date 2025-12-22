@@ -1,10 +1,10 @@
 package ext.library.tool.holder.retry;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.core.Threads;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -15,7 +15,6 @@ import java.io.IOException;
  * @param sleepMillis 重试时间间隔
  */
 public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
-    private static final Logger log = LoggerFactory.getLogger(SimpleRetry.class);
 
     /**
      * The default limit to the number of attempts for a new policy.
@@ -49,7 +48,7 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
                 return retryCallback.call();
             } catch (Throwable e) {
                 retryCount = i + 1;
-                log.warn("[🛠️] 重试 {} 次", retryCount, e);
+                Logs.warn(EmojiSymbol.TOOL,"重试 {} 次", retryCount, e);
                 lastThrowable = e;
                 if (sleepMillis > 0 && retryCount < maxAttempts) {
                     Threads.sleep(sleepMillis);
@@ -59,7 +58,7 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
         if (lastThrowable == null) {
             lastThrowable = new IOException(StringUtil.format("重试 {} 次，仍然失败", maxAttempts));
         }
-        throw Exceptions.unchecked(lastThrowable);
+        throw new ExtException(EmojiSymbol.TOOL, lastThrowable);
     }
 
 }

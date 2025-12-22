@@ -1,8 +1,9 @@
 package ext.library.config;
 
-import ext.library.config.properties.OpenApiProperties;
 import ext.library.handler.OpenApiHandler;
-import ext.library.tool.constant.Symbol;
+import ext.library.properties.OpenApiProperties;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -10,8 +11,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -40,7 +39,6 @@ import java.util.regex.Pattern;
 @AutoConfigureBefore(SpringDocConfiguration.class)
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final OpenApiProperties openApiProperties;
 
@@ -92,7 +90,7 @@ public class OpenApiAutoConfig {
      */
     @Bean
     public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI, SecurityService securityParser, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils, Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers, Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers, Optional<JavadocProvider> javadocProvider) {
-        log.info("[📃] OpenAPI 模块载入成功");
+        Logs.info(EmojiSymbol.OPENAPI, "OpenAPI 模块载入");
         return new OpenApiHandler(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
     }
 
@@ -103,8 +101,8 @@ public class OpenApiAutoConfig {
     public OpenApiCustomizer openApiCustomizer() {
         String contextPath = serverProperties.getServlet().getContextPath();
         String finalContextPath;
-        if (ObjectUtil.isEmpty(contextPath) || Symbol.SLASH.equals(contextPath)) {
-            finalContextPath = Symbol.EMPTY;
+        if (ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath)) {
+            finalContextPath = "";
         } else {
             finalContextPath = contextPath;
         }

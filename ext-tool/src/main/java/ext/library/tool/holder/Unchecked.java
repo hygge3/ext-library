@@ -1,6 +1,7 @@
 package ext.library.tool.holder;
 
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.holder.function.CheckedCallable;
 import ext.library.tool.holder.function.CheckedComparator;
 import ext.library.tool.holder.function.CheckedConsumer;
@@ -41,7 +42,7 @@ public final class Unchecked {
             try {
                 return function.apply(t);
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -60,7 +61,7 @@ public final class Unchecked {
             try {
                 consumer.accept(t);
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -79,7 +80,7 @@ public final class Unchecked {
             try {
                 return supplier.get();
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -98,7 +99,7 @@ public final class Unchecked {
             try {
                 return predicate.test(t);
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -116,7 +117,7 @@ public final class Unchecked {
             try {
                 runnable.run();
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -135,7 +136,7 @@ public final class Unchecked {
             try {
                 return callable.call();
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }
@@ -154,7 +155,7 @@ public final class Unchecked {
             try {
                 return comparator.compare(o1, o2);
             } catch (Throwable e) {
-                throw Exceptions.unchecked(e);
+                throw new ExtException(EmojiSymbol.TOOL, e);
             }
         };
     }

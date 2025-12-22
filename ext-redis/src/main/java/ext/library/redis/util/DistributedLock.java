@@ -1,9 +1,8 @@
 package ext.library.redis.util;
 
-import ext.library.tool.constant.Symbol;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Threads;
-import ext.library.tool.exception.ToolException;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.INetUtil;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import java.util.concurrent.locks.Lock;
 /**
  * 基于 Redis 的分布式锁 (线程内可重入)
  */
-public class DistributedLock implements Lock {
+public final class DistributedLock implements Lock {
     /** 默认的锁超时时间 */
     private final static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30L);
     /** 锁 key 前缀 */
@@ -70,8 +69,8 @@ public class DistributedLock implements Lock {
         this.lockKey = LOCK_PREFIX + lockName;
         this.timeout = timeout;
         this.loopInterval = loopInterval;
-        this.hostThreadId = CURRENT_HOST + Symbol.COLON + Thread.currentThread().threadId();
-        this.lockValue = this.hostThreadId + Symbol.COLON + getNextSerial();
+        this.hostThreadId = CURRENT_HOST + ":" + Thread.currentThread().threadId();
+        this.lockValue = this.hostThreadId + ":" + getNextSerial();
     }
 
     /**
@@ -87,6 +86,7 @@ public class DistributedLock implements Lock {
     }
 
     private static DefaultRedisScript<Boolean> getBooleanDefaultRedisScript() {
+        // language=redis
         String script = "local val,ttl=ARGV[1],ARGV[2] if redis.call('EXISTS', KEYS[1])==1 then local curValue = redis.call('GET', KEYS[1]) if string.find(curValue, val)==1 then local curTtl = redis.call('TTL', KEYS[1]) redis.call('EXPIRE', KEYS[1], curTtl + ttl) return true else return false end else return false end";
         DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
         redisScript.setResultType(Boolean.class);
@@ -101,10 +101,10 @@ public class DistributedLock implements Lock {
     public void lock() {
         try {
             if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
-                throw new ToolException("[🔐] 尝试加锁超时，key: {}", lockKey);
+                throw new ExtException(EmojiSymbol.REDIS, "尝试加锁超时，key:{}", lockKey);
             }
         } catch (InterruptedException e) {
-            throw Exceptions.unchecked(e);
+            throw new ExtException(EmojiSymbol.REDIS, "获取锁失败，请先解锁，lockKey:{}, lockValue:{}", lockKey, lockValue);
         }
     }
 
@@ -116,7 +116,7 @@ public class DistributedLock implements Lock {
     @Override
     public void lockInterruptibly() throws InterruptedException {
         if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
-            throw new ToolException("[🔐] 尝试加锁超时，key: {}", this.lockKey);
+            throw new ExtException(EmojiSymbol.REDIS, "尝试加锁超时，key:{}", this.lockKey);
         }
     }
 
@@ -181,6 +181,7 @@ public class DistributedLock implements Lock {
                 return;
             }
             // 使用 lua 脚本处理锁判断和释放
+            // language=Redis
             String script = "if redis.call('get', KEYS[1]) == ARGV[1] then redis.call('del', KEYS[1]) return true else return false end";
             DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
             redisScript.setResultType(Boolean.class);
@@ -249,7 +250,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw new ToolException("[🔐] 尝试加锁定中断");
+                throw new ExtException(EmojiSymbol.REDIS, "尝试加锁定中断");
             }
             if (tryLock()) {
                 return true;
@@ -275,7 +276,7 @@ public class DistributedLock implements Lock {
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
-                throw new ToolException("[🔐] 尝试加锁中断");
+                throw new ExtException(EmojiSymbol.REDIS, "尝试加锁中断");
             }
             if (tryLock()) {
                 return true;
@@ -285,6 +286,7 @@ public class DistributedLock implements Lock {
         return false;
     }
 
+    // Getter methods
     public String getLockKey() {
         return lockKey;
     }
@@ -308,4 +310,9 @@ public class DistributedLock implements Lock {
     public boolean isReentrant() {
         return reentrant;
     }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
 }

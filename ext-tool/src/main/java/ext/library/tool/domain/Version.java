@@ -1,8 +1,6 @@
 package ext.library.tool.domain;
 
 
-import ext.library.tool.constant.Symbol;
-
 import java.util.Objects;
 
 /**
@@ -80,8 +78,8 @@ public final class Version {
         int len = complete ? Math.max(v1sLen, v2sLen) : Math.min(v1sLen, v2sLen);
 
         for (int i = 0; i < len; i++) {
-            String c1 = len > v1sLen || null == v1s[i] ? Symbol.EMPTY : v1s[i];
-            String c2 = len > v2sLen || null == v2s[i] ? Symbol.EMPTY : v2s[i];
+            String c1 = len > v1sLen || null == v1s[i] ? "" : v1s[i];
+            String c2 = len > v2sLen || null == v2s[i] ? "" : v2s[i];
 
             int result = c1.compareTo(c2);
             if (result != 0) {

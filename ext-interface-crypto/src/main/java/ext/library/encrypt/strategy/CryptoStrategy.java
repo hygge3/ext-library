@@ -1,7 +1,5 @@
 package ext.library.encrypt.strategy;
 
-import jakarta.annotation.Nonnull;
-
 /**
  * 加密策略
  *
@@ -17,7 +15,7 @@ public interface CryptoStrategy {
      *
      * @return {@link String }
      */
-    String decrypt(String secretKey, @Nonnull String encryptedText, String salt);
+    String decrypt(String secretKey, String encryptedText, String salt);
 
     /**
      * 加密
@@ -28,5 +26,5 @@ public interface CryptoStrategy {
      *
      * @return {@link String }
      */
-    String encrypt(String secretKey, @Nonnull String plainText, String salt);
+    String encrypt(String secretKey, String plainText, String salt);
 }

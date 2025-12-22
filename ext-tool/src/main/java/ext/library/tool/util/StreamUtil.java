@@ -1,12 +1,11 @@
 package ext.library.tool.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import ext.library.tool.constant.Symbol;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 /**
  * stream 流工具类
  */
+
 public final class StreamUtil {
 
     /**
@@ -31,7 +31,7 @@ public final class StreamUtil {
      */
     public static <E> List<E> filter(Collection<E> collection, Predicate<E> function) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
         return collection.stream().filter(function).collect(Collectors.toList());
@@ -46,7 +46,7 @@ public final class StreamUtil {
      * @return 拼接后的 list
      */
     public static <E> String join(Collection<E> collection, Function<E, String> function) {
-        return join(collection, function, Symbol.COMMA);
+        return join(collection, function, ",");
     }
 
     /**
@@ -60,7 +60,7 @@ public final class StreamUtil {
      */
     public static <E> String join(Collection<E> collection, Function<E, String> function, CharSequence delimiter) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Symbol.EMPTY;
+            return "";
         }
         return collection.stream().map(function).collect(Collectors.joining(delimiter));
     }
@@ -75,7 +75,7 @@ public final class StreamUtil {
      */
     public static <E> List<E> sorted(Collection<E> collection, Comparator<E> comparing) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
         return collection.stream().sorted(comparing).collect(Collectors.toList());
@@ -94,7 +94,7 @@ public final class StreamUtil {
      */
     public static <V, K> Map<K, V> toIdentityMap(Collection<V> collection, Function<V, K> key) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
         return collection.stream().collect(Collectors.toMap(key, Function.identity(), (l, r) -> l));
     }
@@ -114,7 +114,7 @@ public final class StreamUtil {
      */
     public static <E, K, V> Map<K, V> toMap(Collection<E> collection, Function<E, K> key, Function<E, V> value) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
         return collection.stream().collect(Collectors.toMap(key, value, (l, r) -> l));
     }
@@ -132,7 +132,7 @@ public final class StreamUtil {
      */
     public static <E, K> Map<K, List<E>> groupByKey(Collection<E> collection, Function<E, K> key) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
         return collection.stream().collect(Collectors.groupingBy(key, LinkedHashMap::new, Collectors.toList()));
     }
@@ -152,7 +152,7 @@ public final class StreamUtil {
      */
     public static <E, K, U> Map<K, Map<U, List<E>>> groupBy2Key(Collection<E> collection, Function<E, K> key1, Function<E, U> key2) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
         return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.groupingBy(key2, LinkedHashMap::new, Collectors.toList())));
     }
@@ -172,7 +172,7 @@ public final class StreamUtil {
      */
     public static <E, T, U> Map<T, Map<U, E>> group2Map(Collection<E> collection, Function<E, T> key1, Function<E, U> key2) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         }
         return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.toMap(key2, Function.identity(), (l, r) -> l)));
     }
@@ -190,7 +190,7 @@ public final class StreamUtil {
      */
     public static <E, T> List<T> toList(Collection<E> collection, Function<E, T> function) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         return collection.stream().map(function)
                 // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
@@ -210,7 +210,7 @@ public final class StreamUtil {
      */
     public static <E, T> Set<T> toSet(Collection<E> collection, Function<E, T> function) {
         if (ObjectUtil.isEmpty(collection)) {
-            return Sets.newHashSet();
+            return  new HashSet<>();
         }
         return collection.stream().map(function).collect(Collectors.toSet());
     }
@@ -230,16 +230,16 @@ public final class StreamUtil {
      */
     public static <K, X, Y, V> Map<K, V> merge(Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> merge) {
         if (ObjectUtil.isEmpty(map1) && ObjectUtil.isEmpty(map2)) {
-            return Maps.newHashMap();
+            return new HashMap<>();
         } else if (ObjectUtil.isEmpty(map1)) {
-            map1 = Maps.newHashMap();
+            map1 = new HashMap<>();
         } else if (ObjectUtil.isEmpty(map2)) {
-            map2 = Maps.newHashMap();
+            map2 = new HashMap<>();
         }
-        Set<K> key = Sets.newHashSet();
+        Set<K> key =  new HashSet<>();
         key.addAll(map1.keySet());
         key.addAll(map2.keySet());
-        Map<K, V> map = Maps.newHashMap();
+        Map<K, V> map = new HashMap<>();
         for (K t : key) {
             X x = map1.get(t);
             Y y = map2.get(t);

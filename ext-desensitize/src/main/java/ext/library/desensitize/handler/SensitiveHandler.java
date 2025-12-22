@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.exception.ExtException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import java.util.Objects;
  * 数据脱敏 json 序列化工具
  */
 public class SensitiveHandler extends JsonSerializer<String> implements ContextualSerializer {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private IDesensitizeRule strategy;
 
@@ -31,7 +30,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
         try {
             gen.writeString(strategy.desensitize().apply(value));
         } catch (Exception e) {
-            log.error("[😶] 脱敏失败 => {}", e.getMessage());
+            Logs.error(EmojiSymbol.DESENSITIZE, "脱敏失败：{}", e.getMessage());
             gen.writeString(value);
         }
     }
@@ -46,7 +45,7 @@ public class SensitiveHandler extends JsonSerializer<String> implements Contextu
                     this.strategy = rule.getDeclaredConstructor().newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                          NoSuchMethodException e) {
-                    throw new ExtException(e);
+                    throw new ExtException(EmojiSymbol.DESENSITIZE, e);
                 }
                 return this;
             }

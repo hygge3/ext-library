@@ -1,14 +1,13 @@
 package ext.library.websocket.config;
 
-import ext.library.tool.constant.Symbol;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.StringUtil;
-import ext.library.websocket.config.properties.WebSocketProperties;
 import ext.library.websocket.handler.ExtWebSocketHandler;
 import ext.library.websocket.interceptor.ExtWebSocketInterceptor;
 import ext.library.websocket.listener.WebSocketTopicListener;
+import ext.library.websocket.properties.WebSocketProperties;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,7 +25,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableConfigurationProperties(WebSocketProperties.class)
 @EnableWebSocket
 public class WebSocketAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor handshakeInterceptor, WebSocketHandler webSocketHandler, @NonNull WebSocketProperties webSocketProperties) {
@@ -37,9 +35,9 @@ public class WebSocketAutoConfig {
 
         // 如果允许跨域访问的地址为空，则设置为 "*"，表示允许所有来源的跨域请求
         if (StringUtil.isBlank(webSocketProperties.getAllowedOrigins())) {
-            webSocketProperties.setAllowedOrigins(Symbol.ASTERISK);
+            webSocketProperties.setAllowedOrigins("*");
         }
-        log.info("[⛓️]  WebSocket 模块载入成功，连接路径:{}", webSocketProperties.getPath());
+        Logs.info(EmojiSymbol.WEBSOCKET, "载入模块：WebSocket，连接路径:{}", webSocketProperties.getPath());
 
         // 返回一个 WebSocketConfigurer 对象，用于配置 WebSocket
         return registry -> registry

@@ -1,10 +1,10 @@
 package ext.library.json.config;
 
 import ext.library.json.module.CustomModule;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.DateUtil;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
@@ -13,7 +13,6 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;
 
-import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,7 +23,6 @@ import java.time.LocalTime;
 @AutoConfiguration(before = JacksonAutoConfiguration.class)
 @EnableConfigurationProperties({JacksonProperties.class})
 public class CustomJacksonAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     // 没有使用 {@link RequestBody} 反序列化时生效
 
@@ -37,7 +35,7 @@ public class CustomJacksonAutoConfig {
     public Converter<@NonNull String, @NonNull LocalDateTime> localDateTimeConvert() {
         return new Converter<@NonNull String, @NonNull LocalDateTime>() {
             @Override
-            public LocalDateTime convert(@Nonnull String source) {
+            public LocalDateTime convert(String source) {
                 return LocalDateTime.parse(source, DateUtil.FORMATTER_YMD_HMS);
             }
         };
@@ -52,7 +50,7 @@ public class CustomJacksonAutoConfig {
     public Converter<@NonNull String, @NonNull LocalDate> localDateConvert() {
         return new Converter<@NonNull String, @NonNull LocalDate>() {
             @Override
-            public LocalDate convert(@Nonnull String source) {
+            public LocalDate convert(String source) {
                 return LocalDate.parse(source, DateUtil.FORMATTER_YMD);
             }
         };
@@ -67,7 +65,7 @@ public class CustomJacksonAutoConfig {
     public Converter<@NonNull String, @NonNull LocalTime> localTimeConvert() {
         return new Converter<@NonNull String, @NonNull LocalTime>() {
             @Override
-            public LocalTime convert(@Nonnull String source) {
+            public LocalTime convert(String source) {
                 return LocalTime.parse(source, DateUtil.FORMATTER_HMS);
             }
         };
@@ -75,7 +73,7 @@ public class CustomJacksonAutoConfig {
 
     @Bean
     public JsonMapperBuilderCustomizer jacksonCustomizer() {
-        log.info("[🔁] JSON 模块载入成功");
+        Logs.info(EmojiSymbol.JSON, "JSON 模块载入");
         return builder -> builder.findAndAddModules()
                 // 添加自定义模块
                 .addModules(new CustomModule());

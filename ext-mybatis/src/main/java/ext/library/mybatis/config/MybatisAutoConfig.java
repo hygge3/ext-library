@@ -7,7 +7,6 @@ import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import ext.library.mybatis.config.properties.MybatisProperties;
 import ext.library.mybatis.util.TenantUtil;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class MybatisAutoConfig implements MyBatisFlexCustomizer {
     }
 
     private static String formatSQL(String sql) {
-        return sql.replaceAll("\\s+", Symbol.SPACE).replace("\\r", Symbol.SPACE).replace("\\n", Symbol.SPACE);
+        return sql.replaceAll("\\s+", " ").replace("\\r", " ").replace("\\n", " ");
     }
 
     @Override

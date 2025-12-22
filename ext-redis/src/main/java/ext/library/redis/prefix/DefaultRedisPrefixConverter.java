@@ -1,6 +1,6 @@
 package ext.library.redis.prefix;
 
-import ext.library.redis.config.properties.RedisProperties;
+import ext.library.redis.properties.RedisProperties;
 import ext.library.tool.util.StringUtil;
 
 /**

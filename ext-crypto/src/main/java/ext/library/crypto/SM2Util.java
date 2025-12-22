@@ -1,6 +1,6 @@
 package ext.library.crypto;
 
-import ext.library.tool.constant.Holder;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.bouncycastle.crypto.CryptoException;
@@ -18,8 +18,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.custom.gm.SM2P256V1Curve;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -38,8 +36,7 @@ import java.security.cert.X509Certificate;
  *
  * @since 2025.09.02
  */
-public class SM2Util {
-    private static final Logger log = LoggerFactory.getLogger(SM2Util.class);
+public  final class SM2Util {
 
     // SM2 曲线参数
     private static final SM2P256V1Curve CURVE = new SM2P256V1Curve();
@@ -58,7 +55,7 @@ public class SM2Util {
     public static String[] genKeyPair() {
         // 初始化密钥对生成器
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
-        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, Holder.SECURE_RANDOM));
+        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, ext.library.tool.constant.Holder.SECURE_RANDOM));
 
         // 生成密钥对
         org.bouncycastle.crypto.AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -86,7 +83,7 @@ public class SM2Util {
      *
      * @return 密文（Base64 编码）
      */
-    public static String encrypt(String publicKey, String plainText) {
+    public static  String encrypt(String publicKey, String plainText) {
         // 解析公钥
         byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
         ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
@@ -102,8 +99,7 @@ public class SM2Util {
             // 返回 Base64 编码结果
             return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (InvalidCipherTextException e) {
-            log.error("[🔐] SM2 加密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
 
     }
@@ -117,7 +113,7 @@ public class SM2Util {
      *
      * @return 明文
      */
-    public static String decrypt(String privateKey, String cipherText) {
+    public static  String decrypt(String privateKey, String cipherText) {
         // 解析私钥
         byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
@@ -136,8 +132,7 @@ public class SM2Util {
             // 返回明文
             return new String(decryptedData, StandardCharsets.UTF_8);
         } catch (InvalidCipherTextException e) {
-            log.error("[🔐] SM2 解密失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -168,8 +163,7 @@ public class SM2Util {
             // 返回 Base64 编码结果
             return Base64Util.encodeUrlSafeToStr(signature);
         } catch (CryptoException e) {
-            log.error("[🔐] SM2 签名失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
     }
 
@@ -216,22 +210,21 @@ public class SM2Util {
             CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
             certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (Exception e) {
-            log.error("[🔐] SM2 使用证书验签失败", e);
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
         // 获取证书中的公钥
         PublicKey publicKey = certificate.getPublicKey();
 
         // 检查是否为 EC 公钥
         if (!(publicKey instanceof BCECPublicKey ecPublicKey)) {
-            throw new ToolException("证书中的公钥不是 EC 公钥");
+            throw new ToolException(EmojiSymbol.CRYPTO, "证书中的公钥不是 EC 公钥");
         }
 
         ECParameterSpec parameterSpec = ecPublicKey.getParameters();
 
         // 检查是否为 SM2 曲线
         if (!isSM2Curve(parameterSpec)) {
-            throw new ToolException("证书中的公钥不是 SM2 曲线");
+            throw new ToolException(EmojiSymbol.CRYPTO, "证书中的公钥不是 SM2 曲线");
         }
 
         // 转换为 BC 的参数格式

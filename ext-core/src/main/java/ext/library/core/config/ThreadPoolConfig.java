@@ -1,11 +1,11 @@
 package ext.library.core.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import ext.library.core.config.properties.ThreadPoolProperties;
+import ext.library.core.properties.ThreadPoolProperties;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.constant.Holder;
+import ext.library.tool.core.Logs;
 import ext.library.tool.core.Threads;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @AutoConfiguration
 @EnableConfigurationProperties(ThreadPoolProperties.class)
 public class ThreadPoolConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
@@ -42,7 +41,7 @@ public class ThreadPoolConfig {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
-        log.info("[🌊] Spring 线程池模块载入成功");
+        Logs.info(EmojiSymbol.CORE, "Spring 线程池模块载入成功");
         return executor;
     }
 
@@ -59,7 +58,7 @@ public class ThreadPoolConfig {
             }
         };
         this.scheduledExecutorService = scheduledThreadPoolExecutor;
-        log.info("[🌊] Spring 调度线程池模块载入成功");
+        Logs.info(EmojiSymbol.CORE, "Spring 调度线程池模块载入成功");
         return scheduledThreadPoolExecutor;
     }
 
@@ -69,10 +68,10 @@ public class ThreadPoolConfig {
     @PreDestroy
     public void destroy() {
         try {
-            log.info("[🌊] 关闭后台任务线程池");
+            Logs.info(EmojiSymbol.CORE, "关闭后台任务线程池");
             Threads.shutdownAndAwaitTermination(scheduledExecutorService);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            Logs.error(EmojiSymbol.CORE,e, e.getMessage());
         }
     }
 

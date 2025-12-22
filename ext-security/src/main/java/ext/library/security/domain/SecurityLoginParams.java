@@ -3,8 +3,8 @@ package ext.library.security.domain;
 import com.google.common.collect.Maps;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
-import ext.library.security.config.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
+import ext.library.security.properties.SecurityProperties;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.IDUtil;
 
@@ -19,6 +19,7 @@ import java.util.Objects;
  * 登录参数
  * </p>
  */
+
 public class SecurityLoginParams implements Serializable {
 
     @Serial
@@ -43,6 +44,42 @@ public class SecurityLoginParams implements Serializable {
      * 活跃超时时间
      */
     private Long activityTimeout;
+
+    /**
+     * 获取 session 挂载数据
+     *
+     * @return session 挂载数据
+     */
+    public Map<String, Object> getMountData() {
+        return mountData;
+    }
+
+    /**
+     * 获取 token 挂载数据
+     *
+     * @return token 挂载数据
+     */
+    public Map<String, Object> getTokenMountData() {
+        return tokenMountData;
+    }
+
+    /**
+     * 获取超时时间
+     *
+     * @return 超时时间
+     */
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * 获取活跃超时时间
+     *
+     * @return 活跃超时时间
+     */
+    public Long getActivityTimeout() {
+        return activityTimeout;
+    }
 
     /**
      * 获取设备类型
@@ -171,18 +208,6 @@ public class SecurityLoginParams implements Serializable {
         return session;
     }
 
-    public Map<String, Object> getMountData() {
-        return mountData;
-    }
-
-    public Map<String, Object> getTokenMountData() {
-        return tokenMountData;
-    }
-
-    public Long getTimeout() {
-        return timeout;
-    }
-
     /**
      * 设置超时时间
      *
@@ -193,10 +218,6 @@ public class SecurityLoginParams implements Serializable {
     public SecurityLoginParams setTimeout(Long timeout) {
         this.timeout = timeout;
         return this;
-    }
-
-    public Long getActivityTimeout() {
-        return activityTimeout;
     }
 
     /**

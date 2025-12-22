@@ -3,10 +3,9 @@ package ext.library.encrypt.handler;
 import ext.library.encrypt.annotation.RequestDecrypt;
 import ext.library.encrypt.enums.Algorithm;
 import ext.library.encrypt.properties.CryptoProperties;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
@@ -32,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 @EnableConfigurationProperties(CryptoProperties.class)
 @ControllerAdvice
 public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CryptoProperties cryptoProperties;
 
@@ -65,8 +63,7 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
                 }
             };
         } catch (Exception e) {
-            log.error("[🔓] 请求解密异常", e);
-            throw new ExtException(e);
+            throw new ExtException(EmojiSymbol.INTERFACE_CRYPTO, e);
         }
 
     }

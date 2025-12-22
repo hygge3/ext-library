@@ -1,10 +1,10 @@
 package ext.library.ratelimiter.config;
 
 import ext.library.ratelimiter.aspect.RateLimiterAspect;
-import ext.library.ratelimiter.config.properties.RateLimiterProperties;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.ratelimiter.properties.RateLimiterProperties;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties({RateLimiterProperties.class})
 public class RateLimiterAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Bean
     @ConditionalOnMissingBean
@@ -26,7 +25,7 @@ public class RateLimiterAutoConfig {
 
     @Bean
     public RateLimiterAspect rateLimitAspect(IRateLimitHandler iRateLimitHandler) {
-        log.info("[🚥] 限流器模块载入成功");
+        Logs.info(EmojiSymbol.RATELIMITER, "限流器模块载入");
         return new RateLimiterAspect(iRateLimitHandler);
     }
 

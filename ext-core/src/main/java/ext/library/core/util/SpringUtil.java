@@ -1,5 +1,6 @@
 package ext.library.core.util;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.ObjectUtil;
 import org.jspecify.annotations.Nullable;
@@ -49,7 +50,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     public static ListableBeanFactory getBeanFactory() {
         final ListableBeanFactory factory = ObjectUtil.defaultIfNull(beanFactory, context);
         if (null == factory) {
-            throw new ToolException("[🫛] 没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中？");
+            throw new ToolException(EmojiSymbol.CORE, "没有注入 ConfigurableListableBeanFactory 或 ApplicationContext，可能不是在 Spring 环境中");
         }
         return factory;
     }
@@ -66,7 +67,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         } else if (context instanceof ConfigurableApplicationContext) {
             factory = ((ConfigurableApplicationContext) context).getBeanFactory();
         } else {
-            throw new ToolException("[🫛] 上下文中没有可配置的 BeanFactory！");
+            throw new ToolException(EmojiSymbol.CORE, "上下文中没有可配置的 BeanFactory");
         }
         return factory;
     }
@@ -265,7 +266,7 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
         if (factory instanceof DefaultSingletonBeanRegistry registry) {
             registry.destroySingleton(beanName);
         } else {
-            throw new ToolException("[🫛] 无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry！");
+            throw new ToolException(EmojiSymbol.CORE, "无法取消注册 bean，工厂不是 DefaultSingletonBeanRegistry");
         }
     }
 

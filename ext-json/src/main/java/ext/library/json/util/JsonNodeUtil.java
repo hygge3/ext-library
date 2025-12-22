@@ -1,5 +1,6 @@
 package ext.library.json.util;
 
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -12,7 +13,7 @@ import java.util.Objects;
 /**
  * JsonNode 工具类
  */
-public class JsonNodeUtil {
+public final class JsonNodeUtil {
 
     // region JsonNode 与对象互转
 
@@ -27,9 +28,9 @@ public class JsonNodeUtil {
      */
     public static <T> T toObj(JsonNode jsonNode, Class<T> valueType) {
         try {
-            return JsonUtil.mapper.treeToValue(jsonNode, valueType);
+            return JsonUtil.getMapper().treeToValue(jsonNode, valueType);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -45,9 +46,9 @@ public class JsonNodeUtil {
      */
     public static <T> List<T> toList(JsonNode jsonNode, Class<T> elementType) {
         try {
-            return JsonUtil.mapper.readerForListOf(elementType).readValue(jsonNode);
+            return JsonUtil.getMapper().readerForListOf(elementType).readValue(jsonNode);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -60,7 +61,7 @@ public class JsonNodeUtil {
      * @return 转换结果
      */
     public static <T extends JsonNode> T toNode(Object fromValue) {
-        return JsonUtil.mapper.valueToTree(fromValue);
+        return JsonUtil.getMapper().valueToTree(fromValue);
     }
 
     // endregion
@@ -73,9 +74,9 @@ public class JsonNodeUtil {
     public static <T> T getNodeValue(JsonNode node, String fieldName, Class<T> clazz) {
         JsonNode valueNode = node.get(fieldName);
         try {
-            return JsonUtil.mapper.treeToValue(valueNode, clazz);
+            return JsonUtil.getMapper().treeToValue(valueNode, clazz);
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -84,7 +85,7 @@ public class JsonNodeUtil {
      */
     public static String modifyNode(String json, String fieldName, Object newValue) {
         try {
-            ObjectNode node = (ObjectNode) JsonUtil.mapper.readTree(json);
+            ObjectNode node = (ObjectNode) JsonUtil.getMapper().readTree(json);
             switch (newValue) {
                 case String s -> node.put(fieldName, s);
                 case Integer i -> node.put(fieldName, i);
@@ -94,7 +95,7 @@ public class JsonNodeUtil {
             }
             return node.toString();
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -107,9 +108,9 @@ public class JsonNodeUtil {
      */
     public static JsonNode toNode(String json) {
         try {
-            return JsonUtil.mapper.readTree(Objects.requireNonNull(json, "jsonString is null"));
+            return JsonUtil.getMapper().readTree(Objects.requireNonNull(json, "jsonString is null"));
         } catch (JacksonException e) {
-            throw new ToolException(e);
+            throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
@@ -119,7 +120,7 @@ public class JsonNodeUtil {
      * @return {@code ObjectNode }
      */
     public static ObjectNode createObjectNode() {
-        return JsonUtil.mapper.createObjectNode();
+        return JsonUtil.getMapper().createObjectNode();
     }
 
     /**
@@ -128,7 +129,7 @@ public class JsonNodeUtil {
      * @return {@code ArrayNode }
      */
     public static ArrayNode createArrayNode() {
-        return JsonUtil.mapper.createArrayNode();
+        return JsonUtil.getMapper().createArrayNode();
     }
 
     // endregion

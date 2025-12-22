@@ -1,11 +1,11 @@
 package ext.library.security.config;
 
 import ext.library.security.authority.SecurityAuthority;
-import ext.library.security.config.properties.SecurityProperties;
+import ext.library.security.properties.SecurityProperties;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.service.SecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * 权限服务注入
@@ -50,7 +49,7 @@ public class SecurityAutoConfig {
     @Bean
     @ConditionalOnMissingBean(SecurityAuthority.class)
     public SecurityAuthority securityAuthority() {
-        log.warn("[🛡️] 将使用默认权限认证接口，所有权限皆无，建议实现 SecurityAuthority 接口中的业务逻辑！");
+        Logs.warn(EmojiSymbol.SECURITY, "将使用默认权限认证接口，所有权限皆无，建议实现 SecurityAuthority 接口中的业务逻辑");
         return new SecurityAuthority() {};
     }
 

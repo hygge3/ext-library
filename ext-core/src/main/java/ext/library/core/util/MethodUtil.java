@@ -20,9 +20,10 @@ import java.lang.reflect.Method;
  *
  * @since 2025.08.19
  */
-public final class MethodUtil extends org.springframework.util.ClassUtils {
 
-    private static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
+public class MethodUtil extends org.springframework.util.ClassUtils {
+
+    private final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
 
     /**
      * 获取方法参数信息
@@ -32,7 +33,7 @@ public final class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {MethodParameter}
      */
-    public static MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
+    public MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(constructor, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
@@ -46,7 +47,7 @@ public final class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {MethodParameter}
      */
-    public static MethodParameter getMethodParameter(Method method, int parameterIndex) {
+    public MethodParameter getMethodParameter(Method method, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(method, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
@@ -61,7 +62,7 @@ public final class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public static <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
+    public <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
         Class<?> targetClass = method.getDeclaringClass();
         // The method may be on an interface, but we need attributes from the target
         // class.
@@ -88,7 +89,7 @@ public final class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @return {Annotation}
      */
-    public static <A extends Annotation> @Nullable A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
+    public <A extends Annotation> @Nullable A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
         // 先找方法，再找方法上的类
         A annotation = handlerMethod.getMethodAnnotation(annotationType);
         if (null != annotation) {

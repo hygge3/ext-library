@@ -1,13 +1,12 @@
 package ext.library.web.config;
 
 
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
-import ext.library.web.config.properties.WebMvcProperties;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
+import ext.library.web.properties.WebMvcProperties;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -36,7 +35,6 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @EnableConfigurationProperties({WebMvcProperties.class})
 @ConditionalOnWebApplication(type = SERVLET)
 public class WebMvcAutoConfig implements WebMvcConfigurer {
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final WebMvcProperties webMvcProperties;
 
@@ -79,7 +77,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
         if (webMvcProperties.getInvokeTimeEnabled()) {
-            log.info("[⏱️] 请求调用时间统计模块载入成功");
+            Logs.info("⏱️", "载入模块：请求调用时间统计");
             // 全局访问性能拦截
             registry.addInterceptor(new ExtWebInvokeTimeInterceptor()).addPathPatterns("/**");
         }
@@ -112,7 +110,7 @@ public class WebMvcAutoConfig implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(prefix = WebMvcProperties.PREFIX + ".cors", name = "enabled", havingValue = "true")
     public FilterRegistrationBean<@NonNull CorsFilter> corsFilterRegistrationBean() {
-        log.info("[🔛] CORS 模块载入成功");
+        Logs.info("🔛", "载入模块：CORS");
         // 获取 CORS 配置
         WebMvcProperties.CorsConfig corsConfig = webMvcProperties.getCorsConfig();
 

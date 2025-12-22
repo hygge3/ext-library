@@ -1,7 +1,6 @@
 package ext.library.mybatis.handler;
 
 import com.google.common.base.Splitter;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.util.StringUtil;
 import ext.library.tool.util.TypeCastUtil;
 import io.github.linpeilie.utils.ArrayUtil;
@@ -26,7 +25,7 @@ public class IntArrayTypeHandler extends BaseTypeHandler<Integer[]> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Integer[] parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, ArrayUtil.join(parameter, Symbol.COMMA));
+        ps.setString(i, ArrayUtil.join(parameter, ","));
     }
 
     @Override
@@ -51,7 +50,7 @@ public class IntArrayTypeHandler extends BaseTypeHandler<Integer[]> {
         if (StringUtil.isBlank(str)) {
             return new Integer[0];
         }
-        return Splitter.on(Symbol.COMMA).omitEmptyStrings().trimResults().splitToList(str).stream().map(TypeCastUtil::getAsInteger).toArray(Integer[]::new);
+        return Splitter.on(",").omitEmptyStrings().trimResults().splitToList(str).stream().map(TypeCastUtil::getAsInteger).toArray(Integer[]::new);
     }
 
 }

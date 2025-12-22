@@ -3,6 +3,7 @@ package ext.library.idempotent.aspect;
 import ext.library.idempotent.annotation.Idempotent;
 import ext.library.idempotent.key.generator.IdempotentKeyGenerator;
 import ext.library.idempotent.key.store.IdempotentKeyStore;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,7 +26,7 @@ public record IdempotentAspect(IdempotentKeyStore idempotentKeyStore, Idempotent
         // 校验当前请求是否重复请求
         boolean saveSuccess = this.idempotentKeyStore.saveIfAbsent(idempotentKey, DateUtil.convert(idempotentAnnotation.duration(), idempotentAnnotation.timeUnit()));
         Assert.isTrue(saveSuccess, () -> {
-            throw new ExtException(idempotentAnnotation.message());
+            throw new ExtException(EmojiSymbol.IDEMPOTENT,idempotentAnnotation.message());
         });
 
         try {

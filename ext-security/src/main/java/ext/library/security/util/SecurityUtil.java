@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 认证便捷操作工具
  */
-public class SecurityUtil {
+public final class SecurityUtil {
 
     /**
      * 获取 service

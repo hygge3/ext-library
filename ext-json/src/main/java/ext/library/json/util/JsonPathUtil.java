@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * JSON-Path 工具类
  */
-public class JsonPathUtil {
+public final class JsonPathUtil {
 
     /**
      * 使用 JsonPath 读取指定内容

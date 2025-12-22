@@ -1,7 +1,8 @@
 package ext.library.handler;
 
 import com.google.common.io.CharStreams;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import io.swagger.v3.core.jackson.TypeNameResolver;
 import io.swagger.v3.core.util.AnnotationsUtils;
@@ -195,7 +196,7 @@ public class OpenApiHandler extends OpenAPIService {
                     try {
                         list = CharStreams.readLines(new StringReader(description));
                     } catch (IOException e) {
-                        throw Exceptions.unchecked(e);
+                        throw new ExtException(EmojiSymbol.OPENAPI, e);
                     }
                     // tag.setName(tagAutoName);
                     tag.setName(list.getFirst());

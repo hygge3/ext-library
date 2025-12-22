@@ -1,8 +1,7 @@
 package ext.library.tool.core;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -12,8 +11,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 /**
  * 异常处理工具类
  */
+
 public final class Exceptions {
-    private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
 
     /**
      * parse error to string
@@ -92,7 +91,7 @@ public final class Exceptions {
      */
     public static void log(Throwable e) {
         // 在 getMessage() 获取异常名称的基础上，添加了异常原因
-        log.error(e.getCause().getMessage());
+        Logs.error(EmojiSymbol.EXT, e.getCause().getMessage());
     }
 
 

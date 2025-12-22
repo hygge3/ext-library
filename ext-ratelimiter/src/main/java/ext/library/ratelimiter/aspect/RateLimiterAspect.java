@@ -2,8 +2,9 @@ package ext.library.ratelimiter.aspect;
 
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.ratelimiter.handler.IRateLimitHandler;
+import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -41,7 +42,7 @@ public record RateLimiterAspect(IRateLimitHandler rateLimitHandler) {
         if (rateLimitHandler.proceed(rateLimit, pjp)) {
             return pjp.proceed();
         } else {
-            throw new ExtException(ObjectUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
+            throw new ExtException(EmojiSymbol.RATELIMITER, StringUtil.isEmpty(rateLimit.msg()) ? "触发限流" : rateLimit.msg());
         }
     }
 

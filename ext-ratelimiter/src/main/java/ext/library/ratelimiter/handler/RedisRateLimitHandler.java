@@ -2,6 +2,8 @@ package ext.library.ratelimiter.handler;
 
 import ext.library.ratelimiter.annotation.RateLimit;
 import ext.library.redis.util.RedisUtil;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -44,15 +46,11 @@ public class RedisRateLimitHandler implements IRateLimitHandler {
                 String.valueOf(interval));
         if (null != currentCount) {
             if (currentCount > 0 && currentCount <= count) {
-                if (log.isDebugEnabled()) {
-                    log.debug("[🚥] 限制期内的第 {} 次访问", currentCount);
-                }
+                Logs.debug(EmojiSymbol.RATELIMITER, "限制期内的第 {} 次访问", currentCount);
                 return true;
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("[🚥] 限流规则已触发");
-        }
+        Logs.debug(EmojiSymbol.RATELIMITER, "限流规则已触发");
         return false;
     }
 

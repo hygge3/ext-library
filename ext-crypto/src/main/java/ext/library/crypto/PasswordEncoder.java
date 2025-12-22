@@ -9,12 +9,12 @@ import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 /**
  * 密码加密器
  */
-public class PasswordEncoder {
+public final class PasswordEncoder {
 
-    private final static Lazy<Argon2PasswordEncoder> ARGON2_ENCODER = Lazy.of(Argon2PasswordEncoder::defaultsForSpringSecurity_v5_8);
-    private final static Lazy<BCryptPasswordEncoder> BCRYPT_ENCODER = Lazy.of(() -> new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B));
-    private final static Lazy<Pbkdf2PasswordEncoder> PBKDF2_ENCODER = Lazy.of(Pbkdf2PasswordEncoder::defaultsForSpringSecurity_v5_8);
-    private final static Lazy<SCryptPasswordEncoder> SCRYPT_ENCODER = Lazy.of(SCryptPasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private static final Lazy<Argon2PasswordEncoder> ARGON2_ENCODER = Lazy.of(Argon2PasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private static final Lazy<BCryptPasswordEncoder> BCRYPT_ENCODER = Lazy.of(() -> new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2B));
+    private static final Lazy<Pbkdf2PasswordEncoder> PBKDF2_ENCODER = Lazy.of(Pbkdf2PasswordEncoder::defaultsForSpringSecurity_v5_8);
+    private static final Lazy<SCryptPasswordEncoder> SCRYPT_ENCODER = Lazy.of(SCryptPasswordEncoder::defaultsForSpringSecurity_v5_8);
 
     /**
      * 通过 默认加密器 BCrypt 加密
@@ -46,7 +46,7 @@ public class PasswordEncoder {
      *
      * @return {@code String }
      */
-    public static String encryptByArgon2(String plaintext) {
+    public String encryptByArgon2(String plaintext) {
         return ARGON2_ENCODER.get().encode(plaintext);
     }
 
@@ -58,7 +58,7 @@ public class PasswordEncoder {
      *
      * @return boolean
      */
-    public static boolean checkByArgon2(String plaintext, String passwordHashed) {
+    public boolean checkByArgon2(String plaintext, String passwordHashed) {
         return ARGON2_ENCODER.get().matches(plaintext, passwordHashed);
     }
 
@@ -92,7 +92,7 @@ public class PasswordEncoder {
      *
      * @return {@code String }
      */
-    public static String encryptByPBKDF2(String plaintext) {
+    public String encryptByPBKDF2(String plaintext) {
         return PBKDF2_ENCODER.get().encode(plaintext);
     }
 
@@ -104,7 +104,7 @@ public class PasswordEncoder {
      *
      * @return boolean
      */
-    public static boolean checkByPBKDF2(String plaintext, String passwordHashed) {
+    public boolean checkByPBKDF2(String plaintext, String passwordHashed) {
         return PBKDF2_ENCODER.get().matches(plaintext, passwordHashed);
     }
 

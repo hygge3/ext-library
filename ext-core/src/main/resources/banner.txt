@@ -1,4 +1,4 @@
-${AnsiColor.GREEN}🥳 Ext Library 💫 3.5.0
+${AnsiColor.GREEN}🥳 Ext Library 💫 ${revision}
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ░░░        ░░░░░  ░░░░  ░░░░░        ░░░
 ▒▒▒  ▒▒▒▒▒▒▒▒▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒

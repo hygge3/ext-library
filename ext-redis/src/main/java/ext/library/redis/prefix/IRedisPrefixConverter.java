@@ -1,9 +1,9 @@
 package ext.library.redis.prefix;
 
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.core.Logs;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
  * redis key 前缀生成器
  */
 public interface IRedisPrefixConverter {
-    Logger log = LoggerFactory.getLogger(IRedisPrefixConverter.class);
 
     /**
      * 生成前缀
@@ -40,7 +39,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if (StringUtil.isBlank(prefix)) {
-            log.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            Logs.warn(EmojiSymbol.REDIS, "前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);
@@ -65,7 +64,7 @@ public interface IRedisPrefixConverter {
         }
         String prefix = prefix();
         if (StringUtil.isBlank(prefix)) {
-            log.warn("[🏷️] 前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现！");
+            Logs.warn(EmojiSymbol.REDIS, "前缀转换器已启用，但 getPrefix 方法返回空白结果，请检查您的实现");
             return bytes;
         }
         byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);

@@ -1,9 +1,8 @@
 package ext.library.tool.core;
 
 
+import ext.library.tool.constant.EmojiSymbol;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.concurrent.CancellationException;
@@ -13,12 +12,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 线程相关工具类。
+ * 线程相关工具类
  */
 public final class Threads {
     /** 原始堆栈索引位置，用于获取调用方法的堆栈信息 */
     private static final int ORIGIN_STACK_INDEX = 2;
-    private static final Logger log = LoggerFactory.getLogger(Threads.class);
 
     /**
      * sleep 等待，单位为毫秒
@@ -53,7 +51,7 @@ public final class Threads {
                 if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
                     pool.shutdownNow();
                     if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
-                        log.info("[🛠️] 线程池未停止");
+                        Logs.info(EmojiSymbol.TOOL,"线程池未停止");
                     }
                 }
             } catch (InterruptedException ie) {
@@ -81,7 +79,7 @@ public final class Threads {
             }
         }
         if (t != null) {
-            log.error(t.getMessage(), t);
+            Logs.error(EmojiSymbol.TOOL, t.getMessage(), t);
         }
     }
 

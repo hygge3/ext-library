@@ -25,32 +25,6 @@ public class SseMessage implements Serializable {
 
     public SseMessage() {}
 
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof SseMessage other)) return false;
-        if (!other.canEqual(this)) return false;
-        final Object this$userIds = this.getUserIds();
-        final Object other$userIds = other.getUserIds();
-        if (!Objects.equals(this$userIds, other$userIds)) return false;
-        final Object this$message = this.getMessage();
-        final Object other$message = other.getMessage();
-        return Objects.equals(this$message, other$message);
-    }
-
-    protected boolean canEqual(final Object other) {return other instanceof SseMessage;}
-
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        final Object $userIds = this.getUserIds();
-        result = result * PRIME + ($userIds == null ? 43 : $userIds.hashCode());
-        final Object $message = this.getMessage();
-        result = result * PRIME + ($message == null ? 43 : $message.hashCode());
-        return result;
-    }
-
-    public String toString() {return "SseMessage(userIds=" + this.getUserIds() + ", message=" + this.getMessage() + ")";}
-
     public List<String> getUserIds() {
         return userIds;
     }
@@ -66,4 +40,41 @@ public class SseMessage implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SseMessage other)) return false;
+        if (!other.canEqual(this)) return false;
+        final Object this$userIds = this.getUserIds();
+        final Object other$userIds = other.getUserIds();
+        if (!Objects.equals(this$userIds, other$userIds)) return false;
+        final Object this$message = this.getMessage();
+        final Object other$message = other.getMessage();
+        return Objects.equals(this$message, other$message);
+    }
+
+    protected boolean canEqual(final Object other) {
+        return other instanceof SseMessage;
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final Object $userIds = this.getUserIds();
+        result = result * PRIME + ($userIds == null ? 43 : $userIds.hashCode());
+        final Object $message = this.getMessage();
+        result = result * PRIME + ($message == null ? 43 : $message.hashCode());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SseMessage{" +
+                "userIds=" + userIds +
+                ", message='" + message + '\'' +
+                '}';
+    }
+
 }

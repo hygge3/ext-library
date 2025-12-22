@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式队列工具 轻量级队列 重量级数据量 请使用 MQ 要求 redis 5.X 以上
  */
-public class QueueUtil {
+public final class QueueUtil {
 
     /**
      * 添加普通队列数据
