@@ -1,6 +1,5 @@
 package ext.library.http.useragent;
 
-import com.google.common.collect.Lists;
 
 import java.io.Serial;
 import java.util.List;
@@ -23,7 +22,7 @@ public class Browser extends UserAgentInfo {
     /**
      * 支持的浏览器类型
      */
-    public static final List<Browser> browers = Lists.newArrayList(
+    public static final List<Browser> browers = List.of(
             // 部分特殊浏览器是基于安卓、Iphone 等的，需要优先判断
             // 企业微信 企业微信使用微信浏览器内核，会包含 MicroMessenger 所以要放在前面
             new Browser("wxwork", "wxwork", "wxwork\\/([\\d\\w\\.\\-]+)"),

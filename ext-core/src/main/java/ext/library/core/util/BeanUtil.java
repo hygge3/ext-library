@@ -1,6 +1,5 @@
 package ext.library.core.util;
 
-import com.google.common.collect.Maps;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Logs;
 import ext.library.tool.exception.ToolException;
@@ -26,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,7 +49,7 @@ public class BeanUtil {
      * @return {@code Map<String, Object> }
      */
     public static Map<String, @Nullable Object> beanToMap(Object obj) {
-        Map<String, @Nullable Object> map = Maps.newHashMap();
+        Map<String, @Nullable Object> map = new HashMap<>();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();

@@ -1,6 +1,5 @@
 package ext.library.core.config;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import ext.library.core.properties.ThreadPoolProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.constant.Holder;
@@ -16,6 +15,7 @@ import jakarta.annotation.PreDestroy;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 线程池配置
@@ -50,15 +50,17 @@ public class ThreadPoolConfig {
      */
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core, new ThreadFactoryBuilder().setNameFormat("调度线程-%d").setDaemon(true).build(), new ThreadPoolExecutor.CallerRunsPolicy()) {
-            @Override
-            protected void afterExecute(Runnable r, Throwable t) {
-                super.afterExecute(r, t);
-                Threads.printException(r, t);
-            }
-        };
+        final AtomicInteger threadNumber = new AtomicInteger(1);
+
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(core,
+                r -> {
+                    Thread t = new Thread(r, "调度线程-" + threadNumber.getAndIncrement());
+                    t.setDaemon(true);
+                    t.setUncaughtExceptionHandler(Threads::printException);
+                    return t;
+                });
         this.scheduledExecutorService = scheduledThreadPoolExecutor;
-        Logs.info(EmojiSymbol.CORE, "Spring 调度线程池模块载入成功");
+        Logs.info(EmojiSymbol.CORE, "载入模块:Spring 调度线程池");
         return scheduledThreadPoolExecutor;
     }
 
@@ -71,7 +73,7 @@ public class ThreadPoolConfig {
             Logs.info(EmojiSymbol.CORE, "关闭后台任务线程池");
             Threads.shutdownAndAwaitTermination(scheduledExecutorService);
         } catch (Exception e) {
-            Logs.error(EmojiSymbol.CORE,e, e.getMessage());
+            Logs.error(EmojiSymbol.CORE, e, e.getMessage());
         }
     }
 

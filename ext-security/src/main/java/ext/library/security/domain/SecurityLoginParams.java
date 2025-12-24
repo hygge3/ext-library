@@ -1,6 +1,5 @@
 package ext.library.security.domain;
 
-import com.google.common.collect.Maps;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
@@ -11,6 +10,7 @@ import ext.library.tool.util.IDUtil;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,11 +27,11 @@ public class SecurityLoginParams implements Serializable {
     /**
      * session 挂载数据
      */
-    private final Map<String, Object> mountData = Maps.newHashMap();
+    private final Map<String, Object> mountData = new HashMap<>();
     /**
      * token 挂载数据
      */
-    private final Map<String, Object> tokenMountData = Maps.newHashMap();
+    private final Map<String, Object> tokenMountData = new HashMap<>();
     /**
      * 设备类型
      */

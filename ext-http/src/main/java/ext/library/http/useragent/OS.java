@@ -1,7 +1,5 @@
 package ext.library.http.useragent;
 
-import com.google.common.collect.Lists;
-
 import java.io.Serial;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,7 +17,7 @@ public class OS extends UserAgentInfo {
     /**
      * 支持的引擎类型
      */
-    public static final List<OS> oses = Lists.newArrayList(//
+    public static final List<OS> oses = List.of(//
             new OS("Windows 10 or Windows Server 2016", "windows nt 10\\.0", "windows nt (10\\.0)"),//
             new OS("Windows 8.1 or Windows Server 2012R2", "windows nt 6\\.3", "windows nt (6\\.3)"),//
             new OS("Windows 8 or Windows Server 2012", "windows nt 6\\.2", "windows nt (6\\.2)"),//

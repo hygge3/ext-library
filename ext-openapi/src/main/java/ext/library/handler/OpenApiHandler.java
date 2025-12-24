@@ -1,8 +1,5 @@
 package ext.library.handler;
 
-import com.google.common.io.CharStreams;
-import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import io.swagger.v3.core.jackson.TypeNameResolver;
 import io.swagger.v3.core.util.AnnotationsUtils;
@@ -25,7 +22,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
 
 import jakarta.annotation.Nonnull;
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -192,12 +189,7 @@ public class OpenApiHandler extends OpenAPIService {
                     io.swagger.v3.oas.models.tags.Tag tag = new io.swagger.v3.oas.models.tags.Tag();
 
                     // 自定义部分 修改使用 java 注释当 tag 名
-                    List<String> list = null;
-                    try {
-                        list = CharStreams.readLines(new StringReader(description));
-                    } catch (IOException e) {
-                        throw new ExtException(EmojiSymbol.OPENAPI, e);
-                    }
+                    List<String> list = new BufferedReader(new StringReader(description)).lines().toList();
                     // tag.setName(tagAutoName);
                     tag.setName(list.getFirst());
                     operation.addTagsItem(list.getFirst());
