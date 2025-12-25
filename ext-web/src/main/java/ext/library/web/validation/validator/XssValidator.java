@@ -24,7 +24,7 @@ public class XssValidator implements ConstraintValidator<Xss, String> {
         if (value == null) {
             return this.notNull;
         }
-        return ValidatorUtil.hasXss(value);
+        return !ValidatorUtil.hasXss(value);
     }
 
 }

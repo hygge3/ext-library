@@ -13,6 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+/**
+ * DES 算法密钥长度仅为 56 位，已被证明不安全，在 1999 年就被 NIST 宣布不再作为加密标准使用。
+ */
+@Deprecated
 public final class DESUtil {
 
     private static final String ALGO = "DES";

@@ -37,3 +37,4 @@ build/
 ### AI ###
 /.claude/
 /.spec-workflow/
+/.trae/

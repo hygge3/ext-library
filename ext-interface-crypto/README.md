@@ -8,7 +8,7 @@
 
 <dependency>
     <groupId>ext.library</groupId>
-    <artifactId>ext-encrypt</artifactId>
+    <artifactId>ext-interface-crypto</artifactId>
     <version>${version}</version>
 </dependency>
 ```
