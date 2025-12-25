@@ -1,4 +1,4 @@
-[根目录](../../CLAUDE.md) > **ext-core**
+[根目录](../CLAUDE.md) > **ext-core**
 
 # ext-core 模块文档
 
@@ -19,9 +19,11 @@ ext-core 是 Spring Boot 集成的基础模块，提供 Spring 生态的增强�
   - 配置异步任务线程池 (`threadPoolTaskExecutor`)
   - 配置定时任务线程池 (`scheduledExecutorService`)
   - 支持 graceful shutdown
+- **AsyncConfig**: 异步执行配置
 
-### 2. 配置属性 (config/properties/)
+### 2. 配置属性 (properties/)
 - **ThreadPoolProperties**: 线程池配置参数绑定
+  - `enabled`: 是否启用线程池
   - `core-pool-size`: 核心线程数
   - `max-pool-size`: 最大线程数
   - `queue-capacity`: 队列容量
@@ -32,6 +34,8 @@ ext-core 是 Spring Boot 集成的基础模块，提供 Spring 生态的增强�
   - 集成 MapStruct Plus
   - 提供对象转换功能
   - CGLIB BeanCopier 作为回退
+  - 支持 Bean 与 Map 互转
+  - 支持深度克隆
 - **SpelUtil**: Spring 表达式语言工具
   - 支持动态表达式解析
   - 可访问方法参数、返回值、Bean 属性
@@ -46,14 +50,11 @@ ext-core 是 Spring Boot 集成的基础模块，提供 Spring 生态的增强�
 - **ExtExpressionEvaluator**: 自定义表达式求值器
 - **ExtExpressionRootObject**: 表达式根对象
 
-### 5. 常量 (constant/)
-- **PatternPool**: 常用正则表达式集合
-
 ## 关键依赖
 
 - **ext-tool**: 基础工具类
 - **spring-boot-starter-validation**: 验证支持
-- **mapstruct-plus**: 对象映射
+- **mapstruct-plus 1.5.0**: 对象映射
 - **spring-boot-starter-aop**: AOP 支持
 - **jakarta.servlet-api**: Servlet API
 
@@ -76,17 +77,41 @@ thread-pool:
 
 ### Bean 转换
 ```java
-// 使用 BeanUtil 进行对象转换
+// 对象转换
 TargetDTO dto = BeanUtil.convert(entity, TargetDTO.class);
 
 // 列表转换
 List<TargetDTO> dtos = BeanUtil.convert(entities, TargetDTO.class);
+
+// Map 转对象
+User user = BeanUtil.convert(map, User.class);
+
+// Bean 转 Map
+Map<String, Object> map = BeanUtil.beanToMap(user);
+
+// 深度克隆
+User cloned = BeanUtil.deepClone(user);
 ```
 
 ### SpEL 表达式
 ```java
 // 解析 SpEL 表达式
 String value = SpelUtil.parseValueToString("#user.name", context);
+
+// 获取属性
+Object prop = BeanUtil.getProperty(user, "name");
+
+// 设置属性
+BeanUtil.setProperty(user, "name", "New Name");
+```
+
+### Spring 上下文
+```java
+// 获取 Bean
+MyService service = SpringUtil.getBean(MyService.class);
+
+// 获取环境变量
+String port = SpringUtil.getProperty("server.port");
 ```
 
 ## 常见问题 (FAQ)
@@ -104,19 +129,34 @@ thread-pool:
 public Result someMethod(User user, String operation) { ... }
 ```
 
+### Q: BeanUtil 支持哪些转换？
+- 对象到对象
+- 对象到 Map
+- Map 到对象
+- 列表到列表
+- 深度克隆
+
 ## 相关文件清单
 
 ### 主要源码文件
 - `src/main/java/ext/library/core/config/ThreadPoolConfig.java`
+- `src/main/java/ext/library/core/config/AsyncConfig.java`
 - `src/main/java/ext/library/core/util/BeanUtil.java`
 - `src/main/java/ext/library/core/util/SpelUtil.java`
-- `src/main/java/ext/library/core/config/properties/ThreadPoolProperties.java`
+- `src/main/java/ext/library/core/util/SpringUtil.java`
+- `src/main/java/ext/library/core/util/MethodUtil.java`
+- `src/main/java/ext/library/core/util/spel/ExtExpressionEvaluator.java`
+- `src/main/java/ext/library/core/properties/ThreadPoolProperties.java`
 
 ### 配置文件
 - `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 
 ## 变更记录 (Changelog)
 
+### 2025-12-24
+- 更新：补充详细的组件说明
+- 更新：补充使用示例
+
 ### 2025-12-19
-- 📝 创建模块文档
-- 🔧 适配 Spring Boot 4.0.0
+- 创建：模块文档
+- 适配：Spring Boot 4.0.0

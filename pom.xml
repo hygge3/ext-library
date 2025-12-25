@@ -53,12 +53,10 @@
         <spring-boot.version>4.0.1</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.40</swagger.version>
-        <mybatis-flex.version>1.11.4</mybatis-flex.version>
         <bcprov.version>1.83</bcprov.version>
         <oshi.version>6.9.2</oshi.version>
         <springdoc.version>3.0.0</springdoc.version>
         <zxing-core.version>3.5.3</zxing-core.version>
-        <guava.version>33.5.0-jre</guava.version>
 
         <!-- plugins.version -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -86,11 +84,6 @@
                 <version>${mapstruct-plus.version}</version>
             </dependency>
             <!-- guava -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>

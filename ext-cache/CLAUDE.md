@@ -1,4 +1,4 @@
-[根目录](../../CLAUDE.md) > **ext-cache**
+[根目录](../CLAUDE.md) > **ext-cache**
 
 # ext-cache 模块文档
 
@@ -37,9 +37,9 @@ ext-cache 提供基于注解的缓存解决方案，支持本地缓存、分布�
 
 ### 4. 枚举 (enums/)
 - **CacheType**: 缓存类型枚举
-  - `FULL`: 全量缓存
-  - `PUT`: 仅写入
-  - `DELETE`: 仅删除
+  - `FULL`: 全量缓存（先读缓存，没有则查库并写入）
+  - `PUT`: 仅写入（只写入缓存，不读取）
+  - `DELETE`: 仅删除（从缓存中删除）
 - **CacheStorage**: 缓存存储枚举
   - `LOCAL`: 本地缓存
   - `REDIS`: Redis 缓存
@@ -64,21 +64,21 @@ ext-cache 提供基于注解的缓存解决方案，支持本地缓存、分布�
 @Service
 public class UserService {
 
-    @Cache(cacheName = "user", key = "#id", timeout = 300)
+    // 全量缓存：先查缓存，没有则查库并写入
+    @Cache(cacheName = "user", key = "#id", timeout = 300, timeUnit = TimeUnit.SECONDS)
     public User getUserById(Long id) {
-        // 从数据库查询
         return userRepository.findById(id);
     }
 
+    // 更新缓存：更新后写入缓存
     @Cache(cacheName = "user", key = "#user.id", type = CacheType.PUT)
     public User updateUser(User user) {
-        // 更新数据库
         return userRepository.save(user);
     }
 
+    // 删除缓存：从缓存中删除
     @Cache(cacheName = "user", key = "#id", type = CacheType.DELETE)
     public void deleteUser(Long id) {
-        // 删除数据库记录
         userRepository.deleteById(id);
     }
 }
@@ -100,8 +100,45 @@ ext:
 ```java
 @Component
 public class CustomCacheStrategy implements CacheStrategy {
-    // 实现自定义缓存逻辑
+    @Override
+    public <T> T get(String key, Class<T> clazz) {
+        // 实现自定义缓存获取逻辑
+        return null;
+    }
+
+    @Override
+    public void set(String key, Object value, long timeout) {
+        // 实现自定义缓存设置逻辑
+    }
+
+    @Override
+    public void delete(String key) {
+        // 实现自定义缓存删除逻辑
+    }
 }
+```
+
+### SpEL 表达式示例
+```java
+// 使用方法参数
+@Cache(cacheName = "user", key = "#id")
+public User getUser(Long id) { ... }
+
+// 使用对象属性
+@Cache(cacheName = "user", key = "#user.id")
+public void updateUser(User user) { ... }
+
+// 使用多个参数
+@Cache(cacheName = "user", key = "#userId + ':' + #type")
+public User getUserByType(Long userId, String type) { ... }
+
+// 使用返回值
+@Cache(cacheName = "user", key = "#result.id", type = CacheType.PUT)
+public User createUser(User user) { ... }
+
+// 使用 Bean
+@Cache(cacheName = "user", key = "@beanName.methodName(#id)")
+public User getUser(Long id) { ... }
 ```
 
 ## 常见问题 (FAQ)
@@ -118,19 +155,33 @@ public class CustomCacheStrategy implements CacheStrategy {
 - Bean：`@beanName`
 
 ### Q: 如何处理缓存穿透？
-使用 L2 缓存策略，本地缓存作为一级，Redis 作为二级。
+使用 L2 缓存策略，本地缓存作为一级，Redis 作为二级。二级缓存可以设置空值，防止穿透。
+
+### Q: 缓存超时时间如何设置？
+可以在注解中单独设置，也可以使用全局默认值。
 
 ## 相关文件清单
 
 ### 主要源码文件
 - `src/main/java/ext/library/cache/annotion/Cache.java`
 - `src/main/java/ext/library/cache/core/CacheAspect.java`
+- `src/main/java/ext/library/cache/strategy/CacheStrategy.java`
 - `src/main/java/ext/library/cache/strategy/CaffeineStrategy.java`
+- `src/main/java/ext/library/cache/strategy/RedisStrategy.java`
+- `src/main/java/ext/library/cache/strategy/L2Strategy.java`
 - `src/main/java/ext/library/cache/config/CacheAutoConfig.java`
+
+### 配置文件
+- `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 
 ## 变更记录 (Changelog)
 
+### 2025-12-24
+- 更新：补充详细的使用示例
+- 更新：补充 SpEL 表达式示例
+- 更新：补充常见问题解答
+
 ### 2025-12-19
-- 📝 创建模块文档
-- ✨ 支持多种缓存策略
-- 🔧 优化 SpEL 表达式解析
+- 创建：模块文档
+- 支持：多种缓存策略
+- 优化：SpEL 表达式解析
