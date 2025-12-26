@@ -92,17 +92,14 @@ public final class DistributedLock implements Lock {
         -- 获取传入的参数
         local val = ARGV[1]
         local ttl = tonumber(ARGV[2]) -- 确保是数字
-
         -- 检查键是否存在
         if redis.call('EXISTS', KEYS[1]) == 1 then
             -- 获取当前值
             local curValue = redis.call('GET', KEYS[1])
-
             -- 修改点 1: 使用精确匹配，而不是前缀查找
             if curValue == val then
                 -- 获取当前TTL
                 local curTtl = redis.call('TTL', KEYS[1])
-
                 -- 修改点 2: 严谨处理TTL返回值
                 if curTtl == -1 then
                     -- 如果键是永久有效的，直接设置新的 TTL

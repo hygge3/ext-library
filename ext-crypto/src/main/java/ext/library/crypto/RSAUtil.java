@@ -50,7 +50,7 @@ public final class RSAUtil {
         } catch (NoSuchAlgorithmException e) {
             throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
-        generator.initialize(1024);
+        generator.initialize(4096);
         return generator.generateKeyPair();
     }
 
