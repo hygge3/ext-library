@@ -2,23 +2,32 @@ package ext.library.http.useragent;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * User-agent 信息
+ * User-Agent 信息基类
+ * <p>
+ * 提供基础的模式匹配和版本解析功能。
+ * </p>
+ *
+ * @since 1.0.0
  */
-public class UserAgentInfo implements Serializable {
+public abstract class UserAgentInfo implements Serializable {
 
-    /**
-     * 未知类型
-     */
-    protected static final String NameUnknown = "Unknown";
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 未知类型标识
+     */
+    protected static final String NAME_UNKNOWN = "Unknown";
+
     /**
      * 信息名称
      */
     private final String name;
+
     /**
      * 信息匹配模式
      */
@@ -27,50 +36,59 @@ public class UserAgentInfo implements Serializable {
     /**
      * 构造
      *
-     * @param name  名字
-     * @param regex 表达式
+     * @param name  名称
+     * @param regex 正则表达式
      */
-    public UserAgentInfo(String name, String regex) {
-        this(name, (null == regex) ? null : Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
+    protected UserAgentInfo(String name, String regex) {
+        this(name, (regex == null) ? null : Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
     }
 
     /**
      * 构造
      *
-     * @param name    名字
-     * @param pattern 匹配模式
+     * @param name    名称
+     * @param pattern 编译后的正则模式
      */
-    public UserAgentInfo(String name, Pattern pattern) {
+    protected UserAgentInfo(String name, Pattern pattern) {
         this.name = name;
         this.pattern = pattern;
     }
 
+    /**
+     * 获取组件名称
+     *
+     * @return 名称
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * 获取匹配模式
+     *
+     * @return 正则模式
+     */
     public Pattern getPattern() {
         return pattern;
     }
 
     /**
-     * 指定内容中是否包含匹配此信息的内容
+     * 检查是否匹配指定内容
      *
      * @param content User-Agent 字符串
-     *
-     * @return 是否包含匹配此信息的内容
+     * @return 是否匹配
      */
     public boolean isMatch(String content) {
-        return pattern.matcher(content).find();
+        return pattern != null && pattern.matcher(content).find();
     }
 
     /**
-     * 是否为 Unknown
+     * 是否为未知类型
      *
-     * @return 是否为 Unknown
+     * @return 是否为未知
      */
     public boolean isUnknown() {
-        return NameUnknown.equals(this.name);
+        return NAME_UNKNOWN.equals(this.name);
     }
 
     @Override
@@ -86,21 +104,18 @@ public class UserAgentInfo implements Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final UserAgentInfo other = (UserAgentInfo) obj;
+        UserAgentInfo other = (UserAgentInfo) obj;
         if (name == null) {
             return other.name == null;
-        } else {return name.equals(other.name);}
+        }
+        return name.equals(other.name);
     }
 
     @Override
     public String toString() {
         return this.name;
     }
-
 }

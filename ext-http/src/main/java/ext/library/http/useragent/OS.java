@@ -1,106 +1,105 @@
 package ext.library.http.useragent;
 
 import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 系统对象
+ * 操作系统信息
+ * <p>
+ * 识别操作系统类型及其版本。
+ * </p>
+ *
+ * @since 1.0.0
  */
 public class OS extends UserAgentInfo {
 
-    /**
-     * 未知
-     */
-    public static final OS Unknown = new OS(NameUnknown, null);
-    /**
-     * 支持的引擎类型
-     */
-    public static final List<OS> oses = List.of(//
-            new OS("Windows 10 or Windows Server 2016", "windows nt 10\\.0", "windows nt (10\\.0)"),//
-            new OS("Windows 8.1 or Windows Server 2012R2", "windows nt 6\\.3", "windows nt (6\\.3)"),//
-            new OS("Windows 8 or Windows Server 2012", "windows nt 6\\.2", "windows nt (6\\.2)"),//
-            new OS("Windows Vista", "windows nt 6\\.0", "windows nt (6\\.0)"), //
-            new OS("Windows 7 or Windows Server 2008R2", "windows nt 6\\.1", "windows nt (6\\.1)"), //
-            new OS("Windows 2003", "windows nt 5\\.2", "windows nt (5\\.2)"), //
-            new OS("Windows XP", "windows nt 5\\.1", "windows nt (5\\.1)"), //
-            new OS("Windows 2000", "windows nt 5\\.0", "windows nt (5\\.0)"), //
-            new OS("Windows Phone", "windows (ce|phone|mobile)( os)?", "windows (?:ce|phone|mobile) (\\d+([._]\\d+)*)"), //
-            new OS("Windows", "windows"), //
-            new OS("OSX", "os x (\\d+)[._](\\d+)", "os x (\\d+([._]\\d+)*)"), //
-            new OS("Android", "Android", "Android (\\d+([._]\\d+)*)"),//
-            new OS("Android", "XiaoMi|MI\\s+", "\\(X(\\d+([._]\\d+)*)"),//
-            new OS("Linux", "linux"), //
-            new OS("Wii", "wii", "wii libnup/(\\d+([._]\\d+)*)"), //
-            new OS("PS3", "playstation 3", "playstation 3; (\\d+([._]\\d+)*)"), //
-            new OS("PSP", "playstation portable", "Portable\\); (\\d+([._]\\d+)*)"), //
-            new OS("iPad", "\\(iPad.*os (\\d+)[._](\\d+)", "\\(iPad.*os (\\d+([._]\\d+)*)"), //
-            new OS("iPhone", "\\(iPhone.*os (\\d+)[._](\\d+)", "\\(iPhone.*os (\\d+([._]\\d+)*)"), //
-            new OS("YPod", "iPod touch[\\s\\;]+iPhone.*os (\\d+)[._](\\d+)", "iPod touch[\\s\\;]+iPhone.*os (\\d+([._]\\d+)*)"), //
-            new OS("YPad", "iPad[\\s\\;]+iPhone.*os (\\d+)[._](\\d+)", "iPad[\\s\\;]+iPhone.*os (\\d+([._]\\d+)*)"), //
-            new OS("YPhone", "iPhone[\\s\\;]+iPhone.*os (\\d+)[._](\\d+)", "iPhone[\\s\\;]+iPhone.*os (\\d+([._]\\d+)*)"), //
-            new OS("Symbian", "symbian(os)?"), //
-            new OS("Darwin", "Darwin\\/([\\d\\w\\.\\-]+)", "Darwin\\/([\\d\\w\\.\\-]+)"), //
-            new OS("Adobe Air", "AdobeAir\\/([\\d\\w\\.\\-]+)", "AdobeAir\\/([\\d\\w\\.\\-]+)"), //
-            new OS("Java", "Java[\\s]+([\\d\\w\\.\\-]+)", "Java[\\s]+([\\d\\w\\.\\-]+)")//
-    );
     @Serial
     private static final long serialVersionUID = 1L;
-    private Pattern versionPattern;
 
     /**
-     * 构造
-     *
-     * @param name  系统名称
-     * @param regex 关键字或表达式
+     * 操作系统定义：名称、匹配正则、版本正则
      */
-    public OS(String name, String regex) {
-        this(name, regex, null);
+    private static final String[][] OS_DEFINITIONS = {
+            {"Windows 10 or Windows Server 2016", "windows nt 10\\.0", "windows nt (10\\.0)"},
+            {"Windows 8.1 or Windows Server 2012R2", "windows nt 6\\.3", "windows nt (6\\.3)"},
+            {"Windows 8 or Windows Server 2012", "windows nt 6\\.2", "windows nt (6\\.2)"},
+            {"Windows Vista", "windows nt 6\\.0", "windows nt (6\\.0)"},
+            {"Windows 7 or Windows Server 2008R2", "windows nt 6\\.1", "windows nt (6\\.1)"},
+            {"Windows 2003", "windows nt 5\\.2", "windows nt (5\\.2)"},
+            {"Windows XP", "windows nt 5\\.1", "windows nt (5\\.1)"},
+            {"Windows 2000", "windows nt 5\\.0", "windows nt (5\\.0)"},
+            {"Windows Phone", "windows (ce|phone|mobile)( os)?", "windows (?:ce|phone|mobile) (\\d+([._]\\d+)*)"},
+            {"Windows", "windows", null},
+            {"OSX", "os x (\\d+)[._](\\d+)", "os x (\\d+([._]\\d+)*)"},
+            {"Android", "Android", "Android (\\d+([._]\\d+)*)"},
+            {"Android", "XiaoMi|MI\\s+", "\\(X(\\d+([._]\\d+)*)"},
+            {"Linux", "linux", null},
+            {"Wii", "wii", "wii libnup/(\\d+([._]\\d+)*)"},
+            {"PS3", "playstation 3", "playstation 3; (\\d+([._]\\d+)*)"},
+            {"PSP", "playstation portable", "Portable\\); (\\d+([._]\\d+)*)"},
+            {"iPad", "\\(iPad.*os (\\d+)[._](\\d+)", "\\(iPad.*os (\\d+([._]\\d+)*)"},
+            {"iPhone", "\\(iPhone.*os (\\d+)[._](\\d+)", "\\(iPhone.*os (\\d+([._]\\d+)*)"},
+            {"iPod", "iPod touch[\\s\\;]+iPhone.*os (\\d+)[._](\\d+)", "iPod touch[\\s\\;]+iPhone.*os (\\d+([._]\\d+)*)"},
+            {"Symbian", "symbian(os)?", null},
+            {"Darwin", "Darwin\\/([\\d\\w\\.\\-]+)", "Darwin\\/([\\d\\w\\.\\-]+)"},
+            {"Adobe Air", "AdobeAir\\/([\\d\\w\\.\\-]+)", "AdobeAir\\/([\\d\\w\\.\\-]+)"},
+            {"Java", "Java[\\s]+([\\d\\w\\.\\-]+)", "Java[\\s]+([\\d\\w\\.\\-]+)"}
+    };
+
+    /**
+     * 所有支持的操作系统列表
+     */
+    public static final List<OS> OSES;
+
+    static {
+        List<OS> list = new ArrayList<>(OS_DEFINITIONS.length);
+        for (String[] def : OS_DEFINITIONS) {
+            list.add(new OS(def[0], def[1], def[2]));
+        }
+        OSES = List.copyOf(list);
     }
 
     /**
-     * 构造
-     *
-     * @param name         系统名称
-     * @param regex        关键字或表达式
-     * @param versionRegex 版本正则表达式
-     *
-     * @since 5.7.4
+     * 未知操作系统
      */
-    public OS(String name, String regex, String versionRegex) {
+    public static final OS UNKNOWN = new OS(NAME_UNKNOWN, (String) null, (String) null);
+
+    /**
+     * 版本解析模式
+     */
+    private final Pattern versionPattern;
+
+    /**
+     * 构造操作系统
+     *
+     * @param name         操作系统名称
+     * @param regex        匹配正则
+     * @param versionRegex 版本解析正则
+     */
+    private OS(String name, String regex, String versionRegex) {
         super(name, regex);
-        if (null != versionRegex) {
+        if (versionRegex != null) {
             this.versionPattern = Pattern.compile(versionRegex, Pattern.CASE_INSENSITIVE);
+        } else {
+            this.versionPattern = null;
         }
     }
 
     /**
-     * 添加自定义的系统类型
-     *
-     * @param name         浏览器名称
-     * @param regex        关键字或表达式
-     * @param versionRegex 匹配版本的正则
-     *
-     * @since 5.7.4
-     */
-    synchronized public static void addCustomOs(String name, String regex, String versionRegex) {
-        oses.add(new OS(name, regex, versionRegex));
-    }
-
-    /**
-     * 获取浏览器版本
+     * 获取操作系统版本
      *
      * @param userAgentString User-Agent 字符串
-     *
-     * @return 版本
+     * @return 版本号，未知返回 null
      */
     public String getVersion(String userAgentString) {
-        if (isUnknown() || null == this.versionPattern) {
-            // 无版本信息
+        if (isUnknown() || versionPattern == null) {
             return null;
         }
-        Matcher m = this.versionPattern.matcher(userAgentString);
+        Matcher m = versionPattern.matcher(userAgentString);
         if (m.find()) {
             return m.group(1);
         }
@@ -108,14 +107,11 @@ public class OS extends UserAgentInfo {
     }
 
     /**
-     * 是否为 MacOS
+     * 是否为 macOS
      *
-     * @return 是否为 MacOS
-     *
-     * @since 5.8.29
+     * @return 是否为 macOS
      */
     public boolean isMacOS() {
         return "OSX".equals(getName());
     }
-
 }

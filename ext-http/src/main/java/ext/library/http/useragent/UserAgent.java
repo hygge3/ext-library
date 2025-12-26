@@ -4,51 +4,25 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * User-Agent 信息对象
+ * User-Agent 解析结果
+ * <p>
+ * 封装解析后的完整 User-Agent 信息，包含浏览器、操作系统、平台、引擎等组件。
+ * </p>
+ *
+ * @since 1.0.0
  */
 public class UserAgent implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 是否为移动平台
-     */
     private boolean mobile;
-
-    /**
-     * 浏览器类型
-     */
     private Browser browser;
-
-    /**
-     * 浏览器版本
-     */
     private String version;
-
-    /**
-     * 平台类型
-     */
     private Platform platform;
-
-    /**
-     * 系统类型
-     */
     private OS os;
-
-    /**
-     * 系统版本
-     */
     private String osVersion;
-
-    /**
-     * 引擎类型
-     */
     private Engine engine;
-
-    /**
-     * 引擎版本
-     */
     private String engineVersion;
 
     public boolean isMobile() {
@@ -113,5 +87,11 @@ public class UserAgent implements Serializable {
 
     public void setEngineVersion(String engineVersion) {
         this.engineVersion = engineVersion;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("UserAgent{mobile=%s, browser=%s %s, os=%s %s, platform=%s, engine=%s %s}",
+                mobile, browser, version, os, osVersion, platform, engine, engineVersion);
     }
 }

@@ -36,868 +36,111 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
- * JDK 的 HttpClient 工具类
+ * JDK HttpClient 工具类
+ * <p>
+ * 提供流畅的链式调用 API，支持 HTTP 请求的构建和执行。
+ * </p>
+ *
+ * <h2>使用示例</h2>
+ * <pre>{@code
+ * // 同步 GET 请求
+ * String result = HttpUtil.get("https://api.example.com/data")
+ *     .header("Authorization", "Bearer token")
+ *     .query("page", "1")
+ *     .execute()
+ *     .asString();
+ *
+ * // 同步 POST 请求
+ * String result = HttpUtil.post("https://api.example.com/users")
+ *     .contentTypeJson()
+ *     .body("{\"name\":\"test\"}")
+ *     .execute()
+ *     .asString();
+ *
+ * // 异步请求
+ * HttpUtil.post("https://api.example.com/users")
+ *     .contentTypeJson()
+ *     .body("{\"name\":\"test\"}")
+ *     .executeAsync()
+ *     .thenAccept(response -> System.out.println(response.asString()));
+ *
+ * // 使用表单数据
+ * String result = HttpUtil.post("https://api.example.com/login")
+ *     .form("username", "admin")
+ *     .form("password", "123456")
+ *     .execute()
+ *     .asString();
+ * }</pre>
  *
  * @since jdk11
  */
 public final class HttpUtil {
-    /**
-     * 获取 Http 客户端
-     */
+
     private static volatile HttpClient client;
     private static HttpClientProps httpClientProps;
+    private static long defaultTimeout = 1200000;
+    private static String defaultContentType = "application/json";
 
     static {
+        initDefaultClient();
+    }
+
+    private static void initDefaultClient() {
+        httpClientProps = new HttpClientProps();
         client = HttpClient.newBuilder()
-                // http 协议版本 1.1 或者 2
-                .version(HttpClient.Version.HTTP_1_1)
-                // 连接超时时间，单位为毫秒
-                .connectTimeout(Duration.ofMinutes(1))
-                // 连接完成之后的转发策略
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                // 指定虚拟线程池
+                .version(httpClientProps.getVersion())
+                .connectTimeout(Duration.ofMillis(httpClientProps.getConnectTimeout()))
+                .followRedirects(httpClientProps.getRedirect())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
-                // 认证，默认情况下 Authenticator.getDefault() 是 null 值，会报错
-                //.authenticator(Authenticator.getDefault())
-                // 代理地址
-                //.proxy(ProxySelector.of(new InetSocketAddress("http://www.baidu.com", 8080)))
-                // 缓存，默认情况下 CookieHandler.getDefault() 是 null 值，会报错
-                //.cookieHandler(CookieHandler.getDefault())
                 .build();
     }
 
-    // region init
+    private HttpUtil() {
+    }
 
-    public HttpUtil(HttpClientProps httpClientProps) {
-        if (client == null) {
-            synchronized (HttpUtil.class) {
-                if (client == null) {
-                    HttpUtil.httpClientProps = httpClientProps;
-                    HttpClient.Builder builder = HttpClient.newBuilder().version(httpClientProps.getVersion()).connectTimeout(Duration.ofMillis(httpClientProps.getConnectTimeout())).followRedirects(httpClientProps.getRedirect());
-                    Optional.ofNullable(httpClientProps.getAuthenticator()).ifPresent(builder::authenticator);
-                    Optional.ofNullable(httpClientProps.getCookieHandler()).ifPresent(builder::cookieHandler);
-                    Optional.ofNullable(httpClientProps.getProxySelector()).ifPresent(builder::proxy);
-                    Optional.ofNullable(httpClientProps.getExecutor()).ifPresent(builder::executor);
-                    client = builder.build();
-                }
-            }
-        }
+    public static void setClient(HttpClient client) {
+        HttpUtil.client = client;
+    }
+
+    public static void setDefaultTimeout(long timeout) {
+        HttpUtil.defaultTimeout = timeout;
+    }
+
+    public static void setDefaultContentType(String contentType) {
+        HttpUtil.defaultContentType = contentType;
     }
 
     public static HttpClient getClient() {
         return client;
     }
-    // endregion
-    // region GET
 
-    /**
-     * 同步 GET 请求，返回值解析为字符串
-     *
-     * @param url 网址
-     *
-     * @return {@code String }
-     *
-     */
-    public static String get(String url) {
-        return get(url, Map.of());
+    public static Request request(String url) {
+        return new Request(url);
     }
 
-    /**
-     * 同步 GET 请求，返回值解析为字符串
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     *
-     */
-    public static String get(String url, Map<String, String> headerMap) {
-        return get(url, headerMap, httpClientProps.getDefaultReadTimeout());
+    public static Request get(String url) {
+        return new Request(url).method(HttpMethod.GET);
     }
 
-    /**
-     * 同步 GET 请求，返回值解析为字符串
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     */
-    public static String get(String url, Map<String, String> headerMap, long timeout) {
-        return get(url, headerMap, timeout, String.class);
+    public static Request post(String url) {
+        return new Request(url).method(HttpMethod.POST);
     }
 
-    /**
-     * 同步 GET 请求，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     */
-    public static <T> T get(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
-        return getResData(httpRequest, resClass);
+    public static Request put(String url) {
+        return new Request(url).method(HttpMethod.PUT);
     }
 
-    /**
-     * 同步 GET 请求，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return {@code HttpResponse<T> }
-     *
-     */
-    public static <T> HttpResponse<T> getResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
-        return getRes(httpRequest, resClass);
+    public static Request delete(String url) {
+        return new Request(url).method(HttpMethod.DELETE);
     }
 
-    /**
-     * 同步 GET 请求，返回 byte[]
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> getByteResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+    public static Request patch(String url) {
+        return new Request(url).method(HttpMethod.PATCH);
     }
-
-    /**
-     * 同步 GET 请求，返回 String
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<String>> getStringResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    /**
-     * 同步 GET 请求，返回 InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> getInputStreamResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildGetRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    // endregion
-    // region POST
-
-    /**
-     * 同步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param requestBody 请求体
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, String requestBody) {
-        return post(url, Map.of(), requestBody, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 POST 请求，通过 form 传送数据
-     *
-     * @param url  访问 URL
-     * @param form form 表单
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, Map<String, Object> form) {
-        return post(url, Map.of(), form, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, Map<String, String> headerMap, String requestBody) {
-        return post(url, headerMap, requestBody, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 POST 请求，通过 Form 传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form) {
-        return post(url, headerMap, form, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        return post(url, headerMap, requestBody, timeout, String.class);
-    }
-
-    /**
-     * 同步 POST 请求，通过 FORM 传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        return post(url, headerMap, form, timeout, String.class);
-    }
-
-    /**
-     * 同步 POST 请求，通过请求体传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> T post(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
-        return getResData(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 POST 请求，通过 FORM 传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      form 表单
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> T post(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
-        return postResponse(url, headerMap, form, timeout, resClass).body();
-    }
-
-    /**
-     * 同步 POST 请求，通过请求体传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
-        return postResponse(url, headerMap, HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8), timeout, resClass);
-    }
-
-    /**
-     * 同步 POST 请求，通过 FORM 表单传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
-        String[] headers = createHeader(headerMap, "application/x-www-form-urlencoded");
-        Map<String, String> newHeader = new HashMap<>();
-        for (int i = 0; i < headers.length; i = i + 2) {
-            newHeader.put(headers[i], headers[i + 1]);
-        }
-        HttpRequest httpRequest = buildPostRequest(url, newHeader, form, timeout);
-        return getRes(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 POST 请求，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url           访问 URL
-     * @param headerMap     header 键值对
-     * @param bodyPublisher 请求体
-     * @param timeout       超时时间
-     * @param resClass      返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> postResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, bodyPublisher, timeout);
-        return getRes(httpRequest, resClass);
-    }
-
-    /**
-     * 异步 POST 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> postByteResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-    }
-
-    /**
-     * 异步 POST 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> postInputStreamResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    /**
-     * 异步 POST 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<String>> postStringResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    /**
-     * 异步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> postByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-    }
-
-    /**
-     * 异步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> postInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    /**
-     * 异步 POST 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<String>> postStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPostRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    // endregion
-    // region Download
-
-    /**
-     * 同步下载文件，构建 httpRequest 的方式参见
-     * {@link #buildGetRequest(String, Map, long)}
-     * {@link #buildPostRequest(String, Map, String, long)}
-     * {@link #buildPostRequest(String, Map, Map, long)}
-     * {@link #buildPostRequest(String, Map, HttpRequest.BodyPublisher, long)}
-     *
-     * @param httpRequest 请求
-     * @param filePath    文件路径
-     *
-     * @return {@code Path }
-     *
-     */
-    public static Path download(HttpRequest httpRequest, String filePath) {
-        try {
-            HttpResponse<Path> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
-            return httpResponse.body();
-        } catch (IOException | InterruptedException e) {
-            throw new ExtException(EmojiSymbol.HTTP, e);
-        }
-    }
-
-    /**
-     * 同步下载文件，构建 httpRequest 的方式参见
-     * {@link #buildGetRequest(String, Map, long)}
-     * {@link #buildPostRequest(String, Map, String, long)}
-     * {@link #buildPostRequest(String, Map, Map, long)}
-     * {@link #buildPostRequest(String, Map, HttpRequest.BodyPublisher, long)}
-     *
-     * @param httpRequest 请求
-     * @param filePath    文件路径
-     *
-     * @return {@code HttpResponse<Path> }
-     *
-     */
-    public static HttpResponse<Path> downloadResponse(HttpRequest httpRequest, String filePath) {
-        try {
-            return client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(new File(filePath).toPath()));
-        } catch (IOException | InterruptedException e) {
-            throw new ExtException(EmojiSymbol.HTTP, e);
-        }
-    }
-
-    // endregion
-    // region PUT
-
-    /**
-     * 同步 PUT 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param requestBody 请求体
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String put(String url, String requestBody) {
-        return put(url, Map.of(), requestBody, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 PUT 请求，通过 form 传送数据
-     *
-     * @param url  访问 URL
-     * @param form form 表单
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String put(String url, Map<String, Object> form) {
-        return put(url, Map.of(), form, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 PUT 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String put(String url, Map<String, String> headerMap, String requestBody) {
-        return put(url, headerMap, requestBody, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 PUT 请求，通过 Form 传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form) {
-        return put(url, headerMap, form, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 同步 PUT 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static String put(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        return put(url, headerMap, requestBody, timeout, String.class);
-    }
-
-    /**
-     * 同步 PUT 请求，通过 FORM 传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static String put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        return put(url, headerMap, form, timeout, String.class);
-    }
-
-    /**
-     * 同步 PUT 请求，通过请求体传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> T put(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
-        return getResData(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 PUT 请求，通过 FORM 传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      form 表单
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> T put(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
-        return putResponse(url, headerMap, form, timeout, resClass).body();
-    }
-
-    /**
-     * 同步 Put 请求，通过请求体传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     * @param resClass    返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, String requestBody, long timeout, Class<T> resClass) {
-        return putResponse(url, headerMap, HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8), timeout, resClass);
-    }
-
-    /**
-     * 同步 Put 请求，通过 FORM 表单传送数据，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout, Class<T> resClass) {
-        String[] headers = createHeader(headerMap, "application/x-www-form-urlencoded");
-        Map<String, String> newHeader = new HashMap<>();
-        for (int i = 0; i < headers.length; i = i + 2) {
-            newHeader.put(headers[i], headers[i + 1]);
-        }
-        HttpRequest httpRequest = buildPutRequest(url, newHeader, form, timeout);
-        return getRes(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 Put 请求，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url           访问 URL
-     * @param headerMap     header 键值对
-     * @param bodyPublisher 请求体
-     * @param timeout       超时时间
-     * @param resClass      返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> putResponse(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, bodyPublisher, timeout);
-        return getRes(httpRequest, resClass);
-    }
-
-    /**
-     * 异步 PUT 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> putByteResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-    }
-
-    /**
-     * 异步 PUT 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> putInputStreamResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    /**
-     * 异步 PUT 请求，通过 form 表单传送数据
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param form      表单
-     * @param timeout   超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     */
-    public static CompletableFuture<HttpResponse<String>> putStringResponseAsync(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, form, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    /**
-     * 异步 PUT 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> putByteResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-    }
-
-    /**
-     * 异步 Put 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> putInputStreamResponse(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    /**
-     * 异步 Put 请求，通过请求体传送数据
-     *
-     * @param url         访问 URL
-     * @param headerMap   header 键值对
-     * @param requestBody 请求体
-     * @param timeout     超时时间
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static CompletableFuture<HttpResponse<String>> putStringResponseAsync(String url, Map<String, String> headerMap, String requestBody, long timeout) {
-        HttpRequest httpRequest = buildPutRequest(url, headerMap, requestBody, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    // endregion
-    // region DELETE
-
-    /**
-     * 删除
-     *
-     * @param url 访问 URL
-     *
-     * @return {@code String }
-     *
-     */
-    public static String delete(String url) {
-        return delete(url, Map.of());
-    }
-
-    /**
-     * 删除
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     *
-     * @return {@code String }
-     *
-     */
-    public static String delete(String url, Map<String, String> headerMap) {
-        return delete(url, headerMap, httpClientProps.getDefaultReadTimeout());
-    }
-
-    /**
-     * 删除
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return {@code String }
-     *
-     */
-    public static String delete(String url, Map<String, String> headerMap, long timeout) {
-        return delete(url, headerMap, timeout, String.class);
-    }
-
-    /**
-     * 删除
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return {@code T }
-     *
-     */
-    public static <T> T delete(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
-        return getResData(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 DELETE 请求，返回值支持的解析类型有 byte[]、String、InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     * @param resClass  返回类型，支持 byte[].class、String.class、InputStream.class，其他类型会抛出 UnsupportedOperationException
-     *
-     * @return java.net.http.HttpResponse<T>
-     *
-     */
-    public static <T> HttpResponse<T> deleteResponse(String url, Map<String, String> headerMap, long timeout, Class<T> resClass) {
-        HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
-        return getRes(httpRequest, resClass);
-    }
-
-    /**
-     * 同步 DELETE 请求，返回 byte[]
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<byte[]>> deleteByteResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-    }
-
-    /**
-     * 同步 DELETE 请求，返回 String
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<String>> deleteStringResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-    }
-
-    /**
-     * 同步 Delete 请求，返回 InputStream
-     *
-     * @param url       访问 URL
-     * @param headerMap header 键值对
-     * @param timeout   超时时间
-     *
-     * @return java.util.concurrent.CompletableFuture<java.net.http.HttpResponse < byte [ ]>>
-     */
-    public static CompletableFuture<HttpResponse<InputStream>> deleteInputStreamResponseAsync(String url, Map<String, String> headerMap, long timeout) {
-        HttpRequest httpRequest = buildDeleteRequest(url, headerMap, timeout);
-        return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-    }
-
-    // endregion
-    // region common methods
 
     @SuppressWarnings("unchecked")
     private static <T> T getResData(HttpRequest httpRequest, Class<T> resClass) {
@@ -937,22 +180,30 @@ public final class HttpUtil {
         }
     }
 
-    // region 构建请求
-
     public static HttpRequest buildGetRequest(String url, Map<String, String> headerMap, long timeout) {
         if (timeout <= 0) {
-            timeout = httpClientProps.defaultReadTimeout;
+            timeout = httpClientProps.getDefaultReadTimeout();
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().GET().headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder()
+                .GET()
+                .headers(createHeader(headerMap, httpClientProps.getDefaultContentType()))
+                .uri(URI.create(url))
+                .timeout(duration)
+                .build();
     }
 
     public static HttpRequest buildDeleteRequest(String url, Map<String, String> headerMap, long timeout) {
         if (timeout <= 0) {
-            timeout = httpClientProps.defaultReadTimeout;
+            timeout = httpClientProps.getDefaultReadTimeout();
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().DELETE().headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder()
+                .DELETE()
+                .headers(createHeader(headerMap, httpClientProps.getDefaultContentType()))
+                .uri(URI.create(url))
+                .timeout(duration)
+                .build();
     }
 
     public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, Map<String, Object> form, long timeout) {
@@ -979,21 +230,29 @@ public final class HttpUtil {
 
     public static HttpRequest buildPostRequest(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout) {
         if (timeout <= 0) {
-            timeout = httpClientProps.defaultReadTimeout;
+            timeout = httpClientProps.getDefaultReadTimeout();
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().POST(bodyPublisher).headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder()
+                .POST(bodyPublisher)
+                .headers(createHeader(headerMap, httpClientProps.getDefaultContentType()))
+                .uri(URI.create(url))
+                .timeout(duration)
+                .build();
     }
 
     public static HttpRequest buildPutRequest(String url, Map<String, String> headerMap, HttpRequest.BodyPublisher bodyPublisher, long timeout) {
         if (timeout <= 0) {
-            timeout = httpClientProps.defaultReadTimeout;
+            timeout = httpClientProps.getDefaultReadTimeout();
         }
         Duration duration = Duration.ofMillis(timeout);
-        return HttpRequest.newBuilder().PUT(bodyPublisher).headers(createHeader(headerMap, httpClientProps.defaultContentType)).uri(URI.create(url)).timeout(duration).build();
+        return HttpRequest.newBuilder()
+                .PUT(bodyPublisher)
+                .headers(createHeader(headerMap, httpClientProps.getDefaultContentType()))
+                .uri(URI.create(url))
+                .timeout(duration)
+                .build();
     }
-
-    // endregion
 
     private static String[] createHeader(@Nullable Map<String, String> headerMap, String contentType) {
         if (headerMap == null) {
@@ -1014,63 +273,32 @@ public final class HttpUtil {
         }
         return result;
     }
-    // endregion
 
     public static class HttpClientProps {
 
-        /**
-         * http 版本
-         */
         private final HttpClient.Version version = HttpClient.Version.HTTP_1_1;
-
-        /**
-         * 转发策略
-         */
         private final HttpClient.Redirect redirect = HttpClient.Redirect.NORMAL;
-        /**
-         * 连接超时时间毫秒
-         */
         private final int connectTimeout = 10000;
-        /**
-         * 默认读取数据超时时间
-         */
         private final int defaultReadTimeout = 1200000;
-        /**
-         * 默认 content-type
-         */
         private final String defaultContentType = "application/json";
-        /**
-         * 线程池
-         */
         private Executor executor;
-        /**
-         * 认证
-         */
         private Authenticator authenticator;
-        /**
-         * 代理
-         */
         private ProxySelector proxySelector;
-        /**
-         * cookiehandler
-         */
         private CookieHandler cookieHandler;
 
         public HttpClientProps() {
             TrustManager[] trustAllCertificates = new TrustManager[]{new X509TrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // TODO Auto-generated method stub
                 }
 
                 @Override
                 public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    // TODO Auto-generated method stub
                 }
 
                 @Override
                 public X509Certificate[] getAcceptedIssuers() {
-                    return null; // Not relevant.
+                    return null;
                 }
             }};
             SSLParameters sslParameters = new SSLParameters();
@@ -1078,7 +306,7 @@ public final class HttpUtil {
 
             try {
                 SSLContext sslContext = SSLContext.getInstance("TLS");
-                System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");// 取消主机名验证
+                System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");
                 sslContext.init(null, trustAllCertificates, new SecureRandom());
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 Exceptions.log(e);
@@ -1135,6 +363,581 @@ public final class HttpUtil {
 
         public void setCookieHandler(CookieHandler cookieHandler) {
             this.cookieHandler = cookieHandler;
+        }
+    }
+
+    public enum HttpMethod {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        PATCH,
+        HEAD,
+        OPTIONS
+    }
+
+    public static class Request {
+
+        private final String url;
+        private HttpMethod method;
+        private final Map<String, String> headers;
+        private final Map<String, String> queryParams;
+        @Nullable
+        private Object body;
+        private long timeout;
+        private Class<?> responseType;
+        private boolean formUrlEncoded;
+        private boolean multipart;
+        private Consumer<Exception> errorHandler;
+        private BiConsumer<HttpRequest, HttpResponse<?>> responseHandler;
+
+        public Request(String url) {
+            this.url = url;
+            this.method = HttpMethod.GET;
+            this.headers = new HashMap<>();
+            this.queryParams = new HashMap<>();
+            this.timeout = defaultTimeout;
+            this.responseType = String.class;
+        }
+
+        public Request(String url, HttpMethod method) {
+            this(url);
+            this.method = method;
+        }
+
+        public Request method(HttpMethod method) {
+            this.method = method;
+            return this;
+        }
+
+        public Request get() {
+            return method(HttpMethod.GET);
+        }
+
+        public Request post() {
+            return method(HttpMethod.POST);
+        }
+
+        public Request put() {
+            return method(HttpMethod.PUT);
+        }
+
+        public Request delete() {
+            return method(HttpMethod.DELETE);
+        }
+
+        public Request patch() {
+            return method(HttpMethod.PATCH);
+        }
+
+        public Request header(String name, String value) {
+            this.headers.put(name, value);
+            return this;
+        }
+
+        public Request headers(Map<String, String> headers) {
+            this.headers.putAll(headers);
+            return this;
+        }
+
+        public Request contentType(String contentType) {
+            this.headers.put("Content-Type", contentType);
+            return this;
+        }
+
+        public Request accept(String accept) {
+            this.headers.put("Accept", accept);
+            return this;
+        }
+
+        public Request authorization(String token) {
+            this.headers.put("Authorization", token);
+            return this;
+        }
+
+        public Request bearer(String token) {
+            return authorization("Bearer " + token);
+        }
+
+        public Request query(String name, String value) {
+            this.queryParams.put(name, value);
+            return this;
+        }
+
+        public Request query(Map<String, String> params) {
+            this.queryParams.putAll(params);
+            return this;
+        }
+
+        public Request body(String body) {
+            this.body = body;
+            this.formUrlEncoded = false;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request body(byte[] body) {
+            this.body = body;
+            this.formUrlEncoded = false;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request body(Object body) {
+            this.body = body;
+            this.formUrlEncoded = false;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request body(HttpRequest.BodyPublisher bodyPublisher) {
+            this.body = bodyPublisher;
+            this.formUrlEncoded = false;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request form(String name, Object value) {
+            if (this.body == null) {
+                this.body = new HashMap<String, Object>();
+            }
+            if (this.body instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> form = (Map<String, Object>) this.body;
+                form.put(name, value);
+            }
+            this.formUrlEncoded = true;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request form(Map<String, Object> formData) {
+            this.body = formData;
+            this.formUrlEncoded = true;
+            this.multipart = false;
+            return this;
+        }
+
+        public Request multipartForm(String name, String filename, InputStream stream) {
+            this.body = new Object[]{name, filename, stream};
+            this.formUrlEncoded = false;
+            this.multipart = true;
+            return this;
+        }
+
+        public Request timeout(long millis) {
+            this.timeout = millis;
+            return this;
+        }
+
+        public Request timeout(Duration duration) {
+            this.timeout = duration.toMillis();
+            return this;
+        }
+
+        public Response execute() {
+            HttpRequest httpRequest = buildRequest();
+            HttpResponse<?> response = sendRequest(httpRequest);
+            return new Response(response);
+        }
+
+        public <T> T executeAs(Class<T> type) {
+            this.responseType = type;
+            HttpRequest httpRequest = buildRequest();
+            HttpResponse<?> response = sendRequest(httpRequest);
+            return convertResponse(response, type);
+        }
+
+        public String executeAsString() {
+            return executeAs(String.class);
+        }
+
+        public byte[] executeAsBytes() {
+            return executeAs(byte[].class);
+        }
+
+        public InputStream executeAsStream() {
+            return executeAs(InputStream.class);
+        }
+
+        public CompletableFuture<Response> executeAsync() {
+            HttpRequest httpRequest = buildRequest();
+            return sendAsyncRequest(httpRequest)
+                    .thenApply(Response::new)
+                    .exceptionally(ex -> {
+                        if (errorHandler != null && ex instanceof Exception) {
+                            errorHandler.accept((Exception) ex);
+                        }
+                        return null;
+                    });
+        }
+
+        public <T> CompletableFuture<T> executeAsyncAs(Class<T> type) {
+            this.responseType = type;
+            HttpRequest httpRequest = buildRequest();
+            return sendAsyncRequest(httpRequest)
+                    .thenApply(response -> convertResponse(response, type))
+                    .exceptionally(ex -> {
+                        if (errorHandler != null && ex instanceof Exception) {
+                            errorHandler.accept((Exception) ex);
+                        }
+                        return null;
+                    });
+        }
+
+        public CompletableFuture<String> executeAsyncAsString() {
+            return executeAsyncAs(String.class);
+        }
+
+        public Path download(String filePath) {
+            HttpRequest httpRequest = buildRequest();
+            try {
+                HttpResponse<Path> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofFile(Path.of(filePath)));
+                return response.body();
+            } catch (IOException | InterruptedException e) {
+                throw new ExtException(EmojiSymbol.HTTP, e);
+            }
+        }
+
+        public Request onError(Consumer<Exception> errorHandler) {
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        public Request onResponse(BiConsumer<HttpRequest, HttpResponse<?>> responseHandler) {
+            this.responseHandler = responseHandler;
+            return this;
+        }
+
+        public Request contentTypeJson() {
+            return contentType("application/json; charset=UTF-8");
+        }
+
+        public Request contentTypeForm() {
+            return contentType("application/x-www-form-urlencoded; charset=UTF-8");
+        }
+
+        public Request acceptJson() {
+            return accept("application/json");
+        }
+
+        public Request acceptXml() {
+            return accept("application/xml");
+        }
+
+        private HttpRequest buildRequest() {
+            String requestUrl = buildUrl();
+            Duration duration = Duration.ofMillis(timeout > 0 ? timeout : defaultTimeout);
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(requestUrl))
+                    .timeout(duration);
+            applyMethod(builder);
+            applyHeaders(builder);
+            applyBody(builder);
+            return builder.build();
+        }
+
+        private String buildUrl() {
+            if (queryParams.isEmpty()) {
+                return url;
+            }
+            StringBuilder sb = new StringBuilder(url);
+            String separator = url.contains("?") ? "&" : "?";
+            sb.append(separator);
+            queryParams.forEach((k, v) -> {
+                sb.append(k).append("=").append(java.net.URLEncoder.encode(v, StandardCharsets.UTF_8));
+                sb.append("&");
+            });
+            return sb.substring(0, sb.length() - 1);
+        }
+
+        private void applyMethod(HttpRequest.Builder builder) {
+            switch (method) {
+                case GET -> builder.GET();
+                case POST -> builder.POST(buildBodyPublisher());
+                case PUT -> builder.PUT(buildBodyPublisher());
+                case DELETE -> builder.DELETE();
+                case PATCH -> builder.method("PATCH", buildBodyPublisher());
+                case HEAD -> builder.HEAD();
+                case OPTIONS -> builder.method("OPTIONS", HttpRequest.BodyPublishers.noBody());
+            }
+        }
+
+        private void applyHeaders(HttpRequest.Builder builder) {
+            if (!headers.containsKey("Content-Type") && method != HttpMethod.GET && method != HttpMethod.HEAD) {
+                if (formUrlEncoded) {
+                    builder.header("Content-Type", "application/x-www-form-urlencoded");
+                } else if (multipart) {
+                    builder.header("Content-Type", "multipart/form-data");
+                } else {
+                    builder.header("Content-Type", defaultContentType);
+                }
+            }
+            headers.forEach(builder::header);
+        }
+
+        private void applyBody(HttpRequest.Builder builder) {
+            if (method == HttpMethod.GET || method == HttpMethod.DELETE || method == HttpMethod.HEAD) {
+                return;
+            }
+            if (body == null) {
+                return;
+            }
+            builder.header("Content-Type", getBodyContentType());
+            HttpRequest.BodyPublisher bodyPublisher = buildBodyPublisher();
+            if (bodyPublisher != null) {
+                switch (method) {
+                    case POST -> builder.POST(bodyPublisher);
+                    case PUT -> builder.PUT(bodyPublisher);
+                    case PATCH -> builder.method("PATCH", bodyPublisher);
+                    default -> {
+                    }
+                }
+            }
+        }
+
+        private String getBodyContentType() {
+            String contentType = headers.get("Content-Type");
+            if (contentType != null) {
+                return contentType;
+            }
+            if (formUrlEncoded) {
+                return "application/x-www-form-urlencoded";
+            }
+            if (multipart) {
+                return "multipart/form-data";
+            }
+            return defaultContentType;
+        }
+
+        private HttpRequest.BodyPublisher buildBodyPublisher() {
+            if (body == null) {
+                return HttpRequest.BodyPublishers.noBody();
+            }
+            if (body instanceof HttpRequest.BodyPublisher) {
+                return (HttpRequest.BodyPublisher) body;
+            }
+            if (body instanceof String) {
+                return HttpRequest.BodyPublishers.ofString((String) body, StandardCharsets.UTF_8);
+            }
+            if (body instanceof byte[]) {
+                return HttpRequest.BodyPublishers.ofByteArray((byte[]) body);
+            }
+            if (body instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> form = (Map<String, Object>) body;
+                StringJoiner sj = new StringJoiner("&");
+                form.forEach((k, v) -> sj.add(k + "=" + java.net.URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
+                return HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
+            }
+            if (body instanceof Object[]) {
+                return HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8);
+            }
+            return HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8);
+        }
+
+        private HttpResponse<?> sendRequest(HttpRequest httpRequest) {
+            try {
+                if (byte[].class == responseType) {
+                    HttpResponse<byte[]> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                } else if (InputStream.class == responseType) {
+                    HttpResponse<InputStream> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                } else {
+                    HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                }
+            } catch (IOException | InterruptedException e) {
+                if (errorHandler != null) {
+                    errorHandler.accept(e);
+                }
+                throw new ExtException(EmojiSymbol.HTTP, e);
+            }
+        }
+
+        private CompletableFuture<HttpResponse<?>> sendAsyncRequest(HttpRequest httpRequest) {
+            if (byte[].class == responseType) {
+                return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
+                        .thenApply(response -> {
+                            if (responseHandler != null) {
+                                responseHandler.accept(httpRequest, response);
+                            }
+                            return response;
+                        });
+            } else if (InputStream.class == responseType) {
+                return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())
+                        .thenApply(response -> {
+                            if (responseHandler != null) {
+                                responseHandler.accept(httpRequest, response);
+                            }
+                            return response;
+                        });
+            } else {
+                return client.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                        .thenApply(response -> {
+                            if (responseHandler != null) {
+                                responseHandler.accept(httpRequest, response);
+                            }
+                            return response;
+                        });
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> T convertResponse(HttpResponse<?> response, Class<T> type) {
+            if (type == String.class) {
+                if (response.body() instanceof String) {
+                    return (T) response.body();
+                }
+                return (T) new String((byte[]) response.body(), StandardCharsets.UTF_8);
+            }
+            if (type == byte[].class) {
+                if (response.body() instanceof byte[]) {
+                    return (T) response.body();
+                }
+                return (T) ((String) response.body()).getBytes(StandardCharsets.UTF_8);
+            }
+            if (type == InputStream.class) {
+                return (T) response.body();
+            }
+            throw new UnsupportedOperationException("Unsupported response type: " + type);
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public HttpMethod getMethod() {
+            return method;
+        }
+
+        public Map<String, String> getHeaders() {
+            return headers;
+        }
+
+        public Map<String, String> getQueryParams() {
+            return queryParams;
+        }
+
+        public Object getBody() {
+            return body;
+        }
+
+        public long getTimeout() {
+            return timeout;
+        }
+
+        public Class<?> getResponseType() {
+            return responseType;
+        }
+    }
+
+    public static class Response {
+
+        private final HttpResponse<?> response;
+
+        public Response(HttpResponse<?> response) {
+            this.response = response;
+        }
+
+        public String asString() {
+            Object body = response.body();
+            if (body instanceof String) {
+                return (String) body;
+            }
+            if (body instanceof byte[]) {
+                return new String((byte[]) body, StandardCharsets.UTF_8);
+            }
+            return body.toString();
+        }
+
+        public byte[] asBytes() {
+            Object body = response.body();
+            if (body instanceof byte[]) {
+                return (byte[]) body;
+            }
+            if (body instanceof String) {
+                return ((String) body).getBytes(StandardCharsets.UTF_8);
+            }
+            return body.toString().getBytes(StandardCharsets.UTF_8);
+        }
+
+        public InputStream asStream() {
+            return (InputStream) response.body();
+        }
+
+        public int statusCode() {
+            return response.statusCode();
+        }
+
+        public boolean isSuccess() {
+            return statusCode() >= 200 && statusCode() < 300;
+        }
+
+        public boolean isRedirect() {
+            return statusCode() >= 300 && statusCode() < 400;
+        }
+
+        public boolean isClientError() {
+            return statusCode() >= 400 && statusCode() < 500;
+        }
+
+        public boolean isServerError() {
+            return statusCode() >= 500;
+        }
+
+        public String header(String name) {
+            return response.headers().firstValue(name).orElse(null);
+        }
+
+        public String contentType() {
+            return header("Content-Type");
+        }
+
+        public long contentLength() {
+            String length = header("Content-Length");
+            if (length != null) {
+                try {
+                    return Long.parseLong(length);
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
+            }
+            return -1;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <T> T body(Class<T> type) {
+            if (type == String.class) {
+                return (T) asString();
+            }
+            if (type == byte[].class) {
+                return (T) asBytes();
+            }
+            if (type == InputStream.class) {
+                return (T) asStream();
+            }
+            throw new UnsupportedOperationException("Unsupported body type: " + type);
+        }
+
+        public HttpResponse<?> getRawResponse() {
+            return response;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Response{statusCode=%d, contentType='%s', bodyLength=%d}",
+                    statusCode(), contentType(), contentLength());
         }
     }
 }

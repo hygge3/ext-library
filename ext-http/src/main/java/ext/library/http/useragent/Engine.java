@@ -1,57 +1,93 @@
 package ext.library.http.useragent;
 
 import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 引擎对象
+ * 渲染引擎信息
+ * <p>
+ * 识别浏览器使用的渲染引擎及其版本。
+ * </p>
+ *
+ * @since 1.0.0
  */
 public class Engine extends UserAgentInfo {
 
-    /** 未知 */
-    public static final Engine Unknown = new Engine(NameUnknown, null);
-    /**
-     * 支持的引擎类型
-     */
-    public static final List<Engine> engines = List.of(new Engine("Trident", "trident"), new Engine("Webkit", "webkit"),
-            new Engine("Chrome", "chrome"), new Engine("Opera", "opera"), new Engine("Presto", "presto"),
-            new Engine("Gecko", "gecko"), new Engine("KHTML", "khtml"), new Engine("Konqueror", "konqueror"),
-            new Engine("MIDP", "MIDP"));
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 引擎名称到版本正则的映射
+     */
+    private static final String[][] ENGINE_VERSION_PATTERNS = {
+            {"Trident", "trident", "trident[/\\- ]([\\d\\w.\\-]+)"},
+            {"Webkit", "webkit", "webkit[/\\- ]?([\\d\\w.\\-]+)"},
+            {"Chrome", "chrome", "chrome[/\\- ]?([\\d\\w.\\-]+)"},
+            {"Opera", "opera", "opera[/\\- ]?([\\d\\w.\\-]+)"},
+            {"Presto", "presto", "presto[/\\- ]?([\\d\\w.\\-]+)"},
+            {"Gecko", "gecko", "gecko[/\\- ]?([\\d\\w.\\-]+)"},
+            {"KHTML", "khtml", "khtml[/\\- ]?([\\d\\w.\\-]+)"},
+            {"Konqueror", "konqueror", "konqueror[/\\- ]?([\\d\\w.\\-]+)"},
+            {"MIDP", "MIDP", "MIDP[/\\- ]?([\\d\\w.\\-]+)"}
+    };
+
+    /**
+     * 所有支持的引擎列表
+     */
+    public static final List<Engine> ENGINES;
+
+    static {
+        List<Engine> list = new ArrayList<>(ENGINE_VERSION_PATTERNS.length);
+        for (String[] info : ENGINE_VERSION_PATTERNS) {
+            list.add(new Engine(info[0], info[1], info[2]));
+        }
+        ENGINES = List.copyOf(list);
+    }
+
+    /**
+     * 未知引擎
+     */
+    public static final Engine UNKNOWN = new Engine(NAME_UNKNOWN, (String) null, (String) null);
+
+    /**
+     * 版本解析模式
+     */
     private final Pattern versionPattern;
 
     /**
-     * 构造
+     * 构造引擎
      *
-     * @param name  引擎名称
-     * @param regex 关键字或表达式
+     * @param name         引擎名称
+     * @param regex        匹配正则
+     * @param versionRegex 版本解析正则
      */
-    public Engine(String name, String regex) {
+    private Engine(String name, String regex, String versionRegex) {
         super(name, regex);
-        this.versionPattern = Pattern.compile(name + "[/\\- ]([\\d\\w.\\-]+)", Pattern.CASE_INSENSITIVE);
+        if (versionRegex != null) {
+            this.versionPattern = Pattern.compile(versionRegex, Pattern.CASE_INSENSITIVE);
+        } else {
+            this.versionPattern = null;
+        }
     }
 
     /**
      * 获取引擎版本
      *
      * @param userAgentString User-Agent 字符串
-     *
-     * @return 版本
-     *
-     * @since 5.7.4
+     * @return 版本号，未知返回 null
      */
     public String getVersion(String userAgentString) {
-        if (isUnknown()) {
+        if (isUnknown() || versionPattern == null) {
             return null;
         }
-        Matcher m = this.versionPattern.matcher(userAgentString);
+        Matcher m = versionPattern.matcher(userAgentString);
         if (m.find()) {
             return m.group(1);
         }
         return "";
     }
-
 }
