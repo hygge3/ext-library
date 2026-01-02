@@ -13,6 +13,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+/**
+ * 字符串工具类，提供各种字符串处理方法
+ * 
+ * <p>设计目的：封装常用的字符串操作，简化字符串处理逻辑，提高开发效率</p>
+ * 
+ * <p>核心功能：
+ * <ul>
+ *   <li>字符串判空、转换、拼接等基本操作</li>
+ *   <li>字符串格式化、模板替换功能</li>
+ *   <li>字符串匹配、分割、清理等高级操作</li>
+ *   <li>HTML转义、安全过滤等安全相关操作</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>使用场景：
+ * <ul>
+ *   <li>数据验证：验证字符串是否为空、是否符合特定格式</li>
+ *   <li>数据转换：将其他类型数据转换为字符串，或进行字符串格式转换</li>
+ *   <li>模板处理：处理字符串模板，进行变量替换</li>
+ *   <li>安全处理：对用户输入进行HTML转义，防止XSS攻击</li>
+ * </ul>
+ * </p>
+ */
 public final class StringUtil {
 
     /**
@@ -611,14 +634,19 @@ public final class StringUtil {
     }
 
     /**
-     * 有任意一个非空
+     * 检查集合中是否有任意一个非空字符串
      *
-     * @param strs 字符串列表
+     * <pre>
+     * StringUtil.isAnyNotBlank(Collections.emptyList()) = false
+     * StringUtil.isAnyNotBlank(Arrays.asList(null, "", " ")) = false
+     * StringUtil.isAnyNotBlank(Arrays.asList("", "test", " ")) = true
+     * </pre>
      *
-     * @return boolean
+     * @param strs 字符串集合，可能为null
+     * @return true如果集合中存在至少一个非空字符串，否则false
      */
     public static boolean isAnyNotBlank(Collection<String> strs) {
-        if (Array.getLength(strs) == 0) {
+        if (strs == null || strs.isEmpty()) {
             return false;
         }
         return strs.stream().anyMatch(StringUtil::isNotBlank);

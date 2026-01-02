@@ -15,10 +15,39 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 时间工具类
+ * 日期时间工具类，提供各种日期时间处理方法
+ * 
+ * <p>设计目的：封装Java 8+日期时间API，提供简洁易用的日期时间操作方法，提高开发效率</p>
+ * 
+ * <p>核心功能：
+ * <ul>
+ *   <li>日期时间的解析和格式化</li>
+ *   <li>时间戳与日期时间的相互转换</li>
+ *   <li>时间段计算和比较</li>
+ *   <li>各种时间边界的获取（当天、当周、当月等）</li>
+ *   <li>时区转换和处理</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>使用场景：
+ * <ul>
+ *   <li>数据转换：将字符串或时间戳转换为日期时间对象</li>
+ *   <li>格式处理：将日期时间对象格式化为指定格式的字符串</li>
+ *   <li>时间计算：计算两个日期之间的时间差</li>
+ *   <li>边界获取：获取当天、当周、当月的开始和结束时间</li>
+ *   <li>时间比较：判断某个时间是否在指定时间段内</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>注意事项：
+ * <ul>
+ *   <li>默认使用GMT+8时区</li>
+ *   <li>所有方法均为静态方法，无需实例化</li>
+ *   <li>使用Java 8+的日期时间API，线程安全</li>
+ * </ul>
+ * </p>
  */
-
-public  class DateUtil {
+public final class DateUtil {
 
     // region Common
     /** 默认时区 */
