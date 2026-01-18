@@ -120,19 +120,8 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void error(String module, Throwable throwable, String message, Object... args) {
-        error(module, StringUtil.format(message, args));
-        print(throwable);
-    }
-
-    /**
-     * 打印异常堆栈信息
-     *
-     * @param throwable 异常对象
-     */
-    public static void print(Throwable throwable) {
-        if (throwable != null) {
-            throwable.printStackTrace();
-        }
+        Logger logger = LoggerFactory.getLogger(getCallerClassName());
+        logger.error(StringUtil.format("[{}] ", module) + message, args, throwable);
     }
 
 }

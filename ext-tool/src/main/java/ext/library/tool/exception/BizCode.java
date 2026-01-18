@@ -8,7 +8,7 @@ public enum BizCode implements ResponseCode {
     // region 6xx Custom Error
 
     /** 自定义错误消息 */
-    WARN("600", "系统内部异常"),
+    WARN("600", "未知的内部异常"),
 
     /** 工具异常，表示在执行工具操作过程中发生的异常情况 */
     TOOL_EXCEPTION("610", "工具异常"),
