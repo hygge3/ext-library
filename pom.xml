@@ -48,11 +48,7 @@
         <revision>4.0.0</revision>
         <spring-boot.version>4.0.1</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <swagger.version>2.2.40</swagger.version>
-        <bcprov.version>1.83</bcprov.version>
-        <oshi.version>6.9.2</oshi.version>
-        <springdoc.version>3.0.0</springdoc.version>
-        <zxing-core.version>3.5.3</zxing-core.version>
+        <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
 
         <!-- plugins.version -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -78,48 +74,6 @@
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <!-- ======================= 第三方依赖 ===================== -->
-            <!-- mapstruct-plus -->
-            <dependency>
-                <groupId>io.github.linpeilie</groupId>
-                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
-                <version>${mapstruct-plus.version}</version>
-            </dependency>
-            <!-- guava -->
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk18on</artifactId>
-                <version>${bcprov.version}</version>
-            </dependency>
-            <!-- swagger-annotations -->
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.therapi</groupId>
-                <artifactId>therapi-runtime-javadoc</artifactId>
-                <version>0.15.0</version>
-            </dependency>
-            <!-- oshi -->
-            <dependency>
-                <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java25</artifactId>
-                <version>${oshi.version}</version>
-            </dependency>
-            <!-- springdoc -->
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>${springdoc.version}</version>
-            </dependency>
-            <!-- google zxing -->
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>javase</artifactId>
-                <version>${zxing-core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -180,7 +134,7 @@
                             <path>
                                 <groupId>com.github.therapi</groupId>
                                 <artifactId>therapi-runtime-javadoc-scribe</artifactId>
-                                <version>0.15.0</version>
+                                <version>${therapi-javadoc.version}</version>
                             </path>
                             <path>
                                 <groupId>org.springframework.boot</groupId>
