@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.1.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
 
@@ -71,6 +71,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- ext-bom -->
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-bom</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- ======================= 第三方依赖 ===================== -->
             <!-- mapstruct-plus -->
             <dependency>
@@ -112,112 +120,6 @@
                 <groupId>com.google.zxing</groupId>
                 <artifactId>javase</artifactId>
                 <version>${zxing-core.version}</version>
-            </dependency>
-            <!-- ======================= Ext 依赖 ===================== -->
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-captcha</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-crypto</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-desensitize</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-api-crypto</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-holidays</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-http</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-idempotent</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-json</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-mail</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-monitor</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-openapi</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-qrcode</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-redis</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-cache</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-security</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-sse</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-tool</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-trans</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-mvc</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-websocket</artifactId>
-                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
