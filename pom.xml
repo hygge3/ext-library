@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
 
     <groupId>ext.library</groupId>
     <artifactId>ext-parent</artifactId>
@@ -11,22 +11,22 @@
     <description>Parent</description>
     <url>https://hygge.eu.org</url>
 
-    <modules>
+    <subprojects>
         <!-- 通用基础层 -->
-        <module>ext-common</module>
+        <subproject>ext-common</subproject>
         <!-- 基础设施层 -->
-        <module>ext-infra</module>
+        <subproject>ext-infra</subproject>
         <!-- 安全层（独立） -->
-        <module>ext-security</module>
+        <subproject>ext-security</subproject>
         <!-- 加密层（独立） -->
-        <module>ext-crypto</module>
+        <subproject>ext-crypto</subproject>
         <!-- Web 层 -->
-        <module>ext-web</module>
+        <subproject>ext-web</subproject>
         <!-- 业务增强层 -->
-        <module>ext-enhance</module>
+        <subproject>ext-enhance</subproject>
         <!-- 杂项工具 -->
-        <module>ext-misc</module>
-    </modules>
+        <subproject>ext-misc</subproject>
+    </subprojects>
 
     <licenses>
         <license>
@@ -55,7 +55,6 @@
         <!-- plugins.version -->
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -247,10 +246,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -262,32 +257,6 @@
 
         <pluginManagement>
             <plugins>
-                <!-- 版本管理 -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>flatten-maven-plugin</artifactId>
-                    <version>${flatten-maven-plugin.version}</version>
-                    <configuration>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                        <updatePomFile>true</updatePomFile>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>flatten</goal>
-                            </goals>
-                            <id>flatten</id>
-                            <phase>process-resources</phase>
-                        </execution>
-                        <execution>
-                            <goals>
-                                <goal>clean</goal>
-                            </goals>
-                            <id>flatten.clean</id>
-                            <phase>clean</phase>
-                        </execution>
-                    </executions>
-                </plugin>
                 <!-- 编译插件 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

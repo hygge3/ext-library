@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
 
     <parent>
         <groupId>ext.library</groupId>
@@ -14,12 +14,12 @@
     <packaging>pom</packaging>
     <description>业务增强层聚合器</description>
 
-    <modules>
-        <module>ext-captcha</module>
-        <module>ext-idempotent</module>
-        <module>ext-desensitize</module>
-        <module>ext-trans</module>
-        <module>ext-api-crypto</module>
-    </modules>
+    <subprojects>
+        <subproject>ext-captcha</subproject>
+        <subproject>ext-idempotent</subproject>
+        <subproject>ext-desensitize</subproject>
+        <subproject>ext-trans</subproject>
+        <subproject>ext-api-crypto</subproject>
+    </subprojects>
 
 </project>

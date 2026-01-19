@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
 
     <parent>
         <groupId>ext.library</groupId>
@@ -14,11 +14,11 @@
     <packaging>pom</packaging>
     <description>Web 层聚合器</description>
 
-    <modules>
-        <module>ext-mvc</module>
-        <module>ext-openapi</module>
-        <module>ext-sse</module>
-        <module>ext-websocket</module>
-    </modules>
+    <subprojects>
+        <subproject>ext-mvc</subproject>
+        <subproject>ext-openapi</subproject>
+        <subproject>ext-sse</subproject>
+        <subproject>ext-websocket</subproject>
+    </subprojects>
 
 </project>
