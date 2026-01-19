@@ -1,35 +1,42 @@
 package ext.library.tool.constant;
 
 import ext.library.tool.domain.SnowflakeId;
-import ext.library.tool.holder.retry.SimpleRetry;
 
 import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * 一些常用的单例对象
+ * 常用单例对象持有器
+ * <p>
+ * 提供线程安全的共享实例，避免重复创建开销
  */
-public interface Holder {
+public final class Holder {
+
+    private Holder() {
+        // 防止实例化
+    }
 
     /**
-     * cpu 核心数
+     * 普通随机数生成器
+     * <p>
+     * 注意：非线程安全，高并发场景建议使用 {@link ThreadLocalRandom}
      */
-    int CPU_CORE_NUM = Runtime.getRuntime().availableProcessors();
+    public static final Random RANDOM = new Random();
 
     /**
-     * RANDOM
+     * 安全随机数生成器
+     * <p>
+     * 线程安全，适用于密码学场景
      */
-    Random RANDOM = new Random();
+    public static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     /**
-     * SECURE_RANDOM
+     * 雪花 ID 生成器（默认实例）
+     * <p>
+     * workerId=0, datacenterId=0，适用于单机环境
+     * <p>
+     * 分布式环境建议自行创建 {@link SnowflakeId} 实例并配置合适的 ID
      */
-    SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    /** 简单重试 */
-    SimpleRetry SIMPLE_RETRY = new SimpleRetry();
-
-    /** Twitter 的 Snowflake 算法实现 */
-    SnowflakeId SNOWFLAKE_ID = new SnowflakeId(0, 0);
+    public static final SnowflakeId SNOWFLAKE_ID = new SnowflakeId(0, 0);
 
 }

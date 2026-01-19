@@ -2,136 +2,165 @@ package ext.library.tool.constant;
 
 import java.util.regex.Pattern;
 
-
 /**
- * 常用正则表达式集合。更多正则见:<br>
- * <a href="https://any86.github.io/any-rule/">https://any86.github.io/any-rule/</a>
+ * 常用正则表达式池
+ * <p>
+ * 提供预编译的 Pattern 实例，避免重复编译开销
+ *
+ * @see <a href="https://any86.github.io/any-rule/">更多正则参考</a>
  */
-public interface PatternPool {
+public final class PatternPool {
+
+    private PatternPool() {
+        // 防止实例化
+    }
+
+    // region 基础字符类
 
     /**
-     * 英文字母、数字和下划线。
+     * 英文字母、数字和下划线
      */
-    Pattern GENERAL = Pattern.compile("^\\w+$");
+    public static final Pattern GENERAL = Pattern.compile("^\\w+$");
 
     /**
-     * 数字。
+     * 数字
      */
-    Pattern NUMBERS = Pattern.compile("\\d+");
+    public static final Pattern NUMBERS = Pattern.compile("\\d+");
 
     /**
-     * 字母。
+     * 字母（大小写）
      */
-    Pattern WORD = Pattern.compile("[a-zA-Z]+");
+    public static final Pattern WORD = Pattern.compile("[a-zA-Z]+");
 
     /**
-     * 单个中文汉字。
+     * 16 进制字符串
      */
-    Pattern CHINESE = Pattern.compile("[\u2E80-\u2EFF\u2F00-\u2FDF\u31C0-\u31EF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uD840\uDC00-\uD869\uDEDF\uD869\uDF00-\uD86D\uDF3F\uD86D\uDF40-\uD86E\uDC1F\uD86E\uDC20-\uD873\uDEAF\uD87E\uDC00-\uD87E\uDE1F]");
+    public static final Pattern HEX = Pattern.compile("^[a-fA-F0-9]+$");
+
+    // endregion
+
+    // region 中文相关
 
     /**
-     * 中文汉字。
+     * 中文汉字
+     * <p>
+     * 覆盖 CJK 统一汉字基本区及扩展区
      */
-    Pattern CHINESES = Pattern.compile("[\u2E80-\u2EFF\u2F00-\u2FDF\u31C0-\u31EF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uD840\uDC00-\uD869\uDEDF\uD869\uDF00-\uD86D\uDF3F\uD86D\uDF40-\uD86E\uDC1F\uD86E\uDC20-\uD873\uDEAF\uD87E\uDC00-\uD87E\uDE1F]+");
+    public static final Pattern CHINESE = Pattern.compile("[\\u4E00-\\u9FFF]+");
 
     /**
-     * 分组。
+     * 中文字、英文字母、数字和下划线
      */
-    Pattern GROUP_VAR = Pattern.compile("\\$(\\d+)");
+    public static final Pattern GENERAL_WITH_CHINESE = Pattern.compile("^[\\u4E00-\\u9FFF\\w]+$");
 
     /**
-     * IP v4.
+     * 中文姓名
+     * <p>
+     * 2-60 位，支持中文和维吾尔族名字中的点（·）
      */
-    Pattern IPV4 = Pattern.compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$");
+    public static final Pattern CHINESE_NAME = Pattern.compile("^[\\u4E00-\\u9FFF·]{2,60}$");
+
+    // endregion
+
+    // region 通信相关
 
     /**
-     * IP v6.
+     * 手机号（中国大陆）
+     * <p>
+     * 支持格式：13912345678, 8613912345678, +8613912345678
      */
-    Pattern IPV6 = Pattern.compile("(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))");
+    public static final Pattern MOBILE = Pattern.compile("(?:0|86|\\+86)?1[3-9]\\d{9}");
 
     /**
-     * 邮件。符合 RFC 5322
-     * 规范，正则来自：<a href="http://emailregex.com/">http://emailregex.com/</a><br>
-     * <a href=
-     * "https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/44317754">https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/44317754</a>
-     * 注意 email 要宽松一点。比如 jetz.chong@hutool.cn、jetz-chong@
-     * hutool.cn、jetz_chong@hutool.cn、dazhi.duan@hutool.cn 宽松一点把，都算是正常的邮箱
+     * 座机号码
+     * <p>
+     * 格式：区号-号码，如 010-12345678
      */
-     Pattern EMAIL = Pattern.compile("(?:[a-z0-9\\u4e00-\\u9fa5!#$%&'*+/=?^_`{|}~-]+\\.[a-z0-9\\u4e00-\\u9fa5!#$%&'*+/=?^_`{|}~-]+ *|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:[a-z0-9\\u4e00-\\u9fa5](?:[a-z0-9\\u4e00-\\u9fa5-]*[a-z0-9\\u4e00-\\u9fa5])?\\. +[a-z0-9\\u4e00-\\u9fa5](?:[a-z0-9\\u4e00-\\u9fa5-]*[a-z0-9\\u4e00-\\u9fa5])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9\\u4e00-\\u9fa5-]*[a-z0-9\\u4e00-\\u9fa5]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])", Pattern.CASE_INSENSITIVE);
+    public static final Pattern TEL = Pattern.compile("(010|02\\d|0[3-9]\\d{2})-?(\\d{6,8})");
 
     /**
-     * 移动电话。<br>
-     * eg: 中国大陆： +86 180 4953 1399，2 位区域码标示 +13 位数字
+     * 邮箱
+     * <p>
+     * 符合 RFC 5322 规范
+     *
+     * @see <a href="http://emailregex.com/">emailregex.com</a>
      */
-     Pattern MOBILE = Pattern.compile("(?:0|86|\\+86)?1[3-9]\\d{9}");
+    public static final Pattern EMAIL = Pattern.compile(
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])",
+            Pattern.CASE_INSENSITIVE);
+
+    // endregion
+
+    // region 网络相关
 
     /**
-     * 座机号码。
+     * IPv4 地址
      */
-     Pattern TEL = Pattern.compile("(010|02\\d|0[3-9]\\d{2})-?(\\d{6,8})");
+    public static final Pattern IPV4 = Pattern.compile(
+            "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$");
 
     /**
-     * 18 位身份证号码。
+     * IPv6 地址
      */
-    public static final Pattern CITIZEN_ID = Pattern.compile("[1-9]\\d{5}[1-2]\\d{3}((0\\d)|(1[0-2]))(([012]\\d)|3[0-1])\\d{3}(\\d|X|x)");
+    public static final Pattern IPV6 = Pattern.compile(
+            "(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))");
 
     /**
-     * 邮编，兼容港澳台。
+     * URL
      */
-    Pattern ZIP_CODE = Pattern.compile("^(0[1-7]|1[0-356]|2[0-7]|3[0-6]|4[0-7]|5[0-7]|6[0-7]|7[0-5]|8[0-9]|9[0-8])\\d{4}|99907[78]$");
+    public static final Pattern URL = Pattern.compile("[a-zA-Z]+://[\\w-+&@#/%?=~_|!:,.;]*[\\w-+&@#/%=~_|]");
 
     /**
-     * URL.
+     * HTTP/HTTPS/FTP/FILE URL
+     *
+     * @see <a href="http://urlregex.com/">urlregex.com</a>
      */
-     Pattern URL = Pattern.compile("[a-zA-Z]+://[\\w-+&@#/%?=~_|!:,.;]*[\\w-+&@#/%=~_|]");
+    public static final Pattern URL_HTTP = Pattern.compile(
+            "(https?|ftp|file)://[\\w-+&@#/%?=~_|!:,.;]*[\\w-+&@#/%=~_|]",
+            Pattern.CASE_INSENSITIVE);
+
+    // endregion
+
+    // region 证件相关
 
     /**
-     * Http URL.（来自：<a href="http://urlregex.com/">http://urlregex.com/</a>） <br>
-     * 此正则同时支持 FTP、File 等协议的 URL
+     * 18 位身份证号码
      */
-    Pattern URL_HTTP = Pattern.compile("(https?|ftp|file)://[\\w-+&@#/%?=~_|!:,.;]*[\\w-+&@#/%=~_|]", Pattern.CASE_INSENSITIVE);
+    public static final Pattern CITIZEN_ID = Pattern.compile(
+            "[1-9]\\d{5}[1-2]\\d{3}((0\\d)|(1[0-2]))(([012]\\d)|3[0-1])\\d{3}(\\d|X|x)");
 
     /**
-     * 中文字、英文字母、数字和下划线。
+     * 邮政编码（中国大陆）
+     * <p>
+     * 6 位数字，首位非 0
      */
-     Pattern GENERAL_WITH_CHINESE = Pattern.compile("^[\u4E00-\u9FFF\\w]+$");
+    public static final Pattern ZIP_CODE = Pattern.compile("^[1-9]\\d{5}$");
+
+    // endregion
+
+    // region 其他
 
     /**
-     * 16 进制字符串。
+     * 分组变量
+     * <p>
+     * 匹配 $1, $2 等分组引用
      */
-    Pattern HEX = Pattern.compile("^[a-fA-F0-9]+$");
+    public static final Pattern GROUP_VAR = Pattern.compile("\\$(\\d+)");
 
     /**
-     * 时间正则。
+     * 时间
+     * <p>
+     * 格式：HH:mm 或 HH:mm:ss
      */
-     Pattern TIME = Pattern.compile("\\d{1,2}:\\d{1,2}(:\\d{1,2})?");
+    public static final Pattern TIME = Pattern.compile("\\d{1,2}:\\d{1,2}(:\\d{1,2})?");
 
     /**
-     * 中文姓名。维吾尔族姓名里面的点是 · 输入法中文状态下，键盘左上角数字 1 前面的那个符号；<br>
-     * 错误字符：{@code ．.。．.}<br>
-     * 正确维吾尔族姓名： <pre>
-     * 霍加阿卜杜拉·麦提喀斯木
-     * 玛合萨提别克·哈斯木别克
-     * 阿布都热依木江·艾斯卡尔
-     * 阿卜杜尼亚孜·毛力尼亚孜
-     * </pre> <pre>
-     * ----------
-     * 错误示例：孟  伟                reason: 有空格
-     * 错误示例：连逍遥 0               reason: 数字
-     * 错误示例：依帕古丽 - 艾则孜        reason: 特殊符号
-     * 错误示例：牙力空。买提萨力        reason: 新疆人的点不对
-     * 错误示例：王建鹏 2002-3-2        reason: 有数字、特殊符号
-     * 错误示例：雷金默 (雷皓添）reason: 有括号
-     * 错误示例：翟冬：亮               reason: 有特殊符号
-     * 错误示例：李                   reason: 少于 2 位
-     * ----------
-     * </pre> 总结中文姓名：2-60 位，只能是中文和维吾尔族的点· 放宽汉字范围：如生僻姓名 刘欣䶮 yǎn
+     * HTML 标签
+     * <p>
+     * 用于检测 XSS 攻击
      */
-     Pattern CHINESE_NAME = Pattern.compile("^[\u2E80-\u9FFF·]{2,60}$");
+    public static final Pattern HTML_TAG = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
-    /**
-     * HTML 标签正则。
-     */
-    Pattern RE_HTML_MARK = Pattern.compile("(<[^<]*?>)|(<\\s*?/[^<]*?>)|(<[^<]*?/\\s*?>)", Pattern.CASE_INSENSITIVE);
+    // endregion
 
 }

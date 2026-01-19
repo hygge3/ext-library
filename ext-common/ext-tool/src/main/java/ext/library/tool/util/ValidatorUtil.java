@@ -41,7 +41,7 @@ public final class ValidatorUtil {
      * @return 是否为汉字
      */
     public static boolean isChinese(final CharSequence value) {
-        return isMatchRegex(PatternPool.CHINESES, value);
+        return isMatchRegex(PatternPool.CHINESE, value);
     }
 
     /**
@@ -68,7 +68,7 @@ public final class ValidatorUtil {
         if (ObjectUtil.isEmpty(value)) {
             return false;
         }
-        return PatternPool.RE_HTML_MARK.matcher(value).find();
+        return PatternPool.HTML_TAG.matcher(value).find();
     }
 
     /**

@@ -1,6 +1,5 @@
 package ext.library.tool.core;
 
-import ext.library.tool.constant.Holder;
 import ext.library.tool.util.StringUtil;
 import ext.library.tool.util.TypeCastUtil;
 
@@ -66,7 +65,7 @@ public final class Runtimes {
      * @return cpu count
      */
     public static int getCpuNum() {
-        return Holder.CPU_CORE_NUM;
+        return Runtime.getRuntime().availableProcessors();
     }
 
 }

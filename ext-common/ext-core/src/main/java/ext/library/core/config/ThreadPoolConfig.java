@@ -2,8 +2,8 @@ package ext.library.core.config;
 
 import ext.library.core.properties.ThreadPoolProperties;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.constant.Holder;
 import ext.library.tool.core.Logs;
+import ext.library.tool.core.Runtimes;
 import ext.library.tool.core.Threads;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,7 +26,7 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数 = cpu 核心数 + 1
      */
-    private final int core = Holder.CPU_CORE_NUM + 1;
+    private final int core = Runtimes.getCpuNum() + 1;
     private ScheduledExecutorService scheduledExecutorService;
 
     @ConditionalOnProperty(prefix = "thread-pool", name = "enabled", havingValue = "true")

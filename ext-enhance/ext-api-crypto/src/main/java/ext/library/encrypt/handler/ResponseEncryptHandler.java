@@ -52,7 +52,7 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
             Algorithm algo = cryptoProperties.getAlgo();
             return algo.getCryptoStrategy().encrypt(secretKey, json, cryptoProperties.getSalt());
         } catch (Exception e) {
-            throw new ExtException(EmojiSymbol.INTERFACE_CRYPTO, e);
+            throw new ExtException(EmojiSymbol.API_CRYPTO, e);
         }
     }
 

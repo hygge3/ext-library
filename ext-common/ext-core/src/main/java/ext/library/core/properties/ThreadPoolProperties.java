@@ -1,6 +1,6 @@
 package ext.library.core.properties;
 
-import ext.library.tool.constant.Holder;
+import ext.library.tool.core.Runtimes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -15,7 +15,7 @@ public class ThreadPoolProperties {
     private boolean enabled;
 
     /** 核心线程数 */
-    private int corePoolSize = Holder.CPU_CORE_NUM + 1;
+    private int corePoolSize = Runtimes.getCpuNum() + 1;
 
     /** 最大线程数 */
     private int maxPoolSize = corePoolSize * 2;

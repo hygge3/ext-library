@@ -63,7 +63,7 @@ public class RequestDecryptHandler extends RequestBodyAdviceAdapter {
                 }
             };
         } catch (Exception e) {
-            throw new ExtException(EmojiSymbol.INTERFACE_CRYPTO, e);
+            throw new ExtException(EmojiSymbol.API_CRYPTO, e);
         }
 
     }
