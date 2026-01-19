@@ -114,6 +114,13 @@
             <!-- ======================= Ext 依赖 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
+                <artifactId>ext-pom</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
                 <artifactId>ext-captcha</artifactId>
                 <version>${revision}</version>
             </dependency>

@@ -15,6 +15,7 @@
     <description>通用基础层聚合器</description>
 
     <subprojects>
+        <subproject>ext-pom</subproject>
         <subproject>ext-tool</subproject>
         <subproject>ext-core</subproject>
         <subproject>ext-json</subproject>
