@@ -36,5 +36,7 @@ build/
 
 ### AI ###
 /.claude/
+CLAUDE.md
+./CLAUDE.md
 /.spec-workflow/
 /.serena/
