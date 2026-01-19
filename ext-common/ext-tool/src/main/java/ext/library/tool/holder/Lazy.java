@@ -8,7 +8,7 @@ import java.util.function.Supplier;
  */
 public final class Lazy<T> implements Supplier<T> {
 
-    private transient Supplier<? extends T> supplier;
+    private transient volatile Supplier<? extends T> supplier;
 
     private T value;
 

@@ -90,8 +90,9 @@ public final class Exceptions {
      * @param e 异常
      */
     public static void log(Throwable e) {
-        // 在 getMessage() 获取异常名称的基础上，添加了异常原因
-        Logs.error(EmojiSymbol.EXT, e.getCause().getMessage());
+        Throwable cause = e.getCause();
+        String message = (cause != null) ? cause.getMessage() : e.getMessage();
+        Logs.error(EmojiSymbol.EXT, message != null ? message : e.toString());
     }
 
 

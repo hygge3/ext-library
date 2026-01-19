@@ -47,9 +47,9 @@ public final class StringUtil {
      */
     public static String firstCharToLower(String str) {
         char firstChar = str.charAt(0);
-        if (firstChar >= 'a' && firstChar <= 'z') {
+        if (firstChar >= 'A' && firstChar <= 'Z') {
             char[] chars = str.toCharArray();
-            chars[0] -= ('a' - 'A');
+            chars[0] += ('a' - 'A');
             return new String(chars);
         }
         return str;
@@ -64,9 +64,9 @@ public final class StringUtil {
      */
     public static String firstCharToUpper(String str) {
         char firstChar = str.charAt(0);
-        if (firstChar >= 'A' && firstChar <= 'Z') {
+        if (firstChar >= 'a' && firstChar <= 'z') {
             char[] chars = str.toCharArray();
-            chars[0] += ('a' - 'A');
+            chars[0] -= ('a' - 'A');
             return new String(chars);
         }
         return str;

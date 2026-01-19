@@ -16,7 +16,7 @@ public final class IDUtil {
      * @return {@code String }
      */
     public static String getUUID() {
-        return UUID.randomUUID().toString().replaceAll(",", "");
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
     /**

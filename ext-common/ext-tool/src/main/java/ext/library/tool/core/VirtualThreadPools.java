@@ -61,7 +61,7 @@ public final class VirtualThreadPools {
             try {
                 runnable.run();
             } catch (Throwable throwable) {
-                Logs.info(EmojiSymbol.TOOL, "线程池内线程异常！", throwable);
+                Logs.error(EmojiSymbol.TOOL, throwable, "线程池内线程异常！");
             } finally {
                 thread.setName(oldName);
                 MDC.clear();
@@ -124,7 +124,7 @@ public final class VirtualThreadPools {
             try {
                 return callable.call();
             } catch (Exception e) {
-                Logs.info(EmojiSymbol.TOOL, "线程池内线程异常", e);
+                Logs.error(EmojiSymbol.TOOL, e, "线程池内线程异常");
                 throw e;
             } finally {
                 thread.setName(oldName);

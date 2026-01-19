@@ -59,7 +59,7 @@ public enum BizCode implements ResponseCode {
     /**
      * Redis 操作异常
      */
-    REDIS_ERROR("610", "Redis 操作异常"),
+    REDIS_ERROR("616", "Redis 操作异常"),
 
     /**
      * 通用的逻辑校验异常
