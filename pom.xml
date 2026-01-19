@@ -12,6 +12,8 @@
     <url>https://hygge.eu.org</url>
 
     <subprojects>
+        <!-- BOM 依赖管理 -->
+        <subproject>ext-bom</subproject>
         <!-- 通用基础层 -->
         <subproject>ext-common</subproject>
         <!-- 基础设施层 -->
@@ -112,13 +114,6 @@
                 <version>${zxing-core.version}</version>
             </dependency>
             <!-- ======================= Ext 依赖 ===================== -->
-            <dependency>
-                <groupId>ext.library</groupId>
-                <artifactId>ext-pom</artifactId>
-                <version>${revision}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-captcha</artifactId>

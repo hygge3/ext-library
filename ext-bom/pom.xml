@@ -4,11 +4,11 @@
     <modelVersion>4.1.0</modelVersion>
 
     <groupId>ext.library</groupId>
-    <artifactId>ext-pom</artifactId>
+    <artifactId>ext-bom</artifactId>
     <version>${revision}</version>
-    <packaging>bom</packaging>
-    <name>ext-pom</name>
-    <description>Ext Library BOM - 依赖版本管理</description>
+    <packaging>pom</packaging>
+    <name>ext-bom</name>
+    <description>Ext Library BOM - 依赖版本统一管理</description>
 
     <properties>
         <revision>4.0.0</revision>
@@ -16,7 +16,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- ======================= Ext 模块 ===================== -->
+            <!-- ======================= ext-common 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-tool</artifactId>
@@ -32,6 +32,8 @@
                 <artifactId>ext-json</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- ======================= ext-infra 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-redis</artifactId>
@@ -47,6 +49,8 @@
                 <artifactId>ext-mail</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- ======================= 安全/加密层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-security</artifactId>
@@ -57,6 +61,8 @@
                 <artifactId>ext-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- ======================= ext-web 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-mvc</artifactId>
@@ -77,6 +83,8 @@
                 <artifactId>ext-websocket</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- ======================= ext-enhance 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-captcha</artifactId>
@@ -102,6 +110,8 @@
                 <artifactId>ext-api-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- ======================= ext-misc 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-http</artifactId>
@@ -115,6 +125,11 @@
             <dependency>
                 <groupId>ext.library</groupId>
                 <artifactId>ext-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-holidays</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>
