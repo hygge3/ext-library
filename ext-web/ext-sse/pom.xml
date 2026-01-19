@@ -6,7 +6,7 @@
         <groupId>ext.library</groupId>
         <artifactId>ext-parent</artifactId>
         <version>${revision}</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>ext-sse</artifactId>
 
@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>ext.library</groupId>
-            <artifactId>ext-web</artifactId>
+            <artifactId>ext-mvc</artifactId>
         </dependency>
     </dependencies>
 

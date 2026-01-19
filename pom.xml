@@ -12,26 +12,20 @@
     <url>https://hygge.eu.org</url>
 
     <modules>
-        <module>ext-tool</module>
-        <module>ext-core</module>
-        <module>ext-json</module>
-        <module>ext-redis</module>
-        <module>ext-cache</module>
+        <!-- 通用基础层 -->
+        <module>ext-common</module>
+        <!-- 基础设施层 -->
+        <module>ext-infra</module>
+        <!-- 安全层（独立） -->
         <module>ext-security</module>
-        <module>ext-captcha</module>
+        <!-- 加密层（独立） -->
         <module>ext-crypto</module>
-        <module>ext-desensitize</module>
-        <module>ext-interface-crypto</module>
-        <module>ext-http</module>
-        <module>ext-idempotent</module>
-        <module>ext-mail</module>
-        <module>ext-monitor</module>
-        <module>ext-openapi</module>
-        <module>ext-qrcode</module>
-        <module>ext-sse</module>
-        <module>ext-trans</module>
+        <!-- Web 层 -->
         <module>ext-web</module>
-        <module>ext-websocket</module>
+        <!-- 业务增强层 -->
+        <module>ext-enhance</module>
+        <!-- 杂项工具 -->
+        <module>ext-misc</module>
     </modules>
 
     <licenses>
@@ -141,7 +135,7 @@
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-interface-crypto</artifactId>
+                <artifactId>ext-api-crypto</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -216,7 +210,7 @@
             </dependency>
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-web</artifactId>
+                <artifactId>ext-mvc</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

@@ -2,19 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>ext.library</groupId>
         <artifactId>ext-parent</artifactId>
         <version>${revision}</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>ext-http</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>ext.library</groupId>
-            <artifactId>ext-tool</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>ext-enhance</artifactId>
+    <name>ext-enhance</name>
+    <packaging>pom</packaging>
+    <description>业务增强层聚合器</description>
+
+    <modules>
+        <module>ext-captcha</module>
+        <module>ext-idempotent</module>
+        <module>ext-desensitize</module>
+        <module>ext-trans</module>
+        <module>ext-api-crypto</module>
+    </modules>
 
 </project>
