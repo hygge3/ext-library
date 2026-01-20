@@ -2,7 +2,7 @@ package ext.library.web.interceptor;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;

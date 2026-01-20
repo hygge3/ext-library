@@ -3,7 +3,7 @@ package ext.library.config;
 import ext.library.handler.OpenApiHandler;
 import ext.library.properties.OpenApiProperties;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 import io.swagger.v3.oas.models.OpenAPI;

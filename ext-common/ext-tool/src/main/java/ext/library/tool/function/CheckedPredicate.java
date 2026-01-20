@@ -1,4 +1,4 @@
-package ext.library.tool.holder.function;
+package ext.library.tool.function;
 
 import java.io.Serializable;
 
@@ -16,7 +16,9 @@ public interface CheckedPredicate<T> extends Serializable {
      * 对给定参数进行断言判断
      *
      * @param t 输入参数
+     *
      * @return 如果输入参数匹配断言返回 true，否则返回 false
+     *
      * @throws Throwable 可能抛出的异常
      */
     boolean test(T t) throws Throwable;

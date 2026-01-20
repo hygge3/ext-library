@@ -1,8 +1,8 @@
 package ext.library.tool.holder.retry;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
-import ext.library.tool.core.Threads;
+import ext.library.tool.runtime.Logs;
+import ext.library.tool.runtime.Threads;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
 
@@ -15,6 +15,7 @@ import java.io.IOException;
  *
  * @param maxAttempts 最大尝试次数
  * @param sleepMillis 重试间隔（毫秒）
+ *
  * @since 2025.01.01
  */
 public record SimpleRetry(int maxAttempts, long sleepMillis) implements Retry {

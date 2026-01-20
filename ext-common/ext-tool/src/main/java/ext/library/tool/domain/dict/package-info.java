@@ -6,6 +6,6 @@
  * @since 2025.01.01
  */
 @NullMarked
-package ext.library.tool.util.dict;
+package ext.library.tool.domain.dict;
 
 import org.jspecify.annotations.NullMarked;

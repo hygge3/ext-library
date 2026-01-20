@@ -2,7 +2,7 @@ package ext.library.core.config;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.runtime.Exceptions;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;

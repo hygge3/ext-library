@@ -1,4 +1,4 @@
-package ext.library.tool.holder.function;
+package ext.library.tool.function;
 
 import java.io.Serializable;
 
@@ -17,7 +17,9 @@ public interface CheckedComparator<T> extends Serializable {
      *
      * @param o1 第一个对象
      * @param o2 第二个对象
+     *
      * @return 负数表示 o1 &lt; o2，零表示相等，正数表示 o1 &gt; o2
+     *
      * @throws Throwable 可能抛出的异常
      */
     int compare(T o1, T o2) throws Throwable;

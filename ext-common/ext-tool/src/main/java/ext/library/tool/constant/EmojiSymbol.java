@@ -43,7 +43,7 @@ public final class EmojiSymbol {
     public static final String CAPTCHA = "🔢";
     public static final String IDEMPOTENT = "🔁";
     public static final String DESENSITIZE = "🎭";
-    public static final String API_CRYPTO = "🔐";
+    public static final String API_CRYPTO = "🔏";
     // endregion
 
     // region ext-misc 层

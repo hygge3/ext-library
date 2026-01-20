@@ -2,7 +2,7 @@ package ext.library.cache.strategy;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -21,14 +21,14 @@ public class L2Strategy implements CacheStrategy {
         // 读写，查询 Caffeine
         T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(caffeineCache)) {
-            Logs.debug(EmojiSymbol.CACHE,"从 Caffeine 中获取数据");
+            Logs.debug(EmojiSymbol.CACHE, "从 Caffeine 中获取数据");
             return clazz.cast(caffeineCache);
         }
 
         // 查询 Redis
         T redisCache = redisStrategy.get(cacheName, key, clazz);
         if (Objects.nonNull(redisCache)) {
-            Logs.debug(EmojiSymbol.CACHE,"从 Redis 获取数据");
+            Logs.debug(EmojiSymbol.CACHE, "从 Redis 获取数据");
             redisStrategy.put(cacheName, key, redisCache);
             return redisCache;
         }

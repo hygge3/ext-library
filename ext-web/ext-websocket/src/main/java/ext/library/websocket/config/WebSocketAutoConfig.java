@@ -1,7 +1,7 @@
 package ext.library.websocket.config;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StringUtil;
 import ext.library.websocket.handler.ExtWebSocketHandler;
 import ext.library.websocket.interceptor.ExtWebSocketInterceptor;

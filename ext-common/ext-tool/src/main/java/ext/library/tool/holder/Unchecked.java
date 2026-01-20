@@ -2,13 +2,13 @@ package ext.library.tool.holder;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.holder.function.CheckedCallable;
-import ext.library.tool.holder.function.CheckedComparator;
-import ext.library.tool.holder.function.CheckedConsumer;
-import ext.library.tool.holder.function.CheckedFunction;
-import ext.library.tool.holder.function.CheckedPredicate;
-import ext.library.tool.holder.function.CheckedRunnable;
-import ext.library.tool.holder.function.CheckedSupplier;
+import ext.library.tool.function.CheckedCallable;
+import ext.library.tool.function.CheckedComparator;
+import ext.library.tool.function.CheckedConsumer;
+import ext.library.tool.function.CheckedFunction;
+import ext.library.tool.function.CheckedPredicate;
+import ext.library.tool.function.CheckedRunnable;
+import ext.library.tool.function.CheckedSupplier;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -43,6 +43,7 @@ public final class Unchecked {
      * @param function 受检函数
      * @param <T>      输入类型
      * @param <R>      返回类型
+     *
      * @return 包装后的 Function
      */
     public static <T, R> Function<T, R> function(CheckedFunction<T, R> function) {
@@ -61,6 +62,7 @@ public final class Unchecked {
      *
      * @param consumer 受检消费者
      * @param <T>      输入类型
+     *
      * @return 包装后的 Consumer
      */
     public static <T> Consumer<T> consumer(CheckedConsumer<T> consumer) {
@@ -79,6 +81,7 @@ public final class Unchecked {
      *
      * @param supplier 受检提供者
      * @param <T>      返回类型
+     *
      * @return 包装后的 Supplier
      */
     public static <T> Supplier<T> supplier(CheckedSupplier<T> supplier) {
@@ -97,6 +100,7 @@ public final class Unchecked {
      *
      * @param predicate 受检断言
      * @param <T>       输入类型
+     *
      * @return 包装后的 Predicate
      */
     public static <T> Predicate<T> predicate(CheckedPredicate<T> predicate) {
@@ -114,6 +118,7 @@ public final class Unchecked {
      * 包装可能抛出异常的 Runnable
      *
      * @param runnable 受检可执行对象
+     *
      * @return 包装后的 Runnable
      */
     public static Runnable runnable(CheckedRunnable runnable) {
@@ -132,6 +137,7 @@ public final class Unchecked {
      *
      * @param callable 受检可调用对象
      * @param <T>      返回类型
+     *
      * @return 包装后的 Callable
      */
     public static <T> Callable<T> callable(CheckedCallable<T> callable) {
@@ -150,6 +156,7 @@ public final class Unchecked {
      *
      * @param comparator 受检比较器
      * @param <T>        比较对象类型
+     *
      * @return 包装后的 Comparator
      */
     public static <T> Comparator<T> comparator(CheckedComparator<T> comparator) {

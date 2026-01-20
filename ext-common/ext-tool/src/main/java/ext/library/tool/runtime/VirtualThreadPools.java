@@ -1,8 +1,7 @@
-package ext.library.tool.core;
+package ext.library.tool.runtime;
 
 import ext.library.tool.constant.EmojiSymbol;
 import org.slf4j.MDC;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -64,6 +63,7 @@ public final class VirtualThreadPools {
      *
      * @param supplier 用于生成结果的 Supplier 实现
      * @param <T>      返回值类型
+     *
      * @return 返回一个 CompletableFuture 对象，用于处理异步任务的结果
      */
     public static <T> CompletableFuture<T> async(Supplier<T> supplier) {
@@ -76,6 +76,7 @@ public final class VirtualThreadPools {
      * @param name     任务名称
      * @param supplier 用于生成结果的 Supplier 实现
      * @param <T>      返回值类型
+     *
      * @return 返回一个 CompletableFuture 对象，用于处理异步任务的结果
      */
     public static <T> CompletableFuture<T> async(String name, Supplier<T> supplier) {
@@ -90,6 +91,7 @@ public final class VirtualThreadPools {
      *
      * @param callable 要提交的 Callable 任务
      * @param <T>      返回值类型
+     *
      * @return 与提交任务关联的 Future 对象
      */
     public static <T> Future<T> submit(Callable<T> callable) {
@@ -105,6 +107,7 @@ public final class VirtualThreadPools {
      * @param name     线程执行时的名称
      * @param callable 要执行的 Callable 任务
      * @param <T>      返回值类型
+     *
      * @return 一个 Future 对象，用于获取任务执行结果
      */
     public static <T> Future<T> submit(String name, Callable<T> callable) {
@@ -131,7 +134,7 @@ public final class VirtualThreadPools {
             Thread thread = Thread.currentThread();
             String oldName = thread.getName();
             thread.setName(name);
-            if (!CollectionUtils.isEmpty(mdcContext)) {
+            if (mdcContext != null && !mdcContext.isEmpty()) {
                 MDC.setContextMap(mdcContext);
             }
             try {
@@ -154,7 +157,7 @@ public final class VirtualThreadPools {
             Thread thread = Thread.currentThread();
             String oldName = thread.getName();
             thread.setName(name);
-            if (!CollectionUtils.isEmpty(mdcContext)) {
+            if (mdcContext != null && !mdcContext.isEmpty()) {
                 MDC.setContextMap(mdcContext);
             }
             try {
@@ -178,7 +181,7 @@ public final class VirtualThreadPools {
             Thread thread = Thread.currentThread();
             String oldName = thread.getName();
             thread.setName(name);
-            if (!CollectionUtils.isEmpty(mdcContext)) {
+            if (mdcContext != null && !mdcContext.isEmpty()) {
                 MDC.setContextMap(mdcContext);
             }
             try {

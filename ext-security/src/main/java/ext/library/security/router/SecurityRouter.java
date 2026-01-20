@@ -8,7 +8,7 @@ import ext.library.security.exception.ForbiddenException;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ClassUtil;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;

@@ -3,7 +3,7 @@ package ext.library.websocket.interceptor;
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;

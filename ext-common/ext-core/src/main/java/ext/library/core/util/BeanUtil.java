@@ -1,7 +1,7 @@
 package ext.library.core.util;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ClassUtil;

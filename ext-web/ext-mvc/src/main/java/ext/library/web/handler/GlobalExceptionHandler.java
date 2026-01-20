@@ -1,7 +1,7 @@
 package ext.library.web.handler;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.BizCode;
 import ext.library.tool.exception.BizException;
 import ext.library.tool.util.StreamUtil;
@@ -62,6 +62,7 @@ public class GlobalExceptionHandler {
      * 处理 BindingResult
      *
      * @param result BindingResult
+     *
      * @return R
      */
     private static R<Void> handleBindingResult(BindingResult result) {
@@ -82,6 +83,7 @@ public class GlobalExceptionHandler {
      * 处理 ConstraintViolation
      *
      * @param violations 校验结果
+     *
      * @return R
      */
     private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
@@ -97,7 +99,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
-        Logs.error(EmojiSymbol.WEB,  "URI:{},{}", request.getRequestURI(), e.getMessage());
+        Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());
     }
 
@@ -163,6 +165,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       参数校验未通过异常
      * @param request 请求
+     *
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -179,6 +182,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       参数校验未通过异常
      * @param request 请求
+     *
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -201,6 +205,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -215,6 +220,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -230,6 +236,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageConversionException.class)
@@ -245,6 +252,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(MethodArgumentConversionNotSupportedException.class)
@@ -260,6 +268,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -275,6 +284,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
@@ -291,6 +301,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(BindException.class)
@@ -306,6 +317,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(ConstraintViolationException.class)
@@ -322,6 +334,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
+     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -338,6 +351,7 @@ public class GlobalExceptionHandler {
      *
      * @param e       超出最大上传大小异常
      * @param request 请求
+     *
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)

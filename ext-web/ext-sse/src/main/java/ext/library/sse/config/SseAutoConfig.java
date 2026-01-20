@@ -5,7 +5,7 @@ import ext.library.sse.listener.SseTopicListener;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.sse.properties.SseProperties;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

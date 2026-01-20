@@ -2,7 +2,7 @@ package ext.library.json.config;
 
 import ext.library.json.module.CustomModule;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

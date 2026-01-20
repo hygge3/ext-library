@@ -1,7 +1,7 @@
 package ext.library.redis.prefix;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
 

@@ -1,14 +1,14 @@
-package ext.library.tool.util.dict;
+package ext.library.tool.domain.dict;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ReflectionUtil;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.function.Function;
 
 /**
@@ -32,6 +32,7 @@ public final class DictUtil {
      * @param clazz   枚举类（必须实现 {@link Dict} 接口）
      * @param lambdas 属性获取方法引用
      * @param <D>     枚举类型
+     *
      * @return 字典列表，每个元素为包含指定属性的 Map
      */
     @SafeVarargs
@@ -67,6 +68,7 @@ public final class DictUtil {
      * </ul>
      *
      * @param methodName 方法名
+     *
      * @return 属性名
      */
     private static String extractPropertyName(String methodName) {

@@ -1,16 +1,20 @@
-# ext 工具包
+# ext-tool
 
-## 功能
+> 通用工具类库，提供基础工具函数和公共组件
 
-1. 常用工具包
-2. 综合工具类
+## 功能特性
+
+- 常用工具类：字符串、集合、日期、IO 等
+- ID 生成：UUID、UUIDv7、雪花算法、ObjectId
+- 异常体系：统一的业务异常和错误码管理
+- 函数式工具：受检异常处理、延迟加载、单次执行
+- 重试机制：可配置的重试回调接口
 
 ## 添加依赖
 
-### maven
+### Maven
 
 ```xml
-
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-tool</artifactId>
@@ -18,175 +22,203 @@
 </dependency>
 ```
 
-### gradle
+### Gradle
 
 ```groovy
-compile("ext.library:ext-tool:${version}")
+implementation("ext.library:ext-tool:${version}")
+```
+
+## 包结构
+
+```
+ext.library.tool
+├── constant/     # 常量定义
+├── runtime/      # 运行时工具类（系统、线程、运行时、日志）
+├── domain/       # 领域对象（ID生成器、树构建器、版本号）
+│   └── dict/     # 字典工具
+├── exception/    # 异常体系
+├── function/     # 受检函数式接口
+├── holder/       # 容器类（延迟加载、单次执行）
+│   └── retry/    # 重试机制
+└── util/         # 工具类
 ```
 
 ## 工具类说明
 
-### 常量池
+### 常量类 (constant)
 
-| 类名          | 说明      |
-|-------------|---------|
-| Symbol      | 符号常量    |
-| PatternPool | 常用正则表达式 |
+| 类名 | 说明 |
+|------|------|
+| EmojiSymbol | Emoji 符号常量，用于日志模块标识 |
+| PatternPool | 常用正则表达式预编译池 |
+| Singletons | 常用单例对象持有器 |
 
-### 常用工具类
+### 运行时工具类 (runtime)
 
-| 类名           | 说明          |
-|--------------|-------------|
-| ArithCompute | 数学计算工具类     |
-| BooleanUtils | Boolean 工具类 |
-| Converter    | 简单数据类型转换工具类 |
-| DateUtil     | 时间处理工具      |
-| ImageUtils   | 图片读取写出工具    |
-| MapUtils     | Map 处理工具    |
-| StreamUtils  | Stream 流工具  |
-| TreeUtils    | 树形菜单构建工具    |
-| XmlUtils     | xml 解析工具类   |
+| 类名 | 说明 |
+|------|------|
+| Threads | 线程工具类（sleep、线程池关闭、堆栈信息获取） |
+| Exceptions | 异常处理工具类（异常转换、解包、打印） |
+| Systems | 系统信息工具类（操作系统判断、字符集、分隔符） |
+| Runtimes | 运行时工具类（PID、启动时间、JVM 参数、CPU 核数） |
+| Logs | 固定格式日志工具类（自动获取调用类，模块化日志输出） |
+| VirtualThreadPools | 虚拟线程池（MDC 传递、异常处理） |
 
-### 签名加密工具类
+### 通用工具类 (util)
 
-| 类名      | 说明  |
-|---------|-----|
-| AESUtil | Aes |
-| RSAUtil | Rsa |
+| 类名 | 说明 |
+|------|------|
+| StringUtil | 字符串工具类（判空、格式化、拼接、匹配） |
+| CollUtil | 集合工具类 |
+| MapUtil | Map 工具类 |
+| ObjectUtil | 对象工具类 |
+| TypeCastUtil | 类型转换工具类 |
+| DateUtil | 日期时间工具类 |
+| CalcUtil | 数学计算工具类（精确计算） |
+| IdUtil | ID 生成工具类（UUID、UUIDv7、ObjectId、雪花ID） |
+| StreamUtil | Stream 流工具类 |
+| IOUtil | IO 工具类 |
+| NetUtil | 网络工具类 |
+| Base64Util | Base64 编解码工具类 |
+| HexUtil | 十六进制工具类 |
+| ImageUtil | 图片读取写出工具类 |
+| ClassUtil | 类工具类 |
+| ReflectionUtil | 反射工具类 |
+| ValidatorUtil | 验证工具类 |
+| LatchUtil | 并发闭锁工具类 |
 
-### 线程、异常等工具类
+### 容器类 (holder)
 
-| 类名          | 说明           |
-|-------------|--------------|
-| Threads     | 线程工具类        |
-| ThreadPools | 线程池工具类       |
-| Exceptions  | 异常处理工具类      |
-| Unchecked   | lambda 异常包装类 |
+| 类名 | 说明 |
+|------|------|
+| Lazy | 延迟加载容器（线程安全，首次调用时计算并缓存） |
+| Once | 单次执行控制器（确保操作只执行一次） |
+| Unchecked | Lambda 受检异常处理工具 |
 
-### 其他工具类
+### 受检函数式接口 (function)
 
-| 类名        | 说明         |
-|-----------|------------|
-| CountMap  | 计数器        |
-| Lazy      | 延迟加载       |
-| Once      | 一次加载       |
-| Holder    | 部分常量       |
-| Version   | Version 工具 |
-| INetUtils | 网络工具类      |
-| Runtimes  | 系统运行时工具类   |
+| 类名 | 说明 |
+|------|------|
+| CheckedFunction | 受检 Function（允许抛出异常） |
+| CheckedConsumer | 受检 Consumer |
+| CheckedSupplier | 受检 Supplier |
+| CheckedPredicate | 受检 Predicate |
+| CheckedRunnable | 受检 Runnable |
+| CheckedCallable | 受检 Callable |
+| CheckedComparator | 受检 Comparator |
 
-## Google Guava 说明
+### 重试机制 (holder/retry)
 
-### 包说明
+| 类名 | 说明 |
+|------|------|
+| Retry | 重试接口 |
+| RetryCallback | 重试回调接口 |
+| SimpleRetry | 简单重试实现 |
 
-| 包名                                | 说明                                          |
-|-----------------------------------|---------------------------------------------|
-| com.google.common.annotations     | 普通注解类型                                      |
-| com.google.common.base            | 基本工具类库和接口                                   |
-| com.google.common.cache           | 缓存工具包，非常简单易用且功能强大的 JVM 内缓存                  |
-| com.google.common.collect         | 带泛型的集合接口扩展和实现，以及工具类                         |
-| com.google.common.eventbus        | 发布订阅风格的事件总线                                 |
-| com.google.common.graph           | 对“图”数据结构的支持                                 |
-| com.google.common.hash            | 哈希工具包                                       |
-| com.google.common.io              | I/O工具包                                      |
-| com.google.common.math            | 原始算术类型和超大数的运算工具包                            |
-| com.google.common.net             | 网络工具包                                       |
-| com.google.common.primitives      | 八种原始类型和无符号类型的静态工具包                          |
-| com.google.common.reflect         | 反射工具包                                       |
-| com.google.common.util.concurrent | 多线程工具包                                      |
-| com.google.common.escape          | 提供了对字符串内容中特殊字符进行替换的框架，并包括了 Xml 和 Html 的两个实现 |
-| com.google.common.html            | HtmlEscapers 封装了对 html 中特殊字符的替换             |
-| com.google.common.xml             | XmlEscapers 封装了对 xml 中特殊字符的替换               |
+### 领域对象 (domain)
 
-### 基本工具 [Basic utilities]
+| 类名 | 说明 |
+|------|------|
+| SnowflakeId | Twitter 雪花算法 ID 生成器 |
+| MongoObjectId | MongoDB 风格 ObjectId 生成器 |
+| TreeBuilder | 通用树结构构建工具（支持循环依赖检测） |
+| Version | 版本号比较工具 |
 
-| 类名            | 说明            |
-|---------------|---------------|
-| Optional      | 使用和避免 null    |
-| Preconditions | 前置条件          |
-| Objects       | 常见 Object 方法  |
-| Ordering      | 排序器           |
-| Throwables    | 简化异常和错误的传播与检查 |
+### 字典工具 (domain/dict)
 
-### 集合 [Collections]
+| 类名 | 说明 |
+|------|------|
+| Dict | 字典接口（枚举字典标准结构） |
+| DictUtil | 字典工具类（枚举转前端字典列表） |
 
-| 类名                                                                       | 说明    |
-|--------------------------------------------------------------------------|-------|
-| ImmutableXxx                                                             | 不可变集合 |
-| Multiset,Multimap,BiMap,Table,ClassToInstanceMap,RangeSet,RangeMap       | 新集合类型 |
-| Iterables,Collections2,Lists,Sets,Maps,Queues,Multisets,Multimaps,Tables | 集合工具类 |
-| Forwarding,PeekingIterator,AbstractIterator,AbstractSequentialIterator   | 扩展工具类 |
+### 异常体系 (exception)
 
-### 缓存 [Caches]
+| 类名 | 说明 |
+|------|------|
+| ResponseCode | 响应码接口 |
+| BizCode | 业务错误码枚举（按模块分段 600-699） |
+| BizException | 业务异常（携带错误码） |
+| ExtException | 框架内部异常（自动添加模块标识） |
+| ToolException | 工具异常 |
 
-| 类名           | 说明               |
-|--------------|------------------|
-| CacheBuilder | 缓存构建器，支持多种缓存过期策略 |
+## 使用示例
 
-### 函数式风格 [Functional idioms]
+### ID 生成
 
-| 类名        | 说明                           |
-|-----------|------------------------------|
-| Functions | Guava 的函数式支持可以显著简化代码，但请谨慎使用它 |
-| Suppliers | Guava 的函数式支持可以显著简化代码，但请谨慎使用它 |
+```java
+// UUID（32位）
+String uuid = IdUtil.getUUID();
 
-### 并发 [Concurrency]
+// UUIDv7（时间有序，适合数据库主键）
+String uuidv7 = IdUtil.getUUIDv7();
 
-| 类名               | 说明                                |
-|------------------|-----------------------------------|
-| ListenableFuture | 完成后触发回调的 Future，可以进行一系列的复杂链式的异步操作 |
-| Service          | 抽象可开启和关闭的服务，帮助你维护服务的状态逻辑          |
+// 雪花ID
+String snowflakeId = IdUtil.getSnowflakeId();
 
-### 字符串处理 [Strings]
+// MongoDB ObjectId（24位）
+String objectId = IdUtil.getObjectId();
 
-| 类名          | 说明    |
-|-------------|-------|
-| Strings     | 字符串工具 |
-| Joiner      | 连接器   |
-| Splitter    | 拆分器   |
-| CharMatcher | 字符匹配器 |
-| Charsets    | 字符集   |
-| CaseFormat  | 大小写格式 |
+// 随机字符串
+String random = IdUtil.random(16);
+```
 
-### 区间 [Ranges]
+### 延迟加载
 
-| 类名       | 说明                     |
-|----------|------------------------|
-| Range<C> | 可比较类型的区间 API，包括连续和离散类型 |
+```java
+Lazy<ExpensiveObject> lazy = Lazy.of(() -> new ExpensiveObject());
+// 首次调用时才会创建对象
+ExpensiveObject obj = lazy.get();
+```
 
-### I/O
+### 单次执行
 
-| 类名          | 说明    |
-|-------------|-------|
-| Files       | 文件工具  |
-| ByteStreams | 字节流工具 |
-| CharStreams | 字符流工具 |
+```java
+Once once = new Once();
+// 只会执行一次
+once.run(() -> initializeSystem());
+once.run(() -> initializeSystem()); // 不会执行
+```
 
-### 散列 [Hash]
+### 受检异常处理
 
-| 类名          | 说明                 |
-|-------------|--------------------|
-| BloomFilter | 布鲁姆过滤器             |
-| Hashing     | 若干散列函数及运算 HashCode |
+```java
+// 将受检异常转换为非受检异常
+list.stream()
+    .map(Unchecked.function(item -> riskyOperation(item)))
+    .toList();
+```
 
-### 事件总线 [EventBus]
+### 树结构构建
 
-| 类名       | 说明                               |
-|----------|----------------------------------|
-| EventBus | 发布 - 订阅模式的组件通信，但组件不需要显式地注册到其他组件中 |
+```java
+TreeBuilder<Menu, Long> builder = TreeBuilder.create(
+    Menu::getId,
+    Menu::getParentId,
+    Menu::setChildren,
+    Comparator.comparing(Menu::getSort)
+);
+List<Menu> tree = builder.buildTree(menuList);
+```
 
-### 数学运算 [Math]
+### 版本号比较
 
-| 类名                              | 说明    |
-|---------------------------------|-------|
-| IntMath,LongMath,BigIntegerMath | 整数运算  |
-| DoubleMath                      | 浮点数运算 |
+```java
+Version.of("1.9").lt("1.10");           // true（数字比较）
+Version.of("v0.1").incomplete().eq("v0.1.2");  // true（不完整模式）
+```
 
-### 反射 [Reflection]
+## 错误码规范
 
-| 类名         | 说明                                |
-|------------|-----------------------------------|
-| TypeToken  | 使用了基于反射的技巧甚至让你在运行时都能够巧妙的操作和查询泛型类型 |
-| Invokable  | 简化了常见的反射代码的使用                     |
-| Reflection | 反射工具类                             |
-| ClassPath  | 提供类路径扫描                           |
+业务错误码采用 6xx 段，按模块分类：
+
+| 范围 | 模块 |
+|------|------|
+| 600-609 | 通用错误（参数、未知异常等） |
+| 610-619 | 工具模块 |
+| 620-629 | 数据库模块 |
+| 630-639 | 缓存模块（Redis） |
+| 640-649 | 安全/加密模块 |
+| 650-659 | 业务逻辑模块 |
+| 660-669 | 外部服务模块（邮件、第三方调用） |
+| 670-679 | 日志/监控模块 |
+| 690-699 | 保留/未实现 |

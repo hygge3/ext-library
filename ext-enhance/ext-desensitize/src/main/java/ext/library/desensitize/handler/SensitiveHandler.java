@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import ext.library.desensitize.annotion.Sensitive;
 import ext.library.desensitize.strategy.IDesensitizeRule;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.ExtException;
 
 import jakarta.annotation.Nonnull;

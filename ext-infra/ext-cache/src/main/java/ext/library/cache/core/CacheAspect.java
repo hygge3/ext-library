@@ -5,7 +5,7 @@ import ext.library.cache.enums.CacheType;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -55,7 +55,7 @@ public class CacheAspect {
             return cache;
         }
 
-        Logs.debug(EmojiSymbol.CACHE,"从数据库获取数据");
+        Logs.debug(EmojiSymbol.CACHE, "从数据库获取数据");
         Object object = point.proceed();
         if (Objects.nonNull(object)) {
             cacheStrategy.put(cacheName, key, object, DateUtil.convert(annotation.timeout(), TimeUnit.SECONDS));

@@ -1,7 +1,7 @@
 package ext.library.web.config;
 
 
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;

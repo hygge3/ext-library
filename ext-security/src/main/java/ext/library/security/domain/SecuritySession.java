@@ -6,7 +6,7 @@ import ext.library.security.constants.SecurityConstant;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.IdUtil;

@@ -1,4 +1,4 @@
-package ext.library.tool.core;
+package ext.library.tool.runtime;
 
 import ext.library.tool.constant.EmojiSymbol;
 import org.jspecify.annotations.Nullable;

@@ -1,4 +1,4 @@
-package ext.library.tool.core;
+package ext.library.tool.runtime;
 
 import ext.library.tool.constant.EmojiSymbol;
 
@@ -16,6 +16,7 @@ public final class Exceptions {
      * 将异常堆栈转换为字符串
      *
      * @param e 异常
+     *
      * @return 异常堆栈信息字符串
      */
     public static String print(Throwable e) {
@@ -28,6 +29,7 @@ public final class Exceptions {
      * 将 CheckedException 转换为 UncheckedException
      *
      * @param e 异常
+     *
      * @return RuntimeException
      */
     public static RuntimeException unchecked(Throwable e) {
@@ -51,7 +53,9 @@ public final class Exceptions {
      *
      * @param throwable 异常
      * @param <T>       泛型标记
+     *
      * @return 原异常
+     *
      * @throws T 原异常类型
      */
     @SuppressWarnings("unchecked")
@@ -63,6 +67,7 @@ public final class Exceptions {
      * 代理异常解包
      *
      * @param wrapped 包装过的异常
+     *
      * @return 解包后的异常
      */
     public static Throwable unwrap(Throwable wrapped) {

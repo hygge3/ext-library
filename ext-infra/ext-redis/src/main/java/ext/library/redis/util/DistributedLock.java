@@ -1,7 +1,7 @@
 package ext.library.redis.util;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Threads;
+import ext.library.tool.runtime.Threads;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.NetUtil;
 import org.jspecify.annotations.NonNull;
@@ -86,37 +86,37 @@ public final class DistributedLock implements Lock {
     }
 
     private static DefaultRedisScript<Boolean> getBooleanDefaultRedisScript() {
-   // 使用文本块提高可读性
-    // language=redis
-    String script = """
-        -- 获取传入的参数
-        local val = ARGV[1]
-        local ttl = tonumber(ARGV[2]) -- 确保是数字
-        -- 检查键是否存在
-        if redis.call('EXISTS', KEYS[1]) == 1 then
-            -- 获取当前值
-            local curValue = redis.call('GET', KEYS[1])
-            -- 修改点 1: 使用精确匹配，而不是前缀查找
-            if curValue == val then
-                -- 获取当前TTL
-                local curTtl = redis.call('TTL', KEYS[1])
-                -- 修改点 2: 严谨处理TTL返回值
-                if curTtl == -1 then
-                    -- 如果键是永久有效的，直接设置新的 TTL
-                    redis.call('EXPIRE', KEYS[1], ttl)
+        // 使用文本块提高可读性
+        // language=redis
+        String script = """
+                -- 获取传入的参数
+                local val = ARGV[1]
+                local ttl = tonumber(ARGV[2]) -- 确保是数字
+                -- 检查键是否存在
+                if redis.call('EXISTS', KEYS[1]) == 1 then
+                    -- 获取当前值
+                    local curValue = redis.call('GET', KEYS[1])
+                    -- 修改点 1: 使用精确匹配，而不是前缀查找
+                    if curValue == val then
+                        -- 获取当前TTL
+                        local curTtl = redis.call('TTL', KEYS[1])
+                        -- 修改点 2: 严谨处理TTL返回值
+                        if curTtl == -1 then
+                            -- 如果键是永久有效的，直接设置新的 TTL
+                            redis.call('EXPIRE', KEYS[1], ttl)
+                        else
+                            -- 如果键已经有 TTL，则延长
+                            redis.call('EXPIRE', KEYS[1], curTtl + ttl)
+                        end
+                        return true
+                    else
+                        return false
+                    end
                 else
-                    -- 如果键已经有 TTL，则延长
-                    redis.call('EXPIRE', KEYS[1], curTtl + ttl)
+                    -- 键不存在
+                    return false
                 end
-                return true
-            else
-                return false
-            end
-        else
-            -- 键不存在
-            return false
-        end
-        """;
+                """;
         DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
         redisScript.setResultType(Boolean.class);
         redisScript.setScriptText(script);

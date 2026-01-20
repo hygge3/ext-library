@@ -4,7 +4,7 @@ import ext.library.cache.core.CacheAspect;
 import ext.library.cache.properties.CacheProperties;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

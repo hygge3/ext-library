@@ -1,7 +1,7 @@
 package ext.library.http;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Exceptions;
+import ext.library.tool.runtime.Exceptions;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.StringUtil;
 import org.jspecify.annotations.Nullable;
@@ -10,7 +10,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
@@ -30,7 +29,6 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
@@ -89,6 +87,9 @@ public final class HttpUtil {
         initDefaultClient();
     }
 
+    private HttpUtil() {
+    }
+
     private static void initDefaultClient() {
         httpClientProps = new HttpClientProps();
         client = HttpClient.newBuilder()
@@ -97,13 +98,6 @@ public final class HttpUtil {
                 .followRedirects(httpClientProps.getRedirect())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .build();
-    }
-
-    private HttpUtil() {
-    }
-
-    public static void setClient(HttpClient client) {
-        HttpUtil.client = client;
     }
 
     public static void setDefaultTimeout(long timeout) {
@@ -116,6 +110,10 @@ public final class HttpUtil {
 
     public static HttpClient getClient() {
         return client;
+    }
+
+    public static void setClient(HttpClient client) {
+        HttpUtil.client = client;
     }
 
     public static Request request(String url) {
@@ -274,6 +272,16 @@ public final class HttpUtil {
         return result;
     }
 
+    public enum HttpMethod {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        PATCH,
+        HEAD,
+        OPTIONS
+    }
+
     public static class HttpClientProps {
 
         private final HttpClient.Version version = HttpClient.Version.HTTP_1_1;
@@ -366,22 +374,12 @@ public final class HttpUtil {
         }
     }
 
-    public enum HttpMethod {
-        GET,
-        POST,
-        PUT,
-        DELETE,
-        PATCH,
-        HEAD,
-        OPTIONS
-    }
-
     public static class Request {
 
         private final String url;
-        private HttpMethod method;
         private final Map<String, String> headers;
         private final Map<String, String> queryParams;
+        private HttpMethod method;
         @Nullable
         private Object body;
         private long timeout;

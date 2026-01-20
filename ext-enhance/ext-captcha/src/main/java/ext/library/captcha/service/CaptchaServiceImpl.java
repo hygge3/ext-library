@@ -4,7 +4,7 @@ import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.core.Captcha;
 import ext.library.captcha.properties.CaptchaProperties;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
 
 import java.io.OutputStream;
@@ -30,12 +30,12 @@ public class CaptchaServiceImpl implements ICaptchaService {
     public void generate(String uuid, OutputStream outputStream) {
         String generate = captcha.generate(() -> outputStream);
         captchaCache.put(properties.getCacheName(), uuid, generate);
-        Logs.debug(EmojiSymbol.CAPTCHA,"验证码 UUID 是 {}，生成验证码是 {}", uuid, generate);
+        Logs.debug(EmojiSymbol.CAPTCHA, "验证码 UUID 是 {}，生成验证码是 {}", uuid, generate);
     }
 
     @Override
     public boolean validate(String uuid, String userInputCaptcha) {
-        Logs.debug(EmojiSymbol.CAPTCHA,"验证验证码 uuid 是 {}，输入验证码是 {}", uuid, userInputCaptcha);
+        Logs.debug(EmojiSymbol.CAPTCHA, "验证验证码 uuid 是 {}，输入验证码是 {}", uuid, userInputCaptcha);
         String code = captchaCache.getAndRemove(properties.getCacheName(), uuid);
         if (ObjectUtil.isEmpty(code)) {
             return false;

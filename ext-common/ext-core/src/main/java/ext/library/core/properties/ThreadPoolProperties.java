@@ -1,6 +1,6 @@
 package ext.library.core.properties;
 
-import ext.library.tool.core.Runtimes;
+import ext.library.tool.runtime.Runtimes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**

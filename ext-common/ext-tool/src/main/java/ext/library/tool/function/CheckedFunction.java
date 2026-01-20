@@ -1,4 +1,4 @@
-package ext.library.tool.holder.function;
+package ext.library.tool.function;
 
 import java.io.Serializable;
 
@@ -17,7 +17,9 @@ public interface CheckedFunction<T, R> extends Serializable {
      * 执行函数
      *
      * @param t 输入参数
+     *
      * @return 返回结果
+     *
      * @throws Throwable 可能抛出的异常
      */
     R apply(T t) throws Throwable;

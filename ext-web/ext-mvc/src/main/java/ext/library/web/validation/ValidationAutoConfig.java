@@ -1,6 +1,6 @@
 package ext.library.web.validation;
 
-import ext.library.tool.core.Logs;
+import ext.library.tool.runtime.Logs;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
