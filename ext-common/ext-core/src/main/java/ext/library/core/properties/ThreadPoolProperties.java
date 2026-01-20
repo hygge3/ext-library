@@ -4,31 +4,25 @@ import ext.library.tool.runtime.Runtimes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 线程池 配置属性
+ * 线程池配置属性
  */
-@ConfigurationProperties(prefix = "thread-pool")
+@ConfigurationProperties(prefix = "ext.thread-pool")
 public class ThreadPoolProperties {
 
-    /**
-     * 是否开启自定义线程池
-     */
+    /** 是否开启自定义线程池 */
     private boolean enabled;
 
-    /** 核心线程数 */
+    /** 核心线程数 (默认: CPU核数 + 1) */
     private int corePoolSize = Runtimes.getCpuNum() + 1;
 
-    /** 最大线程数 */
+    /** 最大线程数 (默认: 核心线程数 * 2) */
     private int maxPoolSize = corePoolSize * 2;
 
-    /**
-     * 队列最大长度
-     */
-    private int queueCapacity;
+    /** 队列最大长度 (默认: 200) */
+    private int queueCapacity = 200;
 
-    /**
-     * 线程池维护线程所允许的空闲时间
-     */
-    private int keepAliveSeconds;
+    /** 线程空闲存活时间，单位秒 (默认: 60) */
+    private int keepAliveSeconds = 60;
 
     public boolean isEnabled() {
         return enabled;
@@ -69,4 +63,5 @@ public class ThreadPoolProperties {
     public void setKeepAliveSeconds(int keepAliveSeconds) {
         this.keepAliveSeconds = keepAliveSeconds;
     }
+
 }

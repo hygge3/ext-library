@@ -8,32 +8,32 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.util.ClassUtils;
-import org.springframework.web.method.HandlerMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
- * 方法 工具类
+ * 方法工具类
  *
  * @since 2025.08.19
  */
+public final class MethodUtil {
 
-public class MethodUtil extends org.springframework.util.ClassUtils {
+    private static final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER =
+            Lazy.of(DefaultParameterNameDiscoverer::new);
 
-    private final Lazy<ParameterNameDiscoverer> PARAMETER_NAME_DISCOVERER = Lazy.of(DefaultParameterNameDiscoverer::new);
+    private MethodUtil() {
+    }
 
     /**
      * 获取方法参数信息
      *
      * @param constructor    构造器
      * @param parameterIndex 参数序号
-     *
      * @return {MethodParameter}
      */
-    public MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
+    public static MethodParameter getMethodParameter(Constructor<?> constructor, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(constructor, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
@@ -44,60 +44,34 @@ public class MethodUtil extends org.springframework.util.ClassUtils {
      *
      * @param method         方法
      * @param parameterIndex 参数序号
-     *
      * @return {MethodParameter}
      */
-    public MethodParameter getMethodParameter(Method method, int parameterIndex) {
+    public static MethodParameter getMethodParameter(Method method, int parameterIndex) {
         MethodParameter methodParameter = new SynthesizingMethodParameter(method, parameterIndex);
         methodParameter.initParameterNameDiscovery(PARAMETER_NAME_DISCOVERER.get());
         return methodParameter;
     }
 
     /**
-     * 获取 Annotation
+     * 获取注解（支持组合注解）
+     * <p>
+     * 查找顺序：先查方法上的注解，找不到则查类上的注解
      *
-     * @param method         Method
+     * @param method         方法
      * @param annotationType 注解类
      * @param <A>            泛型标记
-     *
-     * @return {Annotation}
+     * @return 注解实例，未找到时返回 null
      */
-    public <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
-        Class<?> targetClass = method.getDeclaringClass();
-        // The method may be on an interface, but we need attributes from the target
-        // class.
-        // If the target class is null, the method will be unchanged.
-        Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-        // If we are dealing with method with generic parameters, find the original
-        // method.
-        specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-        // 先找方法，再找方法上的类
-        A annotation = AnnotatedElementUtils.findMergedAnnotation(specificMethod, annotationType);
-        if (null != annotation) {
+    public static <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
+        // 处理泛型参数的桥接方法，获取原始方法
+        Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
+        // 先查方法上的注解（支持组合注解）
+        A annotation = AnnotatedElementUtils.findMergedAnnotation(resolvedMethod, annotationType);
+        if (annotation != null) {
             return annotation;
         }
-        // 获取类上面的 Annotation，可能包含组合注解，故采用 spring 的工具类
-        return AnnotatedElementUtils.findMergedAnnotation(specificMethod.getDeclaringClass(), annotationType);
-    }
-
-    /**
-     * 获取 Annotation
-     *
-     * @param handlerMethod  HandlerMethod
-     * @param annotationType 注解类
-     * @param <A>            泛型标记
-     *
-     * @return {Annotation}
-     */
-    public <A extends Annotation> @Nullable A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
-        // 先找方法，再找方法上的类
-        A annotation = handlerMethod.getMethodAnnotation(annotationType);
-        if (null != annotation) {
-            return annotation;
-        }
-        // 获取类上面的 Annotation，可能包含组合注解，故采用 spring 的工具类
-        Class<?> beanType = handlerMethod.getBeanType();
-        return AnnotatedElementUtils.findMergedAnnotation(beanType, annotationType);
+        // 方法上找不到，则查类上的注解（支持组合注解）
+        return AnnotatedElementUtils.findMergedAnnotation(resolvedMethod.getDeclaringClass(), annotationType);
     }
 
 }

@@ -12,18 +12,17 @@ import java.lang.reflect.Method;
  */
 public final class AspectUtil {
 
+    private AspectUtil() {
+    }
+
     /**
      * 获取切入的方法
      *
      * @param point 切面
-     *
-     * @return java.lang.reflect.Method
+     * @return 方法对象，非方法签名时返回 null
      */
     public static @Nullable Method getMethod(ProceedingJoinPoint point) {
-        if (point.getSignature() instanceof MethodSignature ms) {
-            return ms.getMethod();
-        }
-        return null;
+        return point.getSignature() instanceof MethodSignature ms ? ms.getMethod() : null;
     }
 
     /**
@@ -31,20 +30,13 @@ public final class AspectUtil {
      *
      * @param point 切面
      * @param cls   注解类型
-     *
-     * @return T 注解类型
+     * @param <T>   注解泛型
+     * @return 注解实例，未找到时返回 null
      */
-    public static <T extends Annotation> T getAnnotation(ProceedingJoinPoint point, Class<T> cls) {
+    public static <T extends Annotation> @Nullable T getAnnotation(ProceedingJoinPoint point, Class<T> cls) {
         Method method = getMethod(point);
-        T t = null;
-        if (method != null) {
-            t = method.getAnnotation(cls);
-        }
-
-        if (t == null) {
-            t = point.getTarget().getClass().getAnnotation(cls);
-        }
-        return t;
+        T annotation = method != null ? method.getAnnotation(cls) : null;
+        return annotation != null ? annotation : point.getTarget().getClass().getAnnotation(cls);
     }
 
 }

@@ -2,7 +2,6 @@ package ext.library.core.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.method.HandlerMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +10,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -19,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @DisplayName("MethodUtil 工具类测试")
 class MethodUtilTest {
-
-    private final MethodUtil methodUtil = new MethodUtil();
 
     // ========== 测试注解 ==========
 
@@ -63,7 +59,7 @@ class MethodUtilTest {
         // 使用 String 的构造器进行测试
         var constructor = String.class.getDeclaredConstructor(byte[].class);
 
-        var parameter = methodUtil.getMethodParameter(constructor, 0);
+        var parameter = MethodUtil.getMethodParameter(constructor, 0);
 
         assertNotNull(parameter, "参数信息不应为 null");
     }
@@ -75,7 +71,7 @@ class MethodUtilTest {
     void testGetMethodParameter() throws Exception {
         Method method = TestService.class.getMethod("annotatedMethod", String.class);
 
-        var parameter = methodUtil.getMethodParameter(method, 0);
+        var parameter = MethodUtil.getMethodParameter(method, 0);
 
         assertNotNull(parameter, "参数信息不应为 null");
     }
@@ -92,7 +88,7 @@ class MethodUtilTest {
         Method method = MultiParamService.class.getMethod("multiParamMethod", String.class, Integer.class, Boolean.class);
 
         for (int i = 0; i < 3; i++) {
-            var parameter = methodUtil.getMethodParameter(method, i);
+            var parameter = MethodUtil.getMethodParameter(method, i);
             assertNotNull(parameter, "参数 " + i + " 信息不应为 null");
         }
     }
@@ -104,7 +100,7 @@ class MethodUtilTest {
     void testGetMethodAnnotation() throws Exception {
         Method method = TestService.class.getMethod("annotatedMethod", String.class);
 
-        TestAnnotation annotation = methodUtil.getAnnotation(method, TestAnnotation.class);
+        TestAnnotation annotation = MethodUtil.getAnnotation(method, TestAnnotation.class);
 
         assertNotNull(annotation, "应找到方法上的注解");
         assertTrue(annotation.value().contains("方法级别"), "应获取到方法级别的注解");
@@ -115,7 +111,7 @@ class MethodUtilTest {
     void testGetClassAnnotationWhenMethodNone() throws Exception {
         Method method = TestService.class.getMethod("nonAnnotatedMethod", String.class);
 
-        TestAnnotation annotation = methodUtil.getAnnotation(method, TestAnnotation.class);
+        TestAnnotation annotation = MethodUtil.getAnnotation(method, TestAnnotation.class);
 
         assertNotNull(annotation, "应找到类上的注解");
         assertTrue(annotation.value().contains("类级别"), "应获取到类级别的注解");
@@ -128,7 +124,7 @@ class MethodUtilTest {
         // 即使方法 plainMethod 没有注解，也会返回类级别的注解
         Method method = TestService.class.getMethod("plainMethod");
 
-        TestAnnotation annotation = methodUtil.getAnnotation(method, TestAnnotation.class);
+        TestAnnotation annotation = MethodUtil.getAnnotation(method, TestAnnotation.class);
 
         // 会找到类级别的注解作为回退
         assertNotNull(annotation, "会返回类级别的注解作为回退");
@@ -139,45 +135,9 @@ class MethodUtilTest {
     void testGetComposedAnnotation() throws Exception {
         Method method = TestService.class.getMethod("composedAnnotatedMethod");
 
-        TestAnnotation annotation = methodUtil.getAnnotation(method, TestAnnotation.class);
+        TestAnnotation annotation = MethodUtil.getAnnotation(method, TestAnnotation.class);
 
         // 方法上有 @ComposedAnnotation，但由于类上有 @TestAnnotation，会返回类级别注解
-        assertNotNull(annotation, "会返回类级别的注解作为回退");
-    }
-
-    // ========== getAnnotation(HandlerMethod, Class) 测试 ==========
-
-    @Test
-    @DisplayName("测试从 HandlerMethod 获取注解")
-    void testGetHandlerMethodAnnotation() throws Exception {
-        Method method = TestService.class.getMethod("annotatedMethod", String.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new TestService(), method);
-
-        TestAnnotation annotation = methodUtil.getAnnotation(handlerMethod, TestAnnotation.class);
-
-        assertNotNull(annotation, "应从 HandlerMethod 找到注解");
-    }
-
-    @Test
-    @DisplayName("测试从 HandlerMethod 获取类级别注解")
-    void testGetHandlerMethodClassAnnotation() throws Exception {
-        Method method = TestService.class.getMethod("nonAnnotatedMethod", String.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new TestService(), method);
-
-        TestAnnotation annotation = methodUtil.getAnnotation(handlerMethod, TestAnnotation.class);
-
-        assertNotNull(annotation, "应从 HandlerMethod 的 BeanType 找到类级别注解");
-    }
-
-    @Test
-    @DisplayName("测试从 HandlerMethod 获取不存在的注解")
-    void testGetHandlerMethodNonExistentAnnotation() throws Exception {
-        Method method = TestService.class.getMethod("plainMethod");
-        HandlerMethod handlerMethod = new HandlerMethod(new TestService(), method);
-
-        TestAnnotation annotation = methodUtil.getAnnotation(handlerMethod, TestAnnotation.class);
-
-        // 会找到类级别的注解作为回退
         assertNotNull(annotation, "会返回类级别的注解作为回退");
     }
 
@@ -200,7 +160,7 @@ class MethodUtilTest {
 
         Method method = TestInterface.class.getMethod("interfaceMethod", String.class);
 
-        TestAnnotation annotation = methodUtil.getAnnotation(method, TestAnnotation.class);
+        TestAnnotation annotation = MethodUtil.getAnnotation(method, TestAnnotation.class);
 
         assertNotNull(annotation, "应找到接口方法上的注解");
         assertTrue(annotation.value().contains("接口方法"), "应获取到接口方法的注解");

@@ -1,8 +1,6 @@
 package ext.library.security.service;
 
-import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
-import ext.library.security.properties.SecurityProperties;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
@@ -10,6 +8,7 @@ import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.listener.SecurityEventPublishManager;
+import ext.library.security.properties.SecurityProperties;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.security.util.PermissionUtil;
 import ext.library.tool.constant.EmojiSymbol;

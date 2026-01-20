@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 缓存 spEl 提高性能
+ * 缓存 SpEL 表达式求值器
+ * <p>
+ * 通过缓存已解析的表达式和方法信息来提高性能
  */
 public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
 
@@ -25,76 +27,89 @@ public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
     private final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
 
     /**
-     * Create an {@link EvaluationContext}.
+     * 创建求值上下文 (自动构建 RootObject)
      *
-     * @param method      the method
-     * @param args        the method arguments
-     * @param target      the target object
-     * @param targetClass the target class
-     *
-     * @return the evaluation context
+     * @param method      方法
+     * @param args        方法参数
+     * @param target      目标对象实例
+     * @param targetClass 目标类
+     * @param beanFactory Bean 工厂 (可选)
+     * @return 求值上下文
      */
-    public EvaluationContext createContext(Method method, Object[] args, Object target, Class<?> targetClass, BeanFactory beanFactory) {
+    public EvaluationContext createContext(Method method, Object[] args, Object target,
+                                           Class<?> targetClass, BeanFactory beanFactory) {
         Method targetMethod = getTargetMethod(targetClass, method);
-        ExtExpressionRootObject rootObject = new ExtExpressionRootObject(method, args, target, targetClass,
-                targetMethod);
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(rootObject, targetMethod,
-                args, getParameterNameDiscoverer());
-        if (beanFactory != null) {
-            evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
-        }
-        return evaluationContext;
+        ExtExpressionRootObject rootObject = new ExtExpressionRootObject(
+                method, args, target, targetClass, targetMethod);
+        return buildEvaluationContext(targetMethod, args, rootObject, beanFactory);
     }
 
     /**
-     * Create an {@link EvaluationContext}.
+     * 创建求值上下文 (自定义 RootObject)
      *
-     * @param method      the method
-     * @param args        the method arguments
-     * @param rootObject  rootObject
-     * @param targetClass the target class
-     *
-     * @return the evaluation context
+     * @param method      方法
+     * @param args        方法参数
+     * @param targetClass 目标类
+     * @param rootObject  自定义根对象
+     * @param beanFactory Bean 工厂 (可选)
+     * @return 求值上下文
      */
-    public EvaluationContext createContext(Method method, Object[] args, Class<?> targetClass, Object rootObject,
-                                           BeanFactory beanFactory) {
+    public EvaluationContext createContext(Method method, Object[] args, Class<?> targetClass,
+                                           Object rootObject, BeanFactory beanFactory) {
         Method targetMethod = getTargetMethod(targetClass, method);
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(rootObject, targetMethod,
-                args, getParameterNameDiscoverer());
-        if (beanFactory != null) {
-            evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
-        }
-        return evaluationContext;
+        return buildEvaluationContext(targetMethod, args, rootObject, beanFactory);
     }
 
+    /**
+     * 求值表达式
+     */
     public Object eval(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
         return eval(expression, methodKey, evalContext, null);
     }
 
+    /**
+     * 求值表达式并转换为指定类型
+     */
     public <T> T eval(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext,
                       Class<T> valueType) {
         return getExpression(this.expressionCache, methodKey, expression).getValue(evalContext, valueType);
     }
 
+    /**
+     * 求值表达式为字符串
+     */
     public String evalAsText(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
         return eval(expression, methodKey, evalContext, String.class);
     }
 
+    /**
+     * 求值表达式为布尔值
+     */
     public boolean evalAsBool(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
         return Boolean.TRUE.equals(eval(expression, methodKey, evalContext, Boolean.class));
     }
 
-    private Method getTargetMethod(Class<?> targetClass, Method method) {
-        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
-        return methodCache.computeIfAbsent(methodKey, (key) -> AopUtils.getMostSpecificMethod(method, targetClass));
-    }
-
     /**
-     * Clear all caches.
+     * 清除所有缓存
      */
     public void clear() {
         this.expressionCache.clear();
         this.methodCache.clear();
+    }
+
+    private EvaluationContext buildEvaluationContext(Method targetMethod, Object[] args,
+                                                     Object rootObject, BeanFactory beanFactory) {
+        MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(
+                rootObject, targetMethod, args, getParameterNameDiscoverer());
+        if (beanFactory != null) {
+            context.setBeanResolver(new BeanFactoryResolver(beanFactory));
+        }
+        return context;
+    }
+
+    private Method getTargetMethod(Class<?> targetClass, Method method) {
+        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
+        return methodCache.computeIfAbsent(methodKey, key -> AopUtils.getMostSpecificMethod(method, targetClass));
     }
 
 }

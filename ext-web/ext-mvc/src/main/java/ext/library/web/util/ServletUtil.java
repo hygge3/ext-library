@@ -1,4 +1,4 @@
-package ext.library.core.util;
+package ext.library.web.util;
 
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
@@ -27,18 +27,36 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 客户端工具类
+ * Servlet 工具类
+ * <p>
+ * 提供 HttpServletRequest/Response 的便捷操作方法
  */
-
 public final class ServletUtil {
 
     /**
-     * 如果在前端和服务端中间还有一层 Node 服务 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息 便于获取真实 IP
+     * Node 服务转发 IP 头
+     * <p>
+     * 如果在前端和服务端中间还有一层 Node 服务，
+     * 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息便于获取真实 IP
      */
     private static final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
-    private static final String[] CLIENT_IP_HEADERS = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"};
 
-    // region 请求
+    /**
+     * 客户端 IP 获取优先级头列表
+     */
+    private static final String[] CLIENT_IP_HEADERS = {
+            "X-Forwarded-For",
+            "X-Real-IP",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_X_FORWARDED_FOR"
+    };
+
+    private ServletUtil() {
+    }
+
+    // region Request/Response
 
     /**
      * 获取 request
@@ -53,6 +71,23 @@ public final class ServletUtil {
     public static @Nullable HttpServletResponse getResponse() {
         return getRequestAttributes().getResponse();
     }
+
+    /**
+     * 获取 session
+     */
+    public static HttpSession getSession() {
+        return getRequest().getSession();
+    }
+
+    public static ServletRequestAttributes getRequestAttributes() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        Assert.notNull(attributes, "Request Attributes does not exist");
+        return (ServletRequestAttributes) attributes;
+    }
+
+    // endregion
+
+    // region Parameter
 
     /**
      * 获取 String 参数
@@ -124,25 +159,16 @@ public final class ServletUtil {
         return params;
     }
 
-    /**
-     * 获取 session
-     */
-    public static HttpSession getSession() {
-        return getRequest().getSession();
-    }
+    // endregion
 
-    public static ServletRequestAttributes getRequestAttributes() {
-        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-        Assert.notNull(attributes, "Request Attributes 不存在");
-        return (ServletRequestAttributes) attributes;
-    }
+    // region Attribute
 
     public static void setRequestAttribute(String name, Object value) {
         getRequest().setAttribute(name, value);
     }
 
     /**
-     * 获取请求属性 如果指定的属性不存在，则返回 null。
+     * 获取请求属性，如果指定的属性不存在，则返回 null
      *
      * @param name 属性的名称
      *
@@ -153,13 +179,17 @@ public final class ServletUtil {
     }
 
     /**
-     * 从当前请求中移除一个属性。
+     * 从当前请求中移除一个属性
      *
-     * @param name 要移除的属性的名称。这是一个字符串值，用于唯一标识要移除的属性。
+     * @param name 要移除的属性的名称
      */
     public static void removeRequestAttribute(String name) {
         getRequest().removeAttribute(name);
     }
+
+    // endregion
+
+    // region Header
 
     public static String getHeader(HttpServletRequest request, String name) {
         return ObjectUtil.defaultIfEmpty(request.getHeader(name), "");
@@ -173,7 +203,7 @@ public final class ServletUtil {
      * 设置响应的 Header
      *
      * @param name  名
-     * @param value 值，可以是 String，Date，int
+     * @param value 值
      */
     public static void setHeader(String name, String value) {
         getResponse().setHeader(name, value);
@@ -197,6 +227,17 @@ public final class ServletUtil {
     }
 
     /**
+     * 获取 User-Agent
+     */
+    public static String getUA() {
+        return getHeader(HttpHeaders.USER_AGENT);
+    }
+
+    // endregion
+
+    // region Cookie
+
+    /**
      * 将 cookie 封装到 Map 里面
      *
      * @return Cookie map
@@ -218,17 +259,6 @@ public final class ServletUtil {
         return cookie != null ? cookie.getValue() : null;
     }
 
-    /**
-     * 清除 某个指定的 cookie
-     *
-     * @param key cookie key
-     */
-    public static void removeCookie(String key) {
-        addCookie(key, null, 0);
-    }
-
-    // region ip 获取
-
     public static void addCookie(String name, @Nullable String value, Integer maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
@@ -238,13 +268,17 @@ public final class ServletUtil {
     }
 
     /**
-     * 获取 UA
+     * 清除指定的 cookie
      *
-     * @return {@code String }
+     * @param key cookie key
      */
-    public static String getUA() {
-        return getHeader(HttpHeaders.USER_AGENT);
+    public static void removeCookie(String key) {
+        addCookie(key, null, 0);
     }
+
+    // endregion
+
+    // region IP
 
     /**
      * 获取客户端 IP
@@ -262,27 +296,26 @@ public final class ServletUtil {
 
     /**
      * 获取客户端 IP
-     * <p>
-     * 参考 huTool 稍微调整了下 headers 顺序
+     *
+     * @param request          请求对象
+     * @param otherHeaderNames 额外的 IP 头名称
+     *
+     * @return IP 地址
      */
     public static String getIpAddr(HttpServletRequest request, String... otherHeaderNames) {
         return getClientIpByHeader(request, mergeClientIpHeaders(otherHeaderNames));
     }
 
     /**
-     * 获取客户端 IP
-     *
+     * 通过 Header 获取客户端 IP
      * <p>
-     * headerNames 参数用于自定义检测的 Header<br>
-     * 需要注意的是，使用此方法获取的客户 IP 地址必须在 Http 服务器（例如 Nginx）中配置头信息，否则容易造成 IP 伪造。
-     * </p>
+     * 注意：使用此方法获取的客户端 IP 地址必须在 HTTP 服务器（如 Nginx）中正确配置头信息，
+     * 否则可能导致 IP 伪造
      *
      * @param request     请求对象{@link HttpServletRequest}
-     * @param headerNames 自定义头，通常在 Http 服务器（例如 Nginx）中配置
+     * @param headerNames 自定义头，通常在 HTTP 服务器中配置
      *
      * @return IP 地址
-     *
-     * @since 4.4.1
      */
     public static String getClientIpByHeader(HttpServletRequest request, String... headerNames) {
         String ip;
@@ -304,11 +337,11 @@ public final class ServletUtil {
     }
 
     /**
-     * 多次反向代理后会有多个 ip 值，第一个 ip 才是真实 ip
+     * 多次反向代理后会有多个 IP 值，第一个 IP 才是真实 IP
      *
-     * @param ip ip
+     * @param ip IP 字符串
      *
-     * @return 真实 ip
+     * @return 真实 IP
      */
     private static String getMultistageReverseProxyIp(String ip) {
         if (ip.indexOf(",") <= 0) {

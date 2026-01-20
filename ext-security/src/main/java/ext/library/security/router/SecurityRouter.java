@@ -1,6 +1,5 @@
 package ext.library.security.router;
 
-import ext.library.core.util.ServletUtil;
 import ext.library.security.annotion.RequiresPermissions;
 import ext.library.security.annotion.RequiresRoles;
 import ext.library.security.annotion.SecurityIgnore;

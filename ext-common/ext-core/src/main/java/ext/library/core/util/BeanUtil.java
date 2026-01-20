@@ -1,9 +1,9 @@
 package ext.library.core.util;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.holder.Lazy;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
 import io.github.linpeilie.Converter;
@@ -23,7 +23,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Bean 工具类
  */
+public final class BeanUtil {
 
-public class BeanUtil {
+    private BeanUtil() {
+    }
 
     private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
 
@@ -45,22 +46,19 @@ public class BeanUtil {
      * 对象转 Map
      *
      * @param obj 对象
-     *
-     * @return {@code Map<String, Object> }
+     * @return Map
      */
     public static Map<String, @Nullable Object> beanToMap(Object obj) {
         Map<String, @Nullable Object> map = new HashMap<>();
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
-            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-            for (PropertyDescriptor property : propertyDescriptors) {
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
                 String key = property.getName();
-                if (key.compareToIgnoreCase("class") == 0) {
+                if ("class".equalsIgnoreCase(key)) {
                     continue;
                 }
                 Method getter = property.getReadMethod();
-                Object value = getter != null ? getter.invoke(obj) : null;
-                map.put(key, value);
+                map.put(key, getter != null ? getter.invoke(obj) : null);
             }
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
@@ -69,19 +67,17 @@ public class BeanUtil {
     }
 
     /**
-     * map 转对象
+     * Map 转对象
      *
-     * @param map         map
-     * @param targetClass 目标类别
-     *
-     * @return {@code T }
+     * @param map         Map
+     * @param targetClass 目标类型
+     * @return 目标对象
      */
     public static <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
         T object = org.springframework.beans.BeanUtils.instantiateClass(targetClass);
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
-            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-            for (PropertyDescriptor property : propertyDescriptors) {
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
                 Method setter = property.getWriteMethod();
                 if (setter != null) {
                     setter.invoke(object, map.get(property.getName()));
@@ -98,7 +94,6 @@ public class BeanUtil {
      *
      * @param bean         bean
      * @param propertyName 属性名
-     *
      * @return 属性值
      */
     public static @Nullable Object getProperty(Object bean, String propertyName) {
@@ -114,7 +109,8 @@ public class BeanUtil {
      * @param value        属性值
      */
     public static void setProperty(Object bean, String propertyName, Object value) {
-        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(Objects.requireNonNull(bean, "Bean 不能为 null"));
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(
+                Objects.requireNonNull(bean, "Bean 不能为 null"));
         beanWrapper.setPropertyValue(propertyName, value);
     }
 
@@ -122,10 +118,8 @@ public class BeanUtil {
      * 深度拷贝
      *
      * @param source 待拷贝的对象
-     *
      * @return 拷贝之后的对象
      */
-
     @SuppressWarnings("unchecked")
     public static <T> T deepClone(T source) {
         FastByteArrayOutputStream fBos = new FastByteArrayOutputStream(1024);
@@ -146,9 +140,8 @@ public class BeanUtil {
      * 将 S 类型对象，转换为 T 类型的对象并返回
      *
      * @param source     数据来源实体
-     * @param targetType 转换后的对象
-     *
-     * @return targetType
+     * @param targetType 目标类型
+     * @return 转换后的对象
      */
     @SuppressWarnings("unchecked")
     public static <S, T> T convert(S source, Class<T> targetType) {
@@ -167,33 +160,30 @@ public class BeanUtil {
     }
 
     /**
-     * 将 S 类型对象，按照配置的映射字段规则，给 T 类型的对象赋值并返回 T 对象
+     * 将 S 类型对象，按照配置的映射字段规则，给 T 类型的对象赋值
      *
      * @param source 数据来源实体
-     * @param target 转换后的对象
+     * @param target 目标对象，属性将被复制到此对象
      */
-    @SuppressWarnings("unchecked")
     public static <S, T> void convert(S source, T target) {
-        if (target.getClass().equals(source.getClass())) {
-            target = (T) source;
+        if (source == null || target == null) {
+            return;
         }
         try {
-            target = CONVERTER.get().convert(source, target);
+            CONVERTER.get().convert(source, target);
         } catch (Exception e) {
             Logs.warn(EmojiSymbol.CORE, e.getMessage());
+            copyByCopier(source, target);
         }
-        copyByCopier(source, target);
     }
 
     /**
-     * 将 T 类型的集合，转换为 desc 类型的集合并返回
+     * 将 S 类型的集合，转换为 T 类型的集合并返回
      *
      * @param sourceList 数据来源实体列表
-     * @param targetType 描述对象 转换后的对象
-     *
-     * @return targetType
+     * @param targetType 目标类型
+     * @return 转换后的列表
      */
-
     @SuppressWarnings("unchecked")
     public static <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
         if (ObjectUtil.isEmpty(sourceList)) {
@@ -207,16 +197,17 @@ public class BeanUtil {
         } catch (Exception e) {
             Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
-        return copyListByCopier(sourceList, targetType);
+        return sourceList.stream()
+                .map(source -> copyByCopier(source, targetType))
+                .toList();
     }
 
     /**
-     * 将 Map 转换为 beanClass 类型的集合并返回
+     * 将 Map 转换为指定类型的对象
      *
      * @param map        数据来源
-     * @param targetType bean 类
-     *
-     * @return bean 对象
+     * @param targetType 目标类型
+     * @return 转换后的对象
      */
     public static <T> T convert(Map<String, Object> map, Class<T> targetType) {
         if (ObjectUtil.isEmpty(map)) {
@@ -231,16 +222,9 @@ public class BeanUtil {
     }
 
     private static void copyByCopier(Object source, Object target) {
-        Class<?> sourceType = source.getClass();
-        Class<?> targetType = target.getClass();
-        String beanKey = sourceType.getName() + targetType.getName();
-        BeanCopier copier;
-        if (!BEAN_COPIER_CACHE.containsKey(beanKey)) {
-            copier = BeanCopier.create(sourceType, targetType, false);
-            BEAN_COPIER_CACHE.put(beanKey, copier);
-        } else {
-            copier = BEAN_COPIER_CACHE.get(beanKey);
-        }
+        String beanKey = source.getClass().getName() + target.getClass().getName();
+        BeanCopier copier = BEAN_COPIER_CACHE.computeIfAbsent(beanKey,
+                k -> BeanCopier.create(source.getClass(), target.getClass(), false));
         try {
             copier.copy(source, target, null);
         } catch (Exception e) {
@@ -249,34 +233,9 @@ public class BeanUtil {
     }
 
     private static <T> T copyByCopier(Object source, Class<T> targetType) {
-        T t;
-        try {
-            t = targetType.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                 InvocationTargetException e) {
-            throw new ToolException(EmojiSymbol.TOOL, e);
-        }
-        org.springframework.beans.BeanUtils.copyProperties(source, t);
-        return t;
-    }
-
-    private static <S, T> List<T> copyListByCopier(List<S> sourceList, Class<T> targetType) {
-        List<T> resultList = new ArrayList<>(sourceList.size());
-        for (Object source : sourceList) {
-            T target;
-            try {
-                target = targetType.getDeclaredConstructor().newInstance();
-                try {
-                    copyByCopier(source, target);
-                } catch (Exception e) {
-                    org.springframework.beans.BeanUtils.copyProperties(source, target);
-                }
-            } catch (Exception e) {
-                throw new ToolException(EmojiSymbol.TOOL, e);
-            }
-            resultList.add(target);
-        }
-        return resultList;
+        T target = ClassUtil.newInstance(targetType);
+        copyByCopier(source, target);
+        return target;
     }
 
 }

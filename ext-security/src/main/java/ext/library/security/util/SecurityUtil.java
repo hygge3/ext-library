@@ -1,6 +1,5 @@
 package ext.library.security.util;
 
-import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
 import ext.library.http.useragent.UserAgent;
 import ext.library.http.useragent.UserAgentUtil;
