@@ -1,7 +1,7 @@
 package ext.library.trans;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import tools.jackson.databind.json.JsonMapper;
@@ -18,8 +18,6 @@ import java.util.Map;
 @ConditionalOnClass(JsonMapper.class)
 public class TranslationAutoConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(TranslationAutoConfiguration.class);
-
     private final List<Translator<?>> translators;
 
     public TranslationAutoConfiguration(List<Translator<?>> translators) {
@@ -35,11 +33,11 @@ public class TranslationAutoConfiguration {
                 TranslationType annotation = clazz.getAnnotation(TranslationType.class);
                 translatorMap.put(annotation.value(), translator);
             } else {
-                log.warn("[Translation] {} 未标注 @TranslationType 注解", clazz.getName());
+                Logs.warn(EmojiSymbol.TRANS, "{} 未标注 @TranslationType 注解", clazz.getName());
             }
         }
         TranslatorRegistry.registerAll(translatorMap);
-        log.info("[Translation] 翻译模块初始化完成，已注册 {} 个翻译器", translatorMap.size());
+        Logs.info(EmojiSymbol.TRANS, "载入模块: 翻译，已注册 {} 个翻译器", translatorMap.size());
     }
 
 }
