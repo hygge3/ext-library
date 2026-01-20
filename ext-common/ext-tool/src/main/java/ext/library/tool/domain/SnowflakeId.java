@@ -12,53 +12,72 @@ import org.springframework.util.Assert;
  * 5 位数据中心 ID +
  * 5 位工作节点 ID +
  * 12 位序列号 (同毫秒内递增)
+ *
+ * @since 2025.01.01
  */
 public final class SnowflakeId {
-
-    // 自定义纪元（epoch）：2025-01-01T00:00:00Z
+    /** 自定义纪元（epoch）：2025-01-01T00:00:00Z */
     private static final long EPOCH = 1735689600000L;
 
-    /** 机器 id 所占的位数 */
+    /** 机器 ID 所占的位数 */
     private static final int WORKER_ID_BITS = 5;
-    /** 数据标识 id 所占的位数 */
+
+    /** 数据中心 ID 所占的位数 */
     private static final int DATACENTER_ID_BITS = 5;
-    /** 序列在 id 中占的位数 */
+
+    /** 序列号所占的位数 */
     private static final int SEQUENCE_BITS = 12;
 
-    /** 机器 ID 向左移 12 位 */
+    /** 支持的最大机器 ID，结果是 31 */
     private static final long MAX_WORKER_ID = ~(-1L << WORKER_ID_BITS);
-    /** 支持的最大数据标识 id，结果是 31 */// 31
+
+    /** 支持的最大数据中心 ID，结果是 31 */
     private static final long MAX_DATACENTER_ID = ~(-1L << DATACENTER_ID_BITS);
-    /** 生成序列的掩码，这里为 4095 (0b111111111111=0xfff=4095) */
+
+    /** 序列号掩码，用于限制序列号范围 (0~4095) */
     private static final long SEQUENCE_MASK = ~(-1L << SEQUENCE_BITS);
 
-    private static final int WORKER_ID_SHIFT = SEQUENCE_BITS;                                      // 12
-    private static final int DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;                 // 17
-    private static final int TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS; // 22
+    /** 机器 ID 左移位数 (12 位) */
+    private static final int WORKER_ID_SHIFT = SEQUENCE_BITS;
 
-    /** 数据中心 ID(0~31) */
+    /** 数据中心 ID 左移位数 (17 位) */
+    private static final int DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
+
+    /** 时间戳左移位数 (22 位) */
+    private static final int TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
+
+    /** 数据中心 ID (0~31) */
     private final long datacenterId;
-    /** 工作机器 ID(0~31) */
+
+    /** 工作机器 ID (0~31) */
     private final long workerId;
 
-    /** 上次生成 ID 的时间截 */
+    /** 上次生成 ID 的时间戳 */
     private long lastTimestamp = -1L;
-    /** 毫秒内序列 (0~4095) */
+
+    /** 毫秒内序列号 (0~4095) */
     private long sequence = 0L;
 
     /**
-     * @param datacenterId 数据中心 ID，范围 [0,31]
-     * @param workerId     工作节点 ID，范围 [0,31]
+     * 构造 Snowflake ID 生成器
+     *
+     * @param datacenterId 数据中心 ID，范围 [0, 31]
+     * @param workerId     工作节点 ID，范围 [0, 31]
+     * @throws IllegalArgumentException 如果 ID 超出有效范围
      */
     public SnowflakeId(long datacenterId, long workerId) {
-        Assert.isTrue(datacenterId >= 0 && datacenterId <= MAX_DATACENTER_ID, StringUtil.format("datacenterId 超出范围：{}", datacenterId));
-        Assert.isTrue(workerId >= 0 && workerId <= MAX_WORKER_ID, StringUtil.format("workerId 超出范围：{}", workerId));
+        Assert.isTrue(datacenterId >= 0 && datacenterId <= MAX_DATACENTER_ID,
+                StringUtil.format("datacenterId 超出范围：{}", datacenterId));
+        Assert.isTrue(workerId >= 0 && workerId <= MAX_WORKER_ID,
+                StringUtil.format("workerId 超出范围：{}", workerId));
         this.datacenterId = datacenterId;
         this.workerId = workerId;
     }
 
     /**
      * 生成下一个 ID（线程安全）
+     *
+     * @return 生成的唯一 ID
      */
     public synchronized long nextId() {
         long timestamp = currentTime();
@@ -81,13 +100,29 @@ public final class SnowflakeId {
 
         lastTimestamp = timestamp;
 
-        return ((timestamp - EPOCH) << TIMESTAMP_LEFT_SHIFT) | (datacenterId << DATACENTER_ID_SHIFT) | (workerId << WORKER_ID_SHIFT) | sequence;
+        return ((timestamp - EPOCH) << TIMESTAMP_LEFT_SHIFT)
+                | (datacenterId << DATACENTER_ID_SHIFT)
+                | (workerId << WORKER_ID_SHIFT)
+                | sequence;
     }
 
+    /**
+     * 获取当前时间戳（毫秒）
+     *
+     * @return 当前时间戳
+     */
     private long currentTime() {
         return System.currentTimeMillis();
     }
 
+    /**
+     * 等待直到下一毫秒
+     * <p>
+     * 当同一毫秒内序列号溢出时调用，阻塞等待到下一毫秒
+     *
+     * @param lastTs 上次生成 ID 的时间戳
+     * @return 下一毫秒的时间戳
+     */
     private long waitNextMillis(long lastTs) {
         long ts = currentTime();
         while (ts <= lastTs) {
@@ -96,6 +131,14 @@ public final class SnowflakeId {
         return ts;
     }
 
+    /**
+     * 等待直到指定时间戳
+     * <p>
+     * 当检测到时钟回拨时调用，阻塞等待直到时间恢复
+     *
+     * @param targetTs 目标时间戳
+     * @return 达到或超过目标的时间戳
+     */
     private long waitUntil(long targetTs) {
         long ts = currentTime();
         while (ts < targetTs) {
