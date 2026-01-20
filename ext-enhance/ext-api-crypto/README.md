@@ -36,13 +36,17 @@ implementation("ext.library:ext-api-crypto")
 - 响应数据自动加密
 - 支持多种加密算法
 - 基于注解，无侵入
+- 支持方法级和类级注解
 
 ## 配置项
 
 | 配置项 | 默认值 | 说明 |
 |-------|-------|------|
-| ext.api-crypto.public-key | - | RSA 公钥 |
-| ext.api-crypto.private-key | - | RSA 私钥 |
+| ext.api-crypto.algorithm | RSA | 默认加密算法 |
+| ext.api-crypto.public-key | - | RSA/SM2 公钥（用于加密） |
+| ext.api-crypto.private-key | - | RSA/SM2 私钥（用于解密） |
+| ext.api-crypto.secret-key | - | AES/SM4 对称密钥 |
+| ext.api-crypto.salt | - | AES 盐值 |
 
 ## 核心注解
 
@@ -51,14 +55,22 @@ implementation("ext.library:ext-api-crypto")
 | `@RequestDecrypt` | 请求解密注解 |
 | `@ResponseEncrypt` | 响应加密注解 |
 
+### 注解属性
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| algorithm | Algorithm | RSA | 指定加密算法 |
+| useDefault | boolean | true | 是否使用配置文件中的默认算法 |
+
 ## 支持的加密算法
 
-| 算法 | 说明 |
-|------|------|
-| AES | AES 对称加密 |
-| RSA | RSA 非对称加密 |
-| SM2 | 国密 SM2 加密 |
-| SM4 | 国密 SM4 加密 |
+| 算法 | 类型 | 说明 |
+|------|------|------|
+| RSA | 非对称 | RSA 加密，推荐用于安全性要求高的场景 |
+| SM2 | 非对称 | 国密 SM2 加密 |
+| AES | 对称 | AES 对称加密，支持盐值 |
+| SM4 | 对称 | 国密 SM4 加密 |
+| BASE64 | 编码 | Base64 编码（非加密，仅编解码） |
 
 ## 使用示例
 
@@ -67,8 +79,19 @@ implementation("ext.library:ext-api-crypto")
 ```yaml
 ext:
   api-crypto:
+    algorithm: RSA
     public-key: "MIGfMA0GCSqGSIb3DQEBAQUAA4..."
     private-key: "MIICdQIBADANBgkqhkiG9w0BAQ..."
+```
+
+### 对称加密配置
+
+```yaml
+ext:
+  api-crypto:
+    algorithm: AES
+    secret-key: "your-secret-key-here"
+    salt: "your-salt-here"
 ```
 
 ### 请求解密
@@ -114,11 +137,54 @@ public R<SensitiveVO> handleSensitive(@RequestBody SensitiveDTO dto) {
 
 ```java
 @PostMapping("/aes")
-@RequestDecrypt(algorithm = Algorithm.AES)
-@ResponseEncrypt(algorithm = Algorithm.AES)
+@RequestDecrypt(algorithm = Algorithm.AES, useDefault = false)
+@ResponseEncrypt(algorithm = Algorithm.AES, useDefault = false)
 public R<DataVO> handleAes(@RequestBody DataDTO dto) {
     return R.ok(dataService.handle(dto));
 }
+```
+
+### 类级注解
+
+```java
+@RestController
+@RequestMapping("/api/secure")
+@RequestDecrypt
+@ResponseEncrypt
+public class SecureController {
+
+    // 该类下所有方法都会自动解密请求、加密响应
+
+    @PostMapping("/data")
+    public R<DataVO> handleData(@RequestBody DataDTO dto) {
+        return R.ok(dataService.handle(dto));
+    }
+}
+```
+
+## 包结构
+
+```
+ext.library.apicrypto
+├── annotation          # 注解定义
+│   ├── RequestDecrypt
+│   └── ResponseEncrypt
+├── config              # 自动配置
+│   └── ApiCryptoAutoConfiguration
+├── enums               # 枚举
+│   └── Algorithm
+├── handler             # 处理器
+│   ├── RequestDecryptHandler
+│   └── ResponseEncryptHandler
+├── properties          # 配置属性
+│   └── ApiCryptoProperties
+└── strategy            # 加密策略
+    ├── CryptoStrategy
+    ├── AESStrategy
+    ├── RSAStrategy
+    ├── SM2Strategy
+    ├── SM4Strategy
+    └── Base64Strategy
 ```
 
 ## 许可证

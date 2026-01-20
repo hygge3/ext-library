@@ -1,2 +1,1 @@
-ext.library.encrypt.handler.RequestDecryptHandler
-ext.library.encrypt.handler.ResponseEncryptHandler
+ext.library.apicrypto.config.ApiCryptoAutoConfiguration
