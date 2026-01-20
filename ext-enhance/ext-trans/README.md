@@ -27,7 +27,7 @@ implementation("ext.library:ext-trans")
 
 | 依赖 | 说明 |
 |------|------|
-| jackson-databind | JSON 序列化支持 |
+| jackson-databind 3.x | JSON 序列化支持 (tools.jackson) |
 
 ## 核心组件
 
@@ -37,7 +37,7 @@ implementation("ext.library:ext-trans")
 | `@TranslationType` | 翻译类型注解 |
 | `Translator` | 翻译器接口 |
 | `TranslatorRegistry` | 翻译器注册表 |
-| `TranslationHandler` | Jackson 序列化处理器 |
+| `TranslationHandler` | Jackson 3.0 序列化处理器 |
 
 ## 使用示例
 
