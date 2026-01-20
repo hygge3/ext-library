@@ -1,15 +1,12 @@
-# ext-mail（邮件发送）
+# ext-mail
 
-## 功能
+> 邮件发送模块 - 提供邮件发送服务封装
 
-- 简单邮件发送
-- 带附件邮件发送
-- HTML 邮件支持
-- 邮件发送事件
-- 灵活的邮件模型
-- 异步发送支持
+## 简介
 
-## 依赖引用
+`ext-mail` 是 ext-library 的邮件发送模块，封装了 Spring Boot Mail，提供简洁的邮件发送 API 和事件支持。
+
+## 快速开始
 
 ### Maven
 
@@ -17,15 +14,29 @@
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-mail</artifactId>
-    <version>${version}</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile("ext.library:ext-mail:${version}")
+implementation("ext.library:ext-mail")
 ```
+
+## 依赖说明
+
+| 依赖 | 说明 |
+|------|------|
+| spring-boot-starter-mail | Spring Mail 支持 |
+
+## 功能特性
+
+- 简单邮件发送
+- HTML 邮件支持
+- 带附件邮件发送
+- 批量发送支持
+- 邮件发送事件
+- 异步发送支持
 
 ## 配置项
 
@@ -41,14 +52,31 @@ compile("ext.library:ext-mail:${version}")
 ## 核心类说明
 
 | 类名 | 说明 |
-|-----|------|
-| MailSender | 邮件发送接口 |
-| MailSenderImpl | 邮件发送实现 |
-| MailDetails | 邮件详情模型 |
-| MailSendInfo | 邮件发送信息 |
-| MailSendEvent | 邮件发送事件 |
+|------|------|
+| `MailSender` | 邮件发送接口 |
+| `MailSenderImpl` | 邮件发送实现 |
+| `MailDetails` | 邮件详情模型 |
+| `MailSendInfo` | 邮件发送信息 |
+| `MailSendEvent` | 邮件发送事件 |
 
 ## 使用示例
+
+### 配置邮件服务
+
+```yaml
+spring:
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: your-email@example.com
+    password: your-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+```
 
 ### 简单邮件
 
@@ -56,11 +84,11 @@ compile("ext.library:ext-mail:${version}")
 @Autowired
 private MailSender mailSender;
 
-public void sendSimpleMail(String to, String subject, String content) {
+public void sendSimpleMail() {
     MailDetails details = MailDetails.builder()
-        .to(to)
-        .subject(subject)
-        .text(content)
+        .to("recipient@example.com")
+        .subject("测试邮件")
+        .text("这是一封测试邮件")
         .build();
     mailSender.send(details);
 }
@@ -69,10 +97,19 @@ public void sendSimpleMail(String to, String subject, String content) {
 ### HTML 邮件
 
 ```java
-public void sendHtmlMail(String to, String subject, String htmlContent) {
+public void sendHtmlMail() {
+    String htmlContent = """
+        <html>
+        <body>
+            <h1>欢迎注册</h1>
+            <p>您的验证码是：<strong>123456</strong></p>
+        </body>
+        </html>
+        """;
+
     MailDetails details = MailDetails.builder()
-        .to(to)
-        .subject(subject)
+        .to("recipient@example.com")
+        .subject("验证码")
         .html(htmlContent)
         .build();
     mailSender.send(details);
@@ -82,11 +119,11 @@ public void sendHtmlMail(String to, String subject, String htmlContent) {
 ### 带附件邮件
 
 ```java
-public void sendAttachmentMail(String to, String subject, String content, File attachment) {
+public void sendAttachmentMail(File attachment) {
     MailDetails details = MailDetails.builder()
-        .to(to)
-        .subject(subject)
-        .text(content)
+        .to("recipient@example.com")
+        .subject("附件邮件")
+        .text("请查收附件")
         .addAttachment(attachment.getName(), attachment)
         .build();
     mailSender.send(details);
@@ -96,11 +133,11 @@ public void sendAttachmentMail(String to, String subject, String content, File a
 ### 批量发送
 
 ```java
-public void sendBatchMail(List<String> toList, String subject, String content) {
+public void sendBatchMail(List<String> recipients) {
     MailDetails details = MailDetails.builder()
-        .to(toList)
-        .subject(subject)
-        .text(content)
+        .to(recipients)
+        .subject("群发邮件")
+        .text("这是一封群发邮件")
         .build();
     mailSender.send(details);
 }
@@ -114,9 +151,13 @@ public class MailEventListener {
 
     @EventListener
     public void onMailSend(MailSendEvent event) {
-        log.info("邮件发送成功: {}, to: {}",
+        log.info("邮件发送完成: {}, 收件人: {}",
             event.getMailDetails().getSubject(),
             event.getMailDetails().getTo());
     }
 }
 ```
+
+## 许可证
+
+[Apache License 2.0](../../LICENSE)

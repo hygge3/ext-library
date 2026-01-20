@@ -1,15 +1,12 @@
-# ext-redis（Redis 集成）
+# ext-redis
 
-## 功能
+> Redis 集成模块 - 提供 Spring Data Redis 增强和分布式锁支持
 
-- Spring Data Redis 增强
-- 键前缀自动管理
-- 序列化优化
-- 分布式锁支持
-- 队列操作工具
-- Redis 工具类
+## 简介
 
-## 依赖引用
+`ext-redis` 是 ext-library 的 Redis 集成模块，基于 Spring Data Redis 提供增强功能，包括键前缀管理、分布式锁、队列操作等。
+
+## 快速开始
 
 ### Maven
 
@@ -17,21 +14,32 @@
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-redis</artifactId>
-    <version>${version}</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile("ext.library:ext-redis:${version}")
+implementation("ext.library:ext-redis")
 ```
 
-## 依赖模块
+## 依赖说明
 
-ext-redis 依赖以下模块：
-- ext-core：核心工具
-- ext-json：JSON 处理
+| 依赖 | 说明 |
+|------|------|
+| ext-core | 核心工具类 |
+| ext-json | JSON 序列化 |
+| spring-boot-starter-data-redis | Redis 集成 |
+| commons-pool2 | 连接池支持 |
+
+## 功能特性
+
+- Spring Data Redis 增强
+- 键前缀自动管理
+- JSON 序列化优化
+- 分布式锁支持
+- 队列操作工具
+- Redis 工具类
 
 ## 配置项
 
@@ -46,14 +54,14 @@ ext-redis 依赖以下模块：
 ## 核心类说明
 
 | 类名 | 说明 |
-|-----|------|
-| RedisUtil | Redis 操作工具类 |
-| DistributedLock | 分布式锁 |
-| QueueUtil | 队列操作工具 |
-| RedisProperties | Redis 配置属性 |
-| CacheSerializer | 缓存序列化器 |
-| PrefixStringRedisSerializer | 前缀字符串序列化器 |
-| PrefixJdkRedisSerializer | 前缀 JDK 序列化器 |
+|------|------|
+| `RedisUtil` | Redis 操作工具类 |
+| `DistributedLock` | 分布式锁 |
+| `QueueUtil` | 队列操作工具 |
+| `RedisProperties` | Redis 配置属性 |
+| `CacheSerializer` | 缓存序列化器 |
+| `PrefixStringRedisSerializer` | 前缀字符串序列化器 |
+| `PrefixJdkRedisSerializer` | 前缀 JDK 序列化器 |
 
 ## 使用示例
 
@@ -66,6 +74,9 @@ private RedisUtil redisUtil;
 // String 操作
 redisUtil.set("key", "value");
 String value = redisUtil.get("key");
+
+// 带过期时间
+redisUtil.set("key", "value", 60, TimeUnit.SECONDS);
 
 // Hash 操作
 redisUtil.hset("hash", "field", "value");
@@ -82,8 +93,8 @@ String value = redisUtil.rpop("list");
 @Autowired
 private DistributedLock lock;
 
-public void doWithLock(String lockKey, long timeout, TimeUnit unit) {
-    boolean acquired = lock.tryLock(lockKey, timeout, unit);
+public void doWithLock(String lockKey) {
+    boolean acquired = lock.tryLock(lockKey, 10, TimeUnit.SECONDS);
     if (acquired) {
         try {
             // 业务逻辑
@@ -101,9 +112,9 @@ public void doWithLock(String lockKey, long timeout, TimeUnit unit) {
 private IRedisPrefixConverter prefixConverter;
 
 public void example() {
-    String prefix = prefixConverter.prefix("user:");
-    // prefix = "project:user:"
-    redisUtil.set(prefix + "1", "value");
+    String prefixedKey = prefixConverter.prefix("user:");
+    // prefixedKey = "project:user:"
+    redisUtil.set(prefixedKey + "1", "value");
 }
 ```
 
@@ -119,3 +130,7 @@ queueUtil.push("queue:task", task);
 // 消费
 Task task = queueUtil.pop("queue:task", Task.class);
 ```
+
+## 许可证
+
+[Apache License 2.0](../../LICENSE)

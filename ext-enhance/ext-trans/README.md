@@ -1,14 +1,12 @@
-# ext-trans（翻译）
+# ext-trans
 
-## 功能
+> 字段翻译模块 - 提供字典翻译和字段转换功能
 
-- 字段翻译注解
-- 字典值翻译
-- 统一翻译接口
-- 自动序列化处理
-- 灵活的翻译类型
+## 简介
 
-## 依赖引用
+`ext-trans` 是 ext-library 的翻译模块，通过注解实现字段值的自动翻译，如字典值翻译、枚举翻译等。
+
+## 快速开始
 
 ### Maven
 
@@ -16,32 +14,43 @@
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-trans</artifactId>
-    <version>${version}</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile("ext.library:ext-trans:${version}")
+implementation("ext.library:ext-trans")
 ```
+
+## 依赖说明
+
+| 依赖 | 说明 |
+|------|------|
+| jackson-databind | JSON 序列化支持 |
+
+## 功能特性
+
+- 字段翻译注解
+- 字典值翻译
+- 统一翻译接口
+- 自动序列化处理
+- 灵活的翻译类型
 
 ## 核心注解
 
 | 注解 | 说明 |
-|-----|------|
-| @Translation | 字段翻译注解 |
-| @TranslationType | 翻译类型注解 |
+|------|------|
+| `@Translation` | 字段翻译注解 |
+| `@TranslationType` | 翻译类型注解 |
 
 ## 核心类说明
 
 | 类名 | 说明 |
-|-----|------|
-| TranslationInterface | 翻译接口 |
-| TranslationHandler | 翻译处理器 |
-| TranslationBeanSerializerModifier | 序列化修改器 |
-| TranslationAutoConfig | 自动配置 |
-| TransConstant | 常量定义 |
+|------|------|
+| `TranslationInterface` | 翻译接口 |
+| `TranslationHandler` | 翻译处理器 |
+| `TranslationBeanSerializerModifier` | 序列化修改器 |
 
 ## 使用示例
 
@@ -63,14 +72,16 @@ public enum UserStatus {
 
 ```java
 @Component
-public class DictTypeTranslationImpl implements TranslationInterface {
+public class DictTranslation implements TranslationInterface {
+
+    @Autowired
+    private DictService dictService;
 
     @Override
     public String translation(Object value, String type) {
         if (value == null) {
             return null;
         }
-        // 根据类型和值获取翻译
         return dictService.getLabel(type, value.toString());
     }
 }
@@ -81,6 +92,7 @@ public class DictTypeTranslationImpl implements TranslationInterface {
 ```java
 @Data
 public class UserDTO {
+
     private Long id;
 
     @Translation(type = "userStatus")
@@ -88,28 +100,29 @@ public class UserDTO {
 
     private String statusLabel; // 翻译后的文本
 
-    @Translation(type = "userGender")
+    @Translation(type = "gender")
     private Integer gender;
 
     private String genderLabel;
 }
 ```
 
-### 序列化和翻译
+### 序列化结果
 
 ```json
 {
-  "id": 1,
-  "status": 1,
-  "statusLabel": "正常",
-  "gender": 0,
-  "genderLabel": "男"
+    "id": 1,
+    "status": 1,
+    "statusLabel": "正常",
+    "gender": 0,
+    "genderLabel": "男"
 }
 ```
 
-### 自定义翻译
+### 自定义翻译实现
 
 ```java
+@Component
 @TranslationType("orderStatus")
 public class OrderStatusTranslation implements TranslationInterface {
 
@@ -127,16 +140,6 @@ public class OrderStatusTranslation implements TranslationInterface {
 }
 ```
 
-### 批量翻译
+## 许可证
 
-```java
-@Data
-public class OrderListDTO {
-    private List<OrderDTO> orders;
-
-    @Translation(type = "orderStatus")
-    private List<Integer> statuses;
-
-    private List<String> statusLabels;
-}
-```
+[Apache License 2.0](../../LICENSE)

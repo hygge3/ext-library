@@ -1,79 +1,127 @@
-# ext 幂等处理方案
+# ext-idempotent
 
-## 使用
+> 幂等性控制模块 - 提供接口幂等性保障
 
-### maven
+## 简介
+
+`ext-idempotent` 是 ext-library 的幂等性控制模块，通过注解和 AOP 实现接口的幂等性保障，防止重复请求。
+
+## 快速开始
+
+### Maven
 
 ```xml
-
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-idempotent</artifactId>
-    <version>${version}</version>
 </dependency>
 ```
 
-### gradle
+### Gradle
 
 ```groovy
-compile("ext.library:ext-idempotent:${version}")
+implementation("ext.library:ext-idempotent")
 ```
 
-## 配置
+## 依赖说明
 
-| 配置项                           | 默认值        | 说明                     |
-|-------------------------------|------------|------------------------|
-| ext.idempotent.key-store-type | MEMORY（内存） | MEMORY（内存）REDIS（Redis） |
+| 依赖 | 说明 |
+|------|------|
+| ext-redis | Redis 存储模式 |
+| caffeine | 可选，内存存储模式 |
 
-## 使用文档
+## 功能特性
 
-引入依赖后，在需要幂等处理的 Controller 上添加@Idempotent 注解即可。
-该注解具有以下基本属性：
+- 基于注解的幂等性控制
+- 支持 SpEL 表达式
+- 内存和 Redis 两种存储模式
+- 可自定义幂等 Key 生成器
+- 灵活的过期策略
 
-| 注解值                   | 默认值	             | 说明                                                                                                                       |
-|-----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------|
-| prefix                | idem             | 业务标识。作为幂等标识的前缀，可用于区分服务和业务，防止 key 冲突。完整的幂等标识 = {prefix}:{uniqueExpression.value}                                          |
-| uniqueExpression      |                  | 幂等的唯一性标识。值为 SpEL 表达式，从上下文中提取幂等的唯一性标识                                                                                     |
-| duration              | 10 分钟	           | 幂等的控制时长。必须大于业务的处理耗时，其值为幂等 key 的标记时长，超过标记时间，则幂等 key 可再次使用，此时间需自行评估，保证过期时间大于业务执行时间                                         |
-| timeUnit              | TimeUnit.SECONDS | 控制时长单位。默认为 SECONDS 秒                                                                                                     |
-| message               | 重复请求，请稍后重试       | 正在执行中的提示信息                                                                                                               |
-| removeKeyWhenFinished | false(不处理)       | 是否在业务完成后立刻清除幂等 key。建议保持默认配置，即使业务执行完，也不删除 key，强制锁 expireTime 的时间。预防出现第一个业务请求还在执行时，若前端未做遮罩，或者用户跳转页面后再回来做重复请求等短时间内重复发起请求的情况 |
-| removeKeyWhenError    | false(不处理)       | 是否在业务执行异常时立刻清除幂等 key                                                                                                     |
+## 配置项
 
-## 幂等 key 编程式处理
+| 配置项 | 默认值 | 说明 |
+|-------|-------|------|
+| ext.idempotent.key-store-type | MEMORY | MEMORY (内存) / REDIS |
 
-默认情况下，程序的幂等 key 通过全局前缀 prefix 和 SPEL 表达式 uniqueExpression 合并计算而来。
+## 注解属性
 
-如果要实现类似以下的一些需求：
+| 属性 | 默认值 | 说明 |
+|------|-------|------|
+| prefix | idem | 幂等标识前缀 |
+| uniqueExpression | - | SpEL 表达式，提取唯一标识 |
+| duration | 10 | 幂等控制时长 |
+| timeUnit | SECONDS | 时间单位 |
+| message | 重复请求，请稍后重试 | 重复请求提示信息 |
+| removeKeyWhenFinished | false | 业务完成后是否清除 Key |
+| removeKeyWhenError | false | 异常时是否清除 Key |
 
-同一个请求 ip 和接口，相同参数的请求，在 expireTime 内多次请求，只允许成功一次
-同一个用户和接口，相同参数的请求，在 expireTime 内多次请求，只允许成功一次
-同一个租户和接口，相同参数的请求，在 expireTime 内多次请求，只允许成功一次
-此时，在每个@Idempotent 注解上配置 prefix 或 uniqueExpression 就不合适了。启动器提供了一个抽象函数式接口
-ext.library.idempotent.key.generator.IdempotentKeyGenerator 用于处理幂等 key 的生成，默认逻辑见
-DefaultIdempotentKeyGenerator，如果要在应用内进行一些全局幂等 key 实现，那么可以通过扩展 DefaultIdempotentKeyGenerator 逻辑或者完全自定义逻辑。具体代码类似于：
+## 使用示例
+
+### 基本使用
 
 ```java
-public class IPKeyGenerator extends DefaultIdempotentKeyGenerator {
-    @Override
-    public String generate(JoinPoint joinPoint, Idempotent idempotentAnnotation) {
-        String clientIP = 获取IP的逻辑;
-        return clientIP + ":" + super.generate(joinPoint, idempotentAnnotation);
-    }
+@PostMapping("/order")
+@Idempotent(
+    prefix = "order",
+    uniqueExpression = "#dto.orderNo",
+    duration = 60,
+    timeUnit = TimeUnit.SECONDS
+)
+public R<Order> createOrder(@RequestBody OrderDTO dto) {
+    return R.ok(orderService.create(dto));
 }
 ```
-然后，将这个 Bean 注入 Spring 容器：
+
+### 组合多个参数
+
 ```java
-@Configuration(proxyBeanMethods = false)
-public class IdempotentConfiguration {
-    /**
-    * key 解析器
-    * @return KeyResolver
-    */
+@PostMapping("/payment")
+@Idempotent(
+    prefix = "payment",
+    uniqueExpression = "#userId + ':' + #dto.orderId"
+)
+public R<Void> pay(@RequestParam Long userId, @RequestBody PaymentDTO dto) {
+    paymentService.pay(userId, dto);
+    return R.ok();
+}
+```
+
+### 自定义 Key 生成器
+
+```java
+@Component
+public class IPKeyGenerator extends DefaultIdempotentKeyGenerator {
+    @Override
+    public String generate(JoinPoint joinPoint, Idempotent annotation) {
+        String clientIP = ServletUtil.getClientIp();
+        return clientIP + ":" + super.generate(joinPoint, annotation);
+    }
+}
+
+@Configuration
+public class IdempotentConfig {
     @Bean
-    public KeyGenerator keyResolver() {
+    public IdempotentKeyGenerator keyGenerator() {
         return new IPKeyGenerator();
     }
 }
-
 ```
+
+### 业务完成后清除
+
+```java
+@PostMapping("/submit")
+@Idempotent(
+    uniqueExpression = "#dto.formId",
+    removeKeyWhenFinished = true
+)
+public R<Void> submit(@RequestBody FormDTO dto) {
+    formService.submit(dto);
+    return R.ok();
+}
+```
+
+## 许可证
+
+[Apache License 2.0](../../LICENSE)

@@ -1,100 +1,135 @@
-# ext 验证码
+# ext-captcha
 
-## 图示
-![数学验证码 01](../docs/images/0701.m.jpg)
-![数学验证码 02](../docs/images/0702.m.jpg)
+> 图形验证码模块 - 提供验证码生成与校验功能
 
-![随机数验证码 03](../docs/images/0703.r.jpg)
-![随机数验证码 04](../docs/images/0704.r.jpg)
+## 简介
 
-## 功能和特点
-1. 验证码生成
-2. 验证码缓存
-3. 内置字体
+`ext-captcha` 是 ext-library 的验证码模块，支持随机字符和数学表达式两种验证码类型，内置缓存支持。
 
-## 使用
-### maven
+## 快速开始
+
+### Maven
+
 ```xml
-
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-captcha</artifactId>
-    <version>${version}</version>
 </dependency>
 ```
 
-### gradle
+### Gradle
+
 ```groovy
-compile("ext.library:ext-captcha:${version}")
+implementation("ext.library:ext-captcha")
 ```
 
-## 配置
-| 配置项                      | 默认值               | 说明                              |
-|--------------------------|-------------------|---------------------------------|
-| ext.captcha.captcha-type | RANDOM（随机）        | RANDOM（随机）MATH（算术）              |
-| ext.captcha.cache-name   | captcha:cache#5m， | cache 名称，配合 ext-redis 使用 5 分钟缓存 |
+## 依赖说明
 
-注意：
-1. 单服务可以采用 `guava`、`caffeine` 等内存缓存。
-2. 分布式下可以使用 `redis` 等。
-3. 如果不是用 `spring cache`，可自行实现 `ICaptchaCache` 注册成 `Spring bean` 即可。
+| 依赖 | 说明 |
+|------|------|
+| ext-cache | 验证码缓存支持 |
 
-## 使用文档
+## 功能特性
 
-### 导入 Bean
+- 随机字符验证码
+- 数学表达式验证码
+- 验证码缓存
+- 内置字体支持
+- 多种输出格式
+
+## 配置项
+
+| 配置项 | 默认值 | 说明 |
+|-------|-------|------|
+| ext.captcha.captcha-type | RANDOM | RANDOM (随机) / MATH (算术) |
+| ext.captcha.cache-name | captcha:cache#5m | 缓存名称，5分钟过期 |
+
+## 核心类说明
+
+| 类名 | 说明 |
+|------|------|
+| `ICaptchaService` | 验证码服务接口 |
+| `ICaptchaCache` | 验证码缓存接口 |
+| `CaptchaDraw` | 验证码绘制接口 |
+| `RandomCaptchaDraw` | 随机字符验证码 |
+| `MathCaptchaDraw` | 数学表达式验证码 |
+
+## 使用示例
+
+### 注入验证码服务
+
 ```java
 @Autowired
-ICaptchaService captchaService;
+private ICaptchaService captchaService;
 ```
 
-### 方法
+### 生成验证码
+
 ```java
-/**
- * 生成验证码
- *
- * @param uuid         自定义缓存的 uuid
- * @param outputStream OutputStream
- */
-void generate(String uuid, OutputStream outputStream);
+// 生成 Base64 格式
+String base64 = captchaService.generateBase64(uuid);
 
-/**
- * 生成验二进制证码
- *
- * @param uuid 自定义缓存的 uuid
- * @return bytes
- */
-byte[] generateBytes(String uuid);
+// 生成字节数组
+byte[] bytes = captchaService.generateBytes(uuid);
 
-/**
- * 生成验 Resource 证码
- *
- * @param uuid 自定义缓存的 uuid
- * @return ByteArrayResource
- */
-ByteArrayResource generateByteResource(String uuid);
-
-/**
- * 生成验证码 base64 字符串
- *
- * @param uuid 自定义缓存的 uuid
- * @return base64 图片
- */
-String generateBase64(String uuid);
-
-/**
- * 生成验证码
- *
- * @param uuid uuid
- * @return {ResponseEntity}
- */
-ResponseEntity<Resource> generateResponseEntity(String uuid);
-
-/**
- * 校验验证码
- *
- * @param uuid             自定义缓存的 uuid
- * @param userInputCaptcha 用户输入的图形验证码
- * @return 是否校验成功
- */
-boolean validate(String uuid, String userInputCaptcha);
+// 生成 ResponseEntity
+ResponseEntity<Resource> response = captchaService.generateResponseEntity(uuid);
 ```
+
+### 校验验证码
+
+```java
+boolean valid = captchaService.validate(uuid, userInputCaptcha);
+```
+
+### 控制器示例
+
+```java
+@RestController
+@RequestMapping("/captcha")
+public class CaptchaController {
+
+    @Autowired
+    private ICaptchaService captchaService;
+
+    @GetMapping("/image")
+    public ResponseEntity<Resource> getCaptcha(@RequestParam String uuid) {
+        return captchaService.generateResponseEntity(uuid);
+    }
+
+    @PostMapping("/verify")
+    public R<Boolean> verify(@RequestParam String uuid,
+                             @RequestParam String code) {
+        boolean valid = captchaService.validate(uuid, code);
+        return R.ok(valid);
+    }
+}
+```
+
+### 自定义缓存
+
+```java
+@Component
+public class CustomCaptchaCache implements ICaptchaCache {
+
+    @Override
+    public void put(String key, String value) {
+        // 自定义缓存逻辑
+    }
+
+    @Override
+    public String get(String key) {
+        // 自定义获取逻辑
+        return null;
+    }
+
+    @Override
+    public void remove(String key) {
+        // 自定义删除逻辑
+    }
+}
+```
+
+## 许可证
+
+[Apache License 2.0](../../LICENSE)

@@ -1,6 +1,37 @@
-# ext-openapi（OpenAPI 文档）
+# ext-openapi
 
-## 功能
+> OpenAPI 文档模块 - 提供 SpringDoc OpenAPI 集成和 Swagger UI 支持
+
+## 简介
+
+`ext-openapi` 是 ext-library 的 API 文档模块，基于 SpringDoc OpenAPI 提供自动化的 API 文档生成功能。
+
+## 快速开始
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>ext.library</groupId>
+    <artifactId>ext-openapi</artifactId>
+</dependency>
+```
+
+### Gradle
+
+```groovy
+implementation("ext.library:ext-openapi")
+```
+
+## 依赖说明
+
+| 依赖 | 说明 |
+|------|------|
+| ext-core | 核心工具类 |
+| springdoc-openapi-starter-webmvc-ui | SpringDoc OpenAPI |
+| therapi-runtime-javadoc | JavaDoc 运行时读取 |
+
+## 功能特性
 
 - SpringDoc OpenAPI 集成
 - 自动 API 文档生成
@@ -8,28 +39,6 @@
 - Swagger UI 界面
 - 自定义文档配置
 - 接口分组管理
-
-## 依赖引用
-
-### Maven
-
-```xml
-<parameter name="groupId">ext.library</groupId>
-<artifactId>ext-openapi</artifactId>
-<version>${version}</version>
-</dependency>
-```
-
-### Gradle
-
-```groovy
-compile("ext.library:ext-openapi:${version}")
-```
-
-## 依赖模块
-
-ext-openapi 依赖以下模块：
-- ext-core：核心工具
 
 ## 配置项
 
@@ -44,17 +53,17 @@ ext-openapi 依赖以下模块：
 | ext.openapi.contact.name | - | 联系人 |
 | ext.openapi.contact.email | - | 联系邮箱 |
 
+## 访问地址
+
+启动应用后，可通过以下地址访问：
+
+| 地址 | 说明 |
+|------|------|
+| `/swagger-ui.html` | Swagger UI 界面 |
+| `/v3/api-docs` | OpenAPI JSON |
+| `/v3/api-docs.yaml` | OpenAPI YAML |
+
 ## 使用示例
-
-### 访问 Swagger UI
-
-启动应用后，访问：`http://localhost:8080/swagger-ui.html`
-
-### API 文档路径
-
-- Swagger UI：`http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON：`http://localhost:8080/v3/api-docs`
-- OpenAPI YAML：`http://localhost:8080/v3/api-docs.yaml`
 
 ### 配置 API 信息
 
@@ -69,11 +78,12 @@ ext:
       email: "support@example.com"
 ```
 
-### 启用/禁用特定接口
+### 接口文档注解
 
 ```java
+@Tag(name = "用户管理", description = "用户相关接口")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Operation(summary = "获取用户列表", description = "分页获取所有用户信息")
@@ -81,21 +91,28 @@ public class UserController {
         @ApiResponse(responseCode = "200", description = "成功"),
         @ApiResponse(responseCode = "500", description = "服务器错误")
     })
-    @GetMapping("/users")
-    public R<PageResult<UserDTO>> list() {
+    @GetMapping
+    public R<PageResult<UserDTO>> list(PageParam param) {
+        // ...
+    }
+
+    @Operation(summary = "获取用户详情")
+    @Parameter(name = "id", description = "用户ID", required = true)
+    @GetMapping("/{id}")
+    public R<UserDTO> getById(@PathVariable Long id) {
         // ...
     }
 }
 ```
 
-### 分组配置
+### 安全配置
 
 ```java
 @OpenAPIDefinition(
     info = @Info(
         title = "API 文档",
         version = "1.0.0",
-        description = "多组API文档"
+        description = "带认证的 API 文档"
     )
 )
 @SecuritySchemes({
@@ -110,7 +127,7 @@ public class OpenApiConfig {
 }
 ```
 
-### 接口分组显示
+### 接口分组
 
 ```java
 @Tag(name = "用户管理", description = "用户相关接口")
@@ -127,3 +144,7 @@ public class OrderController {
     // ...
 }
 ```
+
+## 许可证
+
+[Apache License 2.0](../../LICENSE)
