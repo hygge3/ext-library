@@ -19,38 +19,60 @@ import java.security.spec.X509EncodedKeySpec;
 
 
 /**
- * RSA 加解密
+ * RSA 加解密工具类，提供 RSA 算法的密钥对生成、加密、解密、签名和验签功能
+ *
+ * <p>设计目的：封装 RSA 非对称加密算法的复杂实现，提供简单易用的 API</p>
+ *
+ * <p>核心功能：
+ * <ul>
+ *   <li>生成 RSA 密钥对（默认 4096 位）</li>
+ *   <li>使用公钥加密、私钥解密</li>
+ *   <li>使用私钥签名、公钥验签（SHA256withRSA）</li>
+ *   <li>支持大数据分段加解密</li>
+ * </ul>
+ * </p>
+ *
+ * <p>注意事项：
+ * <ul>
+ *   <li>默认密钥长度为 4096 位，安全性高</li>
+ *   <li>加密数据长度受密钥长度限制，超长数据自动分段处理</li>
+ *   <li>私钥应妥善保管，避免泄露</li>
+ * </ul>
+ * </p>
  */
 public final class RSAUtil {
 
     private static final String ALGO = "RSA";
     /**
-     * RSA 最大加密明文大小
+     * 默认密钥长度（位）
      */
-    private static final int MAX_ENCRYPT_BLOCK = 117;
+    private static final int DEFAULT_KEY_SIZE = 4096;
     /**
-     * RSA 最大解密密文大小
+     * RSA 最大加密明文大小（基于 4096 位密钥，PKCS1 填充需减去 11 字节）
      */
-    private static final int MAX_DECRYPT_BLOCK = 128;
+    private static final int MAX_ENCRYPT_BLOCK = DEFAULT_KEY_SIZE / 8 - 11;
     /**
-     * 标准签名算法 RSA2
+     * RSA 最大解密密文大小（基于 4096 位密钥）
+     */
+    private static final int MAX_DECRYPT_BLOCK = DEFAULT_KEY_SIZE / 8;
+    /**
+     * 标准签名算法 RSA2（SHA256withRSA）
      */
     private static final String SIGN_ALGO = "SHA256withRSA";
 
     /**
-     * 生成密钥对
+     * 生成 RSA 密钥对
      *
-     * @return {@link KeyPair } 密钥对
-     *
+     * @return {@link KeyPair } 密钥对（4096 位）
      */
-    public static KeyPair genKeyPair() {
+    public static KeyPair generateKeyPair() {
         KeyPairGenerator generator;
         try {
             generator = KeyPairGenerator.getInstance(ALGO);
         } catch (NoSuchAlgorithmException e) {
             throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
-        generator.initialize(4096);
+        generator.initialize(DEFAULT_KEY_SIZE);
         return generator.generateKeyPair();
     }
 
@@ -195,22 +217,22 @@ public final class RSAUtil {
     /**
      * 验签
      *
-     * @param plainText 明文
      * @param publicKey 公钥字符串
-     * @param sign      签名
+     * @param plainText 明文
+     * @param signature 签名（Base64 编码）
      *
-     * @return boolean 通过验证
+     * @return boolean 验签是否通过
      */
-    public static boolean verify(String publicKey, String plainText, String sign) {
+    public static boolean verify(String publicKey, String plainText, String signature) {
         try {
             byte[] keyBytes = castPublicKey(publicKey).getEncoded();
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
             PublicKey key = keyFactory.generatePublic(keySpec);
-            Signature signature = Signature.getInstance(SIGN_ALGO);
-            signature.initVerify(key);
-            signature.update(plainText.getBytes());
-            return signature.verify(Base64Util.decodeUrlSafe(sign.getBytes()));
+            Signature signer = Signature.getInstance(SIGN_ALGO);
+            signer.initVerify(key);
+            signer.update(plainText.getBytes());
+            return signer.verify(Base64Util.decodeUrlSafe(signature.getBytes()));
         } catch (Exception e) {
             throw new ToolException(EmojiSymbol.CRYPTO, e);
         }

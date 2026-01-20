@@ -4,22 +4,45 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.Base64Util;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Objects;
 
+/**
+ * SM4 国密对称加密工具类，提供 SM4 算法的密钥生成、加密和解密功能
+ *
+ * <p>设计目的：封装国密 SM4 对称加密算法，提供 ECB 和 CBC 两种工作模式</p>
+ *
+ * <p>核心功能：
+ * <ul>
+ *   <li>生成 SM4 密钥（128 位）</li>
+ *   <li>ECB 模式加解密（电子密码本模式，不推荐用于大量数据）</li>
+ *   <li>CBC 模式加解密（密码分组链接模式，推荐）</li>
+ * </ul>
+ * </p>
+ *
+ * <p>使用示例：
+ * <pre>
+ * String key = SM4Util.generateKey(128);
+ * String iv = SM4Util.generateKey(128); // CBC 模式需要 IV
+ *
+ * // ECB 模式
+ * String cipherECB = SM4Util.encryptByECB(key, "plaintext");
+ * String plainECB = SM4Util.decryptByECB(key, cipherECB);
+ *
+ * // CBC 模式
+ * String cipherCBC = SM4Util.encryptByCBC(key, iv, "plaintext");
+ * String plainCBC = SM4Util.decryptByCBC(key, iv, cipherCBC);
+ * </pre>
+ * </p>
+ */
 public final class SM4Util {
-    private static final Logger log = LoggerFactory.getLogger(SM4Util.class);
 
     private static final String ALGORITHM = "SM4";
     /** 电子密码本模式 */
@@ -33,17 +56,25 @@ public final class SM4Util {
         }
     }
 
+    private SM4Util() {
+        // 私有构造函数，防止实例化
+    }
+
     /**
-     * 生成密钥对
+     * 生成 SM4 密钥
      *
-     * @param keySize 密钥大小
-     *
-     * @return {@link String } 密钥
+     * @param keySize 密钥大小（位），支持 128，为 null 时默认使用 128 位
+     * @return Base64 URL 安全编码的密钥字符串
+     * @throws ToolException 当密钥生成失败时抛出
      */
-    public static String genKey(Integer keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
-        KeyGenerator kg = KeyGenerator.getInstance(ALGORITHM, BouncyCastleProvider.PROVIDER_NAME);
-        kg.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());
-        return Base64Util.encodeUrlSafeToStr(kg.generateKey().getEncoded());
+    public static String generateKey(Integer keySize) {
+        try {
+            KeyGenerator kg = KeyGenerator.getInstance(ALGORITHM, BouncyCastleProvider.PROVIDER_NAME);
+            kg.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());
+            return Base64Util.encodeUrlSafeToStr(kg.generateKey().getEncoded());
+        } catch (Exception e) {
+            throw new ToolException(EmojiSymbol.CRYPTO, e);
+        }
     }
 
     /**

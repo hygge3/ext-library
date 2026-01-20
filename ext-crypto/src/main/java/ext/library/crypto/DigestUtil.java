@@ -9,11 +9,35 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 /**
- * 摘要算法工具
+ * 摘要算法工具类，提供常用的哈希摘要计算功能
+ *
+ * <p>设计目的：封装 Java 标准库的 MessageDigest，提供简单易用的哈希计算 API</p>
+ *
+ * <p>支持的算法（取决于 JVM 实现）：
+ * <ul>
+ *   <li>MD5 - 128 位摘要（不推荐用于安全场景）</li>
+ *   <li>SHA-1 - 160 位摘要（不推荐用于安全场景）</li>
+ *   <li>SHA-256 - 256 位摘要（推荐）</li>
+ *   <li>SHA-384 - 384 位摘要</li>
+ *   <li>SHA-512 - 512 位摘要</li>
+ *   <li>SHA3-256/384/512 - SHA-3 系列（推荐）</li>
+ * </ul>
+ * </p>
+ *
+ * <p>使用示例：
+ * <pre>
+ * String sha256Hash = DigestUtil.hash("SHA-256", "data");
+ * boolean available = DigestUtil.isAlgorithmAvailable("SHA3-256");
+ * </pre>
+ * </p>
  *
  * @since 2025.08.19
  */
-public class DigestUtil {
+public final class DigestUtil {
+
+    private DigestUtil() {
+        // 私有构造函数，防止实例化
+    }
 
     /**
      * 通用哈希方法
