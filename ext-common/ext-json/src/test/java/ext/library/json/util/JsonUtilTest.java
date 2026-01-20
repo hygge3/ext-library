@@ -329,4 +329,31 @@ class JsonUtilTest {
 
         assertEquals(holder.getAmount(), restored.getAmount(), "BigDecimal 字段应保持精度");
     }
+
+    // ========== 空值序列化测试 ==========
+
+    @Test
+    @DisplayName("测试空值字段不被序列化")
+    void testNullFieldNotSerialized() {
+        User user = new User("张三", 25);
+        // email 字段为 null
+
+        String json = JsonUtil.toJson(user);
+
+        assertFalse(json.contains("email"), "空值字段不应出现在 JSON 中");
+        assertTrue(json.contains("name"), "非空字段应出现在 JSON 中");
+        assertTrue(json.contains("age"), "非空字段应出现在 JSON 中");
+    }
+
+    @Test
+    @DisplayName("测试空值字段反序列化后为 null")
+    void testNullFieldDeserialization() {
+        String json = "{\"name\":\"李四\",\"age\":30}";
+
+        User user = JsonUtil.readObj(json, User.class);
+
+        assertEquals("李四", user.getName());
+        assertEquals(30, user.getAge());
+        assertNull(user.getEmail(), "缺失字段应为 null");
+    }
 }

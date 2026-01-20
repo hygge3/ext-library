@@ -36,7 +36,7 @@ implementation("ext.library:ext-json")
 ```
 ext.library.json
 ├── config/         # 自动配置
-├── module/         # 自定义模块
+├── module/         # Jackson 扩展模块
 ├── serializer/     # 序列化器
 └── util/           # 工具类
 ```
@@ -58,17 +58,17 @@ ext.library.json
 | `BigDecimalPlainSerializer` | BigDecimal 无科学计数法序列化 |
 | `BigNumberSerializer` | 大数字转字符串序列化 (防止 JS 精度丢失) |
 
-### 自定义模块 (module)
+### 扩展模块 (module)
 
 | 类名 | 说明 |
 |------|------|
-| `CustomModule` | 自定义 Jackson 模块 |
+| `ExtJacksonModule` | 扩展 Jackson 模块 |
 
 ### 自动配置 (config)
 
 | 类名 | 说明 |
 |------|------|
-| `CustomJacksonAutoConfig` | Jackson 自动配置类 |
+| `JsonAutoConfig` | JSON 自动配置类 |
 
 ## 使用示例
 
@@ -78,14 +78,33 @@ ext.library.json
 // 对象转 JSON 字符串
 String json = JsonUtil.toJson(user);
 
+// 对象转格式化 JSON 字符串
+String prettyJson = JsonUtil.toPrettyJson(user);
+
+// 序列化时排除指定字段（需配合 @JsonFilter 注解）
+String filtered = JsonUtil.toJsonExcluding(user, "userFilter", "password", "secret");
+
 // JSON 字符串转对象
-User user = JsonUtil.parse(json, User.class);
+User user = JsonUtil.readObj(json, User.class);
 
 // JSON 字符串转 List
-List<User> users = JsonUtil.parseList(json, User.class);
+List<User> users = JsonUtil.readList(json, User.class);
 
 // JSON 字符串转 Map
-Map<String, Object> map = JsonUtil.parseMap(json);
+Map<String, Object> map = JsonUtil.readMap(json);
+
+// JSON 字符串转指定 Key/Value 类型的 Map
+Map<String, User> userMap = JsonUtil.readMap(json, String.class, User.class);
+
+// 复杂泛型类型反序列化
+List<Map<String, User>> result = JsonUtil.readGeneric(json,
+    new TypeReference<List<Map<String, User>>>() {});
+
+// 对象类型转换
+User user = JsonUtil.convert(map, User.class);
+
+// 校验 JSON 格式
+boolean valid = JsonUtil.isValidJson(json);
 ```
 
 ### JsonPath 查询
@@ -102,37 +121,54 @@ String json = """
     }
     """;
 
-// 查询单个值
+// 一次性读取
 String title = JsonPathUtil.read(json, "$.store.book[0].title");
 
-// 查询列表
-List<String> titles = JsonPathUtil.readList(json, "$.store.book[*].title");
+// 解析为 ReadContext 进行多次查询（推荐）
+ReadContext context = JsonPathUtil.parse(json);
+String title1 = context.read("$.store.book[0].title");
+Integer price = context.read("$.store.book[0].price");
+
+// 检查路径是否存在
+boolean exists = JsonPathUtil.hasPath(json, "$.store.book[0].author");
+boolean exists2 = JsonPathUtil.hasPath(context, "$.store.book[0].author");
+
+// 读取值，路径不存在时返回默认值
+String author = JsonPathUtil.readOrDefault(json, "$.store.book[0].author", "Unknown");
 ```
 
 ### JsonNode 操作
 
 ```java
-// 解析为 JsonNode
-JsonNode node = JsonNodeUtil.parse(json);
+// 解析 JSON 字符串为 JsonNode
+JsonNode node = JsonNodeUtil.parseNode(json);
 
-// 获取字段值
-String name = JsonNodeUtil.getString(node, "name");
-int age = JsonNodeUtil.getInt(node, "age");
+// 对象转 JsonNode
+JsonNode userNode = JsonNodeUtil.toNode(user);
 
-// 遍历数组
-JsonNodeUtil.forEach(node.get("items"), item -> {
-    // 处理每个元素
-});
+// JsonNode 转对象
+User user = JsonNodeUtil.toObj(node, User.class);
+
+// JsonNode 转 List
+List<User> users = JsonNodeUtil.toList(arrayNode, User.class);
+
+// 获取字段值（字段不存在时返回 null）
+String name = JsonNodeUtil.getFieldValue(node, "name", String.class);
+Integer age = JsonNodeUtil.getFieldValue(node, "age", Integer.class);
+
+// 创建空节点
+ObjectNode objectNode = JsonNodeUtil.createObjectNode();
+ArrayNode arrayNode = JsonNodeUtil.createArrayNode();
 ```
 
 ## 自动配置特性
 
 模块自动配置了以下 Jackson 特性：
 
-- 日期时间格式化 (ISO 8601)
+- 日期时间格式化 (`yyyy-MM-dd HH:mm:ss`)
 - 空值处理策略
 - 未知属性忽略
-- Long/BigInteger 转字符串 (防止 JS 精度丢失)
+- Long/BigInteger 超出 JS 安全整数范围时转为字符串
 - BigDecimal 无科学计数法输出
 
 ## 许可证

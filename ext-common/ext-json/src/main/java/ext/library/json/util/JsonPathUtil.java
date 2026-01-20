@@ -1,76 +1,104 @@
 package ext.library.json.util;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
 
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * JSON-Path 工具类
+ * JsonPath 工具类
+ * <p>
+ * 基于 <a href="https://github.com/json-path/JsonPath">JsonPath</a> 封装，
+ * 提供便捷的 JSON 路径查询能力。
+ * <p>
+ * 适用于一次性读取；多次读取建议使用 {@link #parse(String)} 获取 {@link ReadContext} 复用。
  */
 public final class JsonPathUtil {
 
-    /**
-     * 使用 JsonPath 读取指定内容
-     * <p>
-     * 适用于一次性读取使用，多次读取建议使用原 SDK, <a href="https://github.com/json-path/JsonPath">查看文档</a>
-     *
-     * @param json json 字符串
-     * @param path 路径
-     *
-     * @return {@link T }
-     */
-    public static <T> T readPath(String json, String path) {
-        return readPath(json).read(path);
+    private JsonPathUtil() {
     }
 
     /**
-     * 使用 JsonPath 读取内容
+     * 解析 JSON 字符串为 ReadContext
      * <p>
-     * 返回 JSONPath 读取对象
+     * 多次读取同一 JSON 时，应复用 ReadContext 以提升性能。
      *
-     * @param json json 字符串
-     *
-     * @return {@link ReadContext }
+     * @param json JSON 字符串
+     * @return ReadContext 实例
      */
-    public static ReadContext readPath(String json) {
+    public static ReadContext parse(String json) {
         return JsonPath.parse(json);
     }
 
     /**
-     * 存在指定路径
+     * 使用 JsonPath 读取指定路径的值
+     * <p>
+     * 适用于一次性读取，多次读取建议使用 {@link #parse(String)} 获取 ReadContext 复用。
      *
-     * @param context json 内容
-     * @param path    路径
-     *
-     * @return {@link ReadContext }
+     * @param json JSON 字符串
+     * @param path JsonPath 路径表达式
+     * @param <T>  返回值类型
+     * @return 路径对应的值
      */
-    public static Boolean existPath(ReadContext context, String path) {
-        return Objects.nonNull(context.read(path));
+    public static <T> T read(String json, String path) {
+        return JsonPath.read(json, path);
     }
 
     /**
-     * JSONPath 读取对象
+     * 检查指定路径是否存在
      *
-     * @param context   内容
-     * @param valueType value 类型
-     *
-     * @return {@link ReadContext }
+     * @param json JSON 字符串
+     * @param path JsonPath 路径表达式
+     * @return 路径存在返回 true，否则返回 false
      */
-    public static <T> T readObj(ReadContext context, Class<T> valueType) {
-        return JsonUtil.readObj(context.jsonString(), valueType);
+    public static boolean hasPath(String json, String path) {
+        return hasPath(parse(json), path);
     }
 
     /**
-     * JSONPath 读取对象
+     * 检查指定路径是否存在
      *
-     * @param context 内容
-     *
-     * @return {@link ReadContext }
+     * @param context ReadContext 实例
+     * @param path    JsonPath 路径表达式
+     * @return 路径存在返回 true，否则返回 false
      */
-    public static Map<String, Object> readMap(ReadContext context) {
-        return JsonUtil.readMap(context.jsonString());
+    public static boolean hasPath(ReadContext context, String path) {
+        try {
+            context.read(path);
+            return true;
+        } catch (PathNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 读取指定路径的值，路径不存在时返回默认值
+     *
+     * @param json         JSON 字符串
+     * @param path         JsonPath 路径表达式
+     * @param defaultValue 默认值
+     * @param <T>          返回值类型
+     * @return 路径对应的值，路径不存在时返回默认值
+     */
+    public static <T> T readOrDefault(String json, String path, T defaultValue) {
+        return readOrDefault(parse(json), path, defaultValue);
+    }
+
+    /**
+     * 读取指定路径的值，路径不存在时返回默认值
+     *
+     * @param context      ReadContext 实例
+     * @param path         JsonPath 路径表达式
+     * @param defaultValue 默认值
+     * @param <T>          返回值类型
+     * @return 路径对应的值，路径不存在时返回默认值
+     */
+    public static <T> T readOrDefault(ReadContext context, String path, T defaultValue) {
+        try {
+            T value = context.read(path);
+            return value != null ? value : defaultValue;
+        } catch (PathNotFoundException e) {
+            return defaultValue;
+        }
     }
 
 }

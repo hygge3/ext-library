@@ -29,7 +29,7 @@ public class BigNumberSerializer extends NumberSerializer {
 
     @Override
     public void serialize(Number value, JsonGenerator g, SerializationContext provider) throws JacksonException {
-        // 超出范围 序列化位字符串
+        // 在 JS 安全整数范围内，直接序列化为数字；超出范围则序列化为字符串
         if (value.longValue() > MIN_SAFE_INTEGER && value.longValue() < MAX_SAFE_INTEGER) {
             super.serialize(value, g, provider);
         } else {

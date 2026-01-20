@@ -2,6 +2,7 @@ package ext.library.json.util;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
+import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -15,13 +16,16 @@ import java.util.Objects;
  */
 public final class JsonNodeUtil {
 
+    private JsonNodeUtil() {
+    }
+
     // region JsonNode 与对象互转
 
     /**
-     * jsonNode 转对象
+     * JsonNode 转对象
      *
      * @param jsonNode  JSON 节点
-     * @param valueType valueType
+     * @param valueType 目标类型
      * @param <T>       泛型标记
      *
      * @return 转换结果
@@ -34,12 +38,11 @@ public final class JsonNodeUtil {
         }
     }
 
-
     /**
-     * tree 转带泛型的集合
+     * JsonNode 转集合
      *
-     * @param jsonNode    JSON 节点
-     * @param elementType elementType
+     * @param jsonNode    JSON 节点（应为数组节点）
+     * @param elementType 集合元素类型
      * @param <T>         泛型标记
      *
      * @return 转换结果
@@ -55,10 +58,10 @@ public final class JsonNodeUtil {
     /**
      * 对象转 JsonNode
      *
-     * @param fromValue fromValue
-     * @param <T>       泛型标记
+     * @param fromValue 源对象
+     * @param <T>       JsonNode 子类型
      *
-     * @return 转换结果
+     * @return JsonNode 节点
      */
     public static <T extends JsonNode> T toNode(Object fromValue) {
         return JsonUtil.getMapper().valueToTree(fromValue);
@@ -69,64 +72,51 @@ public final class JsonNodeUtil {
     // region JsonNode 操作
 
     /**
-     * 从 JsonNode 中提取特定字段
+     * 从 JsonNode 中提取特定字段并转换为指定类型
+     *
+     * @param node      JSON 节点
+     * @param fieldName 字段名
+     * @param clazz     目标类型
+     * @param <T>       泛型标记
+     *
+     * @return 字段值，字段不存在时返回 null
      */
-    public static <T> T getNodeValue(JsonNode node, String fieldName, Class<T> clazz) {
+    public static <T> @Nullable T getFieldValue(JsonNode node, String fieldName, Class<T> clazz) {
         JsonNode valueNode = node.get(fieldName);
-        try {
-            return JsonUtil.getMapper().treeToValue(valueNode, clazz);
-        } catch (JacksonException e) {
-            throw new ToolException(EmojiSymbol.JSON, e);
+        if (valueNode == null || valueNode.isNull()) {
+            return null;
         }
+        return toObj(valueNode, clazz);
     }
 
     /**
-     * 修改 JsonNode 并转换为 JSON 字符串
+     * 解析 JSON 字符串为 JsonNode
+     *
+     * @param json JSON 字符串
+     *
+     * @return JsonNode 节点
      */
-    public static String modifyNode(String json, String fieldName, Object newValue) {
+    public static JsonNode parseNode(String json) {
         try {
-            ObjectNode node = (ObjectNode) JsonUtil.getMapper().readTree(json);
-            switch (newValue) {
-                case String s -> node.put(fieldName, s);
-                case Integer i -> node.put(fieldName, i);
-                case Boolean b -> node.put(fieldName, b);
-                case Double v -> node.put(fieldName, v);
-                default -> node.putPOJO(fieldName, newValue);
-            }
-            return node.toString();
+            return JsonUtil.getMapper().readTree(Objects.requireNonNull(json, "json is null"));
         } catch (JacksonException e) {
             throw new ToolException(EmojiSymbol.JSON, e);
         }
     }
 
     /**
-     * 将 json 字符串转成 JsonNode
+     * 创建空的 ObjectNode
      *
-     * @param json jsonString
-     *
-     * @return jsonString json 字符串
-     */
-    public static JsonNode toNode(String json) {
-        try {
-            return JsonUtil.getMapper().readTree(Objects.requireNonNull(json, "jsonString is null"));
-        } catch (JacksonException e) {
-            throw new ToolException(EmojiSymbol.JSON, e);
-        }
-    }
-
-    /**
-     * 创建 ObjectNode
-     *
-     * @return {@code ObjectNode }
+     * @return ObjectNode 实例
      */
     public static ObjectNode createObjectNode() {
         return JsonUtil.getMapper().createObjectNode();
     }
 
     /**
-     * 创建 ArrayNode
+     * 创建空的 ArrayNode
      *
-     * @return {@code ArrayNode }
+     * @return ArrayNode 实例
      */
     public static ArrayNode createArrayNode() {
         return JsonUtil.getMapper().createArrayNode();
