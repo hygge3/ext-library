@@ -13,11 +13,11 @@ public class AESStrategy implements CryptoStrategy {
 
     @Override
     public String decrypt(String secretKey, String encryptedText, String salt) {
-        return AESUtil.decrypt(secretKey, encryptedText, salt);
+        return AESUtil.decrypt(secretKey, salt, encryptedText);
     }
 
     @Override
     public String encrypt(String secretKey, String plainText, String salt) {
-        return AESUtil.encrypt(secretKey, plainText, salt);
+        return AESUtil.encrypt(secretKey, salt, plainText);
     }
 }
