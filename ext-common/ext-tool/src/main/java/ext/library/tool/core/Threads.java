@@ -29,7 +29,9 @@ public final class Threads {
     }
 
     /**
-     * sleep 等待，单位为毫秒
+     * sleep 等待
+     *
+     * @param duration 等待时长
      */
     public static void sleep(Duration duration) {
         try {
@@ -40,8 +42,13 @@ public final class Threads {
     }
 
     /**
-     * 停止线程池 先使用 shutdown, 停止接收新任务并尝试完成所有已存在任务。如果超时，则调用 shutdownNow, 取消在 workQueue 中
-     * Pending 的任务，并中断所有阻塞函数。如果仍然超時，則強制退出。另对在 shutdown 时线程本身被调用中断做了处理。
+     * 停止线程池
+     * <p>
+     * 先使用 shutdown 停止接收新任务并尝试完成所有已存在任务。
+     * 如果超时，则调用 shutdownNow 取消在 workQueue 中 Pending 的任务，并中断所有阻塞函数。
+     * 如果仍然超时，则强制退出。另对在 shutdown 时线程本身被调用中断做了处理。
+     *
+     * @param pool 线程池
      */
     public static void shutdownAndAwaitTermination(ExecutorService pool) {
         if (!pool.isShutdown()) {
@@ -117,5 +124,4 @@ public final class Threads {
     public static int getLineNumber() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getLineNumber();
     }
-
 }
