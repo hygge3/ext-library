@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(ThreadPoolProperties.class)
-public class ThreadPoolConfig {
+public class ThreadPoolConfiguration {
 
     @ConditionalOnProperty(prefix = "ext.thread-pool", name = "enabled", havingValue = "true")
     @Bean(name = "threadPoolTaskExecutor")

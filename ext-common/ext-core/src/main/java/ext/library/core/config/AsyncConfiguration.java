@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
  * </ul>
  */
 @AutoConfiguration
-public class AsyncConfig implements AsyncConfigurer {
+public class AsyncConfiguration implements AsyncConfigurer {
 
     /**
      * 自定义 @Async 注解使用的执行器
