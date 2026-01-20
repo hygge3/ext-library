@@ -2,12 +2,13 @@ package ext.library.captcha.cache;
 
 import ext.library.cache.strategy.CacheStrategy;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
  * 验证码缓存
  */
-public record CaptchaCache(CacheStrategy cacheStrategy) {
+public record CaptchaCache(CacheStrategy cacheStrategy, Duration expireTime) {
 
     /**
      * 保存缓存
@@ -17,7 +18,7 @@ public record CaptchaCache(CacheStrategy cacheStrategy) {
      * @param value     缓存 value
      */
     public void put(String cacheName, String uuid, String value) {
-        cacheStrategy.put(cacheName, uuid, value);
+        cacheStrategy.put(cacheName, uuid, value, expireTime);
     }
 
 
