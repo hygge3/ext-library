@@ -3,268 +3,329 @@ package ext.library.tool.util;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.StringJoiner;
-import java.util.stream.StreamSupport;
 
-
+/**
+ * 对象工具类
+ * <p>
+ * 提供对象的空判断、类型判断、大小计算等通用功能。
+ *
+ * @since 2025.01.01
+ */
 public final class ObjectUtil {
 
+    /**
+     * 表示"真"的字符串集合（不区分大小写匹配建议使用 {@link #isTrue(Object)}）
+     */
     private static final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
 
+    /**
+     * 表示"假"的字符串集合
+     */
     private static final List<String> STR_FALSE = List.of("0", "false", "no", "n");
 
+    private ObjectUtil() {
+        // 防止实例化
+    }
+
+    // region 布尔判断
+
     /**
-     * 判断给定对象是否表示“真”值
-     * 该方法通过检查不同类型的对象来确定它们是否代表一个“真”值
-     * 对于字符串，它检查是否包含在预定义的表示真的字符串集合中
-     * 对于数字，它检查值是否大于零
-     * 对于布尔值，它检查是否为 true
-     * 其他类型的对象默认返回 false
+     * 判断对象是否表示"真"值
+     * <ul>
+     *   <li>String: 包含在 ["1", "true", "yes", "ok", "y"] 中（区分大小写）</li>
+     *   <li>Number: 值大于 0</li>
+     *   <li>Boolean: 为 true</li>
+     *   <li>其他类型: 返回 false</li>
+     * </ul>
      *
      * @param object 要检查的对象
-     *
-     * @return 如果对象表示“真”值，则返回 true；否则返回 false
+     * @return 如果对象表示"真"值返回 true，否则返回 false
      */
-    public static boolean isTrue(Object object) {
-        // 根据对象类型判断其是否表示“真”值
+    public static boolean isTrue(@Nullable Object object) {
         return switch (object) {
-            // 如果是字符串，检查是否在表示真的字符串集合中
-            case String str -> STR_TRUE.contains(str);
-            // 如果是数字，检查其双精度值是否大于零
+            case String str -> STR_TRUE.contains(str.toLowerCase());
             case Number num -> num.doubleValue() > 0;
-            // 如果是布尔值，检查是否为 true
             case Boolean bool -> bool;
-            // 默认情况下返回 false
-            default -> false;
+            case null, default -> false;
         };
     }
 
     /**
-     * 判断给定对象是否在某种意义上表示“假”或无效的状态
-     * 此方法用于检查传递的对象是否符合特定条件，以决定其是否表示一个“假”或无效的状态
-     * 它通过检查对象的类型和值来确定这一点
+     * 判断对象是否表示"假"值
+     * <ul>
+     *   <li>String: 包含在 ["0", "false", "no", "n"] 中（区分大小写）</li>
+     *   <li>Number: 值小于等于 0</li>
+     *   <li>Boolean: 为 false</li>
+     *   <li>其他类型: 返回 false</li>
+     * </ul>
      *
-     * @param object 要进行检查的对象，可以是任何类型
-     *
-     * @return 如果对象表示“假”或无效状态，则返回 true；否则返回 false
+     * @param object 要检查的对象
+     * @return 如果对象表示"假"值返回 true，否则返回 false
      */
-    public static boolean isFalse(Object object) {
-        // 根据对象类型，判断其是否表示“假”或无效状态
+    public static boolean isFalse(@Nullable Object object) {
         return switch (object) {
-            // 当对象为字符串时，检查其是否包含在预定义的表示“假”的字符串集合中
-            case String str -> STR_FALSE.contains(str);
-            // 当对象为数字时，检查其是否小于等于 0，因为这在许多上下文中表示失败或无效
+            case String str -> STR_FALSE.contains(str.toLowerCase());
             case Number num -> num.doubleValue() <= 0;
-            // 当对象为布尔值时，直接检查其是否为 false
             case Boolean bool -> !bool;
-            // 对于所有其他情况，默认返回 false，表示对象不表示“假”或无效状态
-            default -> false;
+            case null, default -> false;
         };
     }
+
+    // endregion
+
+    // region 空值判断
 
     /**
      * 判断对象是否为 null
      *
-     * @param object 要根据 {@code null} 检查的引用
-     *
-     * @return {@code true} 如果提供的引用为 {@code null}，否则 {@code false}
-     *
+     * @param object 要检查的对象
+     * @return 如果为 null 返回 true
+     * @see Objects#isNull(Object)
      */
     public static boolean isNull(@Nullable Object object) {
-        return Objects.isNull(object);
+        return object == null;
     }
 
     /**
      * 判断对象是否不为 null
      *
-     * @param object 要根据 {@code null} 检查的引用
-     *
-     * @return {@code true} 如果提供的引用不是 {@code null}，否则 {@code false}
-     *
+     * @param object 要检查的对象
+     * @return 如果不为 null 返回 true
+     * @see Objects#nonNull(Object)
      */
     public static boolean isNotNull(@Nullable Object object) {
-        return Objects.nonNull(object);
+        return object != null;
     }
 
     /**
-     * 获取对象的元素数量或长度
-     * 此方法旨在提供一个通用的途径来获取不同类型的对象的大小信息，包括集合、数组、迭代器等
-     * 对于非集合、非数组、非迭代器类型的对象，假设大小为 1，反映其存在性
+     * 判断对象是否为空
+     * <p>
+     * 支持的类型：
+     * <ul>
+     *   <li>null: 返回 true</li>
+     *   <li>Optional: 调用 isEmpty()</li>
+     *   <li>CharSequence: 调用 isEmpty()</li>
+     *   <li>Collection: 调用 isEmpty()</li>
+     *   <li>Map: 调用 isEmpty()</li>
+     *   <li>Iterable: 检查迭代器是否有下一个元素</li>
+     *   <li>Iterator: 检查是否有下一个元素</li>
+     *   <li>数组: 检查长度是否为 0</li>
+     *   <li>其他类型: 返回 false</li>
+     * </ul>
      *
-     * @param obj 要检查其大小的对象
-     *
-     * @return 对象的元素数量或长度如果对象为 null，则返回 0
-     */
-    public static int size(@Nullable Object obj) {
-        // 检查对象是否为 null，null 对象返回大小为 0
-        if (null == obj) {
-            return 0;
-        }
-        // 如果对象是 Collection 类型，直接调用其 size 方法返回大小
-        else if (obj instanceof Collection<?> coll) {
-            return coll.size();
-        }
-        // 如果对象是 Map 类型，直接调用其 size 方法返回大小
-        else if (obj instanceof Map<?, ?> map) {
-            return map.size();
-        }
-        // 如果对象是 Iterable 类型，将其转换为 List 后返回大小
-        else if (obj instanceof Iterable<?> iter) {
-            return Math.toIntExact(StreamSupport.stream(iter.spliterator(), false).count());
-        }
-        // 如果对象是 Iterator 类型，使用 Iterators 工具类的 size 方法返回大小
-        else if (obj instanceof Iterator<?> iter) {
-            return Math.toIntExact(StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED),
-                    false
-            ).count());
-        }
-        // 如果对象是数组类型，使用 Array 类的 getLength 方法返回数组长度
-        else if (obj.getClass().isArray()) {
-            return Array.getLength(obj);
-        }
-        // 对于非上述类型的对象，普通对象大小为 1
-        return 1;
-    }
-
-    /**
-     * 判断对象是数组
-     *
-     * @param obj the object to check
-     *
-     * @return 是否数组
-     */
-    public static boolean isArray(@Nullable Object obj) {
-        return (obj != null && obj.getClass().isArray());
-    }
-
-    /**
-     * 判断空对象 object、map、list、set、字符串、数组
-     *
-     * @param obj the object to check
-     *
-     * @return 数组是否为空
+     * @param obj 要检查的对象
+     * @return 如果对象为空返回 true
      */
     public static boolean isEmpty(@Nullable Object obj) {
-        if (null == obj) {
+        if (obj == null) {
             return true;
         }
         if (obj instanceof Optional<?> optional) {
             return optional.isEmpty();
-        } else if (obj instanceof CharSequence cs) {
+        }
+        if (obj instanceof CharSequence cs) {
             return cs.isEmpty();
-        } else if (obj instanceof Collection<?> coll) {
+        }
+        if (obj instanceof Collection<?> coll) {
             return coll.isEmpty();
-        } else if (obj instanceof Map<?, ?> map) {
+        }
+        if (obj instanceof Map<?, ?> map) {
             return map.isEmpty();
-        } else if (obj instanceof Iterable<?> iter) {
+        }
+        if (obj instanceof Iterable<?> iter) {
             return !iter.iterator().hasNext();
-        } else if (obj instanceof Iterator<?> iter) {
+        }
+        if (obj instanceof Iterator<?> iter) {
             return !iter.hasNext();
-        } else if (isArray(obj)) {
+        }
+        if (obj.getClass().isArray()) {
             return Array.getLength(obj) == 0;
         }
         return false;
     }
 
     /**
-     * 对象不为空 object、map、list、set、字符串、数组
+     * 判断对象是否不为空
      *
-     * @param obj the object to check
-     *
-     * @return 是否不为空
+     * @param obj 要检查的对象
+     * @return 如果对象不为空返回 true
+     * @see #isEmpty(Object)
      */
-    public static boolean isNotEmpty(Object obj) {
+    public static boolean isNotEmpty(@Nullable Object obj) {
         return !isEmpty(obj);
     }
 
+    // endregion
+
+    // region 类型判断
+
     /**
-     * 安全的 equals
+     * 判断对象是否为数组
      *
-     * @param o1 first Object to compare
-     * @param o2 second Object to compare
-     *
-     * @return whether the given objects are equal
-     *
-     * @see Object#equals(Object)
-     * @see Arrays#equals
+     * @param obj 要检查的对象
+     * @return 如果是数组返回 true
      */
-    public static boolean equalsSafe(@Nullable Object o1, @Nullable Object o2) {
-        if (o1 == o2) {
-            return true;
-        } else if (o1 != null && o2 != null) {
-            return o1.equals(o2);
-        } else {
-            return false;
+    public static boolean isArray(@Nullable Object obj) {
+        return obj != null && obj.getClass().isArray();
+    }
+
+    // endregion
+
+    // region 大小计算
+
+    /**
+     * 获取对象的元素数量或长度
+     * <p>
+     * 支持的类型：
+     * <ul>
+     *   <li>null: 返回 0</li>
+     *   <li>Collection: 调用 size()</li>
+     *   <li>Map: 调用 size()</li>
+     *   <li>Iterable: 遍历计数</li>
+     *   <li>Iterator: 遍历计数（<b>注意：会消耗迭代器</b>）</li>
+     *   <li>数组: 返回数组长度</li>
+     *   <li>其他类型: 返回 1</li>
+     * </ul>
+     *
+     * @param obj 要计算大小的对象
+     * @return 对象的元素数量
+     */
+    public static int size(@Nullable Object obj) {
+        if (obj == null) {
+            return 0;
         }
+        if (obj instanceof Collection<?> coll) {
+            return coll.size();
+        }
+        if (obj instanceof Map<?, ?> map) {
+            return map.size();
+        }
+        if (obj instanceof Iterable<?> iter) {
+            int count = 0;
+            for (Object ignored : iter) {
+                count++;
+            }
+            return count;
+        }
+        if (obj instanceof Iterator<?> iter) {
+            int count = 0;
+            while (iter.hasNext()) {
+                iter.next();
+                count++;
+            }
+            return count;
+        }
+        if (obj.getClass().isArray()) {
+            return Array.getLength(obj);
+        }
+        return 1;
+    }
+
+    // endregion
+
+    // region 比较方法
+
+    /**
+     * 比较两个对象是否相等（null 安全）
+     *
+     * @param o1 第一个对象
+     * @param o2 第二个对象
+     * @return 如果相等返回 true
+     * @see Objects#equals(Object, Object)
+     */
+    public static boolean equals(@Nullable Object o1, @Nullable Object o2) {
+        return Objects.equals(o1, o2);
     }
 
     /**
-     * 比较两个对象是否不相等。<br>
+     * 比较两个对象是否不相等
      *
-     * @param o1 对象 1
-     * @param o2 对象 2
-     *
-     * @return 是否不 eq
+     * @param o1 第一个对象
+     * @param o2 第二个对象
+     * @return 如果不相等返回 true
      */
-    public static boolean isNotEqual(Object o1, Object o2) {
+    public static boolean notEquals(@Nullable Object o1, @Nullable Object o2) {
         return !Objects.equals(o1, o2);
     }
 
+    // endregion
+
+    // region 默认值
 
     /**
      * 如果对象为 null，返回默认值
      *
-     * @param object       Object
+     * @param object       对象
      * @param defaultValue 默认值
-     *
-     * @return Object
+     * @return 对象不为 null 时返回对象，否则返回默认值
      */
     public static <T> @Nullable T defaultIfNull(@Nullable T object, @Nullable T defaultValue) {
-        return isNull(object) ? defaultValue : object;
+        return object != null ? object : defaultValue;
     }
 
     /**
      * 如果对象为空，返回默认值
      *
-     * @param object       Object
+     * @param object       对象
      * @param defaultValue 默认值
-     *
-     * @return Object
+     * @return 对象不为空时返回对象，否则返回默认值
+     * @see #isEmpty(Object)
      */
-    public static <T> T defaultIfEmpty(T object, T defaultValue) {
+    public static <T> @Nullable T defaultIfEmpty(@Nullable T object, @Nullable T defaultValue) {
         return isEmpty(object) ? defaultValue : object;
     }
 
+    // endregion
+
+    // region 字符串转换
+
     /**
-     * Return a String representation of the contents of the specified array.
+     * 将数组转换为字符串表示
      *
-     * @param array the array to build a String representation for
-     *
-     * @return a String representation of {@code array}
+     * @param array 数组
+     * @return 字符串表示，格式如 "[a,b,c]"
      */
     public static String toString(Object @Nullable [] array) {
         if (array == null) {
             return "null";
         }
-        int length = array.length;
-        if (length == 0) {
+        if (array.length == 0) {
             return "[]";
         }
-        StringJoiner stringJoiner = new StringJoiner(",", "[", "]");
-        for (Object o : array) {
-            stringJoiner.add(String.valueOf(o));
+        StringJoiner joiner = new StringJoiner(", ", "[", "]");
+        for (Object element : array) {
+            joiner.add(String.valueOf(element));
         }
-        return stringJoiner.toString();
+        return joiner.toString();
     }
+
+    // endregion
+
+    // region 兼容方法（已废弃）
+
+    /**
+     * @deprecated 使用 {@link #equals(Object, Object)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static boolean equalsSafe(@Nullable Object o1, @Nullable Object o2) {
+        return equals(o1, o2);
+    }
+
+    /**
+     * @deprecated 使用 {@link #notEquals(Object, Object)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static boolean isNotEqual(@Nullable Object o1, @Nullable Object o2) {
+        return notEquals(o1, o2);
+    }
+
+    // endregion
 
 }

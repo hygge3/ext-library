@@ -6,7 +6,6 @@ import org.springframework.util.Assert;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -17,6 +16,9 @@ import java.util.function.Function;
 
 
 public final class ReflectionUtil {
+
+    private ReflectionUtil() {
+    }
 
     // ---------------------- Info ----------------------
 
@@ -125,7 +127,7 @@ public final class ReflectionUtil {
      * @param method the method to make accessible
      */
     public static void makeAccessible(Method method) {
-        if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.canAccess(null)) {
+        if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
             method.setAccessible(true);
         }
     }
@@ -141,13 +143,9 @@ public final class ReflectionUtil {
      */
     public static Object invokeMethod(Method method, Object target, Object @Nullable ... args) {
         try {
-            if (args != null) {
-                return method.invoke(target, args);
-            } else {
-                return method.invoke(target);
-            }
+            return args != null ? method.invoke(target, args) : method.invoke(target);
         } catch (Exception ex) {
-            throw new RuntimeException("无法调用方法 [" + method + "]", ex);
+            throw new IllegalStateException("无法调用方法 [" + method + "]", ex);
         }
     }
 
@@ -162,7 +160,7 @@ public final class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public @Nullable Field findField(Class<?> clazz, String name) {
+    public static @Nullable Field findField(Class<?> clazz, String name) {
         return findField(clazz, name, null);
     }
 
@@ -175,7 +173,7 @@ public final class ReflectionUtil {
      *
      * @return field object, or {@code null} if none found
      */
-    public @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
+    public static @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
         Assert.isTrue(name != null || type != null, "必须指定字段的名称或类型");
         Class<?> searchType = clazz;
         while (Object.class != searchType && searchType != null) {
@@ -213,7 +211,7 @@ public final class ReflectionUtil {
      * @param field field to make accessible
      */
     public static void makeAccessible(Field field) {
-        if (!field.canAccess(null)) {
+        if (!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) || Modifier.isFinal(field.getModifiers())) {
             field.setAccessible(true);
         }
     }
@@ -229,7 +227,7 @@ public final class ReflectionUtil {
         try {
             field.set(target, value);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("无法将值设置为字段 [" + field + "]", ex);
+            throw new IllegalStateException("无法将值设置为字段 [" + field + "]", ex);
         }
     }
 
@@ -245,34 +243,38 @@ public final class ReflectionUtil {
         try {
             return field.get(target);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("无法从字段获取值 [" + field + "]", ex);
+            throw new IllegalStateException("无法从字段获取值 [" + field + "]", ex);
         }
     }
 
     /**
-     * <h3>获取 {@code Lambda} 的 {@code Function} 表达式的函数名</h3>
+     * 获取 Lambda 的 Function 表达式的方法名
      *
      * @param lambda 表达式
      *
-     * @return 函数名
+     * @return 方法名
      */
-    public static String getLambdaFunctionName(Function<?, ?> lambda) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
-        replaceMethod.setAccessible(true);
-        SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);
-        return serializedLambda.getImplMethodName().replace("get", "");
+    public static String getLambdaMethodName(Function<?, ?> lambda) {
+        try {
+            Method replaceMethod = lambda.getClass().getDeclaredMethod("writeReplace");
+            replaceMethod.setAccessible(true);
+            SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);
+            return serializedLambda.getImplMethodName();
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("无法解析 Lambda 表达式", ex);
+        }
     }
 
     /**
-     * check field is public final
+     * check field is public static final
      *
      * @param field field to check
      *
-     * @return true if field is public final
+     * @return true if field is public static final
      */
     public static boolean isPublicStaticFinal(Field field) {
         int modifiers = field.getModifiers();
-        return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
+        return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers);
     }
 
     /**

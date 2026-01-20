@@ -4,17 +4,20 @@ import java.io.Serializable;
 
 /**
  * 受检的 Predicate
+ * <p>
+ * 允许抛出受检异常的断言函数式接口
+ *
+ * @param <T> 输入类型
  */
 @FunctionalInterface
 public interface CheckedPredicate<T> extends Serializable {
 
-	/**
-	 * Evaluates this predicate on the given argument.
-	 * @param t the input argument
-	 * @return {@code true} if the input argument matches the predicate, otherwise
-	 * {@code false}
-	 * @throws Throwable CheckedException
-	 */
-	boolean test(T t) throws Throwable;
-
+    /**
+     * 对给定参数进行断言判断
+     *
+     * @param t 输入参数
+     * @return 如果输入参数匹配断言返回 true，否则返回 false
+     * @throws Throwable 可能抛出的异常
+     */
+    boolean test(T t) throws Throwable;
 }

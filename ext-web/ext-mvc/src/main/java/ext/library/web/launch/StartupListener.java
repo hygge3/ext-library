@@ -1,7 +1,7 @@
 package ext.library.web.launch;
 
 import ext.library.tool.util.DateUtil;
-import ext.library.tool.util.INetUtil;
+import ext.library.tool.util.NetUtil;
 import ext.library.tool.util.ObjectUtil;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,8 +33,8 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
         }
         String serverPort = environment.getProperty("server.port", "8080");
         String contextPath = environment.getProperty("server.servlet.context-path", "/");
-        String ip = INetUtil.getHostIp();
-        String hostName = INetUtil.getHostName();
+        String ip = NetUtil.getHostIp();
+        String hostName = NetUtil.getHostName();
         String osName = System.getProperty("os.name");
         String osArch = System.getProperty("os.arch");
         LocalDateTime startTime = LocalDateTime.now();

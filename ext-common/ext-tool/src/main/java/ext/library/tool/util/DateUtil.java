@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 日期时间工具类，提供各种日期时间处理方法
- * 
+ *
  * <p>设计目的：封装Java 8+日期时间API，提供简洁易用的日期时间操作方法，提高开发效率</p>
- * 
+ *
  * <p>核心功能：
  * <ul>
  *   <li>日期时间的解析和格式化</li>
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>时区转换和处理</li>
  * </ul>
  * </p>
- * 
+ *
  * <p>使用场景：
  * <ul>
  *   <li>数据转换：将字符串或时间戳转换为日期时间对象</li>
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>时间比较：判断某个时间是否在指定时间段内</li>
  * </ul>
  * </p>
- * 
+ *
  * <p>注意事项：
  * <ul>
  *   <li>默认使用GMT+8时区</li>
@@ -49,8 +49,12 @@ import java.util.concurrent.TimeUnit;
  */
 public final class DateUtil {
 
-    // region Common
-    /** 默认时区 */
+    private DateUtil() {
+    }
+
+    // region Constants
+
+    /** 默认时区偏移 */
     public static final ZoneOffset DEFAULT_ZONE_OFFSET = ZoneOffset.of("+8");
 
     /** 默认时区 */
@@ -74,6 +78,10 @@ public final class DateUtil {
     /** 时间格式化 HMS */
     public static final DateTimeFormatter FORMATTER_HMS = DateTimeFormatter.ofPattern(STRING_FORMATTER_HMS);
 
+    // endregion Constants
+
+    // region LocalDateTime
+
     /**
      * 字符串转时间
      *
@@ -95,9 +103,6 @@ public final class DateUtil {
     public static LocalDateTime parse(Long timestamp) {
         return parse(timestamp, DEFAULT_ZONE_ID);
     }
-    // endregion Common
-
-    // region LocalDateTime
 
     /**
      * 时间戳转时间
@@ -157,6 +162,10 @@ public final class DateUtil {
         return format(dateTime, DateTimeFormatter.ofPattern(formatter));
     }
 
+    // endregion LocalDateTime
+
+    // region LocalDate
+
     /**
      * 字符串转日期
      *
@@ -179,10 +188,6 @@ public final class DateUtil {
         return format(date, FORMATTER_YMD);
     }
 
-    // endregion LocalDateTime
-
-    // region LocalDate
-
     /**
      * 日期格式化
      *
@@ -194,6 +199,10 @@ public final class DateUtil {
     public static String format(LocalDate date, String formatter) {
         return format(date, DateTimeFormatter.ofPattern(formatter));
     }
+
+    // endregion LocalDate
+
+    // region LocalTime
 
     /**
      * 字符串转时间
@@ -217,10 +226,6 @@ public final class DateUtil {
         return format(time, FORMATTER_HMS);
     }
 
-    // endregion LocalDate
-
-    // region LocalTime
-
     /**
      * 时间格式化
      *
@@ -233,6 +238,10 @@ public final class DateUtil {
         return format(time, DateTimeFormatter.ofPattern(formatter));
     }
 
+    // endregion LocalTime
+
+    // region Duration
+
     /**
      * 格式化 Duration 为天时分秒毫秒
      *
@@ -241,6 +250,13 @@ public final class DateUtil {
      * @return 格式化后的字符串
      */
     public static String format(Duration duration) {
+        if (duration.isZero()) {
+            return "0毫秒";
+        }
+        if (duration.isNegative()) {
+            return "-" + format(duration.negated());
+        }
+
         long days = duration.toDays();
         long hours = duration.toHours() % 24;
         long minutes = duration.toMinutes() % 60;
@@ -273,51 +289,27 @@ public final class DateUtil {
      * @param start 开始时间
      * @param end   结束时间
      *
-     * @return 天数
+     * @return 持续时间
      */
-    public static Duration different(LocalDateTime start, LocalDateTime end) {
+    public static Duration between(LocalDateTime start, LocalDateTime end) {
         return Duration.between(start, end);
     }
 
-    // endregion LocalTime
-
-    // region Helper
-
     /**
-     * 判断某个时间是否在某个时间段
+     * 将时间间隔和时间单位转换为 Duration 对象
      *
-     * @param startTime 起始时间
-     * @param dateTime  比较时间
-     * @param endTime   结束时间
+     * @param interval 时间间隔
+     * @param timeUnit 时间单位
      *
-     * @return 是否在…之间
+     * @return 转换后的 Duration 对象
      */
-    public static boolean isBetween(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
-        return dateTime.isBefore(endTime) && dateTime.isAfter(startTime);
+    public static Duration convert(long interval, TimeUnit timeUnit) {
+        return Duration.of(interval, timeUnit.toChronoUnit());
     }
 
-    /**
-     * 判断某个时间在时间段内的位置
-     * 前:-1，中:0，后:1
-     *
-     * @param startTime 起始时间
-     * @param dateTime  比较时间
-     * @param endTime   结束时间
-     *
-     * @return 是否在…之间
-     */
-    public static Integer position(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
-        // 未开始
-        if (startTime.isAfter(dateTime)) {
-            return -1;
-            // 在内
-        } else if (endTime.isAfter(dateTime)) {
-            return 0;
-            // 已结束
-        } else {
-            return 1;
-        }
-    }
+    // endregion Duration
+
+    // region Boundary
 
     /**
      * 获取当天的开始时间
@@ -385,6 +377,50 @@ public final class DateUtil {
         return time.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
     }
 
+    // endregion Boundary
+
+    // region Comparison
+
+    /**
+     * 判断某个时间是否在某个时间段
+     *
+     * @param startTime 起始时间
+     * @param dateTime  比较时间
+     * @param endTime   结束时间
+     *
+     * @return 是否在…之间
+     */
+    public static boolean isBetween(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
+        return dateTime.isBefore(endTime) && dateTime.isAfter(startTime);
+    }
+
+    /**
+     * 判断某个时间在时间段内的位置
+     * 前:-1，中:0，后:1
+     *
+     * @param startTime 起始时间
+     * @param dateTime  比较时间
+     * @param endTime   结束时间
+     *
+     * @return 是否在…之间
+     */
+    public static int position(LocalDateTime startTime, LocalDateTime dateTime, LocalDateTime endTime) {
+        // 未开始
+        if (startTime.isAfter(dateTime)) {
+            return -1;
+            // 在内
+        } else if (endTime.isAfter(dateTime)) {
+            return 0;
+            // 已结束
+        } else {
+            return 1;
+        }
+    }
+
+    // endregion Comparison
+
+    // region Common
+
     /**
      * 使用指定的格式化器格式化时间对象
      *
@@ -397,18 +433,6 @@ public final class DateUtil {
         return formatter.format(temporal);
     }
 
-    /**
-     * 将时间间隔和时间单位转换为 Duration 对象
-     *
-     * @param interval 时间间隔
-     * @param timeUnit 时间单位
-     *
-     * @return 转换后的 Duration 对象
-     */
-    public static Duration convert(long interval, TimeUnit timeUnit) {
-        return Duration.of(interval, timeUnit.toChronoUnit());
-    }
-
-    // endregion Helper
+    // endregion Common
 
 }

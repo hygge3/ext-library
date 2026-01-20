@@ -10,9 +10,9 @@ import java.util.Random;
  * <p>
  * 提供线程安全的共享实例，避免重复创建开销
  */
-public final class Holder {
+public final class Singletons {
 
-    private Holder() {
+    private Singletons() {
         // 防止实例化
     }
 

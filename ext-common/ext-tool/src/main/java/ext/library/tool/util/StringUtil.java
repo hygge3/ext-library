@@ -3,7 +3,6 @@ package ext.library.tool.util;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 /**
  * 字符串工具类，提供各种字符串处理方法
@@ -38,14 +36,32 @@ import java.util.stream.Stream;
  */
 public final class StringUtil {
 
+    /** 用于清理文本的正则表达式 */
+    private static final Pattern CLEAN_TEXT_PATTERN = Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]");
+
+    /** HTML 转义映射表 */
+    private static final Map<Character, String> HTML_ESCAPE_MAP = Map.of(
+            '&', "&amp;",
+            '<', "&lt;",
+            '>', "&gt;",
+            '"', "&quot;",
+            '\'', "&#39;"
+    );
+
+    private StringUtil() {
+    }
+
     /**
      * 首字母变小写
      *
      * @param str 字符串
      *
-     * @return {String}
+     * @return 首字母小写后的字符串
      */
     public static String firstCharToLower(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
         char firstChar = str.charAt(0);
         if (firstChar >= 'A' && firstChar <= 'Z') {
             char[] chars = str.toCharArray();
@@ -60,9 +76,12 @@ public final class StringUtil {
      *
      * @param str 字符串
      *
-     * @return {String}
+     * @return 首字母大写后的字符串
      */
     public static String firstCharToUpper(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
         char firstChar = str.charAt(0);
         if (firstChar >= 'a' && firstChar <= 'z') {
             char[] chars = str.toCharArray();
@@ -138,10 +157,9 @@ public final class StringUtil {
      *
      * @return boolean
      */
-    public static boolean isNotEmpty(String str) {
+    public static boolean isNotEmpty(@Nullable String str) {
         return !isEmpty(str);
     }
-
 
     /**
      * 判断是否为空字符串 <pre class="code">
@@ -182,33 +200,33 @@ public final class StringUtil {
      *
      * @see Character#isWhitespace
      */
-    public static boolean isNotBlank(String str) {
+    public static boolean isNotBlank(@Nullable String str) {
         return !isBlank(str);
     }
 
     /**
-     * 判断是否有任意一个 空字符串
+     * 判断是否有任意一个空字符串
      *
-     * @param strs String
+     * @param strs 字符串数组
      *
      * @return boolean
      */
     public static boolean isAnyBlank(String... strs) {
-        if (Array.getLength(strs) == 0) {
+        if (strs == null || strs.length == 0) {
             return true;
         }
         return Stream.of(strs).anyMatch(StringUtil::isBlank);
     }
 
     /**
-     * 有 任意 一个 Blank
+     * 判断是否有任意一个空字符串
      *
-     * @param strs 字符串列表
+     * @param strs 字符串集合
      *
      * @return boolean
      */
-    public static boolean isAnyBlank(Collection<String> strs) {
-        if (strs.isEmpty()) {
+    public static boolean isAnyBlank(@Nullable Collection<String> strs) {
+        if (strs == null || strs.isEmpty()) {
             return true;
         }
         return strs.stream().anyMatch(StringUtil::isBlank);
@@ -237,14 +255,14 @@ public final class StringUtil {
     }
 
     /**
-     * 有任意一个非空
+     * 判断是否有任意一个非空字符串
      *
-     * @param strs 字符串列表
+     * @param strs 字符串数组
      *
      * @return boolean
      */
     public static boolean isAnyNotBlank(String... strs) {
-        if (Array.getLength(strs) == 0) {
+        if (strs == null || strs.length == 0) {
             return false;
         }
         return Stream.of(strs).anyMatch(StringUtil::isNotBlank);
@@ -266,42 +284,42 @@ public final class StringUtil {
     }
 
     /**
-     * startWith char
+     * 是否以指定字符开头
      *
      * @param cs CharSequence
-     * @param c  char
+     * @param c  字符
      *
      * @return {boolean}
      */
     public static boolean startWith(CharSequence cs, char c) {
-        return cs.charAt(0) == c;
+        return cs != null && cs.length() > 0 && cs.charAt(0) == c;
     }
 
     /**
-     * endWith char
+     * 是否以指定字符串结尾
      *
      * @param str    被检测字符串
-     * @param prefix 结尾字符串
+     * @param suffix 结尾字符串
      *
      * @return {boolean}
      */
-    public static boolean endWith(String str, String prefix) {
+    public static boolean endWith(String str, String suffix) {
         if (isEmpty(str)) {
             return false;
         }
-        return str.endsWith(prefix);
+        return str.endsWith(suffix);
     }
 
     /**
-     * endWith char
+     * 是否以指定字符结尾
      *
      * @param cs CharSequence
-     * @param c  char
+     * @param c  字符
      *
      * @return {boolean}
      */
     public static boolean endWith(CharSequence cs, char c) {
-        return cs.charAt(cs.length() - 1) == c;
+        return cs != null && cs.length() > 0 && cs.charAt(cs.length() - 1) == c;
     }
 
     /**
@@ -379,7 +397,10 @@ public final class StringUtil {
      * @return {String}
      */
     public static String cleanText(String txt) {
-        return Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]").matcher(txt).replaceAll("");
+        if (txt == null) {
+            return null;
+        }
+        return CLEAN_TEXT_PATTERN.matcher(txt).replaceAll("");
     }
 
     /**
@@ -467,6 +488,7 @@ public final class StringUtil {
      */
     public static String join(Object[] arr, String delim) {
         return Arrays.stream(arr)
+                .filter(Objects::nonNull)
                 .map(String::valueOf)
                 .collect(Collectors.joining(delim));
     }
@@ -581,19 +603,18 @@ public final class StringUtil {
      * @return {String}
      */
     public static String escapeHtml(String html) {
-        Map<String, String> escapeMap = Map.of(
-                "&", "&amp;",
-                "<", "&lt;",
-                ">", "&gt;",
-                "\"", "&quot;",
-                "'", "&#39;"
-        );
-        if (isBlank(html)) return "";
-
+        if (isBlank(html)) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder(html.length());
-        for (char c : html.toCharArray()) {
-            String replacement = escapeMap.get(String.valueOf(c));
-            sb.append(replacement != null ? replacement : c);
+        for (int i = 0; i < html.length(); i++) {
+            char c = html.charAt(i);
+            String replacement = HTML_ESCAPE_MAP.get(c);
+            if (replacement != null) {
+                sb.append(replacement);
+            } else {
+                sb.append(c);
+            }
         }
         return sb.toString();
     }
@@ -642,10 +663,11 @@ public final class StringUtil {
      * StringUtil.isAnyNotBlank(Arrays.asList("", "test", " ")) = true
      * </pre>
      *
-     * @param strs 字符串集合，可能为null
-     * @return true如果集合中存在至少一个非空字符串，否则false
+     * @param strs 字符串集合，可能为 null
+     *
+     * @return true 如果集合中存在至少一个非空字符串，否则 false
      */
-    public static boolean isAnyNotBlank(Collection<String> strs) {
+    public static boolean isAnyNotBlank(@Nullable Collection<String> strs) {
         if (strs == null || strs.isEmpty()) {
             return false;
         }

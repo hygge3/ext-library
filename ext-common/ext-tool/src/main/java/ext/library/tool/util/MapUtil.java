@@ -3,62 +3,49 @@ package ext.library.tool.util;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Map 工具
+ * Map 工具类
+ * <p>
+ * 提供 Map 的判断、操作、转换等常用功能。
+ *
+ * @since 2025.01.01
  */
-
 public final class MapUtil {
 
-    /**
-     * 去掉 Map 中指定 key 的键值对，修改原 Map
-     *
-     * @param <K>  Key 类型
-     * @param <V>  Value 类型
-     * @param map  Map
-     * @param keys 键列表
-     *
-     * @return 修改后的 key
-     *
-     * @since 5.0.5
-     */
-    @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> removeAny(Map<K, V> map, final K... keys) {
-        for (K key : keys) {
-            map.remove(key);
-        }
-        return map;
+    private MapUtil() {
+        // 防止实例化
     }
 
+    // region 判断方法
+
     /**
-     * 判断 Map 数据结构 key 的一致性
+     * 判断 Map 的 key 是否满足约束条件
+     * <p>
+     * 验证逻辑：
+     * <ol>
+     *   <li>必须包含所有 mustContainKeys</li>
+     *   <li>只能包含 mustContainKeys 和 canContainKeys 中的 key</li>
+     * </ol>
      *
-     * @param paramMap        参数
-     * @param mustContainKeys 必须包含的 key（必传）
-     * @param canContainKeys  可包含的 key（非必传）
-     *
+     * @param paramMap        待验证的 Map
+     * @param mustContainKeys 必须包含的 key
+     * @param canContainKeys  可选包含的 key
      * @return 是否满足条件
      */
+    @SafeVarargs
     public static <K> boolean isKeys(Map<K, ?> paramMap, K[] mustContainKeys, K... canContainKeys) {
         // 1. 必传参数校验
         for (K key : mustContainKeys) {
@@ -67,38 +54,35 @@ public final class MapUtil {
             }
         }
 
-        // 2. 无可选参数
+        // 2. 无可选参数时直接返回
         if (ObjectUtil.isEmpty(canContainKeys)) {
-            return true;
+            return paramMap.size() == mustContainKeys.length;
         }
 
-        // 3. 可选参数校验 - 确认 paramMap 大小
-        int keySize = mustContainKeys.length + canContainKeys.length;
-        if (paramMap.size() > keySize) {
+        // 3. 检查 Map 大小是否超过允许的最大 key 数量
+        int maxKeySize = mustContainKeys.length + canContainKeys.length;
+        if (paramMap.size() > maxKeySize) {
             return false;
         }
 
-        // 4. 获得 paramMap 中包含可包含 key 的大小
-        int paramMapCanContainKeysLength = 0;
+        // 4. 统计 Map 中包含的可选 key 数量
+        int optionalKeyCount = 0;
         for (K key : canContainKeys) {
             if (paramMap.containsKey(key)) {
-                paramMapCanContainKeysLength++;
+                optionalKeyCount++;
             }
         }
 
-        // 5. 确认 paramMap 中包含的可包含 key 大小 + 必须包含 key 大小 是否等于 paramMap 大小
-        return paramMapCanContainKeysLength + mustContainKeys.length == paramMap.size();
-
-        // 6. 通过所有校验，返回最终结果
+        // 5. 验证 Map 大小 = 必须 key 数量 + 实际可选 key 数量
+        return paramMap.size() == mustContainKeys.length + optionalKeyCount;
     }
 
     /**
-     * 判断 Map 数据结构所有的 key 是否与数组完全匹配
+     * 判断 Map 的 key 是否与数组完全匹配
      *
-     * @param paramMap 需要确认的 Map
-     * @param keys     条件
-     *
-     * @return 匹配所有的 key 且大小一致（true）
+     * @param paramMap 待验证的 Map
+     * @param keys     期望的 key 数组
+     * @return 匹配所有 key 且大小一致返回 true
      */
     public static <K> boolean isKeysEqual(Map<K, ?> paramMap, K[] keys) {
         if (paramMap.size() != keys.length) {
@@ -113,14 +97,13 @@ public final class MapUtil {
     }
 
     /**
-     * 判断 Map 数据结构是否包含 <b>keys</b> 之一
+     * 判断 Map 是否包含指定 key 之一
      *
-     * @param paramMap 需要确认的 Map
-     * @param keys     条件
-     *
-     * @return 只要包含一个 key（true）
+     * @param paramMap 待验证的 Map
+     * @param keys     key 数组
+     * @return 包含任意一个 key 返回 true
      */
-    public static <K> boolean isContainsOneOfKey(Map<K, ?> paramMap, K[] keys) {
+    public static <K> boolean containsAnyKey(Map<K, ?> paramMap, K[] keys) {
         for (K key : keys) {
             if (paramMap.containsKey(key)) {
                 return true;
@@ -130,311 +113,193 @@ public final class MapUtil {
     }
 
     /**
-     * 判断 Map 数组第一个元素，是否包含所有的 key<br>
+     * 判断 Map 数组是否为空
      * <p>
-     * 弱比较，只判断数组中第一个元素是否包含所有的 key
-     * </p>
+     * 弱判断：只检查数组本身和第一个元素
      *
-     * @param paramMaps 需要确认的 Map 数组
-     * @param keys      条件数组
-     *
-     * @return Map 数组元素 0 包含所有的 key（true）
+     * @param paramMaps Map 数组
+     * @return 数组为 null、长度为 0 或第一个元素为空时返回 true
      */
-    public static <K> boolean isMapsKeys(Map<K, ?>[] paramMaps, K[] keys) {
-        return isKeys(paramMaps[0], keys);
+    public static boolean isArrayEmpty(Map<?, ?> @Nullable [] paramMaps) {
+        return paramMaps == null || paramMaps.length == 0
+                || paramMaps[0] == null || paramMaps[0].isEmpty();
     }
 
     /**
-     * 判断 Map 数组是否为空<br>
-     * <p>
-     * 弱判断，只确定数组中第一个元素是否为空
-     * </p>
+     * 判断 Map 中是否存在空白字符串值
      *
-     * @param paramMaps 要判断的 Map[] 数组
-     *
-     * @return Map 数组==null 或长度==0 或第一个元素为空（true）
+     * @param paramMap 待检查的 Map
+     * @return Map 为空或包含空白字符串值时返回 true
      */
-    public static boolean isEmptys(Map<?, ?> @Nullable [] paramMaps) {
-        return null == paramMaps || paramMaps.length == 0 || paramMaps[0].isEmpty();
-    }
-
-    /**
-     * 判断 Map 是否为空，或者 Map 中 String 类型的 value 值是否为空<br>
-     *
-     * @param paramMap 要判断的 Map
-     *
-     * @return value 值是否为空
-     */
-    public static boolean isStringValueEmpty(Map<?, ?> paramMap) {
+    public static boolean hasBlankStringValue(Map<?, ?> paramMap) {
         if (paramMap.isEmpty()) {
             return true;
         }
         for (Object value : paramMap.values()) {
-            if (value instanceof String str && ObjectUtil.isEmpty(str)) {
+            if (value instanceof String str && str.isBlank()) {
                 return true;
             }
         }
         return false;
     }
 
+    // endregion
+
+    // region 操作方法
+
     /**
-     * 删除 Value 字符串前后空格
+     * 批量移除指定的 key
      *
-     * @param paramMap 需要处理的 map
+     * @param map  待操作的 Map
+     * @param keys 要移除的 key
+     * @return 修改后的 Map（同一实例）
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> removeKeys(Map<K, V> map, K... keys) {
+        for (K key : keys) {
+            map.remove(key);
+        }
+        return map;
+    }
+
+    /**
+     * 移除值为 null 的条目
+     *
+     * @param paramMap 待操作的 Map
+     */
+    public static void removeNullValues(Map<?, ?> paramMap) {
+        paramMap.entrySet().removeIf(entry -> entry.getValue() == null);
+    }
+
+    /**
+     * 移除值为 null 或空白字符串的条目
+     *
+     * @param paramMap 待操作的 Map
+     */
+    public static void removeBlankValues(Map<?, ?> paramMap) {
+        paramMap.entrySet().removeIf(entry -> {
+            Object value = entry.getValue();
+            return value == null || (value instanceof String str && str.isBlank());
+        });
+    }
+
+    /**
+     * 对所有字符串值进行 trim 操作
+     *
+     * @param paramMap 待操作的 Map
      */
     public static <K> void trimStringValues(Map<K, String> paramMap) {
-        for (K key : paramMap.keySet()) {
-            String str = getObject(paramMap, key, String.class);
-            String value = str.trim();
-            if (!Objects.equals(str, value)) {
-                paramMap.replace(key, value);
-            }
+        paramMap.replaceAll((key, value) -> value != null ? value.trim() : null);
+    }
+
+    /**
+     * 替换 key（保留原值）
+     *
+     * @param paramMap   待操作的 Map
+     * @param oldKey     原 key
+     * @param newKey     新 key
+     */
+    public static <K, V> void replaceKey(Map<K, V> paramMap, K oldKey, K newKey) {
+        if (paramMap.containsKey(oldKey)) {
+            paramMap.put(newKey, paramMap.remove(oldKey));
         }
     }
 
-    /**
-     * 批量移除
-     *
-     * @param paramMap 要操作的 Map
-     * @param keys     被移除的 key 数组
-     */
-    public static <K> void remove(Map<K, ?> paramMap, K[] keys) {
-        for (K key : keys) {
-            paramMap.remove(key);
-        }
-    }
+    // endregion
+
+    // region 获取方法
 
     /**
-     * 移除空对象
+     * 获取所有 key 的列表
      *
-     * @param paramMap 要操作的 Map
-     */
-    public static void removeEmpty(Map<?, ?> paramMap) {
-        Iterator<? extends Map.Entry<?, ?>> iter = paramMap.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<?, ?> entry = iter.next();
-            Object value = entry.getValue();
-            if (Objects.isNull(value)) {
-                iter.remove();
-            }
-        }
-    }
-
-    /**
-     * 移除空白字符串
-     * <p>
-     * 空白的定义如下： <br>
-     * 1、为 null <br>
-     * 2、为不可见字符（如空格）<br>
-     * 3、""<br>
-     *
-     * @param paramMap 要操作的 Map
-     */
-    public static void removeBlankStr(Map<?, ?> paramMap) {
-        Iterator<? extends Map.Entry<?, ?>> iter = paramMap.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<?, ?> entry = iter.next();
-            Object value = entry.getValue();
-            if (value == null || (value instanceof String str && ObjectUtil.isEmpty(str))) {
-                iter.remove();
-            }
-        }
-    }
-
-    /**
-     * 替换 key
-     *
-     * @param paramMap   要操作的 Map
-     * @param key        被替换的 key
-     * @param replaceKey 替换的 key
-     */
-    public static <K, V> void replaceKey(Map<K, V> paramMap, K key, K replaceKey) {
-        V value = paramMap.get(key);
-        paramMap.put(replaceKey, value);
-        paramMap.remove(key);
-    }
-
-    /**
-     * 获取所有的 key
-     *
-     * @param paramMap 需要获取 keys 的 map
-     *
-     * @return keyList
+     * @param paramMap Map
+     * @return key 列表
      */
     public static <K> List<K> keyList(Map<K, ?> paramMap) {
         return new ArrayList<>(paramMap.keySet());
     }
 
     /**
-     * 以安全的方式从 Map 中获取对象
+     * 安全获取并转换 Map 中的值
      *
-     * @param <T>      泛型
-     * @param paramMap 参数 map
+     * @param paramMap Map
      * @param key      key
-     * @param clazz    泛型类型
-     *
-     * @return 结果
+     * @param clazz    目标类型
+     * @return 转换后的值，不存在时返回 null
      */
-    public static <K, T> @Nullable T getObject(final Map<?, ?> paramMap, final K key, Class<T> clazz) {
-        Object answer = paramMap.get(key);
-        if (answer != null) {
-            return TypeCastUtil.cast(answer, clazz);
-        }
-        return null;
+    public static <K, T> @Nullable T getObject(Map<?, ?> paramMap, K key, Class<T> clazz) {
+        Object value = paramMap.get(key);
+        return value != null ? TypeCastUtil.cast(value, clazz) : null;
     }
 
+    // endregion
+
+    // region 转换方法
+
     /**
-     * <b>将指定值提取出来作为 map key,map 的值为相同 key 值的 list<b>
-     * <p>
-     * 例：一个用户集合中的对象有 key、name、sex
-     * <p>
-     * 数据 1：key：1，name：张三，sex：man
-     * <p>
-     * 数据 2：key：2，name：李四，sex:woman
-     * <p>
-     * 数据 3：key：3，name：王五，sex：man
-     * <p>
-     * 方法调用：ListPOJOExtractKeyToList(list,"sex");
-     * <p>
-     * 处理后返回结果为一个 map，值为一个 list,json 表示为：
-     * <p>
-     * {"man":[{"key":"1","name":"张三","sex":"man"},{"key":"3","name":"王五","sex":"man"}],"woman":[{"key":"2","name":"李四","sex":"woman"}]}
+     * 将列表按指定 key 分组
      *
-     * @param objectList    对象 list
-     * @param keyClassifier 需要提取的 key
-     *
-     * @return key 为 map key 的键值对
+     * @param list          列表
+     * @param keyClassifier key 提取函数
+     * @return 分组后的 Map
      */
-    public static <K, T> Map<K, List<T>> extractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
-        // 如果需要转换的值是空的，直接返回一个空的集合
-        if (ObjectUtil.isEmpty(objectList)) {
+    public static <K, T> Map<K, List<T>> groupBy(List<T> list, Function<T, K> keyClassifier) {
+        if (ObjectUtil.isEmpty(list)) {
             return Collections.emptyMap();
         }
-        return objectList.stream().collect(Collectors.groupingBy(keyClassifier));
+        return list.stream().collect(Collectors.groupingBy(keyClassifier));
     }
 
     /**
+     * 将列表转换为 Map（提取 key 和 value）
      * <p>
-     * 将 list 对象中数据提取为单个 map 键值对
-     * <p>
-     * 注：如果有相同的 key 时，后面的值会覆盖第一次出现的 key 对应的值
-     * <p>
-     * 例：一个用户集合中的对象有 key、name、sex
-     * <p>
-     * 数据 1：key：1，name：张三，sex：man
-     * <p>
-     * 数据 2：key：2，name：李四，sex:woman
-     * <p>
-     * 数据 3：key：3，name：王五，sex：man
-     * <p>
-     * 方法调用：ListPOJOExtractKeyToMap(list,"key","name");
-     * <p>
-     * 处理后返回结果为一个 map，值为一个对象，json 表示为：
-     * <p>
-     * {"1":"张三","2":"李四","3":"王五"}
+     * 注意：相同 key 时后面的值会覆盖前面的值
      *
-     * @param objectList      list 数据
-     * @param keyClassifier   需要提取的 key
-     * @param valueClassifier 需要提取的 value
-     *
-     * @return Map&lt;String, T&gt;
+     * @param list            列表
+     * @param keyClassifier   key 提取函数
+     * @param valueClassifier value 提取函数
+     * @return 转换后的 Map（保持插入顺序）
      */
-    public static <K, T, V> Map<K, V> extractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
-        // 声明一个返回的 map 集合
-        Map<K, V> map = new LinkedHashMap<>();
-        // 如果需要转换的值是空的，直接返回一个空的集合
-        if (ObjectUtil.isEmpty(objectList)) {
-            return map;
+    public static <K, T, V> Map<K, V> toMap(List<T> list, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
+        if (ObjectUtil.isEmpty(list)) {
+            return new LinkedHashMap<>();
         }
-        for (T t : objectList) {
-            map.put(keyClassifier.apply(t), valueClassifier.apply(t));
+        Map<K, V> map = new LinkedHashMap<>(list.size());
+        for (T item : list) {
+            map.put(keyClassifier.apply(item), valueClassifier.apply(item));
         }
         return map;
     }
 
     /**
+     * 将列表转换为 Map（以元素本身为 value）
      * <p>
-     * 将 list 对象中数据提取为单个 map 键值对
-     * <p>
-     * 注：如果有相同的 key 时，后面的值会覆盖第一次出现的 key 对应的值
-     * <p>
-     * 例：一个用户集合中的对象有 key、name、sex
-     * <p>
-     * 数据 1：key：1，name：张三，sex：man
-     * <p>
-     * 数据 2：key：2，name：李四，sex:woman
-     * <p>
-     * 数据 3：key：3，name：王五，sex：man
-     * <p>
-     * 方法调用：ListPOJOExtractKeyToList(list,"key");
-     * <p>
-     * 处理后返回结果为一个 map，值为一个对象，json 表示为：
-     * <p>
-     * {"1":{"key":"1","name":"张三","sex":"man"},"2":{"key":"2","name":"李四","sex":"woman"},"3":{"key":"3","name":"王五","sex":"man"}}
+     * 注意：相同 key 时后面的值会覆盖前面的值
      *
-     * @param objectList    list 数据
-     * @param keyClassifier 需要提取的 key
-     *
-     * @return Map&lt;String, T&gt;
+     * @param list          列表
+     * @param keyClassifier key 提取函数
+     * @return 转换后的 Map（保持插入顺序）
      */
-    public static <K, T> Map<K, T> extractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
-        // 声明一个返回的 map 集合
-        Map<K, T> map = new LinkedHashMap<>();
-        // 如果需要转换的值是空的，直接返回一个空的集合
-        if (ObjectUtil.isEmpty(objectList)) {
-            return map;
-        }
-        for (T t : objectList) {
-            map.put(keyClassifier.apply(t), t);
-        }
-        return map;
+    public static <K, T> Map<K, T> toMap(List<T> list, Function<T, K> keyClassifier) {
+        return toMap(list, keyClassifier, Function.identity());
     }
 
     /**
-     * 获取
-     */
-    private static <T> @Nullable T getValue(Object obj, String name, Class<T> calzz) {
-        if (obj instanceof Map<?, ?> map) {
-            return TypeCastUtil.cast(map.get(name), calzz);
-        }
-        BeanInfo beanInfo;
-        try {
-            beanInfo = Introspector.getBeanInfo(obj.getClass());
-        } catch (IntrospectionException e) {
-            LoggerFactory.getLogger(MapUtil.class).warn("[🛠️] 获取实体不正确", e);
-            return null;
-        }
-        // 获取所有属性
-        PropertyDescriptor[] descriptors = beanInfo.getPropertyDescriptors();
-        for (PropertyDescriptor descriptor : descriptors) {
-            // 获取 get 方法
-            Method readMethod = descriptor.getReadMethod();
-            // 判断是否是需要的属性的 get 方法
-            if (!name.equals(descriptor.getName())) {
-                continue;
-            }
-            try {
-                // 执行 get 方法拿到值
-                return TypeCastUtil.cast(readMethod.invoke(obj), calzz);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                LoggerFactory.getLogger(MapUtil.class).warn("[🛠️] 获取值时发生错误", e);
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 将对象装成 map 形式，使用反射实现，性能不好
+     * 将 Bean 转换为 Map
+     * <p>
+     * 使用反射实现，不包含 static 和 final 字段
      *
      * @param bean 源对象
-     *
-     * @return {Map}
+     * @return 字段名到字段值的 Map
      */
-    public static Map<String, Object> toMap(Object bean) {
-        Map<String, Object> map = new HashMap<>();
-        Field[] declaredFields = bean.getClass().getDeclaredFields();
-        for (Field field : declaredFields) {
+    public static Map<String, Object> beanToMap(Object bean) {
+        Field[] fields = bean.getClass().getDeclaredFields();
+        Map<String, Object> map = new HashMap<>(fields.length);
+        for (Field field : fields) {
+            int mod = field.getModifiers();
+            if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+                continue;
+            }
             field.setAccessible(true);
             try {
                 map.put(field.getName(), field.get(bean));
@@ -446,31 +311,148 @@ public final class MapUtil {
     }
 
     /**
-     * 将 map 转为 bean，使用反射实现，性能不好
+     * 将 Map 转换为 Bean
+     * <p>
+     * 使用反射实现，要求 Bean 有无参构造函数
      *
-     * @param beanMap   map
-     * @param valueType 对象类型
-     * @param <T>       泛型标记
-     *
-     * @return {T}
+     * @param beanMap   源 Map
+     * @param beanClass 目标类型
+     * @return Bean 实例
      */
-    public static <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
+    public static <T> T mapToBean(Map<String, Object> beanMap, Class<T> beanClass) {
         try {
-            T object = valueType.getDeclaredConstructor().newInstance();
-            Field[] fields = valueType.getDeclaredFields();
+            T instance = beanClass.getDeclaredConstructor().newInstance();
+            Field[] fields = beanClass.getDeclaredFields();
             for (Field field : fields) {
                 int mod = field.getModifiers();
-                if (Modifier.isFinal(mod) || Modifier.isStatic(mod)) {
+                if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
                     continue;
                 }
-                field.setAccessible(true);
-                field.set(object, beanMap.get(field.getName()));
+                Object value = beanMap.get(field.getName());
+                if (value != null) {
+                    field.setAccessible(true);
+                    field.set(instance, value);
+                }
             }
-            return object;
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
+            return instance;
+        } catch (NoSuchMethodException | InvocationTargetException
+                 | InstantiationException | IllegalAccessException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
+
+    // endregion
+
+    // region 兼容方法（已废弃）
+
+    /**
+     * @deprecated 使用 {@link #removeKeys(Map, Object[])} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    @SafeVarargs
+    public static <K, V> Map<K, V> removeAny(Map<K, V> map, K... keys) {
+        return removeKeys(map, keys);
+    }
+
+    /**
+     * @deprecated 使用 {@link #containsAnyKey(Map, Object[])} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K> boolean isContainsOneOfKey(Map<K, ?> paramMap, K[] keys) {
+        return containsAnyKey(paramMap, keys);
+    }
+
+    /**
+     * @deprecated 使用 {@link #isArrayEmpty(Map[])} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static boolean isEmptys(Map<?, ?> @Nullable [] paramMaps) {
+        return isArrayEmpty(paramMaps);
+    }
+
+    /**
+     * @deprecated 使用 {@link #hasBlankStringValue(Map)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static boolean isStringValueEmpty(Map<?, ?> paramMap) {
+        return hasBlankStringValue(paramMap);
+    }
+
+    /**
+     * @deprecated 使用 {@link #removeNullValues(Map)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static void removeEmpty(Map<?, ?> paramMap) {
+        removeNullValues(paramMap);
+    }
+
+    /**
+     * @deprecated 使用 {@link #removeBlankValues(Map)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static void removeBlankStr(Map<?, ?> paramMap) {
+        removeBlankValues(paramMap);
+    }
+
+    /**
+     * @deprecated 使用 {@link #removeKeys(Map, Object[])} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K> void remove(Map<K, ?> paramMap, K[] keys) {
+        removeKeys(paramMap, keys);
+    }
+
+    /**
+     * @deprecated 使用 {@link #groupBy(List, Function)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K, T> Map<K, List<T>> extractKeyToList(List<T> objectList, Function<T, K> keyClassifier) {
+        return groupBy(objectList, keyClassifier);
+    }
+
+    /**
+     * @deprecated 使用 {@link #toMap(List, Function, Function)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K, T, V> Map<K, V> extractKeyToMap(List<T> objectList, Function<T, K> keyClassifier, Function<T, V> valueClassifier) {
+        return toMap(objectList, keyClassifier, valueClassifier);
+    }
+
+    /**
+     * @deprecated 使用 {@link #toMap(List, Function)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K, T> Map<K, T> extractKeyToPOJO(List<T> objectList, Function<T, K> keyClassifier) {
+        return toMap(objectList, keyClassifier);
+    }
+
+    /**
+     * @deprecated 使用 {@link #beanToMap(Object)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static Map<String, Object> toMap(Object bean) {
+        return beanToMap(bean);
+    }
+
+    /**
+     * @deprecated 使用 {@link #mapToBean(Map, Class)} 替代
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
+        return mapToBean(beanMap, valueType);
+    }
+
+    /**
+     * @deprecated 方法设计不合理，建议直接使用 {@link #isKeysEqual(Map, Object[])}
+     */
+    @Deprecated(since = "4.0.0", forRemoval = true)
+    public static <K> boolean isMapsKeys(Map<K, ?>[] paramMaps, K[] keys) {
+        if (paramMaps == null || paramMaps.length == 0 || paramMaps[0] == null) {
+            return false;
+        }
+        return isKeys(paramMaps[0], keys);
+    }
+
+    // endregion
 
 }

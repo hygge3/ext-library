@@ -2,20 +2,43 @@ package ext.library.tool.util;
 
 import java.util.HexFormat;
 
+/**
+ * 十六进制与进制转换工具类
+ *
+ * <p>提供以下功能：
+ * <ul>
+ *   <li>字节数组与十六进制字符串的相互转换</li>
+ *   <li>十进制与二进制、八进制、十六进制之间的转换</li>
+ * </ul>
+ * </p>
+ */
 public final class HexUtil {
 
+    private HexUtil() {
+    }
+
+    private static final HexFormat HEX_FORMAT = HexFormat.of();
+
     /**
-     * 字节流转成十六进制表示
+     * 字节数组转十六进制字符串
+     *
+     * @param bytes 字节数组
+     *
+     * @return 十六进制字符串（小写）
      */
     public static String encode(byte[] bytes) {
-        return HexFormat.of().formatHex(bytes);
+        return HEX_FORMAT.formatHex(bytes);
     }
 
     /**
-     * 十六进制字符串转成字节流
+     * 十六进制字符串转字节数组
+     *
+     * @param hex 十六进制字符串
+     *
+     * @return 字节数组
      */
     public static byte[] decode(String hex) {
-        return HexFormat.of().parseHex(hex);
+        return HEX_FORMAT.parseHex(hex);
     }
 
     /**
@@ -23,21 +46,20 @@ public final class HexUtil {
      *
      * @param num 十进制数字
      *
-     * @return {@link String } 二进制字符串
+     * @return 二进制字符串
      */
-    public static String decToBin(Integer num) {
+    public static String decToBin(int num) {
         return Integer.toString(num, 2);
     }
-
 
     /**
      * 二进制转十进制
      *
      * @param data 二进制字符串
      *
-     * @return {@link Integer } 十进制数字
+     * @return 十进制数字
      */
-    public static Integer binToDec(String data) {
+    public static int binToDec(String data) {
         return Integer.parseInt(data, 2);
     }
 
@@ -46,9 +68,9 @@ public final class HexUtil {
      *
      * @param num 十进制数字
      *
-     * @return {@link String } 八进制字符串
+     * @return 八进制字符串
      */
-    public static String decToOct(Integer num) {
+    public static String decToOct(int num) {
         return Integer.toString(num, 8);
     }
 
@@ -57,9 +79,9 @@ public final class HexUtil {
      *
      * @param data 八进制字符串
      *
-     * @return {@link Integer } 十进制数字
+     * @return 十进制数字
      */
-    public static Integer octToDec(String data) {
+    public static int octToDec(String data) {
         return Integer.parseInt(data, 8);
     }
 
@@ -68,9 +90,9 @@ public final class HexUtil {
      *
      * @param num 十进制数字
      *
-     * @return {@link String } 十六进制字符串
+     * @return 十六进制字符串
      */
-    public static String decToHex(Integer num) {
+    public static String decToHex(int num) {
         return Integer.toString(num, 16);
     }
 
@@ -79,9 +101,9 @@ public final class HexUtil {
      *
      * @param data 十六进制字符串
      *
-     * @return {@link Integer } 十进制数字
+     * @return 十进制数字
      */
-    public static Integer hexToDec(String data) {
+    public static int hexToDec(String data) {
         return Integer.parseInt(data, 16);
     }
 

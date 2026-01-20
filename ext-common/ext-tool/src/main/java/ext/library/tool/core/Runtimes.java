@@ -11,8 +11,10 @@ import java.util.List;
 /**
  * 运行时工具类
  */
-
 public final class Runtimes {
+
+    private Runtimes() {
+    }
 
     /**
      * 获得当前进程的 PID

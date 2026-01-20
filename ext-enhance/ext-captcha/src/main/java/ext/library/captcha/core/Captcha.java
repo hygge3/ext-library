@@ -8,7 +8,7 @@ import ext.library.captcha.draw.RandomCaptchaDraw;
 import ext.library.captcha.draw.SmallCharsBackgroundDraw;
 import ext.library.captcha.enums.CaptchaType;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.constant.Holder;
+import ext.library.tool.constant.Singletons;
 import ext.library.tool.exception.ExtException;
 import org.springframework.core.io.ClassPathResource;
 
@@ -48,7 +48,7 @@ public class Captcha implements ICaptcha {
     }
 
     public Captcha(CaptchaDraw captchaDraw) {
-        this(SmallCharsBackgroundDraw.INSTANCE, captchaDraw, CurveInterferenceDraw.INSTANCE, Holder.SECURE_RANDOM);
+        this(SmallCharsBackgroundDraw.INSTANCE, captchaDraw, CurveInterferenceDraw.INSTANCE, Singletons.SECURE_RANDOM);
     }
 
     public Captcha(BackgroundDraw backgroundDraw, CaptchaDraw captchaDraw, InterferenceDraw interferenceDraw, Random random) {

@@ -19,22 +19,31 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Lambda 受检异常处理
- *
+ * Lambda 受检异常处理工具
  * <p>
- * <a href="https://segmentfault.com/a/1190000007832130">当 Lambda 遇上受检异常</a> <a
- * href=https://github.com/jOOQ/jOOL>jOOλ</a>
- * </p>
+ * 将可能抛出受检异常的函数式接口包装为标准函数式接口，
+ * 异常会被转换为 {@link ExtException} 抛出。
+ * <p>
+ * 参考：
+ * <ul>
+ *   <li><a href="https://segmentfault.com/a/1190000007832130">当 Lambda 遇上受检异常</a></li>
+ *   <li><a href="https://github.com/jOOQ/jOOL">jOOλ</a></li>
+ * </ul>
+ *
+ * @since 2025.01.01
  */
 public final class Unchecked {
 
+    private Unchecked() {
+    }
+
     /**
-     * 构造受检的 function
+     * 包装可能抛出异常的 Function
      *
-     * @param function CheckedFunction
-     * @param <T>      泛型
-     *
-     * @return Function
+     * @param function 受检函数
+     * @param <T>      输入类型
+     * @param <R>      返回类型
+     * @return 包装后的 Function
      */
     public static <T, R> Function<T, R> function(CheckedFunction<T, R> function) {
         Objects.requireNonNull(function);
@@ -48,12 +57,11 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 supplier
+     * 包装可能抛出异常的 Consumer
      *
-     * @param consumer CheckedConsumer
-     * @param <T>      泛型
-     *
-     * @return Consumer
+     * @param consumer 受检消费者
+     * @param <T>      输入类型
+     * @return 包装后的 Consumer
      */
     public static <T> Consumer<T> consumer(CheckedConsumer<T> consumer) {
         Objects.requireNonNull(consumer);
@@ -67,12 +75,11 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 supplier
+     * 包装可能抛出异常的 Supplier
      *
-     * @param supplier CheckedSupplier
-     * @param <T>      泛型
-     *
-     * @return Supplier
+     * @param supplier 受检提供者
+     * @param <T>      返回类型
+     * @return 包装后的 Supplier
      */
     public static <T> Supplier<T> supplier(CheckedSupplier<T> supplier) {
         Objects.requireNonNull(supplier);
@@ -86,16 +93,15 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 predicate
+     * 包装可能抛出异常的 Predicate
      *
-     * @param predicate CheckedPredicate
-     * @param <T>       泛型
-     *
-     * @return Supplier
+     * @param predicate 受检断言
+     * @param <T>       输入类型
+     * @return 包装后的 Predicate
      */
     public static <T> Predicate<T> predicate(CheckedPredicate<T> predicate) {
         Objects.requireNonNull(predicate);
-        return (t) -> {
+        return t -> {
             try {
                 return predicate.test(t);
             } catch (Throwable e) {
@@ -105,11 +111,10 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 runnable
+     * 包装可能抛出异常的 Runnable
      *
-     * @param runnable CheckedRunnable
-     *
-     * @return Runnable
+     * @param runnable 受检可执行对象
+     * @return 包装后的 Runnable
      */
     public static Runnable runnable(CheckedRunnable runnable) {
         Objects.requireNonNull(runnable);
@@ -123,12 +128,11 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 callable
+     * 包装可能抛出异常的 Callable
      *
-     * @param callable CheckedCallable
-     * @param <T>      泛型
-     *
-     * @return Callable
+     * @param callable 受检可调用对象
+     * @param <T>      返回类型
+     * @return 包装后的 Callable
      */
     public static <T> Callable<T> callable(CheckedCallable<T> callable) {
         Objects.requireNonNull(callable);
@@ -142,16 +146,15 @@ public final class Unchecked {
     }
 
     /**
-     * 构造受检的 comparator
+     * 包装可能抛出异常的 Comparator
      *
-     * @param comparator CheckedComparator
-     * @param <T>        泛型
-     *
-     * @return Comparator
+     * @param comparator 受检比较器
+     * @param <T>        比较对象类型
+     * @return 包装后的 Comparator
      */
     public static <T> Comparator<T> comparator(CheckedComparator<T> comparator) {
         Objects.requireNonNull(comparator);
-        return (T o1, T o2) -> {
+        return (o1, o2) -> {
             try {
                 return comparator.compare(o1, o2);
             } catch (Throwable e) {
@@ -159,5 +162,4 @@ public final class Unchecked {
             }
         };
     }
-
 }

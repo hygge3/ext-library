@@ -1,6 +1,6 @@
 package ext.library.tool.domain;
 
-import ext.library.tool.constant.Holder;
+import ext.library.tool.constant.Singletons;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class MongoObjectId {
     /** 下一个计数器值，用于生成唯一标识符 */
-    private static final AtomicInteger NEXT_COUNTER = new AtomicInteger(Holder.SECURE_RANDOM.nextInt() & 0x00FF_FFFF);
+    private static final AtomicInteger NEXT_COUNTER = new AtomicInteger(Singletons.SECURE_RANDOM.nextInt() & 0x00FF_FFFF);
 
     /** 用于生成随机值的字节数组，长度为 5 */
     private static final byte[] RANDOM_VALUE = new byte[5];
@@ -29,7 +29,7 @@ public final class MongoObjectId {
     private static final char[] HEX = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     static {
-        Holder.SECURE_RANDOM.nextBytes(RANDOM_VALUE);
+        Singletons.SECURE_RANDOM.nextBytes(RANDOM_VALUE);
     }
 
     private MongoObjectId() {

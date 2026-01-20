@@ -1,22 +1,30 @@
 package ext.library.tool.holder.retry;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Callback interface for an operation that can be retried using a
+ * 重试回调接口
+ * <p>
+ * 封装可重试的操作，操作应当是幂等的，以确保多次执行的结果一致。
  *
- * @param <T> the type of object returned by the callback
- * @param <E> the type of exception it declares may be thrown
+ * @param <T> 返回值类型
+ * @param <E> 可能抛出的异常类型
+ * @since 2025.01.01
  */
+@FunctionalInterface
 public interface RetryCallback<T, E extends Throwable> extends Serializable {
 
-	/**
-	 * Execute an operation with retry semantics. Operations should generally be
-	 * idempotent, but implementations may choose to implement compensation semantics when
-	 * an operation is retried.
-	 * @return the result of the successful operation.
-	 * @throws E of type E if processing fails
-	 */
-	T call() throws E;
+    @Serial
+    long serialVersionUID = 1L;
 
+    /**
+     * 执行可重试的操作
+     * <p>
+     * 操作应当是幂等的，但实现可以在重试时选择执行补偿逻辑。
+     *
+     * @return 操作执行结果
+     * @throws E 操作失败时抛出的异常
+     */
+    T call() throws E;
 }

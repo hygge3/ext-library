@@ -17,6 +17,9 @@ public final class Threads {
     /** 原始堆栈索引位置，用于获取调用方法的堆栈信息 */
     private static final int ORIGIN_STACK_INDEX = 2;
 
+    private Threads() {
+    }
+
     /**
      * sleep 等待，单位为毫秒
      */

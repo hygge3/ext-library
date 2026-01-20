@@ -3,7 +3,7 @@ package ext.library.redis.util;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Threads;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.util.INetUtil;
+import ext.library.tool.util.NetUtil;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public final class DistributedLock implements Lock {
     /** 分布式锁过期时间 s 可以根据业务自己调节 */
     private static final Long LOCK_REDIS_TIMEOUT = 10L;
     /** 本机 host */
-    private static final String CURRENT_HOST = INetUtil.getHostIp();
+    private static final String CURRENT_HOST = NetUtil.getHostIp();
     /** 序列值，用于确保锁 value 的唯一性 */
     private static AtomicLong SERIAL_NUM;
     /** 最大序列值 */

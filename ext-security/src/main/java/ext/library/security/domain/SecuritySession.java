@@ -9,7 +9,7 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.core.Logs;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;
-import ext.library.tool.util.IDUtil;
+import ext.library.tool.util.IdUtil;
 import ext.library.tool.util.StringUtil;
 
 import java.io.Serial;
@@ -68,6 +68,26 @@ public class SecuritySession implements Serializable {
      * 版本号
      */
     private Long version;
+
+    public SecuritySession(boolean isCreate) {
+        if (isCreate) {
+            this.createdSecuritySession();
+        }
+    }
+
+    public SecuritySession(String securitySessionId, String loginId, Long timeout, SecurityToken currentSecurityToken, String createTime, String updateTime, List<SecurityToken> tokenInfoList, Long version) {
+        this.securitySessionId = securitySessionId;
+        this.loginId = loginId;
+        this.timeout = timeout;
+        this.currentSecurityToken = currentSecurityToken;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+        this.tokenInfoList = tokenInfoList;
+        this.version = version;
+    }
+
+    public SecuritySession() {
+    }
 
     /**
      * 获取挂载数据
@@ -222,31 +242,11 @@ public class SecuritySession implements Serializable {
         this.version = version;
     }
 
-    public SecuritySession(boolean isCreate) {
-        if (isCreate) {
-            this.createdSecuritySession();
-        }
-    }
-
-    public SecuritySession(String securitySessionId, String loginId, Long timeout, SecurityToken currentSecurityToken, String createTime, String updateTime, List<SecurityToken> tokenInfoList, Long version) {
-        this.securitySessionId = securitySessionId;
-        this.loginId = loginId;
-        this.timeout = timeout;
-        this.currentSecurityToken = currentSecurityToken;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-        this.tokenInfoList = tokenInfoList;
-        this.version = version;
-    }
-
-    public SecuritySession() {
-    }
-
     /**
      * 创建 SecuritySession
      */
     public void createdSecuritySession() {
-        this.securitySessionId = IDUtil.getUUIDv7();
+        this.securitySessionId = IdUtil.getUUIDv7();
         this.createTime = DateUtil.format(LocalDateTime.now());
         // 创建通知
         SecurityEventPublishManager.doCreatedSecuritySession(this.securitySessionId);

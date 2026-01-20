@@ -5,7 +5,7 @@ import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
 import ext.library.security.properties.SecurityProperties;
 import ext.library.tool.util.DateUtil;
-import ext.library.tool.util.IDUtil;
+import ext.library.tool.util.IdUtil;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -73,12 +73,36 @@ public class SecurityLoginParams implements Serializable {
     }
 
     /**
+     * 设置超时时间
+     *
+     * @param timeout 超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setTimeout(Long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    /**
      * 获取活跃超时时间
      *
      * @return 活跃超时时间
      */
     public Long getActivityTimeout() {
         return activityTimeout;
+    }
+
+    /**
+     * 设置活跃超时时间
+     *
+     * @param activityTimeout 活跃超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
+        this.activityTimeout = activityTimeout;
+        return this;
     }
 
     /**
@@ -181,7 +205,7 @@ public class SecurityLoginParams implements Serializable {
     public SecurityToken convert(String loginId) {
         SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
         SecurityToken securityToken = new SecurityToken();
-        securityToken.setToken(IDUtil.getUUIDv7());
+        securityToken.setToken(IdUtil.getUUIDv7());
         securityToken.setLoginId(loginId);
         securityToken.setDeviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN));
         securityToken.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
@@ -206,29 +230,5 @@ public class SecurityLoginParams implements Serializable {
         session.setVersion(0L);
         session.addTokenInfo(token);
         return session;
-    }
-
-    /**
-     * 设置超时时间
-     *
-     * @param timeout 超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setTimeout(Long timeout) {
-        this.timeout = timeout;
-        return this;
-    }
-
-    /**
-     * 设置活跃超时时间
-     *
-     * @param activityTimeout 活跃超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
-        this.activityTimeout = activityTimeout;
-        return this;
     }
 }

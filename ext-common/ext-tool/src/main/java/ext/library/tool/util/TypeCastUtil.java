@@ -10,6 +10,9 @@ import java.text.ParseException;
  */
 public final class TypeCastUtil {
 
+    private TypeCastUtil() {
+    }
+
     /**
      * Gets a String from an Object in a null-safe manner.
      * <p>
@@ -20,7 +23,7 @@ public final class TypeCastUtil {
      * @return the value of the Object as a String, <code>null</code> if null object input
      */
     public static String getAsString(Object obj) {
-        return obj.toString();
+        return obj == null ? null : obj.toString();
     }
 
     /**
@@ -35,8 +38,10 @@ public final class TypeCastUtil {
      * object input
      */
     public static String getAsString(Object obj, String defaultValue) {
-        String answer = getAsString(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return obj.toString();
     }
 
     /**
@@ -52,22 +57,21 @@ public final class TypeCastUtil {
      * @return the value of the Object as a Number, <code>null</code> if null object input
      */
     public static Number getAsNumber(Object obj) {
-        switch (obj) {
-            case Number number -> {
-                return number;
-            }
-            case Boolean aBoolean -> {
-                return aBoolean ? 1 : 0;
-            }
+        if (obj == null) {
+            return null;
+        }
+        return switch (obj) {
+            case Number number -> number;
+            case Boolean bool -> bool ? 1 : 0;
             case String s -> {
                 try {
-                    return NumberFormat.getInstance().parse(s);
+                    yield NumberFormat.getInstance().parse(s);
                 } catch (ParseException e) {
-                    throw new NumberFormatException(obj + "不是有效的数字格式");
+                    throw new NumberFormatException(obj + " 不是有效的数字格式");
                 }
             }
-            default -> throw new UnsupportedOperationException();
-        }
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
     }
 
     /**
@@ -82,8 +86,12 @@ public final class TypeCastUtil {
      */
     @SuppressWarnings("unchecked")
     public static <R extends Number> R getAsNumber(Object obj, R defaultValue) {
-        Number answer = getAsNumber(obj);
-        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Number answer = getAsNumber(obj);
+            return answer != null ? (R) answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -101,11 +109,14 @@ public final class TypeCastUtil {
      * input
      */
     public static Boolean getAsBoolean(Object obj) {
+        if (obj == null) {
+            return null;
+        }
         return switch (obj) {
             case Boolean bool -> bool;
             case String s -> Boolean.valueOf(s);
-            case Number n -> (n.intValue() != 0) ? Boolean.TRUE : Boolean.FALSE;
-            default -> throw new UnsupportedOperationException();
+            case Number n -> n.intValue() != 0;
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
         };
     }
 
@@ -125,8 +136,12 @@ public final class TypeCastUtil {
      * object input
      */
     public static Boolean getAsBoolean(Object obj, Boolean defaultValue) {
-        Boolean answer = getAsBoolean(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Boolean answer = getAsBoolean(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -144,8 +159,7 @@ public final class TypeCastUtil {
      * input
      */
     public static boolean getAsBooleanValue(Object obj) {
-        Boolean booleanObject = getAsBoolean(obj);
-        return ObjectUtil.defaultIfNull(booleanObject, false);
+        return getAsBoolean(obj, false);
     }
 
     /**
@@ -179,10 +193,10 @@ public final class TypeCastUtil {
      */
     public static Byte getAsByte(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Byte) {
-            return (Byte) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.byteValue();
+        return answer instanceof Byte b ? b : answer.byteValue();
     }
 
     /**
@@ -198,8 +212,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Byte getAsByte(Object obj, Byte defaultValue) {
-        Byte answer = getAsByte(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Byte answer = getAsByte(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -212,8 +230,7 @@ public final class TypeCastUtil {
      * @return the value of the Object as a byte, <code>0</code> if null object input
      */
     public static byte getAsByteValue(Object obj) {
-        Byte byteObject = getAsByte(obj);
-        return ObjectUtil.defaultIfNull(byteObject, (byte) 0);
+        return getAsByte(obj, (byte) 0);
     }
 
     /**
@@ -242,10 +259,10 @@ public final class TypeCastUtil {
      */
     public static Short getAsShort(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Short) {
-            return (Short) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.shortValue();
+        return answer instanceof Short s ? s : answer.shortValue();
     }
 
     /**
@@ -261,8 +278,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Short getAsShort(Object obj, Short defaultValue) {
-        Short answer = getAsShort(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Short answer = getAsShort(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -275,8 +296,7 @@ public final class TypeCastUtil {
      * @return the value of the Object as a short, <code>0</code> if null object input
      */
     public static short getAsShortValue(Object obj) {
-        Short shortObject = getAsShort(obj);
-        return ObjectUtil.defaultIfNull(shortObject, (short) 0);
+        return getAsShort(obj, (short) 0);
     }
 
     /**
@@ -306,10 +326,10 @@ public final class TypeCastUtil {
      */
     public static Integer getAsInteger(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Integer) {
-            return (Integer) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.intValue();
+        return answer instanceof Integer i ? i : answer.intValue();
     }
 
     /**
@@ -325,8 +345,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Integer getAsInteger(Object obj, Integer defaultValue) {
-        Integer answer = getAsInteger(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Integer answer = getAsInteger(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -339,8 +363,7 @@ public final class TypeCastUtil {
      * @return the value of the Object as an int, <code>0</code> if null object input
      */
     public static int getAsIntValue(Object obj) {
-        Integer integerObject = getAsInteger(obj);
-        return ObjectUtil.defaultIfNull(integerObject, 0);
+        return getAsInteger(obj, 0);
     }
 
     /**
@@ -369,10 +392,10 @@ public final class TypeCastUtil {
      */
     public static Long getAsLong(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Long) {
-            return (Long) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.longValue();
+        return answer instanceof Long l ? l : answer.longValue();
     }
 
     /**
@@ -388,8 +411,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Long getAsLong(Object obj, Long defaultValue) {
-        Long answer = getAsLong(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Long answer = getAsLong(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -402,8 +429,7 @@ public final class TypeCastUtil {
      * @return the value of the Object as a long, <code>0L</code> if null object input
      */
     public static long getAsLongValue(Object obj) {
-        Long longObject = getAsLong(obj);
-        return ObjectUtil.defaultIfNull(longObject, 0L);
+        return getAsLong(obj, 0L);
     }
 
     /**
@@ -433,10 +459,10 @@ public final class TypeCastUtil {
      */
     public static Float getAsFloat(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Float) {
-            return (Float) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.floatValue();
+        return answer instanceof Float f ? f : answer.floatValue();
     }
 
     /**
@@ -452,8 +478,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Float getAsFloat(Object obj, Float defaultValue) {
-        Float answer = getAsFloat(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Float answer = getAsFloat(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -466,8 +496,7 @@ public final class TypeCastUtil {
      * @return the value of Object as a float, <code>0.0F</code> if null object input
      */
     public static float getAsFloatValue(Object obj) {
-        Float floatObject = getAsFloat(obj);
-        return ObjectUtil.defaultIfNull(floatObject, 0F);
+        return getAsFloat(obj, 0F);
     }
 
     /**
@@ -497,10 +526,10 @@ public final class TypeCastUtil {
      */
     public static Double getAsDouble(Object obj) {
         Number answer = getAsNumber(obj);
-        if (answer instanceof Double) {
-            return (Double) answer;
+        if (answer == null) {
+            return null;
         }
-        return answer.doubleValue();
+        return answer instanceof Double d ? d : answer.doubleValue();
     }
 
     /**
@@ -516,8 +545,12 @@ public final class TypeCastUtil {
      * input
      */
     public static Double getAsDouble(Object obj, Double defaultValue) {
-        Double answer = getAsDouble(obj);
-        return ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            Double answer = getAsDouble(obj);
+            return answer != null ? answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -530,8 +563,7 @@ public final class TypeCastUtil {
      * @return the value of Object as a double, <code>0.0</code> if null object input
      */
     public static double getAsDoubleValue(Object obj) {
-        Double doubleObject = getAsDouble(obj);
-        return ObjectUtil.defaultIfNull(doubleObject, 0D);
+        return getAsDouble(obj, 0D);
     }
 
     /**
@@ -557,19 +589,19 @@ public final class TypeCastUtil {
      *
      * @param obj the object to use
      *
-     * @return the value of Object as a BigInteger, <code>0</code> if null object input
+     * @return the value of Object as a BigInteger, <code>null</code> if null object input
      */
     public static BigInteger getAsBigInteger(Object obj) {
-        if (obj instanceof BigInteger) {
-            return (BigInteger) obj;
-        } else if (obj instanceof String) {
-            return new BigInteger((String) obj);
-        } else if (obj instanceof Number || obj instanceof Boolean) {
-            Number answer = getAsNumber(obj);
-            return BigInteger.valueOf(answer.longValue());
-        } else {
-            throw new UnsupportedOperationException();
+        if (obj == null) {
+            return null;
         }
+        return switch (obj) {
+            case BigInteger bi -> bi;
+            case String s -> new BigInteger(s);
+            case Number n -> BigInteger.valueOf(n.longValue());
+            case Boolean b -> BigInteger.valueOf(b ? 1L : 0L);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
     }
 
     /**
@@ -586,8 +618,12 @@ public final class TypeCastUtil {
      */
     @SuppressWarnings("unchecked")
     public static <R extends BigInteger> R getAsBigInteger(Object obj, R defaultValue) {
-        BigInteger answer = getAsBigInteger(obj);
-        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            BigInteger answer = getAsBigInteger(obj);
+            return answer != null ? (R) answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -597,19 +633,19 @@ public final class TypeCastUtil {
      *
      * @param obj the object to use
      *
-     * @return the value of Object as a BigDecimal, <code>0</code> if null object input
+     * @return the value of Object as a BigDecimal, <code>null</code> if null object input
      */
     public static BigDecimal getAsBigDecimal(Object obj) {
-        if (obj instanceof BigDecimal) {
-            return (BigDecimal) obj;
-        } else if (obj instanceof String str) {
-            return new BigDecimal(str);
-        } else if (obj instanceof Number || obj instanceof Boolean) {
-            Number answer = getAsNumber(obj);
-            return new BigDecimal(String.valueOf(answer));
-        } else {
-            throw new UnsupportedOperationException();
+        if (obj == null) {
+            return null;
         }
+        return switch (obj) {
+            case BigDecimal bd -> bd;
+            case String s -> new BigDecimal(s);
+            case Number n -> new BigDecimal(n.toString());
+            case Boolean b -> BigDecimal.valueOf(b ? 1L : 0L);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
     }
 
     /**
@@ -626,89 +662,77 @@ public final class TypeCastUtil {
      */
     @SuppressWarnings("unchecked")
     public static <R extends BigDecimal> R getAsBigDecimal(Object obj, R defaultValue) {
-        BigDecimal answer = getAsBigDecimal(obj);
-        return (R) ObjectUtil.defaultIfNull(answer, defaultValue);
+        try {
+            BigDecimal answer = getAsBigDecimal(obj);
+            return answer != null ? (R) answer : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     /**
-     * This method is mainly used to provide data type conversion services.
+     * 数据类型转换
      *
      * @param obj the object to use
      * @param clz the type for conversion
      *
-     * @return R
+     * @return 转换后的值，如果 obj 为 null 则返回 null
      */
     @SuppressWarnings("unchecked")
     public static <R> R cast(Object obj, Class<R> clz) {
-        R result;
-        if (obj.getClass().isAssignableFrom(clz)) {
-            result = (R) obj;
-        } else if (Boolean.class.equals(clz) || boolean.class.equals(clz)) {
-            result = (R) getAsBoolean(obj);
-        } else if (Byte.class.equals(clz) || byte.class.equals(clz)) {
-            result = (R) getAsByte(obj);
-        } else if (Short.class.equals(clz) || short.class.equals(clz)) {
-            result = (R) getAsShort(obj);
-        } else if (Integer.class.equals(clz) || int.class.equals(clz)) {
-            result = (R) getAsInteger(obj);
-        } else if (Long.class.equals(clz) || long.class.equals(clz)) {
-            result = (R) getAsLong(obj);
-        } else if (Float.class.equals(clz) || float.class.equals(clz)) {
-            result = (R) getAsFloat(obj);
-        } else if (Double.class.equals(clz) || double.class.equals(clz)) {
-            result = (R) getAsDouble(obj);
-        } else if (String.class.equals(clz)) {
-            result = (R) getAsString(obj);
-        } else if (BigInteger.class.isAssignableFrom(clz)) {
-            result = (R) getAsBigInteger(obj);
-        } else if (BigDecimal.class.isAssignableFrom(clz)) {
-            result = (R) getAsBigDecimal(obj);
-        } else if (Number.class.isAssignableFrom(clz)) {
-            result = (R) getAsNumber(obj);
-        } else {
-            throw new UnsupportedOperationException();
+        if (obj == null) {
+            return null;
         }
-        return result;
+        // 类型已匹配，直接返回
+        if (clz.isAssignableFrom(obj.getClass())) {
+            return (R) obj;
+        }
+        // 类型转换
+        if (Boolean.class.equals(clz) || boolean.class.equals(clz)) {
+            return (R) getAsBoolean(obj);
+        } else if (Byte.class.equals(clz) || byte.class.equals(clz)) {
+            return (R) getAsByte(obj);
+        } else if (Short.class.equals(clz) || short.class.equals(clz)) {
+            return (R) getAsShort(obj);
+        } else if (Integer.class.equals(clz) || int.class.equals(clz)) {
+            return (R) getAsInteger(obj);
+        } else if (Long.class.equals(clz) || long.class.equals(clz)) {
+            return (R) getAsLong(obj);
+        } else if (Float.class.equals(clz) || float.class.equals(clz)) {
+            return (R) getAsFloat(obj);
+        } else if (Double.class.equals(clz) || double.class.equals(clz)) {
+            return (R) getAsDouble(obj);
+        } else if (String.class.equals(clz)) {
+            return (R) getAsString(obj);
+        } else if (BigInteger.class.isAssignableFrom(clz)) {
+            return (R) getAsBigInteger(obj);
+        } else if (BigDecimal.class.isAssignableFrom(clz)) {
+            return (R) getAsBigDecimal(obj);
+        } else if (Number.class.isAssignableFrom(clz)) {
+            return (R) getAsNumber(obj);
+        }
+        throw new UnsupportedOperationException("不支持的目标类型: " + clz);
     }
 
     /**
-     * This method is mainly used to provide data type conversion services.
+     * 数据类型转换（带默认值）
      *
      * @param obj          the object to use
      * @param defaultValue return if the value is null or if the conversion fails
      *
-     * @return R
+     * @return 转换后的值，如果转换失败则返回 defaultValue
      */
     @SuppressWarnings("unchecked")
     public static <R> R cast(Object obj, R defaultValue) {
-        R result;
-        Class<?> clz = defaultValue.getClass();
-        if (Boolean.class.equals(clz)) {
-            result = (R) getAsBoolean(obj, (Boolean) defaultValue);
-        } else if (Byte.class.equals(clz)) {
-            result = (R) getAsByte(obj, (Byte) defaultValue);
-        } else if (Short.class.equals(clz)) {
-            result = (R) getAsShort(obj, (Short) defaultValue);
-        } else if (Integer.class.equals(clz)) {
-            result = (R) getAsInteger(obj, (Integer) defaultValue);
-        } else if (Long.class.equals(clz)) {
-            result = (R) getAsLong(obj, (Long) defaultValue);
-        } else if (Float.class.equals(clz)) {
-            result = (R) getAsFloat(obj, (Float) defaultValue);
-        } else if (Double.class.equals(clz)) {
-            result = (R) getAsDouble(obj, (Double) defaultValue);
-        } else if (String.class.equals(clz)) {
-            result = (R) getAsString(obj, (String) defaultValue);
-        } else if (BigInteger.class.isAssignableFrom(clz)) {
-            result = (R) getAsBigInteger(obj, (BigInteger) defaultValue);
-        } else if (BigDecimal.class.isAssignableFrom(clz)) {
-            result = (R) getAsBigDecimal(obj, (BigDecimal) defaultValue);
-        } else if (Number.class.isAssignableFrom(clz)) {
-            result = (R) getAsNumber(obj, (Number) defaultValue);
-        } else {
-            throw new UnsupportedOperationException();
+        if (defaultValue == null) {
+            throw new IllegalArgumentException("defaultValue 不能为 null");
         }
-        return result;
+        try {
+            R result = (R) cast(obj, defaultValue.getClass());
+            return result != null ? result : defaultValue;
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
 }

@@ -18,20 +18,37 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
 
-
+/**
+ * IO 操作工具类
+ * <p>
+ * 提供流读写、文件操作、资源关闭等常用 IO 功能的封装。
+ *
+ * @since 2025.01.01
+ */
 public final class IOUtil {
 
     /**
-     * The default buffer size used when copying bytes.
+     * 默认缓冲区大小：4KB
      */
-    private static final int BUFFER_SIZE = 1024 * 4;
+    private static final int BUFFER_SIZE = 4096;
+
+    private IOUtil() {
+        // 防止实例化
+    }
+
+    // region 资源关闭
 
     /**
-     * 关闭 Closeable
+     * 静默关闭资源（忽略异常）
+     * <p>
+     * 如果资源实现了 {@link Flushable}，会先尝试刷新缓冲区
      *
-     * @param closeable 自动关闭
+     * @param closeable 待关闭的资源，可以为 null
      */
-    public static void closeQuietly(Closeable closeable) {
+    public static void closeQuietly(@Nullable Closeable closeable) {
+        if (closeable == null) {
+            return;
+        }
         if (closeable instanceof Flushable flushable) {
             try {
                 flushable.flush();
@@ -46,28 +63,28 @@ public final class IOUtil {
         }
     }
 
+    // endregion
+
+    // region 读取为字符串
+
     /**
-     * InputStream to String utf-8
+     * 从输入流读取字符串（UTF-8 编码）
      *
-     * @param input the <code>InputStream</code> to read from
-     *
-     * @return the requested String
-     *
-     * @throws NullPointerException if the input is null
+     * @param input 输入流
+     * @return 读取的字符串
+     * @throws ToolException 如果读取失败
      */
     public static String readToString(InputStream input) {
         return readToString(input, StandardCharsets.UTF_8);
     }
 
     /**
-     * InputStream to String
+     * 从输入流读取字符串
      *
-     * @param input   the <code>InputStream</code> to read from
-     * @param charset the <code>Charset</code>
-     *
-     * @return the requested String
-     *
-     * @throws NullPointerException if the input is null
+     * @param input   输入流
+     * @param charset 字符编码
+     * @return 读取的字符串
+     * @throws ToolException 如果读取失败
      */
     public static String readToString(InputStream input, Charset charset) {
         try {
@@ -78,26 +95,11 @@ public final class IOUtil {
     }
 
     /**
-     * InputStream to bytes 数组
+     * 读取文件内容为字符串（UTF-8 编码）
      *
-     * @param input InputStream
-     *
-     * @return the requested byte array
-     */
-    public static byte[] readToByteArray(InputStream input) {
-        try {
-            return input.readAllBytes();
-        } catch (IOException e) {
-            throw new ToolException(EmojiSymbol.TOOL, e);
-        }
-    }
-
-    /**
-     * 读取文件为字符串
-     *
-     * @param file the file to read, must not be {@code null}
-     *
-     * @return the file contents, never {@code null}
+     * @param file 文件
+     * @return 文件内容
+     * @throws ToolException 如果读取失败
      */
     public static String readToString(File file) {
         try {
@@ -108,27 +110,46 @@ public final class IOUtil {
     }
 
     /**
-     * 读取文件为字符串
+     * 读取文件内容为字符串
      *
-     * @param file     the file to read, must not be {@code null}
-     * @param encoding the encoding to use, {@code null} means platform default
-     *
-     * @return the file contents, never {@code null}
+     * @param file    文件
+     * @param charset 字符编码
+     * @return 文件内容
+     * @throws ToolException 如果读取失败
      */
-    public static String readToString(File file, Charset encoding) {
+    public static String readToString(File file, Charset charset) {
         try {
-            return Files.readString(file.toPath(),encoding);
+            return Files.readString(file.toPath(), charset);
+        } catch (IOException e) {
+            throw new ToolException(EmojiSymbol.TOOL, e);
+        }
+    }
+
+    // endregion
+
+    // region 读取为字节数组
+
+    /**
+     * 从输入流读取字节数组
+     *
+     * @param input 输入流
+     * @return 字节数组
+     * @throws ToolException 如果读取失败
+     */
+    public static byte[] readToByteArray(InputStream input) {
+        try {
+            return input.readAllBytes();
         } catch (IOException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
     /**
-     * 读取文件为 byte 数组
+     * 读取文件内容为字节数组
      *
-     * @param file the file to read, must not be {@code null}
-     *
-     * @return the file contents, never {@code null}
+     * @param file 文件
+     * @return 字节数组
+     * @throws ToolException 如果读取失败
      */
     public static byte[] readToByteArray(File file) {
         try {
@@ -138,56 +159,64 @@ public final class IOUtil {
         }
     }
 
-    /**
-     * 拼接临时文件目录。
-     *
-     * @return 临时文件目录。
-     */
-    public static String toTempDirPath(String subDirFile) {
-        return toTempDir(subDirFile).getAbsolutePath();
-    }
+    // endregion
+
+    // region 临时目录
 
     /**
-     * Returns a {@link File} representing the system temporary directory.
+     * 获取系统临时目录
      *
-     * @return the system temporary directory.
+     * @return 临时目录 File 对象
      */
     public static File getTempDir() {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
     /**
-     * 拼接临时文件目录。
+     * 在临时目录下创建子路径
+     * <p>
+     * 如果父目录不存在，会自动创建
      *
-     * @return 临时文件目录。
+     * @param subPath 子路径（相对于临时目录）
+     * @return 完整路径的 File 对象
      */
-    public static File toTempDir(String subDirFile) {
-        String tempDirPath = System.getProperty("java.io.tmpdir");
-        if (subDirFile.startsWith("/")) {
-            subDirFile = subDirFile.substring(1);
+    public static File toTempDir(String subPath) {
+        File tempDir = getTempDir();
+        File fullPath = new File(tempDir, subPath);
+        File parentDir = fullPath.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
         }
-        String fullPath = tempDirPath.concat(subDirFile);
-        File fullFilePath = new File(fullPath);
-        File dir = fullFilePath.getParentFile();
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        return fullFilePath;
+        return fullPath;
     }
 
     /**
-     * Copy from InputStream to OutputStream, Closes both streams when done.
+     * 获取临时目录下子路径的绝对路径字符串
      *
-     * @param in  InputStream
-     * @param out OutputStream
-     *
-     * @return the number of bytes copied
-     *
-     * @throws IOException in case of I/O errors
+     * @param subPath 子路径（相对于临时目录）
+     * @return 绝对路径字符串
      */
-    public static int copy(InputStream in, OutputStream out) throws IOException {
+    public static String toTempDirPath(String subPath) {
+        return toTempDir(subPath).getAbsolutePath();
+    }
+
+    // endregion
+
+    // region 流复制
+
+    /**
+     * 从输入流复制到输出流
+     * <p>
+     * 完成后会关闭两个流
+     *
+     * @param in  输入流
+     * @param out 输出流
+     * @return 复制的字节数
+     * @throws IOException 如果发生 IO 错误
+     */
+    public static long copy(InputStream in, OutputStream out) throws IOException {
         try (in; out) {
-            int byteCount = 0;
+            long byteCount = 0;
             byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -200,12 +229,13 @@ public final class IOUtil {
     }
 
     /**
-     * Copy from byte array to OutputStream, Closes the stream when done.
+     * 将字节数组写入输出流
+     * <p>
+     * 完成后会关闭输出流
      *
-     * @param in  the byte array
-     * @param out OutputStream
-     *
-     * @throws IOException in case of I/O errors
+     * @param in  字节数组
+     * @param out 输出流
+     * @throws IOException 如果发生 IO 错误
      */
     public static void copy(byte[] in, OutputStream out) throws IOException {
         try (out) {
@@ -214,14 +244,13 @@ public final class IOUtil {
     }
 
     /**
-     * Copy the contents of the given InputStream into a new byte array.
-     * Closes the stream when done.
+     * 从输入流复制到字节数组
+     * <p>
+     * 完成后会关闭输入流
      *
-     * @param in the stream to copy from (may be {@code null} or empty)
-     *
-     * @return the new byte array that has been copied to (possibly empty)
-     *
-     * @throws IOException in case of I/O errors
+     * @param in 输入流
+     * @return 字节数组
+     * @throws IOException 如果发生 IO 错误
      */
     public static byte[] copyToBytes(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -230,15 +259,16 @@ public final class IOUtil {
     }
 
     /**
-     * Copy the contents of the given InputStream into a String.
+     * 从输入流复制到字符串
+     * <p>
+     * 完成后会关闭输入流
      *
-     * @param in      the stream to copy from (may be {@code null} or empty)
-     * @param charset the Charset
-     *
-     * @return the requested String
-     *
+     * @param in      输入流
+     * @param charset 字符编码
+     * @return 字符串
+     * @throws IOException 如果发生 IO 错误
      */
-    public static String copyToStr(InputStream in, Charset charset) throws IOException {
+    public static String copyToString(InputStream in, Charset charset) throws IOException {
         StringBuilder out = new StringBuilder(BUFFER_SIZE);
         try (in; InputStreamReader reader = new InputStreamReader(in, charset)) {
             char[] buffer = new char[BUFFER_SIZE];
@@ -250,31 +280,62 @@ public final class IOUtil {
         return out.toString();
     }
 
+    // endregion
 
-    /*
-     * Write the given collection to the given output as lines.
+    // region 写入
+
+    /**
+     * 将字符串写入输出流（UTF-8 编码）
+     *
+     * @param data   字符串数据
+     * @param output 输出流
+     * @throws IOException 如果发生 IO 错误
+     */
+    public static void writeString(String data, OutputStream output) throws IOException {
+        writeString(data, output, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 将字符串写入输出流
+     * <p>
+     * 使用 {@link Charset#encode(String)} 避免大字符串转换时的内存问题
+     *
+     * @param data    字符串数据
+     * @param output  输出流
+     * @param charset 字符编码
+     * @throws IOException 如果发生 IO 错误
+     */
+    public static void writeString(String data, OutputStream output, Charset charset) throws IOException {
+        Channels.newChannel(output).write(charset.encode(data));
+    }
+
+    /**
+     * 将集合按行写入输出流（UTF-8 编码，系统默认换行符）
+     *
+     * @param lines  行集合
+     * @param output 输出流
+     * @throws IOException 如果发生 IO 错误
      */
     public static void writeLines(Collection<?> lines, OutputStream output) throws IOException {
         writeLines(lines, null, output, null);
     }
 
-
     /**
-     * Write the given collection to the given output as lines.
+     * 将集合按行写入输出流
      *
-     * @param lines      the lines to write
-     * @param lineEnding the line separator to use (defaults to system default)
-     * @param output     the {@link OutputStream} to write to
-     * @param charset    the charset to use to convert lines to bytes (defaults to UTF-8)
-     *
-     * @throws IOException in case of I/O errors
+     * @param lines      行集合
+     * @param lineEnding 行结束符（null 使用系统默认）
+     * @param output     输出流
+     * @param charset    字符编码（null 使用 UTF-8）
+     * @throws IOException 如果发生 IO 错误
      */
-    public static void writeLines(Collection<?> lines, @Nullable String lineEnding, OutputStream output, @Nullable Charset charset) throws IOException {
+    public static void writeLines(Collection<?> lines, @Nullable String lineEnding,
+                                  OutputStream output, @Nullable Charset charset) throws IOException {
         if (lineEnding == null) {
             lineEnding = System.lineSeparator();
         }
         if (StandardCharsets.UTF_16.equals(charset)) {
-            // don't write a BOM
+            // 避免写入 BOM
             charset = StandardCharsets.UTF_16BE;
         }
         if (charset == null) {
@@ -283,45 +344,11 @@ public final class IOUtil {
 
         byte[] eolBytes = lineEnding.getBytes(charset);
         for (Object line : lines) {
-            writeStr(line.toString(), output, charset);
+            writeString(line.toString(), output, charset);
             output.write(eolBytes);
         }
     }
 
-
-    /**
-     * Write the given string to the given output as a byte array using the UTF-8 charset.
-     */
-    public static void writeStr(String data, OutputStream output) throws IOException {
-        writeStr(data, output, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Write the given string to the given output as a byte array using the given charset.
-     *
-     * @param data    the string to write
-     * @param output  the {@link OutputStream} to write to
-     * @param charset the charset to use to convert lines to bytes (defaults to UTF-8)
-     *
-     * @throws IOException in case of I/O errors
-     */
-    public static void writeStr(String data, OutputStream output, Charset charset) throws IOException {
-        // Use Charset#encode(String), since calling String#getBytes(Charset) might result in
-        // NegativeArraySizeException or OutOfMemoryError.
-        // The underlying OutputStream should not be closed, so the channel is not closed.
-        Channels.newChannel(output).write(charset.encode(data));
-    }
-
-    /**
-     * Attempt to close the supplied {@link Closeable}, ignore exceptions
-     *
-     * @param closeable the {@code Closeable} to close
-     */
-    private static void close(Closeable closeable) {
-        try {
-            closeable.close();
-        } catch (IOException ignore) {
-        }
-    }
+    // endregion
 
 }

@@ -9,48 +9,59 @@ import ext.library.tool.util.StringUtil;
 import java.io.IOException;
 
 /**
- * 简单的 retry 重试
+ * 简单重试实现
+ * <p>
+ * 提供固定次数、固定间隔的重试策略。
  *
- * @param maxAttempts 重试次数
- * @param sleepMillis 重试时间间隔
+ * @param maxAttempts 最大尝试次数
+ * @param sleepMillis 重试间隔（毫秒）
+ * @since 2025.01.01
  */
-public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
+public record SimpleRetry(int maxAttempts, long sleepMillis) implements Retry {
 
-    /**
-     * The default limit to the number of attempts for a new policy.
-     */
+    /** 默认最大尝试次数 */
     private static final int DEFAULT_MAX_ATTEMPTS = 3;
 
+    /** 默认重试间隔（毫秒） */
+    private static final long DEFAULT_SLEEP_MILLIS = 1L;
+
     /**
-     * Default back off period - 1ms.
+     * 使用默认配置构造（3 次尝试，1ms 间隔）
      */
-    private static final long DEFAULT_BACK_OFF_PERIOD = 1L;
-
     public SimpleRetry() {
-        this(DEFAULT_MAX_ATTEMPTS, DEFAULT_BACK_OFF_PERIOD);
+        this(DEFAULT_MAX_ATTEMPTS, DEFAULT_SLEEP_MILLIS);
     }
 
+    /**
+     * 指定最大尝试次数，使用默认间隔
+     *
+     * @param maxAttempts 最大尝试次数
+     */
     public SimpleRetry(int maxAttempts) {
-        this(maxAttempts, DEFAULT_BACK_OFF_PERIOD);
+        this(maxAttempts, DEFAULT_SLEEP_MILLIS);
     }
 
+    /**
+     * 规范构造函数
+     *
+     * @param maxAttempts 最大尝试次数
+     * @param sleepMillis 重试间隔（毫秒），小于等于 0 时自动设为 1
+     */
     public SimpleRetry(int maxAttempts, long sleepMillis) {
         this.maxAttempts = maxAttempts;
-        this.sleepMillis = (sleepMillis > 0 ? sleepMillis : 1);
+        this.sleepMillis = sleepMillis > 0 ? sleepMillis : 1;
     }
 
     @Override
     public <T, E extends Throwable> T execute(RetryCallback<T, E> retryCallback) throws E {
-        int retryCount;
         Throwable lastThrowable = null;
-        for (int i = 0; i < maxAttempts; i++) {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 return retryCallback.call();
             } catch (Throwable e) {
-                retryCount = i + 1;
-                Logs.warn(EmojiSymbol.TOOL,"重试 {} 次", retryCount, e);
+                Logs.warn(EmojiSymbol.TOOL, "重试 {} 次", attempt, e);
                 lastThrowable = e;
-                if (sleepMillis > 0 && retryCount < maxAttempts) {
+                if (sleepMillis > 0 && attempt < maxAttempts) {
                     Threads.sleep(sleepMillis);
                 }
             }
@@ -60,5 +71,4 @@ public record SimpleRetry(int maxAttempts, long sleepMillis) implements IRetry {
         }
         throw new ExtException(EmojiSymbol.TOOL, lastThrowable);
     }
-
 }

@@ -2,7 +2,7 @@ package ext.library.web.filter;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.util.IDUtil;
+import ext.library.tool.util.IdUtil;
 import ext.library.web.properties.WebMvcProperties;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,7 +30,7 @@ public class TraceFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String traceIdHeaderName = properties.getTraceIdHeaderName();
         // 生成并设置 TraceID
-        String traceId = IDUtil.getObjectId();
+        String traceId = IdUtil.getObjectId();
         // 在作用域中设置值
         TRACE_ID.set(traceId);
         MDC.put(traceIdHeaderName, traceId);

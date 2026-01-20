@@ -24,151 +24,142 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 类工具
+ * 类工具类
+ * <p>
+ * 提供类型判断、反射操作、注解获取、对象实例化等功能。
  *
- * @since 2025.08.19
+ * @since 2025.01.01
  */
 public final class ClassUtil {
 
-    // ---------------------- judge ----------------------
+    /** 包装类型 → 基本类型映射 */
+    private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = new IdentityHashMap<>(9);
 
-    private static final Map<Class<?>, Class<?>> primitiveWrapper2TypeMap = new IdentityHashMap<>(9);
-    private static final Map<Class<?>, Class<?>> primitiveType2WrapperMap = new IdentityHashMap<>(9);
+    /** 基本类型 → 包装类型映射 */
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new IdentityHashMap<>(9);
 
     static {
-        primitiveWrapper2TypeMap.put(Boolean.class, boolean.class);
-        primitiveWrapper2TypeMap.put(Byte.class, byte.class);
-        primitiveWrapper2TypeMap.put(Character.class, char.class);
-        primitiveWrapper2TypeMap.put(Double.class, double.class);
-        primitiveWrapper2TypeMap.put(Float.class, float.class);
-        primitiveWrapper2TypeMap.put(Integer.class, int.class);
-        primitiveWrapper2TypeMap.put(Long.class, long.class);
-        primitiveWrapper2TypeMap.put(Short.class, short.class);
-        primitiveWrapper2TypeMap.put(Void.class, void.class);
+        WRAPPER_TO_PRIMITIVE.put(Boolean.class, boolean.class);
+        WRAPPER_TO_PRIMITIVE.put(Byte.class, byte.class);
+        WRAPPER_TO_PRIMITIVE.put(Character.class, char.class);
+        WRAPPER_TO_PRIMITIVE.put(Double.class, double.class);
+        WRAPPER_TO_PRIMITIVE.put(Float.class, float.class);
+        WRAPPER_TO_PRIMITIVE.put(Integer.class, int.class);
+        WRAPPER_TO_PRIMITIVE.put(Long.class, long.class);
+        WRAPPER_TO_PRIMITIVE.put(Short.class, short.class);
+        WRAPPER_TO_PRIMITIVE.put(Void.class, void.class);
 
-        // 映射条目迭代的初始化成本低于使用 lambda 的 forEach
-        for (Map.Entry<Class<?>, Class<?>> entry : primitiveWrapper2TypeMap.entrySet()) {
-            primitiveType2WrapperMap.put(entry.getValue(), entry.getKey());
+        for (Map.Entry<Class<?>, Class<?>> entry : WRAPPER_TO_PRIMITIVE.entrySet()) {
+            PRIMITIVE_TO_WRAPPER.put(entry.getValue(), entry.getKey());
         }
     }
 
+    private ClassUtil() {
+    }
+
+    // region 类型判断
+
     /**
-     * Check if the super-type may be assigned to the sub-type
-     * Considers primitive wrapper classes as assignable to the corresponding primitive types.
+     * 判断子类型是否可分配给父类型
+     * <p>
+     * 考虑基本类型和包装类型的兼容性。
      *
-     * @param superType the target type (left-hand side (LHS) type)
-     * @param subType   the value type (right-hand side (RHS) type) that should be assigned to the target type
-     *
-     * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
+     * @param superType 父类型
+     * @param subType   子类型
+     * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Class<?> superType, Class<?> subType) {
-        Assert.notNull(superType, "左侧类型不得为 null");
-        Assert.notNull(subType, "右侧类型不得为 null");
+        Assert.notNull(superType, "父类型不得为 null");
+        Assert.notNull(subType, "子类型不得为 null");
         if (superType.isAssignableFrom(subType)) {
             return true;
         }
         if (superType.isPrimitive()) {
-            Class<?> resolvedPrimitive = primitiveWrapper2TypeMap.get(subType);
-            return (superType == resolvedPrimitive);
+            Class<?> resolvedPrimitive = WRAPPER_TO_PRIMITIVE.get(subType);
+            return superType == resolvedPrimitive;
         } else {
-            Class<?> resolvedWrapper = primitiveType2WrapperMap.get(subType);
-            return (resolvedWrapper != null && superType.isAssignableFrom(resolvedWrapper));
+            Class<?> resolvedWrapper = PRIMITIVE_TO_WRAPPER.get(subType);
+            return resolvedWrapper != null && superType.isAssignableFrom(resolvedWrapper);
         }
     }
 
-
     /**
-     * Check if the right-hand side type may be assigned to the left-hand side type
+     * 判断子类型是否可分配给父类型（支持泛型类型）
      *
-     * @param superType super type
-     * @param subType   the sub type that should be assigned to the target type
-     *
-     * @return true if subType is assignable to superType
+     * @param superType 父类型
+     * @param subType   子类型
+     * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Type superType, Type subType) {
-        Assert.notNull(superType, "左侧类型不得为 null");
-        Assert.notNull(subType, "右侧类型不得为 null");
+        Assert.notNull(superType, "父类型不得为 null");
+        Assert.notNull(subType, "子类型不得为 null");
 
         // 所有类型都可以分配给自身和 Object
         if (superType.equals(subType) || Object.class == superType) {
             return true;
         }
 
-        if (superType instanceof Class<?> lhsClass) {
-
-            // 只是比较两个类
-            switch (subType) {
-                case Class<?> aClass -> {
-                    return isAssignable(lhsClass, aClass);
+        if (superType instanceof Class<?> superClass) {
+            return switch (subType) {
+                case Class<?> subClass -> isAssignable(superClass, subClass);
+                case ParameterizedType paramType -> {
+                    Type rawType = paramType.getRawType();
+                    yield rawType instanceof Class<?> rawClass && isAssignable(superClass, rawClass);
                 }
-                // 参数化类型只能分配给其他参数化类型
-                case ParameterizedType parameterizedType -> {
-                    Type rhsRaw = parameterizedType.getRawType();
-
-                    // 参数化类型始终可分配给其原始类类型
-                    if (rhsRaw instanceof Class) {
-                        return isAssignable(lhsClass, (Class<?>) rhsRaw);
-                    }
-                }
-                case GenericArrayType genericArrayType when lhsClass.isArray() -> {
-                    Type rhsComponent = genericArrayType.getGenericComponentType();
-
-                    return isAssignable(lhsClass.getComponentType(), rhsComponent);
-                }
-                default -> {
-                }
-            }
-
+                case GenericArrayType arrayType when superClass.isArray() ->
+                        isAssignable(superClass.getComponentType(), arrayType.getGenericComponentType());
+                default -> false;
+            };
         }
 
-        // 参数化类型只能分配给其他参数化类型和类类型
-        if (superType instanceof ParameterizedType) {
-            if (subType instanceof Class) {
-                Type lhsRaw = ((ParameterizedType) superType).getRawType();
-
-                if (lhsRaw instanceof Class) {
-                    return isAssignable((Class<?>) lhsRaw, (Class<?>) subType);
+        if (superType instanceof ParameterizedType superParamType) {
+            Type superRaw = superParamType.getRawType();
+            if (superRaw instanceof Class<?> superRawClass) {
+                if (subType instanceof Class<?> subClass) {
+                    return isAssignable(superRawClass, subClass);
                 }
-            } else if (subType instanceof ParameterizedType) {
-                return isAssignable(superType, subType);
+                if (subType instanceof ParameterizedType subParamType) {
+                    Type subRaw = subParamType.getRawType();
+                    return subRaw instanceof Class<?> subRawClass && isAssignable(superRawClass, subRawClass);
+                }
             }
         }
 
-        if (superType instanceof GenericArrayType) {
-            Type lhsComponent = ((GenericArrayType) superType).getGenericComponentType();
-
-            if (subType instanceof Class<?> rhsClass) {
-
-                if (rhsClass.isArray()) {
-                    return isAssignable(lhsComponent, rhsClass.getComponentType());
-                }
-            } else if (subType instanceof GenericArrayType) {
-                Type rhsComponent = ((GenericArrayType) subType).getGenericComponentType();
-
-                return isAssignable(lhsComponent, rhsComponent);
+        if (superType instanceof GenericArrayType superArrayType) {
+            Type superComponent = superArrayType.getGenericComponentType();
+            if (subType instanceof Class<?> subClass && subClass.isArray()) {
+                return isAssignable(superComponent, subClass.getComponentType());
+            }
+            if (subType instanceof GenericArrayType subArrayType) {
+                return isAssignable(superComponent, subArrayType.getGenericComponentType());
             }
         }
 
-        if (superType instanceof WildcardType) {
-            return isAssignable(superType, subType);
+        if (superType instanceof WildcardType wildcardType) {
+            for (Type upperBound : wildcardType.getUpperBounds()) {
+                if (!isAssignable(upperBound, subType)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         return false;
     }
 
+    // endregion
+
+    // region 方法获取
 
     /**
-     * Determine whether the given class has a public method with the given signature, and return it if available (else return {@code null}).
+     * 获取公共方法
+     * <p>
+     * 如果未指定参数类型，则仅在方法名唯一时返回。
      *
-     * <p>In case of any signature specified, only returns the method if there is a
-     * unique candidate, i.e. a single public method with the specified name.
-     * <p>Essentially translates {@code NoSuchMethodException} to {@code null}.
-     *
-     * @param clazz      the clazz to analyze
-     * @param methodName the name of the method
-     * @param paramTypes the parameter types of the method (can be {@code null} to indicate any signature)
-     *
-     * @return the method, or {@code null} if not found
+     * @param clazz      类
+     * @param methodName 方法名
+     * @param paramTypes 参数类型（可为 null 表示任意签名）
+     * @return 方法，未找到返回 null
      */
     public static @Nullable Method getMethod(Class<?> clazz, String methodName, Class<?> @Nullable ... paramTypes) {
         if (paramTypes != null) {
@@ -182,7 +173,7 @@ public final class ClassUtil {
         }
     }
 
-    private static @Nullable Method getMethodOrNull(Class<?> clazz, String methodName, Class<?> @Nullable [] paramTypes) {
+    private static @Nullable Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
         try {
             return clazz.getMethod(methodName, paramTypes);
         } catch (NoSuchMethodException ex) {
@@ -192,8 +183,7 @@ public final class ClassUtil {
 
     private static Set<Method> findMethodCandidatesByName(Class<?> clazz, String methodName) {
         Set<Method> candidates = new HashSet<>(1);
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
+        for (Method method : clazz.getMethods()) {
             if (methodName.equals(method.getName())) {
                 candidates.add(method);
             }
@@ -202,53 +192,53 @@ public final class ClassUtil {
     }
 
     /**
-     * 获取方法参数信息
+     * 获取构造函数参数
      *
-     * @param constructor    构造器
-     * @param parameterIndex 参数序号
-     *
-     * @return {MethodParameter}
+     * @param constructor    构造函数
+     * @param parameterIndex 参数索引
+     * @return 参数对象
      */
-    public static Parameter getMethod(Constructor<?> constructor, int parameterIndex) {
+    public static Parameter getParameter(Constructor<?> constructor, int parameterIndex) {
         return constructor.getParameters()[parameterIndex];
     }
 
     /**
-     * 获取方法参数信息
+     * 获取方法参数
      *
      * @param method         方法
-     * @param parameterIndex 参数序号
-     *
-     * @return {MethodParameter}
+     * @param parameterIndex 参数索引
+     * @return 参数对象
      */
     public static Parameter getMethodParameter(Method method, int parameterIndex) {
         return method.getParameters()[parameterIndex];
     }
 
-    /**
-     * 获取 Annotation 注解
-     *
-     * @param annotatedElement AnnotatedElement
-     * @param annotationType   注解类
-     * @param <A>              泛型标记
-     *
-     * @return {Annotation}
-     */
+    // endregion
 
-    public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
-        return annotatedElement.getDeclaredAnnotation(annotationType);
+    // region 注解获取
+
+    /**
+     * 获取元素上的注解
+     *
+     * @param element        注解元素
+     * @param annotationType 注解类型
+     * @param <A>            注解类型
+     * @return 注解实例，未找到返回 null
+     */
+    public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationType) {
+        return element.getDeclaredAnnotation(annotationType);
     }
 
     /**
-     * 获取 Annotation，先找方法，没有则再找方法上的类
+     * 获取方法或其声明类上的注解
+     * <p>
+     * 优先查找方法上的注解，未找到则查找声明类上的注解。
      *
-     * @param method         Method
-     * @param annotationType 注解类
-     * @param <A>            泛型标记
-     *
-     * @return {Annotation}
+     * @param method         方法
+     * @param annotationType 注解类型
+     * @param <A>            注解类型
+     * @return 注解实例，未找到返回 null
      */
-
     public static @Nullable <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
         A annotation = method.getAnnotation(annotationType);
         if (annotation != null) {
@@ -257,13 +247,16 @@ public final class ClassUtil {
         return method.getDeclaringClass().getAnnotation(annotationType);
     }
 
+    // endregion
+
+    // region 实例化
+
     /**
      * 实例化对象
      *
      * @param clazz 类
-     * @param <T>   泛型标记
-     *
-     * @return 对象
+     * @param <T>   对象类型
+     * @return 新实例
      */
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<?> clazz) {
@@ -276,132 +269,114 @@ public final class ClassUtil {
     }
 
     /**
-     * 实例化对象
+     * 根据类名实例化对象
      *
-     * @param clazzStr 类名
-     * @param <T>      泛型标记
-     *
-     * @return 对象
+     * @param className 完全限定类名
+     * @param <T>       对象类型
+     * @return 新实例
      */
-    public static <T> T newInstance(String clazzStr) {
+    public static <T> T newInstance(String className) {
         try {
-            return newInstance(Class.forName(clazzStr));
+            return newInstance(Class.forName(className));
         } catch (ClassNotFoundException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
+    // endregion
+
+    // region 属性操作
+
     /**
-     * 获取 Bean 的属性
+     * 获取 Bean 属性值
      *
-     * @param bean         bean
+     * @param bean         Bean 对象
      * @param propertyName 属性名
-     *
      * @return 属性值
      */
-
     public static Object getProperty(Object bean, String propertyName) {
-        Class<?> beanClass = bean.getClass();
         try {
-            PropertyDescriptor pd = new PropertyDescriptor(propertyName, beanClass);
-            Method getMethod = pd.getReadMethod();
-            return getMethod.invoke(bean);
+            PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
+            Method readMethod = pd.getReadMethod();
+            return readMethod.invoke(bean);
         } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
     /**
-     * 设置 Bean 属性
+     * 设置 Bean 属性值
      *
-     * @param bean         bean
+     * @param bean         Bean 对象
      * @param propertyName 属性名
      * @param value        属性值
      */
     public static void setProperty(Object bean, String propertyName, Object value) {
-        Class<?> beanClass = bean.getClass();
         try {
-            // 获取属性对象
-            Field declaredField = beanClass.getDeclaredField(propertyName);
-            declaredField.setAccessible(true);
-            // 修改属性值
-            declaredField.set(bean, value);
+            Field field = bean.getClass().getDeclaredField(propertyName);
+            field.setAccessible(true);
+            field.set(bean, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
+    // endregion
+
+    // region 对象复制
+
     /**
-     * 浅复制
+     * 浅复制对象
+     * <p>
+     * 通过反射创建新实例并复制所有字段值。
      *
      * @param source 源对象
-     * @param <T>    泛型标记
-     *
-     * @return T
+     * @param <T>    对象类型
+     * @return 复制后的新对象，源对象为 null 时返回 null
      */
-
     @SuppressWarnings("unchecked")
     public static <T> @Nullable T clone(@Nullable T source) {
         if (source == null) {
             return null;
         }
-        // 1.获取字节码对象
-        Class<T> clz = (Class<T>) source.getClass();
-        // 2.获取实例对象（新对象）
-        // 获取构造方法（保证一定能获取一个构造方法）
-        Constructor<?> c = clz.getDeclaredConstructors()[0];
-        // 获取构造方法的参数列表的所有类型
-        Class<?>[] cs = c.getParameterTypes();
-        // 新建 Object 类型的数组，存放每个参数给与的初始值
-        Object[] os = new Object[cs.length];
-        // 遍历数组
-        for (int i = 0; i < cs.length; i++) {
-            // 判断是否是基本数据类型
-            if (cs[i].isPrimitive()) {
-                // 基本数据类型
-                if (cs[i] == byte.class || cs[i] == short.class || cs[i] == int.class || cs[i] == long.class) {
-                    // 初始值赋值为 0
-                    os[i] = 0;
-                }
-                if (cs[i] == char.class) {
-                    os[i] = '\u0000';
-                }
-                if (cs[i] == float.class) {
-                    os[i] = 0.0F;
-                }
-                if (cs[i] == double.class) {
-                    os[i] = 0.0;
-                }
-                if (cs[i] == boolean.class) {
-                    os[i] = false;
-                }
+        Class<T> clazz = (Class<T>) source.getClass();
+        Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
+        Class<?>[] paramTypes = constructor.getParameterTypes();
+        Object[] initArgs = new Object[paramTypes.length];
 
-            } else {
-                // 引用数据类型
-                os[i] = new Object();
-            }
+        for (int i = 0; i < paramTypes.length; i++) {
+            initArgs[i] = getDefaultValue(paramTypes[i]);
         }
-        try {
-            // 给定值，执行构造方法
-            // 返回实例对象 //返回值有 3 个点，
-            T o = (T) c.newInstance(os);
-            // 3.获取原对象的所有属性 指定
-            Field[] fs = clz.getDeclaredFields();
 
-            // 4.把原对象的属性值赋值到新对象中
-            for (Field f : fs) {
-                // 暴力破解
-                f.setAccessible(true);
-                // 获取原对象的属性值
-                Object value = f.get(source);
-                // 把原对象的属性值赋值到新对象的属性中
-                f.set(o, value);
+        try {
+            constructor.setAccessible(true);
+            T target = (T) constructor.newInstance(initArgs);
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                field.set(target, field.get(source));
             }
-            // 返回新对象
-            return o;
+            return target;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
     }
 
+    /**
+     * 获取类型的默认值
+     *
+     * @param type 类型
+     * @return 默认值
+     */
+    private static Object getDefaultValue(Class<?> type) {
+        if (!type.isPrimitive()) {
+            return null;
+        }
+        if (type == boolean.class) return false;
+        if (type == char.class) return '\u0000';
+        if (type == float.class) return 0.0f;
+        if (type == double.class) return 0.0d;
+        return 0; // byte, short, int, long
+    }
+
+    // endregion
 }

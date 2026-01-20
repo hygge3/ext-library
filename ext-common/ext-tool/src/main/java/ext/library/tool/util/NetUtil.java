@@ -9,15 +9,16 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-
 /**
- * INet 相关工具
+ * 网络相关工具
  */
-
-public final class INetUtil {
+public final class NetUtil {
 
     private static final String LOCAL_HOST = "127.0.0.1";
     private static final String LOCAL_HOST_IPv6 = "[::1]";
+
+    private NetUtil() {
+    }
 
     /**
      * 获取 服务器 hostname
@@ -142,11 +143,11 @@ public final class INetUtil {
     }
 
     /**
-     * 尝试端口时候被占用
+     * 尝试端口是否可用
      *
      * @param port 端口号
      *
-     * @return 没有被占用：true，被占用：false
+     * @return 端口可用返回 true，被占用返回 false
      */
     public static boolean tryPort(int port) {
         try (ServerSocket ignore = new ServerSocket(port)) {
@@ -208,38 +209,95 @@ public final class INetUtil {
     }
 
     /**
-     * 判断是否内网 ip
+     * 判断是否内网 ip（支持 IPv4 和 IPv6）
+     * <p>
+     * IPv4 内网地址范围：
+     * <ul>
+     *   <li>10.0.0.0/8 (10.x.x.x)</li>
+     *   <li>172.16.0.0/12 (172.16.x.x ~ 172.31.x.x)</li>
+     *   <li>192.168.0.0/16 (192.168.x.x)</li>
+     * </ul>
+     * <p>
+     * IPv6 内网地址范围：
+     * <ul>
+     *   <li>::1/128 - 环回地址</li>
+     *   <li>fe80::/10 - 链路本地地址</li>
+     *   <li>fc00::/7 - 唯一本地地址 (ULA)</li>
+     * </ul>
      *
-     * @param addr ip
+     * @param addr ip 地址字节数组（IPv4 为 4 字节，IPv6 为 16 字节）
      *
-     * @return boolean
+     * @return 是否为内网 ip
      */
     public static boolean isInternalIp(byte[] addr) {
+        if (addr == null) {
+            return false;
+        }
+        return switch (addr.length) {
+            case 4 -> isInternalIpv4(addr);
+            case 16 -> isInternalIpv6(addr);
+            default -> false;
+        };
+    }
+
+    /**
+     * 判断是否 IPv4 内网地址
+     */
+    private static boolean isInternalIpv4(byte[] addr) {
         final byte b0 = addr[0];
         final byte b1 = addr[1];
         // 10.x.x.x/8
-        final byte section1 = 0x0A;
-        // 172.16.x.x/12
-        final byte section2 = (byte) 0xAC;
-        final byte section3 = (byte) 0x10;
-        final byte section4 = (byte) 0x1F;
+        final byte SECTION_10 = 0x0A;
+        // 172.16.x.x/12 ~ 172.31.x.x
+        final byte SECTION_172 = (byte) 0xAC;
+        final byte SECTION_172_MIN = (byte) 0x10;
+        final byte SECTION_172_MAX = (byte) 0x1F;
         // 192.168.x.x/16
-        final byte section5 = (byte) 0xC0;
-        final byte section6 = (byte) 0xA8;
-        switch (b0) {
-            case section1:
-                return true;
-            case section2:
-                if (b1 >= section3 && b1 <= section4) {
-                    return true;
-                }
-            case section5:
-                if (b1 == section6) {
-                    return true;
-                }
-            default:
-                return false;
+        final byte SECTION_192 = (byte) 0xC0;
+        final byte SECTION_168 = (byte) 0xA8;
+
+        return switch (b0) {
+            case SECTION_10 -> true;
+            case SECTION_172 -> b1 >= SECTION_172_MIN && b1 <= SECTION_172_MAX;
+            case SECTION_192 -> b1 == SECTION_168;
+            default -> false;
+        };
+    }
+
+    /**
+     * 判断是否 IPv6 内网地址
+     * <ul>
+     *   <li>::1 - 环回地址（前 15 字节全 0，最后字节为 1）</li>
+     *   <li>fe80::/10 - 链路本地地址（第一字节 0xFE，第二字节高 2 位为 10）</li>
+     *   <li>fc00::/7 - 唯一本地地址（第一字节为 0xFC 或 0xFD）</li>
+     * </ul>
+     */
+    private static boolean isInternalIpv6(byte[] addr) {
+        final byte b0 = addr[0];
+        final byte b1 = addr[1];
+
+        // ::1 环回地址检测
+        if (isIpv6Loopback(addr)) {
+            return true;
         }
+        // fe80::/10 链路本地地址：第一字节 0xFE，第二字节 0x80-0xBF
+        if (b0 == (byte) 0xFE && (b1 & 0xC0) == 0x80) {
+            return true;
+        }
+        // fc00::/7 唯一本地地址：第一字节为 0xFC 或 0xFD
+        return b0 == (byte) 0xFC || b0 == (byte) 0xFD;
+    }
+
+    /**
+     * 判断是否 IPv6 环回地址 (::1)
+     */
+    private static boolean isIpv6Loopback(byte[] addr) {
+        for (int i = 0; i < 15; i++) {
+            if (addr[i] != 0) {
+                return false;
+            }
+        }
+        return addr[15] == 1;
     }
 
 }

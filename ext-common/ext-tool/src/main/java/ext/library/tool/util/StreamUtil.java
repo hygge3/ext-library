@@ -1,6 +1,5 @@
 package ext.library.tool.util;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -16,25 +15,27 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * stream 流工具类
+ * Stream 流工具类
  */
-
 public final class StreamUtil {
+
+    private StreamUtil() {
+    }
 
     /**
      * 将 collection 过滤
      *
      * @param collection 需要转化的集合
-     * @param function   过滤方法
+     * @param predicate  过滤条件
      *
      * @return 过滤后的 list
      */
-    public static <E> List<E> filter(Collection<E> collection, Predicate<E> function) {
+    public static <E> List<E> filter(Collection<E> collection, Predicate<E> predicate) {
         if (ObjectUtil.isEmpty(collection)) {
             return new ArrayList<>();
         }
         // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
-        return collection.stream().filter(function).collect(Collectors.toList());
+        return collection.stream().filter(predicate).collect(Collectors.toList());
     }
 
     /**
@@ -210,7 +211,7 @@ public final class StreamUtil {
      */
     public static <E, T> Set<T> toSet(Collection<E> collection, Function<E, T> function) {
         if (ObjectUtil.isEmpty(collection)) {
-            return  new HashSet<>();
+            return new HashSet<>();
         }
         return collection.stream().map(function).collect(Collectors.toSet());
     }
@@ -218,35 +219,28 @@ public final class StreamUtil {
     /**
      * 合并两个相同 key 类型的 map
      *
-     * @param map1  第一个需要合并的 map
-     * @param map2  第二个需要合并的 map
-     * @param merge 合并的 lambda，将 key value1 value2 合并成最终的类型，注意 value 可能为空的情况
-     * @param <K>   map 中的 key 类型
-     * @param <X>   第一个 map 的 value 类型
-     * @param <Y>   第二个 map 的 value 类型
-     * @param <V>   最终 map 的 value 类型
+     * @param map1     第一个需要合并的 map
+     * @param map2     第二个需要合并的 map
+     * @param mergeFunc 合并函数，将 value1 和 value2 合并成最终类型，注意 value 可能为空
+     * @param <K>      map 中的 key 类型
+     * @param <X>      第一个 map 的 value 类型
+     * @param <Y>      第二个 map 的 value 类型
+     * @param <V>      最终 map 的 value 类型
      *
      * @return 合并后的 map
      */
-    public static <K, X, Y, V> Map<K, V> merge(Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> merge) {
-        if (ObjectUtil.isEmpty(map1) && ObjectUtil.isEmpty(map2)) {
-            return new HashMap<>();
-        } else if (ObjectUtil.isEmpty(map1)) {
-            map1 = new HashMap<>();
-        } else if (ObjectUtil.isEmpty(map2)) {
-            map2 = new HashMap<>();
+    public static <K, X, Y, V> Map<K, V> merge(Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> mergeFunc) {
+        Map<K, X> m1 = ObjectUtil.isEmpty(map1) ? Map.of() : map1;
+        Map<K, Y> m2 = ObjectUtil.isEmpty(map2) ? Map.of() : map2;
+
+        Set<K> allKeys = new HashSet<>(m1.keySet());
+        allKeys.addAll(m2.keySet());
+
+        Map<K, V> result = new HashMap<>(allKeys.size());
+        for (K key : allKeys) {
+            result.put(key, mergeFunc.apply(m1.get(key), m2.get(key)));
         }
-        Set<K> key =  new HashSet<>();
-        key.addAll(map1.keySet());
-        key.addAll(map2.keySet());
-        Map<K, V> map = new HashMap<>();
-        for (K t : key) {
-            X x = map1.get(t);
-            Y y = map2.get(t);
-            V z = merge.apply(x, y);
-            map.put(t, z);
-        }
-        return map;
+        return result;
     }
 
 }

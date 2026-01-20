@@ -55,7 +55,7 @@ public  final class SM2Util {
     public static String[] genKeyPair() {
         // 初始化密钥对生成器
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
-        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, ext.library.tool.constant.Holder.SECURE_RANDOM));
+        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, ext.library.tool.constant.Singletons.SECURE_RANDOM));
 
         // 生成密钥对
         org.bouncycastle.crypto.AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
