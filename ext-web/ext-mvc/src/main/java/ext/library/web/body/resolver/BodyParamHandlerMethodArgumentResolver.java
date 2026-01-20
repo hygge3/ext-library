@@ -44,7 +44,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String contentType = Objects.requireNonNull(request).getContentType();
 
-        if (ObjectUtil.isNotEqual(contentType, MimeTypeUtils.APPLICATION_JSON_VALUE)) {
+        if (ObjectUtil.notEquals(contentType, MimeTypeUtils.APPLICATION_JSON_VALUE)) {
             throw new ExtException(EmojiSymbol.WEB, "解析参数异常，ContentType 需为 application/json");
         }
 
@@ -65,7 +65,7 @@ public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgu
                 return TypeCastUtil.cast(param.defaultValue(), parameterType);
             }
         }
-        return JsonNodeUtil.getNodeValue(jsonNode, paramName, parameterType);
+        return JsonNodeUtil.getFieldValue(jsonNode, paramName, parameterType);
     }
 
 }

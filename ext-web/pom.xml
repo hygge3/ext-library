@@ -3,11 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
 
-    <parent>
-        <groupId>ext.library</groupId>
-        <artifactId>ext-parent</artifactId>
-        <version>${revision}</version>
-    </parent>
+    <parent/>
 
     <artifactId>ext-web</artifactId>
     <name>ext-web</name>
