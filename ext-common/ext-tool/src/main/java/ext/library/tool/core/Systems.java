@@ -1,19 +1,17 @@
 package ext.library.tool.core;
 
-
 import java.io.File;
 import java.nio.charset.Charset;
 
 /**
  * 系统信息工具类
  */
-
 public final class Systems {
 
     /**
-     * 当前系统是否为 Windows 系统，参考以下系统 API
+     * 判断当前操作系统是否为 Windows 系统
      *
-     * @return boolean
+     * @return 如果是 Windows 系统返回 true，否则返回 false
      */
     public static boolean isWindows() {
         return osName().contains("Windows");
@@ -76,9 +74,14 @@ public final class Systems {
 
     /**
      * 获取系统字符集
+     * <p>
+     * 优先使用 JVM 内部编码属性，若不可用则回退到系统默认字符集
+     *
+     * @return 系统字符集
      */
     public static Charset charset() {
-        return Charset.forName(System.getProperty("sun.jnu.encoding"));
+        String encoding = System.getProperty("sun.jnu.encoding");
+        return encoding != null ? Charset.forName(encoding) : Charset.defaultCharset();
     }
 
     /**

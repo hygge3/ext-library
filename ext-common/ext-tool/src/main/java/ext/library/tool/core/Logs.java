@@ -1,6 +1,5 @@
 package ext.library.tool.core;
 
-import ext.library.tool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,23 +10,31 @@ import org.slf4j.LoggerFactory;
  */
 public final class Logs {
 
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
     /**
      * 获取调用者的类名
+     * <p>
+     * 使用 StackWalker 跳过 Logs 类的所有方法，获取实际调用者
      *
      * @return 调用者类名
      */
     private static String getCallerClassName() {
-        // 获取调用栈信息，跳过当前类和调用方法
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        // stackTrace[0] 是 getStackTrace 方法
-        // stackTrace[1] 是当前 getCallerClassName 方法
-        // stackTrace[2] 是 LogUtil 中的调用方法
-        // stackTrace[3] 是实际调用 LogUtil 的类
-        if (stackTrace.length > 3) {
-            return stackTrace[3].getClassName();
-        }
-        return "Unknown";
+        return STACK_WALKER.walk(frames -> frames
+                .map(StackWalker.StackFrame::getClassName)
+                .filter(className -> !className.equals(Logs.class.getName()))
+                .findFirst()
+                .orElse("Unknown"));
     }
+
+    /**
+     * 获取指定调用者的 Logger
+     */
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(getCallerClassName());
+    }
+
+    // region DEBUG
 
     /**
      * 打印 DEBUG 级别日志
@@ -36,19 +43,37 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void debug(String module, String message) {
-        Logger logger = LoggerFactory.getLogger(getCallerClassName());
-        logger.debug("[{}] {}", module, message);
+        getLogger().debug("[{}] {}", module, message);
     }
 
     /**
      * 打印 DEBUG 级别日志
      *
      * @param module  模块名称（对应 EmojiSymbol 中的模块）
-     * @param message 日志内容
+     * @param message 日志内容（支持 {} 占位符）
+     * @param args    格式化参数
      */
     public static void debug(String module, String message, Object... args) {
-        debug(module, StringUtil.format(message, args));
+        Object[] allArgs = prependModule(module, args);
+        getLogger().debug("[{}] " + message, allArgs);
     }
+
+    /**
+     * 打印 DEBUG 级别日志（带异常堆栈）
+     *
+     * @param module    模块名称（对应 EmojiSymbol 中的模块）
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void debug(String module, Throwable throwable, String message, Object... args) {
+        Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
+        getLogger().debug("[{}] " + message, allArgs);
+    }
+
+    // endregion
+
+    // region INFO
 
     /**
      * 打印 INFO 级别日志
@@ -57,19 +82,37 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void info(String module, String message) {
-        Logger logger = LoggerFactory.getLogger(getCallerClassName());
-        logger.info("[{}] {}", module, message);
+        getLogger().info("[{}] {}", module, message);
     }
 
     /**
      * 打印 INFO 级别日志
      *
      * @param module  模块名称（对应 EmojiSymbol 中的模块）
-     * @param message 日志内容
+     * @param message 日志内容（支持 {} 占位符）
+     * @param args    格式化参数
      */
     public static void info(String module, String message, Object... args) {
-        info(module, StringUtil.format(message, args));
+        Object[] allArgs = prependModule(module, args);
+        getLogger().info("[{}] " + message, allArgs);
     }
+
+    /**
+     * 打印 INFO 级别日志（带异常堆栈）
+     *
+     * @param module    模块名称（对应 EmojiSymbol 中的模块）
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void info(String module, Throwable throwable, String message, Object... args) {
+        Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
+        getLogger().info("[{}] " + message, allArgs);
+    }
+
+    // endregion
+
+    // region WARN
 
     /**
      * 打印 WARN 级别日志
@@ -78,19 +121,37 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void warn(String module, String message) {
-        Logger logger = LoggerFactory.getLogger(getCallerClassName());
-        logger.warn("[{}] {}", module, message);
+        getLogger().warn("[{}] {}", module, message);
     }
 
     /**
      * 打印 WARN 级别日志
      *
      * @param module  模块名称（对应 EmojiSymbol 中的模块）
-     * @param message 日志内容
+     * @param message 日志内容（支持 {} 占位符）
+     * @param args    格式化参数
      */
     public static void warn(String module, String message, Object... args) {
-        warn(module, StringUtil.format(message, args));
+        Object[] allArgs = prependModule(module, args);
+        getLogger().warn("[{}] " + message, allArgs);
     }
+
+    /**
+     * 打印 WARN 级别日志（带异常堆栈）
+     *
+     * @param module    模块名称（对应 EmojiSymbol 中的模块）
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void warn(String module, Throwable throwable, String message, Object... args) {
+        Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
+        getLogger().warn("[{}] " + message, allArgs);
+    }
+
+    // endregion
+
+    // region ERROR
 
     /**
      * 打印 ERROR 级别日志
@@ -99,29 +160,61 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void error(String module, String message) {
-        Logger logger = LoggerFactory.getLogger(getCallerClassName());
-        logger.error("[{}] {}", module, message);
+        getLogger().error("[{}] {}", module, message);
     }
 
     /**
      * 打印 ERROR 级别日志
      *
      * @param module  模块名称（对应 EmojiSymbol 中的模块）
-     * @param message 日志内容
+     * @param message 日志内容（支持 {} 占位符）
+     * @param args    格式化参数
      */
     public static void error(String module, String message, Object... args) {
-        error(module, StringUtil.format(message, args));
+        Object[] allArgs = prependModule(module, args);
+        getLogger().error("[{}] " + message, allArgs);
     }
 
     /**
-     * 打印 ERROR 级别日志
+     * 打印 ERROR 级别日志（带异常堆栈）
      *
-     * @param module  模块名称（对应 EmojiSymbol 中的模块）
-     * @param message 日志内容
+     * @param module    模块名称（对应 EmojiSymbol 中的模块）
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
      */
     public static void error(String module, Throwable throwable, String message, Object... args) {
-        Logger logger = LoggerFactory.getLogger(getCallerClassName());
-        logger.error(StringUtil.format("[{}] ", module) + message, args, throwable);
+        Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
+        getLogger().error("[{}] " + message, allArgs);
     }
+
+    // endregion
+
+    // region 辅助方法
+
+    /**
+     * 将 module 添加到参数数组开头
+     */
+    private static Object[] prependModule(String module, Object[] args) {
+        Object[] allArgs = new Object[args.length + 1];
+        allArgs[0] = module;
+        System.arraycopy(args, 0, allArgs, 1, args.length);
+        return allArgs;
+    }
+
+    /**
+     * 将 module 添加到参数数组开头，throwable 添加到末尾
+     * <p>
+     * SLF4J 会将最后一个 Throwable 参数特殊处理，打印堆栈
+     */
+    private static Object[] prependModuleAppendThrowable(String module, Throwable throwable, Object[] args) {
+        Object[] allArgs = new Object[args.length + 2];
+        allArgs[0] = module;
+        System.arraycopy(args, 0, allArgs, 1, args.length);
+        allArgs[allArgs.length - 1] = throwable;
+        return allArgs;
+    }
+
+    // endregion
 
 }

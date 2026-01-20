@@ -1,6 +1,5 @@
 package ext.library.tool.core;
 
-
 import ext.library.tool.constant.EmojiSymbol;
 import org.jspecify.annotations.Nullable;
 
@@ -51,7 +50,7 @@ public final class Threads {
                 if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
                     pool.shutdownNow();
                     if (!pool.awaitTermination(120, TimeUnit.SECONDS)) {
-                        Logs.info(EmojiSymbol.TOOL,"线程池未停止");
+                        Logs.warn(EmojiSymbol.TOOL, "线程池未停止");
                     }
                 }
             } catch (InterruptedException ie) {
@@ -79,16 +78,21 @@ public final class Threads {
             }
         }
         if (t != null) {
-            Logs.error(EmojiSymbol.TOOL, t.getMessage(), t);
+            Logs.error(EmojiSymbol.TOOL, t, t.getMessage());
         }
     }
 
+    /**
+     * 获取调用者所在的文件名
+     *
+     * @return 文件名
+     */
     public static @Nullable String getFileName() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getFileName();
     }
 
     /**
-     * 得到当前线程所在的类名称
+     * 获取调用者所在的类名称
      *
      * @return 类名称
      */
@@ -97,7 +101,7 @@ public final class Threads {
     }
 
     /**
-     * 得到当前线程所在的方法名称
+     * 获取调用者所在的方法名称
      *
      * @return 方法名称
      */
@@ -106,9 +110,9 @@ public final class Threads {
     }
 
     /**
-     * 得到当前线程在第几行
+     * 获取调用者所在的行号
      *
-     * @return 第几行
+     * @return 行号
      */
     public static int getLineNumber() {
         return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getLineNumber();
