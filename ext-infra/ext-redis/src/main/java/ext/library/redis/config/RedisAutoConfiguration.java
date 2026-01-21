@@ -1,7 +1,7 @@
 package ext.library.redis.config;
 
 import ext.library.redis.prefix.DefaultRedisPrefixConverter;
-import ext.library.redis.prefix.IRedisPrefixConverter;
+import ext.library.redis.prefix.RedisPrefixConverter;
 import ext.library.redis.properties.RedisProperties;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
@@ -28,33 +28,33 @@ import tools.jackson.databind.json.JsonMapper;
 public class RedisAutoConfig {
 
     @Bean
-    @ConditionalOnBean(IRedisPrefixConverter.class)
+    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean
-    public StringRedisTemplate stringRedisTemplate(IRedisPrefixConverter redisPrefixConverter, RedisConnectionFactory redisConnectionFactory) {
+    public StringRedisTemplate stringRedisTemplate(RedisPrefixConverter prefixConverter, RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate template = new StringRedisTemplate();
         template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(new PrefixStringRedisSerializer(redisPrefixConverter));
+        template.setKeySerializer(new PrefixStringRedisSerializer(prefixConverter));
         Logs.info(EmojiSymbol.REDIS, "载入模块:Redis");
         return template;
     }
 
     @Bean
     @ConditionalOnBean(RedisProperties.class)
-    @ConditionalOnMissingBean(IRedisPrefixConverter.class)
-    public IRedisPrefixConverter prefixConverter(RedisProperties redisProperties) {
+    @ConditionalOnMissingBean(RedisPrefixConverter.class)
+    public RedisPrefixConverter redisPrefixConverter(RedisProperties redisProperties) {
         return new DefaultRedisPrefixConverter(redisProperties);
     }
 
     @Bean
-    @ConditionalOnBean(IRedisPrefixConverter.class)
+    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(IRedisPrefixConverter redisPrefixConverter, JsonMapper jsonMapper, RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<Object, Object> redisTemplate(RedisPrefixConverter prefixConverter, JsonMapper jsonMapper, RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         // 设置  key 的序列化方式为 自定义 String Key 序列化
-        template.setKeySerializer(new PrefixJdkRedisSerializer(redisPrefixConverter));
+        template.setKeySerializer(new PrefixJdkRedisSerializer(prefixConverter));
         // 设置 hash key 的序列化方式为 自定义 String Key 序列化
-        template.setHashKeySerializer(new PrefixJdkRedisSerializer(redisPrefixConverter));
+        template.setHashKeySerializer(new PrefixJdkRedisSerializer(prefixConverter));
         GenericJacksonJsonRedisSerializer valueSerializer = new GenericJacksonJsonRedisSerializer(jsonMapper);
         // 设置 value 的序列化方式为 JSON
         template.setValueSerializer(valueSerializer);

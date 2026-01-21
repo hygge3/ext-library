@@ -1,9 +1,12 @@
 package ext.library.mail.model;
 
-import java.io.File;
+import org.springframework.core.io.InputStreamSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 邮件详细信息
+ * 邮件详情
  */
 public class MailDetails {
 
@@ -15,7 +18,17 @@ public class MailDetails {
     /**
      * 收件人
      */
-    private String[] to;
+    private List<String> to = new ArrayList<>();
+
+    /**
+     * 抄送
+     */
+    private List<String> cc = new ArrayList<>();
+
+    /**
+     * 密送
+     */
+    private List<String> bcc = new ArrayList<>();
 
     /**
      * 邮件主题
@@ -23,171 +36,230 @@ public class MailDetails {
     private String subject;
 
     /**
-     * 是否渲染 html
-     */
-    private Boolean showHtml;
-
-    /**
      * 邮件内容
      */
     private String content;
 
     /**
-     * 抄送
+     * 是否为 HTML 内容
      */
-    private String[] cc;
+    private boolean html;
 
     /**
-     * 密送
+     * 附件列表
      */
-    private String[] bcc;
+    private List<Attachment> attachments = new ArrayList<>();
 
-    /**
-     * 附件
-     */
-    private File[] files;
+    // ==================== Getters/Setters ====================
 
-    /**
-     * 获取发件人
-     *
-     * @return 发件人
-     */
     public String getFrom() {
         return from;
     }
 
-    /**
-     * 设置发件人
-     *
-     * @param from 发件人
-     */
     public void setFrom(String from) {
         this.from = from;
     }
 
-    /**
-     * 获取收件人
-     *
-     * @return 收件人
-     */
-    public String[] getTo() {
+    public List<String> getTo() {
         return to;
     }
 
-    /**
-     * 设置收件人
-     *
-     * @param to 收件人
-     */
-    public void setTo(String[] to) {
+    public void setTo(List<String> to) {
         this.to = to;
     }
 
-    /**
-     * 获取邮件主题
-     *
-     * @return 邮件主题
-     */
+    public List<String> getCc() {
+        return cc;
+    }
+
+    public void setCc(List<String> cc) {
+        this.cc = cc;
+    }
+
+    public List<String> getBcc() {
+        return bcc;
+    }
+
+    public void setBcc(List<String> bcc) {
+        this.bcc = bcc;
+    }
+
     public String getSubject() {
         return subject;
     }
 
-    /**
-     * 设置邮件主题
-     *
-     * @param subject 邮件主题
-     */
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
-    /**
-     * 获取是否渲染 html
-     *
-     * @return 是否渲染 html
-     */
-    public Boolean getShowHtml() {
-        return showHtml;
-    }
-
-    /**
-     * 设置是否渲染 html
-     *
-     * @param showHtml 是否渲染 html
-     */
-    public void setShowHtml(Boolean showHtml) {
-        this.showHtml = showHtml;
-    }
-
-    /**
-     * 获取邮件内容
-     *
-     * @return 邮件内容
-     */
     public String getContent() {
         return content;
     }
 
-    /**
-     * 设置邮件内容
-     *
-     * @param content 邮件内容
-     */
     public void setContent(String content) {
         this.content = content;
     }
 
+    public boolean isHtml() {
+        return html;
+    }
+
+    public void setHtml(boolean html) {
+        this.html = html;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    // ==================== Builder ====================
+
     /**
-     * 获取抄送
+     * 创建 Builder
      *
-     * @return 抄送
+     * @return Builder
      */
-    public String[] getCc() {
-        return cc;
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
-     * 设置抄送
-     *
-     * @param cc 抄送
+     * 邮件详情构建器
      */
-    public void setCc(String[] cc) {
-        this.cc = cc;
+    public static class Builder {
+        private final MailDetails details = new MailDetails();
+
+        /**
+         * 设置发件人
+         */
+        public Builder from(String from) {
+            details.from = from;
+            return this;
+        }
+
+        /**
+         * 添加收件人
+         */
+        public Builder to(String recipient) {
+            details.to.add(recipient);
+            return this;
+        }
+
+        /**
+         * 设置收件人列表
+         */
+        public Builder to(List<String> recipients) {
+            details.to.addAll(recipients);
+            return this;
+        }
+
+        /**
+         * 添加抄送人
+         */
+        public Builder cc(String recipient) {
+            details.cc.add(recipient);
+            return this;
+        }
+
+        /**
+         * 设置抄送人列表
+         */
+        public Builder cc(List<String> recipients) {
+            details.cc.addAll(recipients);
+            return this;
+        }
+
+        /**
+         * 添加密送人
+         */
+        public Builder bcc(String recipient) {
+            details.bcc.add(recipient);
+            return this;
+        }
+
+        /**
+         * 设置密送人列表
+         */
+        public Builder bcc(List<String> recipients) {
+            details.bcc.addAll(recipients);
+            return this;
+        }
+
+        /**
+         * 设置主题
+         */
+        public Builder subject(String subject) {
+            details.subject = subject;
+            return this;
+        }
+
+        /**
+         * 设置纯文本内容
+         */
+        public Builder text(String text) {
+            details.content = text;
+            details.html = false;
+            return this;
+        }
+
+        /**
+         * 设置 HTML 内容
+         */
+        public Builder html(String htmlContent) {
+            details.content = htmlContent;
+            details.html = true;
+            return this;
+        }
+
+        /**
+         * 设置内容
+         */
+        public Builder content(String content) {
+            details.content = content;
+            return this;
+        }
+
+        /**
+         * 添加附件
+         */
+        public Builder addAttachment(String name, InputStreamSource source) {
+            details.attachments.add(new Attachment(name, source));
+            return this;
+        }
+
+        /**
+         * 构建邮件详情
+         */
+        public MailDetails build() {
+            return details;
+        }
     }
 
-    /**
-     * 获取密送
-     *
-     * @return 密送
-     */
-    public String[] getBcc() {
-        return bcc;
-    }
+    // ==================== Attachment ====================
 
     /**
-     * 设置密送
+     * 附件信息
      *
-     * @param bcc 密送
+     * @param name   附件名称
+     * @param source 附件内容源
      */
-    public void setBcc(String[] bcc) {
-        this.bcc = bcc;
+    public record Attachment(String name, InputStreamSource source) {
     }
 
-    /**
-     * 获取附件
-     *
-     * @return 附件
-     */
-    public File[] getFiles() {
-        return files;
-    }
-
-    /**
-     * 设置附件
-     *
-     * @param files 附件
-     */
-    public void setFiles(File[] files) {
-        this.files = files;
+    @Override
+    public String toString() {
+        return "MailDetails{" +
+                "from='" + from + '\'' +
+                ", to=" + to +
+                ", cc=" + cc +
+                ", bcc=" + bcc +
+                ", subject='" + subject + '\'' +
+                ", html=" + html +
+                ", attachments=" + attachments.size() +
+                '}';
     }
 }

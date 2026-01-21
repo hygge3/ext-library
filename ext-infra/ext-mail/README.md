@@ -36,7 +36,6 @@ implementation("ext.library:ext-mail")
 - 带附件邮件发送
 - 批量发送支持
 - 邮件发送事件
-- 异步发送支持
 
 ## 配置项
 
@@ -56,7 +55,7 @@ implementation("ext.library:ext-mail")
 | `MailSender` | 邮件发送接口 |
 | `MailSenderImpl` | 邮件发送实现 |
 | `MailDetails` | 邮件详情模型 |
-| `MailSendInfo` | 邮件发送信息 |
+| `MailSendResult` | 邮件发送结果 |
 | `MailSendEvent` | 邮件发送事件 |
 
 ## 使用示例
@@ -94,6 +93,16 @@ public void sendSimpleMail() {
 }
 ```
 
+### 快捷方法
+
+```java
+// 发送纯文本邮件
+mailSender.sendText("主题", "内容", "recipient@example.com");
+
+// 发送 HTML 邮件
+mailSender.sendHtml("主题", "<h1>HTML内容</h1>", "recipient@example.com");
+```
+
 ### HTML 邮件
 
 ```java
@@ -124,7 +133,7 @@ public void sendAttachmentMail(File attachment) {
         .to("recipient@example.com")
         .subject("附件邮件")
         .text("请查收附件")
-        .addAttachment(attachment.getName(), attachment)
+        .addAttachment(attachment.getName(), new FileSystemResource(attachment))
         .build();
     mailSender.send(details);
 }
@@ -151,9 +160,12 @@ public class MailEventListener {
 
     @EventListener
     public void onMailSend(MailSendEvent event) {
-        log.info("邮件发送完成: {}, 收件人: {}",
-            event.getMailDetails().getSubject(),
-            event.getMailDetails().getTo());
+        MailSendResult result = event.getResult();
+        if (result.success()) {
+            log.info("邮件发送成功: {}", result.mailDetails().getSubject());
+        } else {
+            log.error("邮件发送失败: {}", result.errorMsg());
+        }
     }
 }
 ```

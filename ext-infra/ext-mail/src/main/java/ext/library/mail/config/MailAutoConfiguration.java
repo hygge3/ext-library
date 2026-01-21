@@ -2,8 +2,8 @@ package ext.library.mail.config;
 
 import ext.library.mail.sender.MailSender;
 import ext.library.mail.sender.MailSenderImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,15 +17,14 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 
 @AutoConfiguration(after = MailSenderAutoConfiguration.class)
-public class MailAutoConfig {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+public class MailAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(MailSender.class)
     @ConditionalOnProperty(prefix = "spring.mail", name = "host")
-    public MailSender mailSenderImpl(JavaMailSender javaMailSender, ApplicationEventPublisher applicationEventPublisher) {
-        log.info("[📧] 邮件模块载入成功");
-        return new MailSenderImpl(javaMailSender, applicationEventPublisher);
+    public MailSender mailSender(JavaMailSender javaMailSender, ApplicationEventPublisher eventPublisher) {
+        Logs.info(EmojiSymbol.MAIL, "载入模块: 邮件");
+        return new MailSenderImpl(javaMailSender, eventPublisher);
     }
 
 }
