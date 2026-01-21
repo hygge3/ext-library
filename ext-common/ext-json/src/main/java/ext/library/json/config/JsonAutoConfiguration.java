@@ -24,7 +24,7 @@ import tools.jackson.databind.SerializationFeature;
  * </ul>
  */
 @AutoConfiguration(before = JacksonAutoConfiguration.class)
-public class JsonAutoConfig {
+public class JsonAutoConfiguration {
 
     @Bean
     public JsonMapperBuilderCustomizer extJsonCustomizer() {

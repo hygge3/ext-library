@@ -17,10 +17,12 @@ public final class EmojiSymbol {
     public static final String JSON = "📃";
     // region ext-infra 层
     public static final String REDIS = "🔴";
+    public static final String LOCK = "🔒";
+    public static final String MAIL = "📧";
     // endregion
     public static final String CACHE = "💾";
     // region 安全/加密层
-    public static final String SECURITY = "🔒";
+    public static final String SECURITY = "🛡️";
     // endregion
     public static final String CRYPTO = "🔐";
     // region ext-web 层
