@@ -4,11 +4,11 @@
     <modelVersion>4.1.0</modelVersion>
 
     <groupId>ext.library</groupId>
-    <artifactId>ext-parent</artifactId>
-    <name>ext-parent</name>
+    <artifactId>ext-library</artifactId>
+    <name>ext-library</name>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <description>Parent</description>
+    <description>Ext Library</description>
     <url>https://hygge.eu.org</url>
 
     <subprojects>
