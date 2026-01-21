@@ -1,6 +1,6 @@
 package ext.library.redis.serialize;
 
-import ext.library.redis.prefix.IRedisPrefixConverter;
+import ext.library.redis.prefix.RedisPrefixConverter;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -11,23 +11,22 @@ import java.nio.charset.StandardCharsets;
  */
 public class PrefixStringRedisSerializer extends StringRedisSerializer {
 
-    private final IRedisPrefixConverter iRedisPrefixConverter;
+    private final RedisPrefixConverter prefixConverter;
 
-    public PrefixStringRedisSerializer(IRedisPrefixConverter iRedisPrefixConverter) {
+    public PrefixStringRedisSerializer(RedisPrefixConverter prefixConverter) {
         super(StandardCharsets.UTF_8);
-        this.iRedisPrefixConverter = iRedisPrefixConverter;
+        this.prefixConverter = prefixConverter;
     }
 
     @Override
     public byte @NonNull [] serialize(String key) {
         byte[] originBytes = super.serialize(key);
-        return this.iRedisPrefixConverter.wrap(originBytes);
+        return this.prefixConverter.wrap(originBytes);
     }
 
     @Override
     public String deserialize(byte[] bytes) {
-        byte[] unwrap = this.iRedisPrefixConverter.unwrap(bytes);
+        byte[] unwrap = this.prefixConverter.unwrap(bytes);
         return super.deserialize(unwrap);
     }
-
 }

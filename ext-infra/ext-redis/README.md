@@ -68,67 +68,90 @@ implementation("ext.library:ext-redis")
 ### 基本操作
 
 ```java
-@Autowired
-private RedisUtil redisUtil;
+// RedisUtil 是静态工具类，直接调用即可
 
 // String 操作
-redisUtil.set("key", "value");
-String value = redisUtil.get("key");
+RedisUtil.set("key", "value");
+String value = RedisUtil.get("key");
 
 // 带过期时间
-redisUtil.set("key", "value", 60, TimeUnit.SECONDS);
+RedisUtil.set("key", "value", Duration.ofSeconds(60));
 
 // Hash 操作
-redisUtil.hset("hash", "field", "value");
-Object value = redisUtil.hget("hash", "field");
+RedisUtil.hashOps().put("hash", "field", "value");
+Object value = RedisUtil.hashOps().get("hash", "field");
 
 // List 操作
-redisUtil.lpush("list", "value");
-String value = redisUtil.rpop("list");
+RedisUtil.listOps().leftPush("list", "value");
+String value = RedisUtil.listOps().rightPop("list");
 ```
 
 ### 分布式锁
 
 ```java
-@Autowired
-private DistributedLock lock;
-
-public void doWithLock(String lockKey) {
-    boolean acquired = lock.tryLock(lockKey, 10, TimeUnit.SECONDS);
-    if (acquired) {
-        try {
-            // 业务逻辑
-        } finally {
-            lock.unlock(lockKey);
-        }
+// 基础用法
+DistributedLock lock = new DistributedLock("myLockName");
+if (lock.tryLock()) {
+    try {
+        // 业务逻辑
+    } finally {
+        lock.unlock();
     }
+}
+
+// 带超时的锁获取
+DistributedLock lock = new DistributedLock("myLockName", Duration.ofSeconds(30));
+if (lock.tryLock(Duration.ofSeconds(10))) {
+    try {
+        // 业务逻辑
+    } finally {
+        lock.unlock();
+    }
+}
+
+// 推荐：使用 try-with-resources (实现了 AutoCloseable)
+try (DistributedLock lock = new DistributedLock("myLockName")) {
+    lock.lock();
+    // 业务逻辑，锁会在 try 块结束时自动释放
 }
 ```
 
-### 键前缀
+### 自定义键前缀转换器
 
 ```java
-@Autowired
-private IRedisPrefixConverter prefixConverter;
+// 实现 RedisPrefixConverter 接口以自定义前缀逻辑
+@Component
+public class MyPrefixConverter implements RedisPrefixConverter {
 
-public void example() {
-    String prefixedKey = prefixConverter.prefix("user:");
-    // prefixedKey = "project:user:"
-    redisUtil.set(prefixedKey + "1", "value");
+    @Override
+    public String prefix() {
+        return "myapp:";  // 自定义前缀
+    }
+
+    @Override
+    public boolean enabled() {
+        return true;  // 启用前缀
+    }
 }
 ```
 
 ### 队列操作
 
 ```java
-@Autowired
-private QueueUtil queueUtil;
+// QueueUtil 是静态工具类
 
-// 生产
-queueUtil.push("queue:task", task);
+// 普通队列
+QueueUtil.producer("queue:task", "taskData");
+String data = QueueUtil.consumer("queue:task");
 
-// 消费
-Task task = queueUtil.pop("queue:task", Task.class);
+// 延迟队列 (需要 Redis 5.0+)
+QueueUtil.delayedProducer("delayed:task", "taskData", 60);  // 60 秒后可消费
+QueueUtil.delayedProducer("delayed:task", "taskData", Duration.ofMinutes(5));  // 5 分钟后
+String delayedData = QueueUtil.delayedConsumer("delayed:task");
+
+// 删除和销毁
+QueueUtil.remove("queue:task", "taskData");
+QueueUtil.destroy("queue:task");
 ```
 
 ## 许可证

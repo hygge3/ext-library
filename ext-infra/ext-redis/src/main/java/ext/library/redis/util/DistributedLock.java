@@ -1,8 +1,9 @@
 package ext.library.redis.util;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.runtime.Threads;
 import ext.library.tool.exception.ExtException;
+import ext.library.tool.runtime.Logs;
+import ext.library.tool.runtime.Threads;
 import ext.library.tool.util.NetUtil;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -20,23 +21,21 @@ import java.util.concurrent.locks.Lock;
 /**
  * 基于 Redis 的分布式锁 (线程内可重入)
  */
-public final class DistributedLock implements Lock {
+public final class DistributedLock implements Lock, AutoCloseable {
     /** 默认的锁超时时间 */
-    private final static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30L);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30L);
     /** 锁 key 前缀 */
-    private final static String LOCK_PREFIX = "distributed_lock";
+    private static final String LOCK_PREFIX = "distributed_lock";
     /** 默认的获取锁超时时间 */
-    private final static Duration DEFAULT_TRY_LOCK_TIMEOUT = Duration.ofSeconds(10L);
+    private static final Duration DEFAULT_TRY_LOCK_TIMEOUT = Duration.ofSeconds(10L);
     /** 等待锁时，自旋尝试的周期，默认 10 毫秒 */
-    private final static Duration DEFAULT_LOOP_INTERVAL = Duration.ofMillis(10L);
-    /** 分布式锁过期时间 s 可以根据业务自己调节 */
-    private static final Long LOCK_REDIS_TIMEOUT = 10L;
+    private static final Duration DEFAULT_LOOP_INTERVAL = Duration.ofMillis(10L);
     /** 本机 host */
     private static final String CURRENT_HOST = NetUtil.getHostIp();
     /** 序列值，用于确保锁 value 的唯一性 */
-    private static AtomicLong SERIAL_NUM;
-    /** 最大序列值 */
-    private static long MAX_SERIAL;
+    private static final AtomicLong SERIAL_NUM = new AtomicLong(0);
+    /** 最大序列值，预留一定空间防止溢出 */
+    private static final long MAX_SERIAL = Long.MAX_VALUE - 1_000_000;
     private final Logger log = LoggerFactory.getLogger(getClass());
     /** 锁 Key */
     private final String lockKey;
@@ -64,7 +63,7 @@ public final class DistributedLock implements Lock {
 
     public DistributedLock(String lockName, Duration timeout, Duration loopInterval) {
         if (lockName == null) {
-            throw new IllegalArgumentException("[🔐] lockName 必须分配");
+            throw new ExtException(EmojiSymbol.LOCK, "lockName 必须分配");
         }
         this.lockKey = LOCK_PREFIX + lockName;
         this.timeout = timeout;
@@ -130,10 +129,10 @@ public final class DistributedLock implements Lock {
     public void lock() {
         try {
             if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
-                throw new ExtException(EmojiSymbol.REDIS, "尝试加锁超时，key:{}", lockKey);
+                throw new ExtException(EmojiSymbol.LOCK, "尝试加锁超时，key:{}", lockKey);
             }
         } catch (InterruptedException e) {
-            throw new ExtException(EmojiSymbol.REDIS, "获取锁失败，请先解锁，lockKey:{}, lockValue:{}", lockKey, lockValue);
+            throw new ExtException(EmojiSymbol.LOCK, "获取锁失败，请先解锁，lockKey:{}, lockValue:{}", lockKey, lockValue);
         }
     }
 
@@ -145,7 +144,7 @@ public final class DistributedLock implements Lock {
     @Override
     public void lockInterruptibly() throws InterruptedException {
         if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
-            throw new ExtException(EmojiSymbol.REDIS, "尝试加锁超时，key:{}", this.lockKey);
+            throw new ExtException(EmojiSymbol.LOCK, "尝试加锁超时，key:{}", this.lockKey);
         }
     }
 
@@ -160,7 +159,7 @@ public final class DistributedLock implements Lock {
             Boolean success = setIfAbsent(lockKey, lockValue, timeout);
             if (success != null && success) {
                 locked = true;
-                log.debug("[🔐] 加锁成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
+                Logs.debug(EmojiSymbol.LOCK, "加锁成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return true;
             } else {
                 // 如果持有锁的是当前线程，则重入
@@ -170,12 +169,12 @@ public final class DistributedLock implements Lock {
                 if (success != null && success) {
                     this.reentrant = true;
                     locked = true;
-                    log.debug("[🔐] 锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
+                    Logs.debug(EmojiSymbol.LOCK, "锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                     return true;
                 }
             }
         } catch (Exception e) {
-            log.error("[🔐] 尝试加锁错误，请先解锁，lockKey: {}, lockValue: {}", lockKey, lockValue, e);
+            Logs.error(EmojiSymbol.LOCK, e, "尝试加锁错误，请先解锁，lockKey: {}, lockValue: {}", lockKey, lockValue);
             unlock();
         }
         return false;
@@ -206,7 +205,7 @@ public final class DistributedLock implements Lock {
                 return;
             }
             if (this.reentrant) {
-                log.debug("[🔐] 解锁重入成功，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+                Logs.debug(EmojiSymbol.REDIS, "解锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return;
             }
             // 使用 lua 脚本处理锁判断和释放
@@ -218,13 +217,13 @@ public final class DistributedLock implements Lock {
             Boolean res = RedisUtil.execute(redisScript, Collections.singletonList(this.lockKey), this.lockValue);
             if (res != null && res) {
                 locked = false;
-                log.debug("[🔐] 解锁成功，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+                Logs.debug(EmojiSymbol.LOCK, "解锁成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return;
             }
         } catch (Exception e) {
-            log.error("[🔐] 解锁错误", e);
+            Logs.error(EmojiSymbol.LOCK, e, "解锁错误");
         }
-        log.warn("[🔐] 解锁失败，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
+        Logs.warn(EmojiSymbol.LOCK, "解锁失败，lockKey: {}, lockValue: {}", this.lockKey, this.lockValue);
     }
 
     @Override
@@ -342,6 +341,22 @@ public final class DistributedLock implements Lock {
 
     public boolean isLocked() {
         return locked;
+    }
+
+    /**
+     * 实现 AutoCloseable，支持 try-with-resources 语法
+     * <p>
+     * 示例:
+     * <pre>{@code
+     * try (DistributedLock lock = new DistributedLock("myLock")) {
+     *     lock.lock();
+     *     // 执行业务逻辑
+     * }
+     * }</pre>
+     */
+    @Override
+    public void close() {
+        unlock();
     }
 
 }

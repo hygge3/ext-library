@@ -25,7 +25,7 @@ import tools.jackson.databind.json.JsonMapper;
  */
 @AutoConfiguration(before = DataRedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisProperties.class)
-public class RedisAutoConfig {
+public class RedisAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(RedisPrefixConverter.class)
@@ -34,7 +34,7 @@ public class RedisAutoConfig {
         StringRedisTemplate template = new StringRedisTemplate();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(prefixConverter));
-        Logs.info(EmojiSymbol.REDIS, "载入模块:Redis");
+        Logs.info(EmojiSymbol.REDIS, "载入模块: Redis");
         return template;
     }
 

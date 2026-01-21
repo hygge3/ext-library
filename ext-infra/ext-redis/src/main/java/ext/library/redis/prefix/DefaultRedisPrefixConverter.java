@@ -6,7 +6,7 @@ import ext.library.tool.util.StringUtil;
 /**
  * redis key 前缀默认转换器
  */
-public class DefaultRedisPrefixConverter implements IRedisPrefixConverter {
+public class DefaultRedisPrefixConverter implements RedisPrefixConverter {
     private final RedisProperties redisProperties;
 
     public DefaultRedisPrefixConverter(RedisProperties redisProperties) {
@@ -19,7 +19,7 @@ public class DefaultRedisPrefixConverter implements IRedisPrefixConverter {
     }
 
     @Override
-    public boolean match() {
+    public boolean enabled() {
         return StringUtil.isNotEmpty(redisProperties.getKeyPrefix());
     }
 

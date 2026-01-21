@@ -1,6 +1,6 @@
 package ext.library.redis.serialize;
 
-import ext.library.redis.prefix.IRedisPrefixConverter;
+import ext.library.redis.prefix.RedisPrefixConverter;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
@@ -9,22 +9,21 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
  */
 public class PrefixJdkRedisSerializer extends JdkSerializationRedisSerializer {
 
-    private final IRedisPrefixConverter redisPrefixConverter;
+    private final RedisPrefixConverter prefixConverter;
 
-    public PrefixJdkRedisSerializer(IRedisPrefixConverter redisPrefixConverter) {
-        this.redisPrefixConverter = redisPrefixConverter;
+    public PrefixJdkRedisSerializer(RedisPrefixConverter prefixConverter) {
+        this.prefixConverter = prefixConverter;
     }
 
     @Override
     public byte @NonNull [] serialize(Object object) {
         byte[] originBytes = super.serialize(object);
-        return this.redisPrefixConverter.wrap(originBytes);
+        return this.prefixConverter.wrap(originBytes);
     }
 
     @Override
     public Object deserialize(byte[] bytes) {
-        byte[] unwrap = this.redisPrefixConverter.unwrap(bytes);
+        byte[] unwrap = this.prefixConverter.unwrap(bytes);
         return super.deserialize(unwrap);
     }
-
 }

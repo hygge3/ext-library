@@ -91,22 +91,23 @@ public final class QueueUtil {
         String luaScript = """
                 -- KEYS[1] 延时队列的 key
                 -- ARGV[1] 当前时间戳
-                -- 返回值：任务 ID（如果存在）或 nil
-                
+                -- 返回值：到期的任务数据（如果存在）或 nil
+
                 local key = KEYS[1]
                 local currentTime = tonumber(ARGV[1])
-                
-                -- 使用 zrangebyscore 和 zrem 的组合命令 zpopmin，它原子性地返回并移除分数最低的元素
-                -- 这里假设 Redis 版本支持 zpopmin 命令（Redis 5.0 及以上版本）
-                local task = redis.call('zpopmin', key, 1, 'BLOCK', 0, 'SCORES')
-                
-                -- zpopmin 返回的是一个包含两个元素的数组，第一个元素是分数，第二个是成员
-                if task and #task > 0 and task[2] and tonumber(task[1]) <= currentTime then
-                    return task[2] -- 返回任务 ID
+
+                -- 获取分数最低且已到期的元素 (score <= currentTime)
+                local tasks = redis.call('ZRANGEBYSCORE', key, '-inf', currentTime, 'LIMIT', 0, 1)
+
+                if tasks and #tasks > 0 then
+                    local task = tasks[1]
+                    -- 原子删除该元素
+                    redis.call('ZREM', key, task)
+                    return task
                 else
                     return nil
                 end
-                """; // 上面定义的 Lua 脚本内容
+                """;
         RedisScript<String> script = RedisScript.of(luaScript, String.class);
         long currentTime = System.currentTimeMillis() / 1000;
         return RedisUtil.getRedisTemplate()
