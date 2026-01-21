@@ -125,7 +125,7 @@ public final class PermissionUtil {
         }
         // 如果表达式不带有*号，则只需简单 equals 即可 (这样可以使速度提升 200 倍左右)
         if (!s2.contains("*")) {
-            return ObjectUtil.equalsSafe(s1, s2);
+            return ObjectUtil.equals(s1, s2);
         }
         return Pattern.matches(s2.replace("*", ".*"), s1);
     }

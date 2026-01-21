@@ -46,6 +46,7 @@ public final class ObjectUtil {
      * </ul>
      *
      * @param object 要检查的对象
+     *
      * @return 如果对象表示"真"值返回 true，否则返回 false
      */
     public static boolean isTrue(@Nullable Object object) {
@@ -67,6 +68,7 @@ public final class ObjectUtil {
      * </ul>
      *
      * @param object 要检查的对象
+     *
      * @return 如果对象表示"假"值返回 true，否则返回 false
      */
     public static boolean isFalse(@Nullable Object object) {
@@ -86,7 +88,9 @@ public final class ObjectUtil {
      * 判断对象是否为 null
      *
      * @param object 要检查的对象
+     *
      * @return 如果为 null 返回 true
+     *
      * @see Objects#isNull(Object)
      */
     public static boolean isNull(@Nullable Object object) {
@@ -97,7 +101,9 @@ public final class ObjectUtil {
      * 判断对象是否不为 null
      *
      * @param object 要检查的对象
+     *
      * @return 如果不为 null 返回 true
+     *
      * @see Objects#nonNull(Object)
      */
     public static boolean isNotNull(@Nullable Object object) {
@@ -121,6 +127,7 @@ public final class ObjectUtil {
      * </ul>
      *
      * @param obj 要检查的对象
+     *
      * @return 如果对象为空返回 true
      */
     public static boolean isEmpty(@Nullable Object obj) {
@@ -155,7 +162,9 @@ public final class ObjectUtil {
      * 判断对象是否不为空
      *
      * @param obj 要检查的对象
+     *
      * @return 如果对象不为空返回 true
+     *
      * @see #isEmpty(Object)
      */
     public static boolean isNotEmpty(@Nullable Object obj) {
@@ -170,6 +179,7 @@ public final class ObjectUtil {
      * 判断对象是否为数组
      *
      * @param obj 要检查的对象
+     *
      * @return 如果是数组返回 true
      */
     public static boolean isArray(@Nullable Object obj) {
@@ -195,32 +205,37 @@ public final class ObjectUtil {
      * </ul>
      *
      * @param obj 要计算大小的对象
+     *
      * @return 对象的元素数量
      */
     public static int size(@Nullable Object obj) {
-        if (obj == null) {
-            return 0;
-        }
-        if (obj instanceof Collection<?> coll) {
-            return coll.size();
-        }
-        if (obj instanceof Map<?, ?> map) {
-            return map.size();
-        }
-        if (obj instanceof Iterable<?> iter) {
-            int count = 0;
-            for (Object ignored : iter) {
-                count++;
+        switch (obj) {
+            case null -> {
+                return 0;
             }
-            return count;
-        }
-        if (obj instanceof Iterator<?> iter) {
-            int count = 0;
-            while (iter.hasNext()) {
-                iter.next();
-                count++;
+            case Collection<?> coll -> {
+                return coll.size();
             }
-            return count;
+            case Map<?, ?> map -> {
+                return map.size();
+            }
+            case Iterable<?> iter -> {
+                int count = 0;
+                for (Object ignored : iter) {
+                    count++;
+                }
+                return count;
+            }
+            case Iterator<?> iter -> {
+                int count = 0;
+                while (iter.hasNext()) {
+                    iter.next();
+                    count++;
+                }
+                return count;
+            }
+            default -> {
+            }
         }
         if (obj.getClass().isArray()) {
             return Array.getLength(obj);
@@ -237,7 +252,9 @@ public final class ObjectUtil {
      *
      * @param o1 第一个对象
      * @param o2 第二个对象
+     *
      * @return 如果相等返回 true
+     *
      * @see Objects#equals(Object, Object)
      */
     public static boolean equals(@Nullable Object o1, @Nullable Object o2) {
@@ -249,6 +266,7 @@ public final class ObjectUtil {
      *
      * @param o1 第一个对象
      * @param o2 第二个对象
+     *
      * @return 如果不相等返回 true
      */
     public static boolean notEquals(@Nullable Object o1, @Nullable Object o2) {
@@ -264,6 +282,7 @@ public final class ObjectUtil {
      *
      * @param object       对象
      * @param defaultValue 默认值
+     *
      * @return 对象不为 null 时返回对象，否则返回默认值
      */
     public static <T> @Nullable T defaultIfNull(@Nullable T object, @Nullable T defaultValue) {
@@ -275,7 +294,9 @@ public final class ObjectUtil {
      *
      * @param object       对象
      * @param defaultValue 默认值
+     *
      * @return 对象不为空时返回对象，否则返回默认值
+     *
      * @see #isEmpty(Object)
      */
     public static <T> @Nullable T defaultIfEmpty(@Nullable T object, @Nullable T defaultValue) {
@@ -290,6 +311,7 @@ public final class ObjectUtil {
      * 将数组转换为字符串表示
      *
      * @param array 数组
+     *
      * @return 字符串表示，格式如 "[a,b,c]"
      */
     public static String toString(Object @Nullable [] array) {
@@ -304,26 +326,6 @@ public final class ObjectUtil {
             joiner.add(String.valueOf(element));
         }
         return joiner.toString();
-    }
-
-    // endregion
-
-    // region 兼容方法（已废弃）
-
-    /**
-     * @deprecated 使用 {@link #equals(Object, Object)} 替代
-     */
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    public static boolean equalsSafe(@Nullable Object o1, @Nullable Object o2) {
-        return equals(o1, o2);
-    }
-
-    /**
-     * @deprecated 使用 {@link #notEquals(Object, Object)} 替代
-     */
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    public static boolean isNotEqual(@Nullable Object o1, @Nullable Object o2) {
-        return notEquals(o1, o2);
     }
 
     // endregion

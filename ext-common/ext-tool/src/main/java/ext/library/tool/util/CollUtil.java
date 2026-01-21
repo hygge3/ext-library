@@ -37,13 +37,14 @@ public final class CollUtil {
      * @param array   数组（可为 null）
      * @param element 要查找的元素
      * @param <T>     元素类型
+     *
      * @return 如果找到返回 true，否则返回 false
      */
     public static <T> boolean contains(T @Nullable [] array, final T element) {
         if (array == null) {
             return false;
         }
-        return Arrays.stream(array).anyMatch(x -> ObjectUtil.equalsSafe(x, element));
+        return Arrays.stream(array).anyMatch(x -> ObjectUtil.equals(x, element));
     }
 
     /**
@@ -51,13 +52,14 @@ public final class CollUtil {
      *
      * @param iterator 迭代器（可为 null）
      * @param element  要查找的元素
+     *
      * @return 如果找到返回 true，否则返回 false
      */
     public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
         if (iterator != null) {
             while (iterator.hasNext()) {
                 Object candidate = iterator.next();
-                if (ObjectUtil.equalsSafe(candidate, element)) {
+                if (ObjectUtil.equals(candidate, element)) {
                     return true;
                 }
             }
@@ -70,13 +72,14 @@ public final class CollUtil {
      *
      * @param enumeration 枚举（可为 null）
      * @param element     要查找的元素
+     *
      * @return 如果找到返回 true，否则返回 false
      */
     public static boolean contains(@Nullable Enumeration<?> enumeration, Object element) {
         if (enumeration != null) {
             while (enumeration.hasMoreElements()) {
                 Object candidate = enumeration.nextElement();
-                if (ObjectUtil.equalsSafe(candidate, element)) {
+                if (ObjectUtil.equals(candidate, element)) {
                     return true;
                 }
             }
@@ -93,6 +96,7 @@ public final class CollUtil {
      *
      * @param one   第一个数组
      * @param other 第二个数组
+     *
      * @return 拼接后的新数组
      */
     public static String[] concat(String[] one, String[] other) {
@@ -106,6 +110,7 @@ public final class CollUtil {
      * @param other 第二个数组
      * @param clazz 数组元素类型
      * @param <T>   元素类型
+     *
      * @return 拼接后的新数组
      */
     @SuppressWarnings("unchecked")
@@ -125,6 +130,7 @@ public final class CollUtil {
      *
      * @param elements 可迭代对象
      * @param <E>      元素类型
+     *
      * @return 列表集合
      */
     public static <E> List<E> toList(Iterable<E> elements) {
@@ -148,6 +154,7 @@ public final class CollUtil {
      * @param keysValues 键值对数组
      * @param <K>        键类型
      * @param <V>        值类型
+     *
      * @return Map 集合
      */
     @SuppressWarnings("unchecked")
@@ -175,6 +182,7 @@ public final class CollUtil {
      * @param list 原始列表
      * @param size 每个分片的大小（必须大于 0）
      * @param <T>  元素类型
+     *
      * @return 分片后的列表
      */
     public static <T> List<List<T>> partition(List<T> list, int size) {
@@ -189,6 +197,7 @@ public final class CollUtil {
      *
      * @param coll 集合
      * @param <T>  元素类型
+     *
      * @return 元素到出现次数的映射
      */
     public static <T> Map<T, Long> counting(final Collection<T> coll) {

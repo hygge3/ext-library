@@ -4,7 +4,7 @@
     <modelVersion>4.1.0</modelVersion>
     <parent>
         <groupId>ext.library</groupId>
-        <artifactId>ext-parent</artifactId>
+        <artifactId>ext-library</artifactId>
         <version>${revision}</version>
     </parent>
     <artifactId>ext-idempotent</artifactId>
