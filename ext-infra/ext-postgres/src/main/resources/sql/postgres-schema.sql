@@ -16,8 +16,8 @@ CREATE UNLOGGED TABLE IF NOT EXISTS pg_cache (
 -- 过期时间索引，用于清理任务
 CREATE INDEX IF NOT EXISTS idx_pg_cache_expires ON pg_cache(expires_at);
 
--- 更新时间触发器函数
-CREATE OR REPLACE FUNCTION update_pg_cache_updated_at()
+-- 通用更新时间触发器函数（供所有需要自动更新 updated_at 的表使用）
+CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
@@ -30,7 +30,7 @@ DROP TRIGGER IF EXISTS trg_pg_cache_updated_at ON pg_cache;
 CREATE TRIGGER trg_pg_cache_updated_at
     BEFORE UPDATE ON pg_cache
     FOR EACH ROW
-    EXECUTE FUNCTION update_pg_cache_updated_at();
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
 -- 2. 任务队列表
@@ -67,3 +67,32 @@ CREATE TABLE IF NOT EXISTS pg_rate_limits (
 
 -- 窗口过期索引
 CREATE INDEX IF NOT EXISTS idx_pg_rate_limits_window ON pg_rate_limits(window_start);
+
+-- =====================================================
+-- 4. 会话表 (JSONB 存储会话数据)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS pg_sessions (
+    session_id TEXT PRIMARY KEY,
+    user_id TEXT,
+    data JSONB NOT NULL DEFAULT '{}',
+    expires_at TIMESTAMPTZ NOT NULL,
+    last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 用户 ID 索引（查询用户的所有会话）
+CREATE INDEX IF NOT EXISTS idx_pg_sessions_user ON pg_sessions(user_id) WHERE user_id IS NOT NULL;
+
+-- 过期时间索引（清理过期会话）
+CREATE INDEX IF NOT EXISTS idx_pg_sessions_expires ON pg_sessions(expires_at);
+
+-- 更新时间触发器
+DROP TRIGGER IF EXISTS trg_pg_sessions_updated_at ON pg_sessions;
+CREATE TRIGGER trg_pg_sessions_updated_at
+    BEFORE UPDATE ON pg_sessions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- 最后访问时间索引（清理不活跃会话）
+CREATE INDEX IF NOT EXISTS idx_pg_sessions_last_accessed ON pg_sessions(last_accessed_at);

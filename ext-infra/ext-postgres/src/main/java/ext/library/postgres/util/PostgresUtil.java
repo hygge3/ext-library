@@ -7,6 +7,8 @@ import ext.library.postgres.queue.Job;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.ratelimit.RateLimitResult;
+import ext.library.postgres.session.PostgresSessionManager;
+import ext.library.postgres.session.Session;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -17,7 +19,7 @@ import java.util.function.Consumer;
 /**
  * PostgreSQL 操作静态工具类
  * <p>
- * 提供缓存、队列、发布订阅、限流等功能的静态方法访问
+ * 提供缓存、队列、发布订阅、限流、会话等功能的静态方法访问
  *
  * @since 4.0.0
  */
@@ -326,6 +328,144 @@ public final class PostgresUtil {
         return getRateLimiter().reset(key);
     }
 
+    // ==================== 会话操作 ====================
+
+    /**
+     * 创建新会话
+     *
+     * @return 新会话
+     */
+    public static Session createSession() {
+        return getSessionManager().createSession();
+    }
+
+    /**
+     * 创建新会话
+     *
+     * @param userId 用户 ID
+     * @return 新会话
+     */
+    public static Session createSession(String userId) {
+        return getSessionManager().createSession(userId);
+    }
+
+    /**
+     * 创建新会话
+     *
+     * @param userId      用户 ID
+     * @param initialData 初始数据
+     * @return 新会话
+     */
+    public static Session createSession(String userId, Object initialData) {
+        return getSessionManager().createSession(userId, initialData);
+    }
+
+    /**
+     * 获取会话
+     *
+     * @param sessionId 会话 ID
+     * @return 会话，不存在或已过期返回空
+     */
+    public static Optional<Session> getSession(String sessionId) {
+        return getSessionManager().getSession(sessionId);
+    }
+
+    /**
+     * 更新会话数据
+     *
+     * @param sessionId 会话 ID
+     * @param data      新数据
+     * @return 是否更新成功
+     */
+    public static boolean setSessionData(String sessionId, Object data) {
+        return getSessionManager().setSessionData(sessionId, data);
+    }
+
+    /**
+     * 合并更新会话数据
+     *
+     * @param sessionId 会话 ID
+     * @param data      要合并的数据
+     * @return 是否更新成功
+     */
+    public static boolean mergeSessionData(String sessionId, Object data) {
+        return getSessionManager().mergeSessionData(sessionId, data);
+    }
+
+    /**
+     * 设置会话属性
+     *
+     * @param sessionId 会话 ID
+     * @param key       属性键
+     * @param value     属性值
+     * @return 是否设置成功
+     */
+    public static boolean setSessionAttribute(String sessionId, String key, Object value) {
+        return getSessionManager().setAttribute(sessionId, key, value);
+    }
+
+    /**
+     * 获取会话属性
+     *
+     * @param sessionId 会话 ID
+     * @param key       属性键
+     * @param clazz     属性类型
+     * @return 属性值，不存在返回 null
+     */
+    public static <T> T getSessionAttribute(String sessionId, String key, Class<T> clazz) {
+        return getSessionManager().getAttribute(sessionId, key, clazz);
+    }
+
+    /**
+     * 续期会话
+     *
+     * @param sessionId 会话 ID
+     * @return 是否续期成功
+     */
+    public static boolean renewSession(String sessionId) {
+        return getSessionManager().renewSession(sessionId);
+    }
+
+    /**
+     * 删除会话
+     *
+     * @param sessionId 会话 ID
+     * @return 是否删除成功
+     */
+    public static boolean deleteSession(String sessionId) {
+        return getSessionManager().deleteSession(sessionId);
+    }
+
+    /**
+     * 获取用户的所有会话
+     *
+     * @param userId 用户 ID
+     * @return 会话列表
+     */
+    public static List<Session> getSessionsByUser(String userId) {
+        return getSessionManager().getSessionsByUser(userId);
+    }
+
+    /**
+     * 删除用户的所有会话
+     *
+     * @param userId 用户 ID
+     * @return 删除的会话数
+     */
+    public static int deleteSessionsByUser(String userId) {
+        return getSessionManager().deleteSessionsByUser(userId);
+    }
+
+    /**
+     * 检查会话是否存在
+     *
+     * @param sessionId 会话 ID
+     * @return 是否存在
+     */
+    public static boolean sessionExists(String sessionId) {
+        return getSessionManager().exists(sessionId);
+    }
+
     // ==================== Bean 获取 ====================
 
     /**
@@ -354,5 +494,12 @@ public final class PostgresUtil {
      */
     public static PostgresRateLimiter getRateLimiter() {
         return SpringUtil.getBean(PostgresRateLimiter.class);
+    }
+
+    /**
+     * 获取会话管理器 Bean
+     */
+    public static PostgresSessionManager getSessionManager() {
+        return SpringUtil.getBean(PostgresSessionManager.class);
     }
 }

@@ -6,6 +6,7 @@ import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.schema.PostgresSchemaInitializer;
+import ext.library.postgres.session.PostgresSessionManager;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,7 +32,7 @@ import javax.sql.DataSource;
 public class PostgresAutoConfiguration {
 
     public PostgresAutoConfiguration() {
-        Logs.info(EmojiSymbol.POSTGRES, "载入模块: ext-postgres (PostgreSQL 缓存/队列/发布订阅/限流)");
+        Logs.info(EmojiSymbol.POSTGRES, "载入模块: ext-postgres (PostgreSQL 缓存/队列/发布订阅/限流/会话)");
     }
 
     @Bean
@@ -67,5 +68,12 @@ public class PostgresAutoConfiguration {
     public PostgresRateLimiter postgresRateLimiter(DataSource dataSource, PostgresProperties properties) {
         Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresRateLimiter");
         return new PostgresRateLimiter(dataSource, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PostgresSessionManager postgresSessionManager(DataSource dataSource, PostgresProperties properties) {
+        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresSessionManager");
+        return new PostgresSessionManager(dataSource, properties);
     }
 }
