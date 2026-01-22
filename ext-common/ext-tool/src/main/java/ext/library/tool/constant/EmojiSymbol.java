@@ -19,6 +19,7 @@ public final class EmojiSymbol {
     public static final String REDIS = "🔴";
     public static final String LOCK = "🔒";
     public static final String MAIL = "📧";
+    public static final String POSTGRES = "🐘";
     // endregion
     public static final String CACHE = "💾";
     // region 安全/加密层

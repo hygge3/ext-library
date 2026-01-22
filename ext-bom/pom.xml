@@ -101,6 +101,11 @@
                 <artifactId>ext-mail</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-postgres</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!-- ======================= 安全/加密层 ===================== -->
             <dependency>

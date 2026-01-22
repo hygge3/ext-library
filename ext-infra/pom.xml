@@ -14,6 +14,7 @@
         <subproject>ext-redis</subproject>
         <subproject>ext-cache</subproject>
         <subproject>ext-mail</subproject>
+        <subproject>ext-postgres</subproject>
     </subprojects>
 
 </project>
