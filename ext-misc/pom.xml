@@ -12,6 +12,7 @@
 
     <subprojects>
         <subproject>ext-http</subproject>
+        <subproject>ext-useragent</subproject>
         <subproject>ext-qrcode</subproject>
         <subproject>ext-monitor</subproject>
     </subprojects>

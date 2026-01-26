@@ -15,10 +15,9 @@
  *
  * <h2>类结构</h2>
  * <ul>
- *   <li>{@link UserAgentUtil} - 工具入口，提供便捷的解析方法</li>
- *   <li>{@link UserAgentParser} - 解析器，协调各组件完成解析</li>
+ *   <li>{@link UserAgentParser} - 解析器，提供 User-Agent 解析入口</li>
  *   <li>{@link UserAgent} - 解析结果数据模型</li>
- *   <li>{@link UserAgentInfo} - 信息基类，提供模式匹配基础功能</li>
+ *   <li>{@link UserAgentInfo} - 信息基类，提供模式匹配和版本解析基础功能</li>
  *   <li>{@link Browser} - 浏览器信息组件</li>
  *   <li>{@link OS} - 操作系统信息组件</li>
  *   <li>{@link Platform} - 平台信息组件</li>
@@ -29,7 +28,7 @@
  * <pre>{@code
  * // 解析 User-Agent
  * String userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)...";
- * UserAgent ua = UserAgentUtil.parse(userAgent);
+ * UserAgent ua = UserAgentParser.parse(userAgent);
  *
  * // 获取解析结果
  * if (ua != null) {
@@ -44,4 +43,4 @@
  *
  * @since 1.0.0
  */
-package ext.library.http.useragent;
+package ext.library.useragent;

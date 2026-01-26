@@ -1,11 +1,8 @@
-package ext.library.http.useragent;
+package ext.library.useragent;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 操作系统信息
@@ -53,25 +50,20 @@ public class OS extends UserAgentInfo {
     /**
      * 所有支持的操作系统列表
      */
-    public static final List<OS> OSES;
+    public static final List<OS> OS_LIST;
 
     static {
         List<OS> list = new ArrayList<>(OS_DEFINITIONS.length);
         for (String[] def : OS_DEFINITIONS) {
             list.add(new OS(def[0], def[1], def[2]));
         }
-        OSES = List.copyOf(list);
+        OS_LIST = List.copyOf(list);
     }
 
     /**
      * 未知操作系统
      */
-    public static final OS UNKNOWN = new OS(NAME_UNKNOWN, (String) null, (String) null);
-
-    /**
-     * 版本解析模式
-     */
-    private final Pattern versionPattern;
+    public static final OS UNKNOWN = new OS(NAME_UNKNOWN, null, null);
 
     /**
      * 构造操作系统
@@ -81,29 +73,7 @@ public class OS extends UserAgentInfo {
      * @param versionRegex 版本解析正则
      */
     private OS(String name, String regex, String versionRegex) {
-        super(name, regex);
-        if (versionRegex != null) {
-            this.versionPattern = Pattern.compile(versionRegex, Pattern.CASE_INSENSITIVE);
-        } else {
-            this.versionPattern = null;
-        }
-    }
-
-    /**
-     * 获取操作系统版本
-     *
-     * @param userAgentString User-Agent 字符串
-     * @return 版本号，未知返回 null
-     */
-    public String getVersion(String userAgentString) {
-        if (isUnknown() || versionPattern == null) {
-            return null;
-        }
-        Matcher m = versionPattern.matcher(userAgentString);
-        if (m.find()) {
-            return m.group(1);
-        }
-        return "";
+        super(name, regex, versionRegex);
     }
 
     /**

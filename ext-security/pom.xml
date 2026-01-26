@@ -8,7 +8,7 @@
     <dependencies>
         <dependency>
             <groupId>ext.library</groupId>
-            <artifactId>ext-http</artifactId>
+            <artifactId>ext-useragent</artifactId>
         </dependency>
         <dependency>
             <groupId>ext.library</groupId>

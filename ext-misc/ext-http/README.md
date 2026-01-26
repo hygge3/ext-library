@@ -36,7 +36,7 @@ implementation("ext.library:ext-http")
 - 同步/异步：支持同步和异步请求
 - 多种数据格式：JSON、表单、文件上传下载
 - 虚拟线程：默认使用虚拟线程执行器
-- 内聚设计：所有功能集中在 HttpUtil 类中
+- SSL 安全：默认启用 SSL 证书验证，可选禁用
 
 ## 核心类说明
 
@@ -169,6 +169,20 @@ HttpUtil.get(url)
     .execute();
 ```
 
+### 禁用 SSL 验证（仅限开发/测试）
+
+```java
+// 对于自签名证书的测试环境，可以禁用 SSL 验证
+// ⚠️ 警告：生产环境绝对不要使用！
+String result = HttpUtil.get("https://localhost:8443/api")
+    .insecure()  // 禁用 SSL 验证
+    .execute()
+    .asString();
+
+// 也可以直接获取不安全的 HttpClient
+HttpClient insecureClient = HttpUtil.getInsecureClient();
+```
+
 ## API 速查
 
 ### 入口方法
@@ -192,6 +206,7 @@ HttpUtil.get(url)
 | `body(content)` | 设置请求体 |
 | `form(name, value)` | 添加表单数据 |
 | `timeout(ms)` | 设置超时时间 |
+| `insecure()` | 禁用 SSL 验证（仅开发/测试） |
 | `contentTypeJson()` | 设置 Content-Type: application/json |
 | `contentTypeForm()` | 设置 Content-Type: application/x-www-form-urlencoded |
 | `acceptJson()` | 设置 Accept: application/json |
@@ -209,12 +224,13 @@ HttpUtil.get(url)
 
 ## 注意事项
 
-1. **默认超时**：读取超时 20 分钟，连接超时 10 秒
+1. **默认超时**：读取超时 2 分钟，连接超时 10 秒
 2. **虚拟线程**：默认使用虚拟线程执行器
 3. **自动编码**：查询参数自动进行 URL 编码
 4. **响应流**：InputStream 只能读取一次
 5. **线程安全**：Request 不是线程安全的，不应在多线程间共享
 6. **异常处理**：网络异常会抛出 `ExtException`
+7. **SSL 验证**：默认启用，使用 `insecure()` 禁用（仅开发环境）
 
 ## 许可证
 

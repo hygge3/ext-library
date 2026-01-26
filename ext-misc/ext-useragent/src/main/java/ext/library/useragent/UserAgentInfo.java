@@ -1,4 +1,4 @@
-package ext.library.http.useragent;
+package ext.library.useragent;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,24 +34,31 @@ public abstract class UserAgentInfo implements Serializable {
     private final Pattern pattern;
 
     /**
+     * 版本解析模式
+     */
+    private final Pattern versionPattern;
+
+    /**
      * 构造
      *
      * @param name  名称
      * @param regex 正则表达式
      */
     protected UserAgentInfo(String name, String regex) {
-        this(name, (regex == null) ? null : Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
+        this(name, regex, null);
     }
 
     /**
      * 构造
      *
-     * @param name    名称
-     * @param pattern 编译后的正则模式
+     * @param name         名称
+     * @param regex        匹配正则表达式
+     * @param versionRegex 版本解析正则表达式
      */
-    protected UserAgentInfo(String name, Pattern pattern) {
+    protected UserAgentInfo(String name, String regex, String versionRegex) {
         this.name = name;
-        this.pattern = pattern;
+        this.pattern = (regex == null) ? null : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        this.versionPattern = (versionRegex == null) ? null : Pattern.compile(versionRegex, Pattern.CASE_INSENSITIVE);
     }
 
     /**
@@ -89,6 +96,20 @@ public abstract class UserAgentInfo implements Serializable {
      */
     public boolean isUnknown() {
         return NAME_UNKNOWN.equals(this.name);
+    }
+
+    /**
+     * 获取版本号
+     *
+     * @param userAgentString User-Agent 字符串
+     * @return 版本号，未知或无法解析返回 null
+     */
+    public String getVersion(String userAgentString) {
+        if (isUnknown() || versionPattern == null) {
+            return null;
+        }
+        Matcher m = versionPattern.matcher(userAgentString);
+        return m.find() ? m.group(1) : "";
     }
 
     @Override

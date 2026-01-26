@@ -1,8 +1,8 @@
 package ext.library.security.util;
 
 import ext.library.core.util.SpringUtil;
-import ext.library.http.useragent.UserAgent;
-import ext.library.http.useragent.UserAgentUtil;
+import ext.library.useragent.UserAgent;
+import ext.library.useragent.UserAgentParser;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
@@ -32,8 +32,8 @@ public final class SecurityUtil {
      */
     private static String getPlatform() {
         String ua = ServletUtil.getUA();
-        UserAgent userAgent = UserAgentUtil.parse(ua);
-        return userAgent.getPlatform().getName();
+        UserAgent userAgent = UserAgentParser.parse(ua);
+        return userAgent != null ? userAgent.getPlatform().getName() : "Unknown";
     }
 
     /**

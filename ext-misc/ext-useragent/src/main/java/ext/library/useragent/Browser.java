@@ -1,11 +1,9 @@
-package ext.library.http.useragent;
+package ext.library.useragent;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 /**
  * 浏览器信息
@@ -23,7 +21,7 @@ public class Browser extends UserAgentInfo {
     /**
      * 移动浏览器名称列表
      */
-    private static final java.util.Set<String> MOBILE_BROWSERS = java.util.Set.of(
+    private static final Set<String> MOBILE_BROWSERS = Set.of(
             "PSP", "Yammer Mobile", "Android Browser", "IEMobile",
             "MicroMessenger", "miniProgram", "DingTalk"
     );
@@ -79,7 +77,7 @@ public class Browser extends UserAgentInfo {
     /**
      * 所有支持的浏览器列表
      */
-    public static final List<Browser> BROWSERS;
+    public static final List<Browser> BROWSER_LIST;
 
     static {
         List<Browser> list = new ArrayList<>(BROWSER_DEFINITIONS.length);
@@ -87,23 +85,19 @@ public class Browser extends UserAgentInfo {
             String name = def[0];
             String regex = def[1];
             String versionRegex = def[2];
-            if (!VERSION_REGEX.equals(versionRegex)) {
+            // 当使用通用版本正则时，需要在前面加上浏览器名称来限定匹配
+            if (VERSION_REGEX.equals(versionRegex)) {
                 versionRegex = name + versionRegex;
             }
             list.add(new Browser(name, regex, versionRegex));
         }
-        BROWSERS = List.copyOf(list);
+        BROWSER_LIST = List.copyOf(list);
     }
 
     /**
      * 未知浏览器
      */
-    public static final Browser UNKNOWN = new Browser(NAME_UNKNOWN, (String) null, (String) null);
-
-    /**
-     * 版本解析模式
-     */
-    private final Pattern versionPattern;
+    public static final Browser UNKNOWN = new Browser(NAME_UNKNOWN, null, null);
 
     /**
      * 构造浏览器
@@ -113,29 +107,7 @@ public class Browser extends UserAgentInfo {
      * @param versionRegex 版本解析正则
      */
     private Browser(String name, String regex, String versionRegex) {
-        super(name, regex);
-        if (versionRegex != null) {
-            this.versionPattern = Pattern.compile(versionRegex, Pattern.CASE_INSENSITIVE);
-        } else {
-            this.versionPattern = null;
-        }
-    }
-
-    /**
-     * 获取浏览器版本
-     *
-     * @param userAgentString User-Agent 字符串
-     * @return 版本号
-     */
-    public String getVersion(String userAgentString) {
-        if (isUnknown() || versionPattern == null) {
-            return null;
-        }
-        Matcher m = versionPattern.matcher(userAgentString);
-        if (m.find()) {
-            return m.group(1);
-        }
-        return "";
+        super(name, regex, versionRegex);
     }
 
     /**

@@ -17,8 +17,6 @@
  * </ul>
  *
  * <h2>使用示例</h2>
- *
- * <h3>链式调用（推荐）</h3>
  * <pre>{@code
  * // 同步 GET 请求
  * String result = HttpUtil.get("https://api.example.com/data")
@@ -51,16 +49,15 @@
  *
  * // 下载文件
  * Path filePath = HttpUtil.get("https://example.com/file.pdf")
- *     .execute()
  *     .download("/path/to/save/file.pdf");
  * }</pre>
  *
  * <h2>主要类</h2>
  * <ul>
- *   <li>{@link HttpUtil} - 主工具类，提供静态方法和链式调用入口</li>
- *   <li>{@link HttpUtil.Request} - 链式请求构建器</li>
- *   <li>{@link HttpUtil.Response} - 响应包装类</li>
- *   <li>{@link HttpUtil.HttpMethod} - HTTP 方法枚举</li>
+ *   <li>{@link ext.library.http.HttpUtil} - 主工具类，提供静态方法和链式调用入口</li>
+ *   <li>{@link ext.library.http.HttpUtil.Request} - 链式请求构建器</li>
+ *   <li>{@link ext.library.http.HttpUtil.Response} - 响应包装类</li>
+ *   <li>{@link ext.library.http.HttpUtil.HttpMethod} - HTTP 方法枚举</li>
  * </ul>
  *
  * @since 1.0.0

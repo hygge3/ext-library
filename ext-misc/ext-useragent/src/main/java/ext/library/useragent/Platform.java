@@ -1,7 +1,6 @@
-package ext.library.http.useragent;
+package ext.library.useragent;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class Platform extends UserAgentInfo {
     /**
      * 移动平台定义
      */
-    private static final String[][] MOBILE_PLATFORMS = {
+    private static final String[][] MOBILE_DEFINITIONS = {
             {"Windows Phone", "windows (ce|phone|mobile)( os)?"},
             {"iPad", "ipad"},
             {"iPod", "ipod"},
@@ -37,7 +36,7 @@ public class Platform extends UserAgentInfo {
     /**
      * 桌面平台定义
      */
-    private static final String[][] DESKTOP_PLATFORMS = {
+    private static final String[][] DESKTOP_DEFINITIONS = {
             {"Windows", "windows"},
             {"Mac", "(macintosh|darwin)"},
             {"Linux", "linux"},
@@ -49,26 +48,26 @@ public class Platform extends UserAgentInfo {
     /**
      * 所有移动平台列表
      */
-    public static final List<Platform> MOBILE_PLATFORMS_LIST;
+    public static final List<Platform> MOBILE_PLATFORM_LIST;
 
     /**
      * 所有桌面平台列表
      */
-    public static final List<Platform> DESKTOP_PLATFORMS_LIST;
+    public static final List<Platform> DESKTOP_PLATFORM_LIST;
 
     /**
      * 所有平台列表
      */
-    public static final List<Platform> PLATFORMS;
+    public static final List<Platform> PLATFORM_LIST;
 
     static {
-        MOBILE_PLATFORMS_LIST = createPlatforms(MOBILE_PLATFORMS);
-        DESKTOP_PLATFORMS_LIST = createPlatforms(DESKTOP_PLATFORMS);
+        MOBILE_PLATFORM_LIST = createPlatforms(MOBILE_DEFINITIONS);
+        DESKTOP_PLATFORM_LIST = createPlatforms(DESKTOP_DEFINITIONS);
 
-        List<Platform> all = new ArrayList<>(MOBILE_PLATFORMS_LIST.size() + DESKTOP_PLATFORMS_LIST.size());
-        all.addAll(MOBILE_PLATFORMS_LIST);
-        all.addAll(DESKTOP_PLATFORMS_LIST);
-        PLATFORMS = List.copyOf(all);
+        List<Platform> all = new ArrayList<>(MOBILE_PLATFORM_LIST.size() + DESKTOP_PLATFORM_LIST.size());
+        all.addAll(MOBILE_PLATFORM_LIST);
+        all.addAll(DESKTOP_PLATFORM_LIST);
+        PLATFORM_LIST = List.copyOf(all);
     }
 
     private static List<Platform> createPlatforms(String[][] definitions) {
@@ -82,37 +81,7 @@ public class Platform extends UserAgentInfo {
     /**
      * 未知平台
      */
-    public static final Platform UNKNOWN = new Platform(NAME_UNKNOWN, (String) null);
-
-    /**
-     * iPhone 平台
-     */
-    public static final Platform IPHONE = new Platform("iPhone", "iphone");
-
-    /**
-     * iPod 平台
-     */
-    public static final Platform IPOD = new Platform("iPod", "ipod");
-
-    /**
-     * iPad 平台
-     */
-    public static final Platform IPAD = new Platform("iPad", "ipad");
-
-    /**
-     * Android 平台
-     */
-    public static final Platform ANDROID = new Platform("Android", "android");
-
-    /**
-     * Google TV 平台
-     */
-    public static final Platform GOOGLE_TV = new Platform("GoogleTV", "googletv");
-
-    /**
-     * Windows Phone 平台
-     */
-    public static final Platform WINDOWS_PHONE = new Platform("Windows Phone", "windows (ce|phone|mobile)( os)?");
+    public static final Platform UNKNOWN = new Platform(NAME_UNKNOWN, null);
 
     /**
      * 构造平台
@@ -120,7 +89,7 @@ public class Platform extends UserAgentInfo {
      * @param name  平台名称
      * @param regex 匹配正则
      */
-    public Platform(String name, String regex) {
+    private Platform(String name, String regex) {
         super(name, regex);
     }
 
@@ -130,7 +99,7 @@ public class Platform extends UserAgentInfo {
      * @return 是否为移动平台
      */
     public boolean isMobile() {
-        return MOBILE_PLATFORMS_LIST.contains(this);
+        return MOBILE_PLATFORM_LIST.stream().anyMatch(p -> p.getName().equals(this.getName()));
     }
 
     /**
@@ -139,7 +108,8 @@ public class Platform extends UserAgentInfo {
      * @return 是否为 iPhone 或 iPod
      */
     public boolean isIPhoneOrIPod() {
-        return this.equals(IPHONE) || this.equals(IPOD);
+        String name = getName();
+        return "iPhone".equals(name) || "iPod".equals(name);
     }
 
     /**
@@ -148,7 +118,7 @@ public class Platform extends UserAgentInfo {
      * @return 是否为 iPad
      */
     public boolean isIPad() {
-        return this.equals(IPAD);
+        return "iPad".equals(getName());
     }
 
     /**
@@ -166,6 +136,7 @@ public class Platform extends UserAgentInfo {
      * @return 是否为 Android 平台
      */
     public boolean isAndroid() {
-        return this.equals(ANDROID) || this.equals(GOOGLE_TV);
+        String name = getName();
+        return "Android".equals(name) || "GoogleTV".equals(name);
     }
 }
