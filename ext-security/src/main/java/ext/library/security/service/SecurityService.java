@@ -6,6 +6,7 @@ import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
+import ext.library.security.enums.TokenState;
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.listener.SecurityEventPublishManager;
 import ext.library.security.properties.SecurityProperties;
@@ -14,7 +15,6 @@ import ext.library.security.util.PermissionUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.holder.Lazy;
-import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.web.util.ServletUtil;
 
@@ -172,35 +172,11 @@ public interface SecurityService {
      */
     default void checkToken() {
         SecuritySession session = getCurrentSecuritySession();
+        validateTokenState(session, "当前");
 
-        if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
-            throw new UnauthorizedException("当前 token 已失效");
-        }
-
-        if (SecurityConstant.TOKEN_STATE_KICKED_OFFLINE.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("当前 token 已被踢下线");
-        }
-
-        if (SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("当前 token 已被顶下线");
-        }
-
-        if (SecurityConstant.TOKEN_STATE_BANNED.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("当前 token 已被封禁");
-        }
-
-        // 判断 token 续约操作
-        SecurityToken securityToken = session.getCurrentSecurityToken();
-        if (!SecurityConstant.NON_EXPIRING.equals(securityToken.getActivityTimeout())) {
-            Long activityTimeout = tokenActivityTimeout(securityToken.getToken());
-            if (null == activityTimeout || activityTimeout <= 0) {
-                throw new UnauthorizedException("当前 token 已超时");
-            }
-
-            if (PROPERTIES.get().getAutoRenewal()) {
-                // 续约操作
-                renewalToken(securityToken.getToken());
-            }
+        // 自动续约
+        if (Boolean.TRUE.equals(PROPERTIES.get().getAutoRenewal())) {
+            renewalToken(session.getCurrentSecurityToken().getToken());
         }
     }
 
@@ -211,27 +187,38 @@ public interface SecurityService {
      */
     default void checkToken(String token) {
         SecuritySession session = getSecuritySessionByToken(token);
+        validateTokenState(session, "指定");
+    }
 
-        if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
-            throw new UnauthorizedException("指定 token 已失效");
+    /**
+     * 验证 Token 状态
+     *
+     * @param session 会话信息
+     * @param prefix  错误消息前缀（"当前"或"指定"）
+     */
+    private void validateTokenState(SecuritySession session, String prefix) {
+        if (session == null || session.getCurrentSecurityToken() == null) {
+            throw new UnauthorizedException(prefix + " token 已失效");
         }
 
-        if (SecurityConstant.TOKEN_STATE_KICKED_OFFLINE.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("指定 token 已被踢下线");
-        }
-
-        if (SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("指定 token 已被顶下线");
-        }
-
-        if (SecurityConstant.TOKEN_STATE_BANNED.equals(session.getCurrentSecurityToken().getState())) {
-            throw new UnauthorizedException("指定 token 已被封禁");
-        }
         SecurityToken securityToken = session.getCurrentSecurityToken();
+        TokenState state = securityToken.getState();
+
+        if (state == TokenState.KICKED_OFFLINE) {
+            throw new UnauthorizedException(prefix + " token 已被踢下线");
+        }
+        if (state == TokenState.REPLACED_OFFLINE) {
+            throw new UnauthorizedException(prefix + " token 已被顶下线");
+        }
+        if (state == TokenState.BANNED) {
+            throw new UnauthorizedException(prefix + " token 已被封禁");
+        }
+
+        // 检查活跃超时
         if (!SecurityConstant.NON_EXPIRING.equals(securityToken.getActivityTimeout())) {
             Long activityTimeout = tokenActivityTimeout(securityToken.getToken());
-            if (null == activityTimeout || activityTimeout <= 0) {
-                throw new UnauthorizedException("指定 token 已超时");
+            if (activityTimeout == null || activityTimeout <= 0) {
+                throw new UnauthorizedException(prefix + " token 已超时");
             }
         }
     }
@@ -254,7 +241,7 @@ public interface SecurityService {
             throw new UnauthorizedException("需要被踢下线的 token 无效");
         }
         SecurityToken securityToken = session.getCurrentSecurityToken();
-        session.updateTokenInfoState(securityToken.getToken(), SecurityConstant.TOKEN_STATE_KICKED_OFFLINE);
+        session.updateTokenInfoState(securityToken.getToken(), TokenState.KICKED_OFFLINE);
         session.flushSessionStorage();
         SecurityEventPublishManager.doKickOut(session.getLoginId(), securityToken.getToken(),
                 securityToken.getDeviceType());
@@ -278,7 +265,7 @@ public interface SecurityService {
             throw new UnauthorizedException("需要被顶下线的 token 无效");
         }
         SecurityToken securityToken = session.getCurrentSecurityToken();
-        session.updateTokenInfoState(securityToken.getToken(), SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);
+        session.updateTokenInfoState(securityToken.getToken(), TokenState.REPLACED_OFFLINE);
         session.flushSessionStorage();
         SecurityEventPublishManager.doReplaceOut(session.getLoginId(), securityToken.getToken(),
                 securityToken.getDeviceType());
@@ -293,24 +280,33 @@ public interface SecurityService {
 
     /**
      * 续约 token
+     * <p>
+     * 只有当距离上次续约时间超过配置的间隔时才会执行续约操作
      *
      * @param token 用户 token
      */
     default void renewalToken(String token) {
         SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
-        if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
+        if (session == null || session.getCurrentSecurityToken() == null) {
             return;
         }
+
         SecurityToken securityToken = session.getCurrentSecurityToken();
-        // 判断上次续约与本次的间隔
-        Long autoRenewalIntervalTime = PROPERTIES.get().getAutoRenewalIntervalTime();
-        LocalDateTime activityTime = this.tokenLastActivityTime(securityToken.getToken());
-        if (Objects.nonNull(activityTime)
-                && activityTime.plusSeconds(autoRenewalIntervalTime).isBefore(LocalDateTime.now())) {
+        LocalDateTime lastActivityTime = tokenLastActivityTime(securityToken.getToken());
+        if (lastActivityTime == null) {
+            return;
+        }
+
+        // 检查是否超过续约间隔
+        long intervalSeconds = PROPERTIES.get().getAutoRenewalIntervalSeconds();
+        LocalDateTime nextRenewalTime = lastActivityTime.plusSeconds(intervalSeconds);
+        if (nextRenewalTime.isBefore(LocalDateTime.now())) {
             session.renewalToken(securityToken.getToken());
-            // 续约成功通知
-            SecurityEventPublishManager.doRenewal(session.getLoginId(), securityToken.getToken(),
-                    securityToken.getDeviceType());
+            SecurityEventPublishManager.doRenewal(
+                    session.getLoginId(),
+                    securityToken.getToken(),
+                    securityToken.getDeviceType()
+            );
         }
     }
 
@@ -332,7 +328,7 @@ public interface SecurityService {
             throw new UnauthorizedException("需要被封禁的 token 无效");
         }
         SecurityToken securityToken = session.getCurrentSecurityToken();
-        session.updateTokenInfoState(securityToken.getToken(), SecurityConstant.TOKEN_STATE_BANNED);
+        session.updateTokenInfoState(securityToken.getToken(), TokenState.BANNED);
         session.flushSessionStorage();
         SecurityEventPublishManager.doBanned(session.getLoginId(), securityToken.getToken(),
                 securityToken.getDeviceType());
@@ -356,7 +352,7 @@ public interface SecurityService {
             throw new UnauthorizedException("需要被解封的 token 无效");
         }
         SecurityToken securityToken = session.getCurrentSecurityToken();
-        session.updateTokenInfoState(securityToken.getToken(), SecurityConstant.TOKEN_STATE_NORMAL);
+        session.updateTokenInfoState(securityToken.getToken(), TokenState.NORMAL);
         session.flushSessionStorage();
         SecurityEventPublishManager.doUnseal(session.getLoginId(), securityToken.getToken(),
                 securityToken.getDeviceType());
@@ -385,8 +381,8 @@ public interface SecurityService {
     /**
      * 退出操作
      */
-    default void loginOut() {
-        loginOut(null);
+    default void logout() {
+        logout(null);
     }
 
     /**
@@ -394,7 +390,7 @@ public interface SecurityService {
      *
      * @param token 用户 token
      */
-    default void loginOut(String token) {
+    default void logout(String token) {
         SecuritySession session = ObjectUtil.isEmpty(token) ? getCurrentSecuritySession() : getSecuritySessionByToken(token);
         if (Objects.isNull(session) || Objects.isNull(session.getCurrentSecurityToken())) {
             throw new UnauthorizedException("需要被退出的 token 无效");
@@ -420,7 +416,7 @@ public interface SecurityService {
         }
 
         if (REPOSITORY.get().removeTokenByTokenValue(securityToken.getToken())) {
-            SecurityEventPublishManager.doLoginOut(session.getLoginId(), securityToken.getToken(), deviceType);
+            SecurityEventPublishManager.doLogout(session.getLoginId(), securityToken.getToken(), deviceType);
         }
     }
 
@@ -506,11 +502,7 @@ public interface SecurityService {
      * @return 续约时间
      */
     default LocalDateTime tokenLastActivityTime(String token) {
-        String activityTime = REPOSITORY.get().getActivityTimeByTokenValue(token);
-        if (ObjectUtil.isEmpty(activityTime)) {
-            return null;
-        }
-        return DateUtil.parse(activityTime);
+        return REPOSITORY.get().getActivityTimeByTokenValue(token);
     }
 
     /**
@@ -654,7 +646,7 @@ public interface SecurityService {
 
         List<SecurityToken> availableTokenInfoList = securitySession.getTokenInfoList()
                 .stream()
-                .filter(item -> SecurityConstant.TOKEN_STATE_NORMAL.equals(item.getState()))
+                .filter(item -> TokenState.NORMAL == item.getState())
                 .toList();
         if (!availableTokenInfoList.isEmpty()) {
             // 最先登录的 token
@@ -671,7 +663,7 @@ public interface SecurityService {
                         .forEach(tokenInfo -> {
                             // 已达到登录设备类型上限，顶掉最先登录设备的所有相同的设备类型
                             securitySession.updateTokenInfoState(tokenInfo.getToken(),
-                                    SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);
+                                    TokenState.REPLACED_OFFLINE);
                             SecurityEventPublishManager.doReplaceOut(loginId, tokenInfo.getToken(),
                                     tokenInfo.getDeviceType());
                         });
@@ -682,7 +674,7 @@ public interface SecurityService {
                         && availableTokenInfoList.size() >= PROPERTIES.get().getMaxLoginLimit()) {
                     // 已达到登录上限，顶掉最先登录的设备
                     securitySession.updateTokenInfoState(earliestToken.getToken(),
-                            SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);
+                            TokenState.REPLACED_OFFLINE);
                     SecurityEventPublishManager.doReplaceOut(loginId, earliestToken.getToken(),
                             earliestToken.getDeviceType());
                 }
@@ -693,14 +685,14 @@ public interface SecurityService {
                                 .equals(securitySession.getCurrentSecurityToken().getDeviceType()))
                         .forEach(tokenInfo -> {
                             securitySession.updateTokenInfoState(tokenInfo.getToken(),
-                                    SecurityConstant.TOKEN_STATE_REPLACE_OFFLINE);
+                                    TokenState.REPLACED_OFFLINE);
                             SecurityEventPublishManager.doReplaceOut(securitySession.getLoginId(), tokenInfo.getToken(),
                                     tokenInfo.getDeviceType());
                         });
             }
         }
 
-        securitySession.setUpdateTime(DateUtil.format(LocalDateTime.now()));
+        securitySession.setUpdateTime(LocalDateTime.now());
         securitySession.addTokenInfo(securitySession.getCurrentSecurityToken());
         return securitySession;
     }

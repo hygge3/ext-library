@@ -1,60 +1,88 @@
 package ext.library.security.constants;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 /**
- * <p>
- * 常量
- * </p>
+ * 安全模块常量
  */
-public interface SecurityConstant {
+public final class SecurityConstant {
 
-	/**
-	 * 不过期
-	 */
-	Long NON_EXPIRING = -1L;
+    private SecurityConstant() {
+        // 禁止实例化
+    }
 
-	/**
-	 * 不限制
-	 */
-	Integer NON_LIMIT = -1;
+    /**
+     * 计算剩余超时秒数
+     *
+     * @param baseTime       基准时间（创建时间或活跃时间）
+     * @param timeoutSeconds 超时时间（秒）
+     * @return 剩余秒数，若已过期返回 0
+     */
+    public static long calculateRemainingSeconds(LocalDateTime baseTime, long timeoutSeconds) {
+        if (NON_EXPIRING.equals(timeoutSeconds)) {
+            return NON_EXPIRING;
+        }
+        long remaining = Duration.between(LocalDateTime.now(), baseTime.plusSeconds(timeoutSeconds)).toSeconds();
+        return Math.max(0L, remaining);
+    }
 
-	/**
-	 * token-正常状态
-	 */
-	String TOKEN_STATE_NORMAL = "1";
+    /**
+     * 判断是否已超时
+     *
+     * @param baseTime       基准时间
+     * @param timeoutSeconds 超时时间（秒）
+     * @return true 已超时，false 未超时
+     */
+    public static boolean isExpired(LocalDateTime baseTime, long timeoutSeconds) {
+        if (NON_EXPIRING.equals(timeoutSeconds)) {
+            return false;
+        }
+        return baseTime.plusSeconds(timeoutSeconds).isBefore(LocalDateTime.now());
+    }
 
-	/**
-	 * token-被踢下线
-	 */
-	String TOKEN_STATE_KICKED_OFFLINE = "2";
+    /**
+     * 不过期（-1L）
+     */
+    public static final Long NON_EXPIRING = -1L;
 
-	/**
-	 * token-被顶下线
-	 */
-	String TOKEN_STATE_REPLACE_OFFLINE = "3";
+    /**
+     * 不限制（-1）
+     */
+    public static final Integer NON_LIMIT = -1;
 
-	/**
-	 * token-封禁
-	 */
-	String TOKEN_STATE_BANNED = "4";
+    /**
+     * Authorization 前缀
+     */
+    public static final String AUTHORIZATION_PREFIX = "Bearer ";
 
-	/**
-	 * authorization 前缀
-	 */
-	String AUTHORIZATION_PREFIX = "Bearer ";
+    /**
+     * 未知
+     */
+    public static final String UNKNOWN = "unknown";
 
-	/**
-	 * 未知
-	 */
-	String UNKNOWN = "unknown";
+    /**
+     * Security Session ID
+     */
+    public static final String SECURITY_SESSION_ID = "security_session_id";
 
-	/**
-	 * security session id
-	 */
-	String SECURITY_SESSION_ID = "security_session_id";
+    /**
+     * 自定义 Token 参数名称
+     */
+    public static final String SECURITY_CUSTOM_IDENTITY_TOKEN = "security_custom_identity_token";
 
-	/**
-	 * 自定义 token 参数名称
-	 */
-	String SECURITY_CUSTOM_IDENTITY_TOKEN = "security_custom_identity_token";
+    /**
+     * 默认超时时间：30 天（秒）
+     */
+    public static final long DEFAULT_TIMEOUT_SECONDS = 60L * 60 * 24 * 30;
 
+    /**
+     * 默认活跃超时时间：1 小时（秒）
+     */
+    public static final long DEFAULT_ACTIVITY_TIMEOUT_SECONDS = 60L * 60;
+
+    /**
+     * 无效 Token 清理阈值：48 小时
+     */
+    public static final int INVALID_TOKEN_CLEANUP_HOURS = 48;
 }

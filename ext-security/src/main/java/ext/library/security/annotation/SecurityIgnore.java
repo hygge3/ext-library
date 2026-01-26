@@ -1,4 +1,4 @@
-package ext.library.security.annotion;
+package ext.library.security.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

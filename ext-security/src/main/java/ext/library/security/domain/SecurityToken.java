@@ -2,258 +2,178 @@ package ext.library.security.domain;
 
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
+import ext.library.security.enums.TokenState;
 import ext.library.security.repository.SecurityRepository;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>
- * SecurityToken
- * </p>
+ * Security Token 信息
  */
 public class SecurityToken implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
     /**
-     * token 挂载数据
+     * Token 挂载数据
      */
     private final Map<String, Object> tokenMountData = new HashMap<>();
+
     /**
-     * token
+     * Token 值
      */
     private String token;
+
     /**
-     * 登录 Id
+     * 登录 ID
      */
     private String loginId;
+
     /**
      * 设备类型
      */
     private String deviceType;
+
     /**
-     * 过期时间 单位秒
+     * 过期时间（秒）
      */
     private Long timeout;
+
     /**
-     * 活跃时间 格式 yyyy-MM-dd HH:mm:ss
+     * 活跃时间
      */
-    private String activityTime;
+    private LocalDateTime activityTime;
+
     /**
-     * 活跃超时时间 单位秒
+     * 活跃超时时间（秒）
      */
     private Long activityTimeout;
-    /**
-     * 状态标记 1 正常 2 被踢下线 3 被顶下线 4 封禁
-     */
-    private String state;
-    /**
-     * 创建时间 格式 yyyy-MM-dd HH:mm:ss
-     */
-    private String createTime;
-    /**
-     * 更新时间 格式 yyyy-MM-dd HH:mm:ss
-     */
-    private String updateTime;
 
     /**
-     * 获取 token 挂载数据
-     *
-     * @return token 挂载数据
+     * 状态
      */
-    public Map<String, Object> getTokenMountData() {
-        return tokenMountData;
-    }
+    private TokenState state;
 
     /**
-     * 获取 token
-     *
-     * @return token
+     * 创建时间
      */
-    public String getToken() {
-        return token;
-    }
+    private LocalDateTime createTime;
 
     /**
-     * 设置 token
-     *
-     * @param token token
+     * 更新时间
      */
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    /**
-     * 获取登录 Id
-     *
-     * @return 登录 Id
-     */
-    public String getLoginId() {
-        return loginId;
-    }
-
-    /**
-     * 设置登录 Id
-     *
-     * @param loginId 登录 Id
-     */
-    public void setLoginId(String loginId) {
-        this.loginId = loginId;
-    }
-
-    /**
-     * 获取设备类型
-     *
-     * @return 设备类型
-     */
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    /**
-     * 设置设备类型
-     *
-     * @param deviceType 设备类型
-     */
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
-
-    /**
-     * 获取过期时间 单位秒
-     *
-     * @return 过期时间
-     */
-    public Long getTimeout() {
-        return timeout;
-    }
-
-    /**
-     * 设置过期时间 单位秒
-     *
-     * @param timeout 过期时间
-     */
-    public void setTimeout(Long timeout) {
-        this.timeout = timeout;
-    }
-
-    /**
-     * 获取活跃时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @return 活跃时间
-     */
-    public String getActivityTime() {
-        return activityTime;
-    }
-
-    /**
-     * 设置活跃时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @param activityTime 活跃时间
-     */
-    public void setActivityTime(String activityTime) {
-        this.activityTime = activityTime;
-    }
-
-    /**
-     * 获取活跃超时时间 单位秒
-     *
-     * @return 活跃超时时间
-     */
-    public Long getActivityTimeout() {
-        return activityTimeout;
-    }
-
-    /**
-     * 设置活跃超时时间 单位秒
-     *
-     * @param activityTimeout 活跃超时时间
-     */
-    public void setActivityTimeout(Long activityTimeout) {
-        this.activityTimeout = activityTimeout;
-    }
-
-    /**
-     * 获取状态标记 1 正常 2 被踢下线 3 被顶下线 4 封禁
-     *
-     * @return 状态标记
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * 设置状态标记 1 正常 2 被踢下线 3 被顶下线 4 封禁
-     *
-     * @param state 状态标记
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * 获取创建时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @return 创建时间
-     */
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    /**
-     * 设置创建时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @param createTime 创建时间
-     */
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
-    }
-
-    /**
-     * 获取更新时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @return 更新时间
-     */
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    /**
-     * 设置更新时间 格式 yyyy-MM-dd HH:mm:ss
-     *
-     * @param updateTime 更新时间
-     */
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public SecurityToken(String token, String loginId, String deviceType, Long timeout, String activityTime, Long activityTimeout, String state, String createTime, String updateTime) {
-        this.token = token;
-        this.loginId = loginId;
-        this.deviceType = deviceType;
-        this.timeout = timeout;
-        this.activityTime = activityTime;
-        this.activityTimeout = activityTimeout;
-        this.state = state;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
+    private LocalDateTime updateTime;
 
     public SecurityToken() {
     }
 
+    public SecurityToken(String token, String loginId, String deviceType, Long timeout,
+                         LocalDateTime activityTime, Long activityTimeout, TokenState state,
+                         LocalDateTime createTime, LocalDateTime updateTime) {
+        this.token = token;
+        this.loginId = loginId;
+        this.deviceType = deviceType;
+        this.timeout = timeout;
+        this.activityTime = activityTime;
+        this.activityTimeout = activityTimeout;
+        this.state = state;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
+
+    // ==================== Getter/Setter ====================
+
+    public Map<String, Object> getTokenMountData() {
+        return tokenMountData;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+    public LocalDateTime getActivityTime() {
+        return activityTime;
+    }
+
+    public void setActivityTime(LocalDateTime activityTime) {
+        this.activityTime = activityTime;
+    }
+
+    public Long getActivityTimeout() {
+        return activityTimeout;
+    }
+
+    public void setActivityTimeout(Long activityTimeout) {
+        this.activityTimeout = activityTimeout;
+    }
+
+    public TokenState getState() {
+        return state;
+    }
+
+    public void setState(TokenState state) {
+        this.state = state;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    // ==================== 业务方法 ====================
+
     /**
-     * 设置存储信息
+     * 设置存储属性
      *
-     * @param key   key 值
-     * @param value value 值
-     *
-     * @return SecuritySession
+     * @param key   键
+     * @param value 值
+     * @return this
      */
     public SecurityToken setAttribute(String key, Object value) {
         tokenMountData.put(key, value);
@@ -262,39 +182,36 @@ public class SecurityToken implements Serializable {
     }
 
     /**
-     * 获取存储信息
+     * 获取存储属性
      *
-     * @param key key 值
-     *
-     * @return Object
+     * @param key 键
+     * @return 值
      */
     public Object getAttribute(String key) {
         return tokenMountData.get(key);
     }
 
     /**
-     * 获取存储信息
+     * 获取存储属性并转换类型
      *
-     * @param key    字符串 key
-     * @param tClass 类型
-     * @param <T>    泛型
-     *
+     * @param key   键
+     * @param clazz 目标类型
+     * @param <T>   泛型
      * @return 转换后的对象
      */
-    public <T> T getAttribute(String key, Class<T> tClass) {
+    public <T> T getAttribute(String key, Class<T> clazz) {
         Object obj = getAttribute(key);
-        return JsonUtil.readObj(JsonUtil.toJson(obj), tClass);
+        return JsonUtil.readObj(JsonUtil.toJson(obj), clazz);
     }
 
     /**
-     * 刷新 token 存储
+     * 刷新 Token 存储
      */
     public void flushTokenStorage() {
         SecurityRepository repository = SpringUtil.getBean(SecurityRepository.class);
-
         boolean result = repository.saveToken(this);
         if (!result) {
-            throw new ExtException(EmojiSymbol.SECURITY,"保存 token 认证数据失败");
+            throw new ExtException(EmojiSymbol.SECURITY, "保存 Token 认证数据失败");
         }
     }
 }

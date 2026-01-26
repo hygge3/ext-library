@@ -1,15 +1,18 @@
 package ext.library.security.properties;
 
-import ext.library.security.enums.SecurityRepositoryEnum;
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.Pattern;
 
 /**
+ * 安全模块配置属性
  * <p>
- * 配置文件
- * </p>
+ * 配置前缀：{@code ext.security}
+ *
+ * @since 4.0.0
  */
 @ConfigurationProperties(SecurityProperties.PREFIX)
 @Validated
@@ -23,24 +26,32 @@ public class SecurityProperties {
     private String securityName = "Authorization";
 
     /**
-     * 授权有效期（单位：秒）默认 30 天，-1 代表永久
+     * 授权有效期，默认 30 天
+     * <p>
+     * 支持 Duration 格式：30d, 720h, 2592000s 等
      */
-    private Long timeout = 60 * 60 * 24 * 30L;
+    private Duration timeout = Duration.ofDays(30);
 
     /**
-     * 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，，默认 30 分钟，-1 代表不限制，永不冻结
+     * 最低活跃频率，如果 token 超过此时间没有访问系统就会被冻结，默认 1 小时
+     * <p>
+     * 支持 Duration 格式：1h, 60m, 3600s 等
      */
-    private Long activityTimeout = 60 * 60L;
+    private Duration activityTimeout = Duration.ofHours(1);
 
     /**
-     * 是否自动续约 默认为 true 设置为 true 时会在调用 checkToken 完成时自动调用续约方法
+     * 是否自动续约，默认为 true
+     * <p>
+     * 设置为 true 时会在调用 checkToken 完成时自动调用续约方法
      */
     private Boolean autoRenewal = true;
 
     /**
-     * 自动续约间隔时长（单位：秒）
+     * 自动续约间隔时长，默认 3 分钟
+     * <p>
+     * 支持 Duration 格式：3m, 180s 等
      */
-    private Long autoRenewalIntervalTime = 180L;
+    private Duration autoRenewalInterval = Duration.ofMinutes(3);
 
     /**
      * 同一账号，多地同时登录 true 表示允许一起登录，false 表示新登录会挤掉旧登录
@@ -68,11 +79,6 @@ public class SecurityProperties {
     private Boolean enableCookie = true;
 
     /**
-     * security 存储库
-     */
-    private SecurityRepositoryEnum repository = SecurityRepositoryEnum.RAM;
-
-    /**
      * cookie 配置
      */
     private CookieProperties cookieConfig = new CookieProperties();
@@ -85,19 +91,37 @@ public class SecurityProperties {
         this.securityName = securityName;
     }
 
-    public Long getTimeout() {
+    public Duration getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(Long timeout) {
+    /**
+     * 获取超时时间（秒）
+     *
+     * @return 超时秒数
+     */
+    public long getTimeoutSeconds() {
+        return timeout.toSeconds();
+    }
+
+    public void setTimeout(Duration timeout) {
         this.timeout = timeout;
     }
 
-    public Long getActivityTimeout() {
+    public Duration getActivityTimeout() {
         return activityTimeout;
     }
 
-    public void setActivityTimeout(Long activityTimeout) {
+    /**
+     * 获取活跃超时时间（秒）
+     *
+     * @return 活跃超时秒数
+     */
+    public long getActivityTimeoutSeconds() {
+        return activityTimeout.toSeconds();
+    }
+
+    public void setActivityTimeout(Duration activityTimeout) {
         this.activityTimeout = activityTimeout;
     }
 
@@ -109,12 +133,21 @@ public class SecurityProperties {
         this.autoRenewal = autoRenewal;
     }
 
-    public Long getAutoRenewalIntervalTime() {
-        return autoRenewalIntervalTime;
+    public Duration getAutoRenewalInterval() {
+        return autoRenewalInterval;
     }
 
-    public void setAutoRenewalIntervalTime(Long autoRenewalIntervalTime) {
-        this.autoRenewalIntervalTime = autoRenewalIntervalTime;
+    /**
+     * 获取自动续约间隔时间（秒）
+     *
+     * @return 自动续约间隔秒数
+     */
+    public long getAutoRenewalIntervalSeconds() {
+        return autoRenewalInterval.toSeconds();
+    }
+
+    public void setAutoRenewalInterval(Duration autoRenewalInterval) {
+        this.autoRenewalInterval = autoRenewalInterval;
     }
 
     public Boolean getIsConcurrentLogin() {
@@ -155,14 +188,6 @@ public class SecurityProperties {
 
     public void setEnableCookie(Boolean enableCookie) {
         this.enableCookie = enableCookie;
-    }
-
-    public SecurityRepositoryEnum getRepository() {
-        return repository;
-    }
-
-    public void setRepository(SecurityRepositoryEnum repository) {
-        this.repository = repository;
     }
 
     public CookieProperties getCookieConfig() {

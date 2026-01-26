@@ -3,8 +3,8 @@ package ext.library.security.domain;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.constants.SecurityConstant;
+import ext.library.security.enums.TokenState;
 import ext.library.security.properties.SecurityProperties;
-import ext.library.tool.util.DateUtil;
 import ext.library.tool.util.IdUtil;
 
 import java.io.Serial;
@@ -202,33 +202,49 @@ public class SecurityLoginParams implements Serializable {
         return tokenMountData.get(key);
     }
 
+    /**
+     * 转换为 SecurityToken
+     *
+     * @param loginId 登录 ID
+     * @return SecurityToken
+     */
     public SecurityToken convert(String loginId) {
         SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
+        LocalDateTime now = LocalDateTime.now();
+
         SecurityToken securityToken = new SecurityToken();
         securityToken.setToken(IdUtil.getUUIDv7());
         securityToken.setLoginId(loginId);
         securityToken.setDeviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN));
-        securityToken.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
-        securityToken.setActivityTime(DateUtil.format(LocalDateTime.now()));
-        securityToken.setActivityTimeout(Objects.isNull(this.getActivityTimeout()) ? properties.getActivityTimeout() : this.getActivityTimeout());
-        securityToken.setState(SecurityConstant.TOKEN_STATE_NORMAL);
-        securityToken.setCreateTime(DateUtil.format(LocalDateTime.now()));
-
-        // 设置 token 挂载数据
+        securityToken.setTimeout(this.getTimeout() != null ? this.getTimeout() : properties.getTimeoutSeconds());
+        securityToken.setActivityTime(now);
+        securityToken.setActivityTimeout(this.getActivityTimeout() != null ? this.getActivityTimeout() : properties.getActivityTimeoutSeconds());
+        securityToken.setState(TokenState.NORMAL);
+        securityToken.setCreateTime(now);
         securityToken.getTokenMountData().putAll(this.getTokenMountData());
+
         return securityToken;
     }
 
+    /**
+     * 转换为 SecuritySession
+     *
+     * @param loginId       登录 ID
+     * @param securityToken SecurityToken，若为 null 则自动创建
+     * @return SecuritySession
+     */
     public SecuritySession convert(String loginId, SecurityToken securityToken) {
         SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
-        SecurityToken token = Objects.isNull(securityToken) ? this.convert(loginId) : securityToken;
+        SecurityToken token = securityToken != null ? securityToken : this.convert(loginId);
+
         SecuritySession session = new SecuritySession(true);
         session.setLoginId(loginId);
         session.getMountData().putAll(this.getMountData());
-        session.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
+        session.setTimeout(this.getTimeout() != null ? this.getTimeout() : properties.getTimeoutSeconds());
         session.setCurrentSecurityToken(token);
         session.setVersion(0L);
         session.addTokenInfo(token);
+
         return session;
     }
 }

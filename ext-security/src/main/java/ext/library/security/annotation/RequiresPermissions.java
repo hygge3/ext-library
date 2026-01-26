@@ -1,4 +1,4 @@
-package ext.library.security.annotion;
+package ext.library.security.annotation;
 
 import ext.library.security.enums.Logical;
 import java.lang.annotation.Documented;

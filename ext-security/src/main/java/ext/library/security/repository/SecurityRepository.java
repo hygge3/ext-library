@@ -2,6 +2,8 @@ package ext.library.security.repository;
 
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -55,7 +57,7 @@ public interface SecurityRepository {
 	 * @param tokenValue token
 	 * @return 活跃时间点
 	 */
-	String getActivityTimeByTokenValue(String tokenValue);
+	LocalDateTime getActivityTimeByTokenValue(String tokenValue);
 
 	/**
 	 * 根据 tokenValue 获取 token 超时时间

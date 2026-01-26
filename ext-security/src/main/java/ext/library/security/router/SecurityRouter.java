@@ -1,8 +1,8 @@
 package ext.library.security.router;
 
-import ext.library.security.annotion.RequiresPermissions;
-import ext.library.security.annotion.RequiresRoles;
-import ext.library.security.annotion.SecurityIgnore;
+import ext.library.security.annotation.RequiresPermissions;
+import ext.library.security.annotation.RequiresRoles;
+import ext.library.security.annotation.SecurityIgnore;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.util.PermissionUtil;
 import ext.library.security.util.SecurityUtil;

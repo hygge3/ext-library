@@ -100,7 +100,7 @@ public interface SecurityListener {
      * @param token      token 值
      * @param deviceType 设备类型
      */
-    default void doLoginOut(String loginId, String token, String deviceType) {
+    default void doLogout(String loginId, String token, String deviceType) {
         Logs.info(EmojiSymbol.SECURITY, "退出，account:{},token:{},deviceType:{}", loginId, token, deviceType);
     }
 

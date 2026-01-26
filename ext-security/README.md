@@ -27,10 +27,12 @@ implementation("ext.library:ext-security")
 
 | 依赖 | 说明 |
 |------|------|
-| ext-http | HTTP 客户端 |
+| ext-useragent | UserAgent 解析 |
+| ext-core | 核心工具 |
 | ext-json | JSON 处理 |
+| ext-cache | 缓存支持（支持 Caffeine/Redis/PostgreSQL/L2） |
+| ext-mvc | MVC 支持 |
 | ext-crypto | 加密支持 |
-| ext-redis | 可选，Redis 存储模式 |
 | spring-boot-starter-web | 可选，Web 支持 |
 
 ## 功能特性
@@ -38,7 +40,7 @@ implementation("ext.library:ext-security")
 - 轻量级安全认证
 - 基于路由的权限控制
 - 基于注解的权限校验
-- 内存和 Redis 两种存储模式
+- 多种缓存后端支持（Caffeine、Redis、PostgreSQL、L2 二级缓存）
 - 灵活的认证策略
 - 安全事件监听
 - 异常统一处理
@@ -47,10 +49,20 @@ implementation("ext.library:ext-security")
 
 | 配置项 | 默认值 | 说明 |
 |-------|-------|------|
-| ext.security.repository | RAM | 存储方式：RAM、REDIS |
-| ext.security.exclude-path | - | 排除路径 |
-| ext.security.token-header | Authorization | Token 请求头 |
-| ext.security.token-prefix | Bearer | Token 前缀 |
+| ext.security.security-name | Authorization | 认证名称 |
+| ext.security.timeout | 30d | 授权有效期，支持 Duration 格式（30d, 720h, 2592000s） |
+| ext.security.activity-timeout | 1h | 最低活跃频率，支持 Duration 格式（1h, 60m, 3600s） |
+| ext.security.auto-renewal | true | 是否自动续约 |
+| ext.security.auto-renewal-interval | 3m | 自动续约间隔，支持 Duration 格式 |
+| ext.security.is-concurrent-login | true | 是否允许多地同时登录 |
+| ext.security.enable-cookie | true | 是否开启 cookie |
+
+存储配置通过 ext-cache 模块进行（参考 [ext-cache 配置](../ext-infra/ext-cache/)）：
+
+| 配置项 | 默认值 | 说明 |
+|-------|-------|------|
+| ext.cache.cache-storage | L2 | 缓存存储方式：CAFFEINE/REDIS/POSTGRES/L2 |
+| ext.cache.l2-backend | REDIS | L2 模式下的分布式后端：REDIS/POSTGRES |
 
 ## 包结构
 
@@ -90,8 +102,7 @@ ext.library.security
 | `SecurityAuthority` | 权限校验核心 |
 | `SecurityInterceptor` | 安全拦截器 |
 | `SecurityRepository` | 存储接口 |
-| `SecurityRamRepository` | 内存存储实现 |
-| `SecurityRedisRepository` | Redis 存储实现 |
+| `SecurityCacheRepository` | 基于 ext-cache 的存储实现 |
 | `SecurityListener` | 安全事件监听 |
 | `SecurityExceptionHandler` | 异常处理器 |
 
@@ -102,12 +113,16 @@ ext.library.security
 ```yaml
 ext:
   security:
-    repository: RAM  # 或 REDIS
-    token-header: Authorization
-    token-prefix: Bearer
-    exclude-path:
-      - /api/public/**
-      - /health
+    security-name: Authorization
+    timeout: 30d               # 授权有效期，支持 Duration 格式
+    activity-timeout: 1h       # 活跃超时时间
+    auto-renewal: true
+    auto-renewal-interval: 3m  # 自动续约间隔
+    is-concurrent-login: true
+    enable-cookie: true
+  cache:
+    cache-storage: L2          # CAFFEINE/REDIS/POSTGRES/L2
+    l2-backend: REDIS          # L2 模式下的分布式后端
 ```
 
 ### 路由权限配置

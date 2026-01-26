@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @EnableConfigurationProperties({CacheProperties.class})
-public class CacheAutoConfig {
+public class CacheAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

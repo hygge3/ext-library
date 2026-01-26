@@ -108,8 +108,8 @@ public final class SecurityUtil {
     /**
      * 退出操作
      */
-    public static void loginOut() {
-        SERVICE.get().loginOut();
+    public static void logout() {
+        SERVICE.get().logout();
     }
 
     /**
@@ -117,8 +117,8 @@ public final class SecurityUtil {
      *
      * @param token token
      */
-    public static void loginOut(String token) {
-        SERVICE.get().loginOut(token);
+    public static void logout(String token) {
+        SERVICE.get().logout(token);
     }
 
     /**
