@@ -1,37 +1,61 @@
 package ext.library.monitor;
 
+import java.util.List;
+
 /**
  * 磁盘信息
+ *
+ * @param name 分区名称
+ * @param mount 挂载点
+ * @param type 文件系统类型（FAT、NTFS、ext4 等）
+ * @param totalSpace 总空间（字节）
+ * @param usableSpace 可用空间（字节）
+ * @param usePercent 使用率（0-1）
  */
 public record DiskInfo(
-        // 名称
         String name,
-        // 文件系统的卷名
-        String volume,
-        // 标签
-        String label,
-        // 文件系统的逻辑卷名
-        String logicalVolume,
-        // 文件系统的挂载点
         String mount,
-        // 文件系统的描述
-        String description,
-        // 文件系统的选项
-        String options,
-        // 文件系统的类型（FAT、NTFS、etx2、ext4 等）
         String type,
-        // UUID/GUID
-        String UUID,
-        // 分区大小
-        String size,
-        // 总空间
-        Long totalSpace,
-        // 已使用
-        String used,
-        // 可用空间
-        Long usableSpace,
-        // 可用
-        String avail,
-        // 已使用百分比
+        long totalSpace,
+        long usableSpace,
         double usePercent
-) {}
+) {
+    private static final SystemMonitor MONITOR = new SystemMonitor();
+
+    /**
+     * 获取所有磁盘信息（静态便捷方法）
+     *
+     * @return 磁盘信息列表
+     */
+    public static List<DiskInfo> getAll() {
+        return MONITOR.getDiskInfos();
+    }
+
+    /**
+     * 获取已用空间（字节）
+     */
+    public long usedSpace() {
+        return totalSpace - usableSpace;
+    }
+
+    /**
+     * 获取格式化的总空间
+     */
+    public String totalSpaceFormatted() {
+        return FormatUtil.formatBytes(totalSpace);
+    }
+
+    /**
+     * 获取格式化的可用空间
+     */
+    public String usableSpaceFormatted() {
+        return FormatUtil.formatBytes(usableSpace);
+    }
+
+    /**
+     * 获取格式化的已用空间
+     */
+    public String usedSpaceFormatted() {
+        return FormatUtil.formatBytes(usedSpace());
+    }
+}

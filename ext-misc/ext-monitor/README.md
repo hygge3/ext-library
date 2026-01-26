@@ -31,20 +31,22 @@ implementation("ext.library:ext-monitor")
 
 ## 功能特性
 
-- CPU 信息采集 (使用率、核心数、型号)
-- 内存信息采集 (总量、可用、已用、使用率)
-- 磁盘信息采集 (分区、容量、使用率)
-- 网络 IO 信息 (接收/发送字节、速度)
+- CPU 信息采集（使用率、核心数）
+- 内存信息采集（总量、可用、已用、使用率）
+- 磁盘信息采集（分区、容量、使用率）
+- 网络 IO 信息（接收/发送字节、包数、速率）
 - JVM 信息监控
-- 系统综合信息
-- 跨平台支持 (Windows/Linux/macOS)
+- 主机信息采集
+- 跨平台支持（Windows/Linux/macOS）
+- **静态便捷方法**：无需注入即可直接使用
+- **可配置采样时间**：CPU 和网络 IO 支持自定义采样时间
 
 ## 核心类说明
 
 | 类名 | 说明 |
 |------|------|
-| `OshiMonitor` | 监控管理器，Spring Bean |
-| `SysInfo` | 系统综合信息 |
+| `SystemMonitor` | 监控管理器（可作为 Spring Bean 注入） |
+| `HostInfo` | 主机信息 |
 | `CpuInfo` | CPU 信息 |
 | `MemoryInfo` | 内存信息 |
 | `DiskInfo` | 磁盘信息 |
@@ -53,96 +55,42 @@ implementation("ext.library:ext-monitor")
 
 ## 使用示例
 
-### 注入监控器
+### 方式一：静态便捷方法（推荐）
+
+无需 Spring 注入，直接使用静态方法：
 
 ```java
-@Autowired
-private OshiMonitor monitor;
-```
+// 获取 CPU 信息（默认采样 500ms）
+CpuInfo cpu = CpuInfo.get();
+System.out.println("CPU 使用率: " + cpu.usePercent());
 
-### 获取系统信息
+// 自定义采样时间（200ms）
+CpuInfo cpuFast = CpuInfo.get(200);
 
-```java
-public SysInfo getSystemInfo() {
-    return monitor.getSysInfo();
+// 获取内存信息
+MemoryInfo memory = MemoryInfo.get();
+System.out.println("内存使用率: " + memory.usePercent());
+
+// 获取 JVM 信息
+JvmInfo jvm = JvmInfo.get();
+System.out.println("JDK 版本: " + jvm.jdkVersion());
+
+// 获取主机信息
+HostInfo host = HostInfo.get();
+System.out.println("主机名: " + host.hostName());
+
+// 获取磁盘信息
+List<DiskInfo> disks = DiskInfo.getAll();
+for (DiskInfo disk : disks) {
+    System.out.println(disk.name() + ": " + disk.totalSpaceFormatted());
 }
+
+// 获取网络 IO（默认采样 1 秒）
+NetIoInfo net = NetIoInfo.get();
+System.out.println("下载速度: " + net.receiveKBPerSecond() + " KB/s");
 ```
 
-### CPU 信息
-
-```java
-public CpuInfo getCpuInfo() {
-    CpuInfo cpuInfo = new CpuInfo();
-    cpuInfo.setCpuLoad(monitor.cpuLoad());           // CPU 使用率
-    cpuInfo.setCpuCount(monitor.processorCount());   // CPU 核心数
-    cpuInfo.setCpuModel(monitor.processorModel());   // CPU 型号
-    return cpuInfo;
-}
-```
-
-### 内存信息
-
-```java
-public MemoryInfo getMemoryInfo() {
-    MemoryInfo memoryInfo = new MemoryInfo();
-    memoryInfo.setTotalMemory(monitor.totalMemory());        // 总内存
-    memoryInfo.setAvailableMemory(monitor.availableMemory()); // 可用内存
-    memoryInfo.setUsedMemory(monitor.usedMemory());          // 已用内存
-    memoryInfo.setUsedPercent(monitor.memoryUsedPercent());  // 使用率
-    return memoryInfo;
-}
-```
-
-### 磁盘信息
-
-```java
-public List<DiskInfo> getDiskInfo() {
-    return monitor.diskInfos();
-}
-```
-
-### 网络 IO 信息
-
-```java
-public NetIoInfo getNetIoInfo() {
-    NetIoInfo netIoInfo = new NetIoInfo();
-    netIoInfo.setRxBytes(monitor.receiveBytes());      // 接收字节
-    netIoInfo.setTxBytes(monitor.transmitBytes());     // 发送字节
-    netIoInfo.setRxSpeed(monitor.receiveSpeed());      // 下载速度
-    netIoInfo.setTxSpeed(monitor.transmitSpeed());     // 上传速度
-    return netIoInfo;
-}
-```
-
-### JVM 信息
-
-```java
-public JvmInfo getJvmInfo() {
-    JvmInfo jvmInfo = new JvmInfo();
-    jvmInfo.setVersion(System.getProperty("java.version"));
-    jvmInfo.setVmName(System.getProperty("java.vm.name"));
-    jvmInfo.setTotalMemory(Runtime.getRuntime().totalMemory());
-    jvmInfo.setFreeMemory(Runtime.getRuntime().freeMemory());
-    jvmInfo.setMaxMemory(Runtime.getRuntime().maxMemory());
-    return jvmInfo;
-}
-```
-
-### 完整监控数据
-
-```java
-public Map<String, Object> getAllMetrics() {
-    Map<String, Object> metrics = new HashMap<>();
-    metrics.put("cpu", getCpuInfo());
-    metrics.put("memory", getMemoryInfo());
-    metrics.put("disk", getDiskInfo());
-    metrics.put("jvm", getJvmInfo());
-    metrics.put("netIo", getNetIoInfo());
-    return metrics;
-}
-```
-
-### 监控 API 示例
+### 方式二：Spring Bean 注入
 
 ```java
 @RestController
@@ -150,106 +98,152 @@ public Map<String, Object> getAllMetrics() {
 public class MonitorController {
 
     @Autowired
-    private OshiMonitor monitor;
+    private SystemMonitor monitor;
 
     @GetMapping("/cpu")
     public CpuInfo getCpu() {
-        CpuInfo cpuInfo = new CpuInfo();
-        cpuInfo.setCpuLoad(monitor.cpuLoad());
-        cpuInfo.setCpuCount(monitor.processorCount());
-        cpuInfo.setCpuModel(monitor.processorModel());
-        return cpuInfo;
+        return monitor.getCpuInfo();
     }
 
     @GetMapping("/memory")
     public MemoryInfo getMemory() {
-        MemoryInfo memoryInfo = new MemoryInfo();
-        memoryInfo.setTotalMemory(monitor.totalMemory());
-        memoryInfo.setAvailableMemory(monitor.availableMemory());
-        memoryInfo.setUsedMemory(monitor.usedMemory());
-        memoryInfo.setUsedPercent(monitor.memoryUsedPercent());
-        return memoryInfo;
+        return monitor.getMemoryInfo();
     }
 
     @GetMapping("/disk")
     public List<DiskInfo> getDisk() {
-        return monitor.diskInfos();
+        return monitor.getDiskInfos();
     }
 
-    @GetMapping("/all")
-    public SysInfo getAll() {
-        return monitor.getSysInfo();
+    @GetMapping("/jvm")
+    public JvmInfo getJvm() {
+        return monitor.getJvmInfo();
+    }
+
+    @GetMapping("/host")
+    public HostInfo getHost() {
+        return monitor.getHostInfo();
+    }
+
+    @GetMapping("/net")
+    public NetIoInfo getNetIo() {
+        return monitor.getNetIoInfo();
     }
 }
 ```
 
 ## API 速查
 
-### OshiMonitor 方法
+### 静态便捷方法
+
+| 方法 | 描述 | 采样时间 |
+|------|------|----------|
+| `CpuInfo.get()` | 获取 CPU 信息 | 500ms |
+| `CpuInfo.get(millis)` | 获取 CPU 信息（自定义采样） | 自定义 |
+| `MemoryInfo.get()` | 获取内存信息 | 无 |
+| `JvmInfo.get()` | 获取 JVM 信息 | 无 |
+| `HostInfo.get()` | 获取主机信息 | 无 |
+| `DiskInfo.getAll()` | 获取所有磁盘信息 | 无 |
+| `NetIoInfo.get()` | 获取网络 IO 信息 | 1000ms |
+| `NetIoInfo.get(millis)` | 获取网络 IO 信息（自定义采样） | 自定义 |
+
+### SystemMonitor 方法
 
 | 方法 | 描述 |
 |------|------|
-| `getSysInfo()` | 获取系统综合信息 |
-| `cpuLoad()` | 获取 CPU 使用率 |
-| `processorCount()` | 获取 CPU 核心数 |
-| `processorModel()` | 获取 CPU 型号 |
-| `totalMemory()` | 获取总内存 |
-| `availableMemory()` | 获取可用内存 |
-| `usedMemory()` | 获取已用内存 |
-| `memoryUsedPercent()` | 获取内存使用率 |
-| `diskInfos()` | 获取磁盘信息列表 |
-| `receiveBytes()` | 获取网络接收字节 |
-| `transmitBytes()` | 获取网络发送字节 |
-| `receiveSpeed()` | 获取下载速度 |
-| `transmitSpeed()` | 获取上传速度 |
+| `getHostInfo()` | 获取主机信息 |
+| `getCpuInfo()` | 获取 CPU 信息（采样 500ms） |
+| `getCpuInfo(millis)` | 获取 CPU 信息（自定义采样时间） |
+| `getMemoryInfo()` | 获取内存信息 |
+| `getJvmInfo()` | 获取 JVM 信息 |
+| `getDiskInfos()` | 获取磁盘信息列表 |
+| `getNetIoInfo()` | 获取网络 IO 信息（采样 1 秒） |
+| `getNetIoInfo(millis)` | 获取网络 IO 信息（自定义采样时间） |
 
-## 信息类属性
+## 数据结构
 
 ### CpuInfo
 
-| 属性 | 描述 |
-|------|------|
-| cpuLoad | CPU 使用率 |
-| cpuCount | CPU 核心数 |
-| cpuModel | CPU 型号 |
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `physicalProcessorCount` | int | 物理处理器数量 |
+| `logicalProcessorCount` | int | 逻辑处理器数量 |
+| `systemPercent` | double | 系统使用率（0-1） |
+| `userPercent` | double | 用户使用率（0-1） |
+| `waitPercent` | double | IO 等待率（0-1） |
+| `usePercent` | double | 总使用率（0-1） |
 
 ### MemoryInfo
 
-| 属性 | 描述 |
-|------|------|
-| totalMemory | 总内存 |
-| availableMemory | 可用内存 |
-| usedMemory | 已用内存 |
-| usedPercent | 使用率 |
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `total` | String | 总内存（如 "16GB"） |
+| `used` | String | 已使用（如 "8GB"） |
+| `free` | String | 空闲（如 "8GB"） |
+| `usePercent` | double | 使用率（0-1） |
 
 ### DiskInfo
 
-| 属性 | 描述 |
-|------|------|
-| name | 分区名称 |
-| totalSpace | 总容量 |
-| usableSpace | 可用容量 |
-| usedSpace | 已用容量 |
-| usedPercent | 使用率 |
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `name` | String | 分区名称 |
+| `mount` | String | 挂载点 |
+| `type` | String | 文件系统类型 |
+| `totalSpace` | long | 总空间（字节） |
+| `usableSpace` | long | 可用空间（字节） |
+| `usePercent` | double | 使用率（0-1） |
+
+**便捷方法**：
+- `usedSpace()` - 已用空间（字节）
+- `totalSpaceFormatted()` - 格式化的总空间
+- `usableSpaceFormatted()` - 格式化的可用空间
+- `usedSpaceFormatted()` - 格式化的已用空间
 
 ### NetIoInfo
 
-| 属性 | 描述 |
-|------|------|
-| rxBytes | 接收字节 |
-| txBytes | 发送字节 |
-| rxSpeed | 下载速度 |
-| txSpeed | 上传速度 |
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `receivePacketsPerSecond` | long | 每秒接收包数 |
+| `transmitPacketsPerSecond` | long | 每秒发送包数 |
+| `receiveBytesPerSecond` | long | 每秒接收字节 |
+| `transmitBytesPerSecond` | long | 每秒发送字节 |
+
+**便捷方法**：
+- `receiveKBPerSecond()` - 每秒接收 KB 数
+- `transmitKBPerSecond()` - 每秒发送 KB 数
 
 ### JvmInfo
 
-| 属性 | 描述 |
-|------|------|
-| version | Java 版本 |
-| vmName | JVM 名称 |
-| totalMemory | 堆内存总量 |
-| freeMemory | 空闲堆内存 |
-| maxMemory | 最大堆内存 |
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `jdkVersion` | String | JDK 版本 |
+| `jdkHome` | String | JDK 安装目录 |
+| `jdkName` | String | JVM 名称 |
+| `jvmTotalMemory` | String | JVM 总内存 |
+| `maxMemory` | String | 最大可用内存 |
+| `freeMemory` | String | 空闲内存 |
+| `usedMemory` | String | 已使用内存 |
+| `usePercent` | double | 使用率（0-1） |
+| `startTime` | long | 启动时间戳（毫秒） |
+| `uptime` | long | 运行时长（毫秒） |
+
+### HostInfo
+
+| 属性 | 类型 | 描述 |
+|------|------|------|
+| `hostName` | String | 主机名 |
+| `hostAddress` | String | IP 地址 |
+| `osName` | String | 操作系统名称 |
+| `osArch` | String | 系统架构 |
+| `userDir` | String | 工作目录 |
+
+## 注意事项
+
+1. **采样时间**：CPU 和网络 IO 信息需要采样计算，默认采样时间分别为 500ms 和 1000ms。如需更快响应，可使用自定义采样时间，但精度会降低。
+
+2. **百分比表示**：所有 `usePercent` 字段值范围为 0-1（如 0.75 表示 75%）。
+
+3. **静态方法**：每个 Info 类的静态方法内部共享一个 SystemMonitor 实例，适合轻量级使用。在 Spring 环境中建议注入 SystemMonitor Bean 以获得更好的可测试性。
 
 ## 许可证
 
