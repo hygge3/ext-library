@@ -15,11 +15,6 @@ public class PostgresProperties {
     public static final String PREFIX = "ext.postgres";
 
     /**
-     * 是否启用模块
-     */
-    private boolean enabled = true;
-
-    /**
      * 是否自动初始化表结构
      */
     private boolean autoInitSchema = true;
@@ -90,14 +85,6 @@ public class PostgresProperties {
     private Duration sessionCleanupInterval = Duration.ofMinutes(10);
 
     // region Getters and Setters
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public boolean isAutoInitSchema() {
         return autoInitSchema;

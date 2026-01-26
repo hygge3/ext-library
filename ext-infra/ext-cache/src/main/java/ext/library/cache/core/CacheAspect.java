@@ -1,6 +1,6 @@
 package ext.library.cache.core;
 
-import ext.library.cache.annotion.Cache;
+import ext.library.cache.annotation.Cache;
 import ext.library.cache.enums.CacheType;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
@@ -14,17 +14,24 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * 缓存切面
+ * <p>
+ * 拦截 {@link Cache} 注解标记的方法，根据缓存类型执行相应的缓存操作
+ *
+ * @since 2025.08.29
+ */
 @Aspect
 public class CacheAspect {
 
     private final CacheStrategy cacheStrategy;
 
-    public CacheAspect(CacheStrategy cacheStrategy) {this.cacheStrategy = cacheStrategy;}
+    public CacheAspect(CacheStrategy cacheStrategy) {
+        this.cacheStrategy = cacheStrategy;
+    }
 
-    @Pointcut("@annotation(ext.library.cache.annotion.Cache)")
+    @Pointcut("@annotation(ext.library.cache.annotation.Cache)")
     public void cacheAspect() {
     }
 
@@ -32,34 +39,41 @@ public class CacheAspect {
     public Object doAround(ProceedingJoinPoint point) throws Throwable {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-
         Object[] args = point.getArgs();
 
         Cache annotation = method.getAnnotation(Cache.class);
         String cacheName = annotation.cacheName();
         String key = SpelUtil.parseValueToString(point.getThis(), method, args, annotation.key());
 
-        // 强制更新
-        if (annotation.type() == CacheType.PUT) {
-            Object object = point.proceed();
-            cacheStrategy.put(cacheName, key, object);
-            return object;
-        }
-        // 删除
-        else if (annotation.type() == CacheType.DELETE) {
-            cacheStrategy.evict(cacheName, key);
-            return point.proceed();
-        }
+        return switch (annotation.type()) {
+            case PUT -> {
+                Object result = point.proceed();
+                cacheStrategy.put(cacheName, key, result);
+                yield result;
+            }
+            case DELETE -> {
+                cacheStrategy.evict(cacheName, key);
+                yield point.proceed();
+            }
+            case FULL -> getOrLoad(point, signature, cacheName, key, annotation);
+        };
+    }
+
+    /**
+     * 获取缓存或加载数据
+     */
+    private Object getOrLoad(ProceedingJoinPoint point, MethodSignature signature,
+                             String cacheName, String key, Cache annotation) throws Throwable {
         Object cache = cacheStrategy.get(cacheName, key, signature.getReturnType());
-        if (Objects.nonNull(cache)) {
+        if (cache != null) {
             return cache;
         }
 
         Logs.debug(EmojiSymbol.CACHE, "从数据库获取数据");
-        Object object = point.proceed();
-        if (Objects.nonNull(object)) {
-            cacheStrategy.put(cacheName, key, object, DateUtil.convert(annotation.timeout(), TimeUnit.SECONDS));
+        Object result = point.proceed();
+        if (result != null) {
+            cacheStrategy.put(cacheName, key, result, DateUtil.convert(annotation.timeout(), annotation.timeUnit()));
         }
-        return object;
+        return result;
     }
 }

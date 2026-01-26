@@ -3,41 +3,76 @@ package ext.library.cache.strategy;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
+import ext.library.cache.properties.CacheProperties;
+import ext.library.core.util.SpringUtil;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
-import java.util.Objects;
 
 /**
- * Caffeine 策略
+ * Caffeine 本地缓存策略
+ * <p>
+ * 使用延迟初始化，根据配置动态创建 Cache 实例。
+ * 支持基于条目的自定义过期策略和访问后刷新过期时间。
  *
  * @since 2025.08.29
  */
 public class CaffeineStrategy implements CacheStrategy {
-    private static final Cache<@NonNull String, @NonNull CaffeineEntry> CACHE = Caffeine.newBuilder().maximumSize(100).expireAfter(new Expiry<@NonNull String, @NonNull CaffeineEntry>() {
-        @Override
-        public long expireAfterCreate(@NonNull String s, @NonNull CaffeineEntry caffeineEntry, long l) {
-            return caffeineEntry.expireTime().toNanos();
-        }
 
-        @Override
-        public long expireAfterUpdate(@NonNull String s, @NonNull CaffeineEntry caffeineEntry, long l, long l1) {
-            return caffeineEntry.expireTime().toNanos();
-        }
+    private volatile Cache<@NonNull String, @NonNull CaffeineEntry> cache;
 
-        @Override
-        public long expireAfterRead(@NonNull String s, @NonNull CaffeineEntry caffeineEntry, long l, long l1) {
-            if (caffeineEntry.accessFresh()) {
-                return caffeineEntry.expireTime().toNanos();
+    /**
+     * 获取或创建 Cache 实例（双重检查锁定延迟初始化）
+     */
+    private Cache<@NonNull String, @NonNull CaffeineEntry> getCache() {
+        if (cache == null) {
+            synchronized (this) {
+                if (cache == null) {
+                    cache = buildCache();
+                }
             }
-            return l1;
         }
-    }).build();
+        return cache;
+    }
+
+    /**
+     * 根据配置构建 Caffeine Cache 实例
+     */
+    private Cache<@NonNull String, @NonNull CaffeineEntry> buildCache() {
+        CacheProperties properties = SpringUtil.getBean(CacheProperties.class);
+        CacheProperties.CaffeineConfig config = properties.getCaffeine();
+        boolean refreshOnAccess = config.isRefreshOnAccess();
+
+        return Caffeine.newBuilder()
+                .maximumSize(config.getMaximumSize())
+                .expireAfter(new Expiry<@NonNull String, @NonNull CaffeineEntry>() {
+                    @Override
+                    public long expireAfterCreate(@NonNull String key, @NonNull CaffeineEntry entry, long currentTime) {
+                        return entry.expireTime().toNanos();
+                    }
+
+                    @Override
+                    public long expireAfterUpdate(@NonNull String key, @NonNull CaffeineEntry entry,
+                                                  long currentTime, long currentDuration) {
+                        return entry.expireTime().toNanos();
+                    }
+
+                    @Override
+                    public long expireAfterRead(@NonNull String key, @NonNull CaffeineEntry entry,
+                                                long currentTime, long currentDuration) {
+                        if (refreshOnAccess && entry.accessFresh()) {
+                            return entry.expireTime().toNanos();
+                        }
+                        return currentDuration;
+                    }
+                })
+                .build();
+    }
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {
-        CaffeineEntry entry = CACHE.getIfPresent(genKey(cacheName, key));
-        if (Objects.isNull(entry)) {
+        CaffeineEntry entry = getCache().getIfPresent(genKey(cacheName, key));
+        if (entry == null) {
             return null;
         }
         return clazz.cast(entry.value());
@@ -45,36 +80,36 @@ public class CaffeineStrategy implements CacheStrategy {
 
     @Override
     public <T> T put(String cacheName, String key, T value, Duration expireTime) {
-        String genKey = genKey(cacheName, key);
-        CaffeineEntry caffeineEntry = new CaffeineEntry(genKey, value, expireTime, true);
-        CACHE.put(genKey, caffeineEntry);
+        String cacheKey = genKey(cacheName, key);
+        getCache().put(cacheKey, new CaffeineEntry(cacheKey, value, expireTime, true));
         return value;
     }
 
     @Override
     public <T> T put(String cacheName, String key, T value) {
-        put(cacheName, key, value, getDefaultExpireTime());
-        return value;
+        return put(cacheName, key, value, getDefaultExpireTime());
     }
 
     @Override
     public void evict(String cacheName, String key) {
-        CACHE.invalidate(genKey(cacheName, key));
+        getCache().invalidate(genKey(cacheName, key));
+    }
+
+    @Override
+    public void clear(String cacheName) {
+        CacheProperties properties = SpringUtil.getBean(CacheProperties.class);
+        String prefix = properties.getKeyPrefix() + ":" + cacheName + ":";
+        getCache().asMap().keySet().removeIf(k -> k.startsWith(prefix));
     }
 
     /**
-     * 清理所有缓存
+     * Caffeine 缓存条目
      *
-     * @param cacheName 缓存名称
+     * @param key         缓存键
+     * @param value       缓存值
+     * @param expireTime  过期时间
+     * @param accessFresh 读取后是否刷新过期时间
      */
-    @Override
-    public void clear(String cacheName) {
-        CACHE.invalidateAll();
+    record CaffeineEntry(String key, Object value, Duration expireTime, boolean accessFresh) {
     }
-
-    record CaffeineEntry(String key, Object value,
-                         // 过期时间
-                         Duration expireTime,
-                         // 读后是否刷新
-                         boolean accessFresh) {}
 }

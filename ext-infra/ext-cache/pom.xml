@@ -8,12 +8,30 @@
         <version>${revision}</version>
     </parent>
     <artifactId>ext-cache</artifactId>
+    <description>多级缓存抽象模块，支持 Caffeine + Redis/PostgreSQL</description>
 
     <dependencies>
         <dependency>
             <groupId>ext.library</groupId>
-            <artifactId>ext-redis</artifactId>
+            <artifactId>ext-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-json</artifactId>
+        </dependency>
+        <!-- Redis 缓存支持 (可选) -->
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- PostgreSQL 缓存支持 (可选) -->
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-postgres</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Caffeine 本地缓存 -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>

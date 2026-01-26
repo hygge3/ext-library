@@ -1,63 +1,106 @@
 package ext.library.cache.strategy;
 
-import ext.library.json.util.JsonUtil;
+import ext.library.cache.enums.L2Backend;
+import ext.library.cache.properties.CacheProperties;
+import ext.library.core.util.SpringUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 
 import java.time.Duration;
-import java.util.Objects;
 
 /**
- * 二级缓存 策略
+ * 二级缓存策略
+ * <p>
+ * 结合 Caffeine 本地缓存和分布式缓存（Redis 或 PostgreSQL），实现多级缓存架构。
+ * 读取时先查询本地缓存，未命中则查询分布式缓存并回填本地缓存。
+ * <p>
+ * 分布式缓存后端通过 {@code ext.cache.l2-backend} 配置项指定：
+ * <ul>
+ *     <li>{@link L2Backend#REDIS} - 使用 Redis（默认）</li>
+ *     <li>{@link L2Backend#POSTGRES} - 使用 PostgreSQL</li>
+ * </ul>
  *
  * @since 2025.08.29
  */
 public class L2Strategy implements CacheStrategy {
-    final CacheStrategy redisStrategy = new RedisStrategy();
-    final CacheStrategy caffeineStrategy = new CaffeineStrategy();
+
+    private final CacheStrategy caffeineStrategy = new CaffeineStrategy();
+
+    private volatile CacheStrategy distributedStrategy;
+    private volatile L2Backend backendType;
+
+    /**
+     * 获取分布式缓存策略（延迟初始化）
+     */
+    private CacheStrategy getDistributedStrategy() {
+        if (distributedStrategy == null) {
+            synchronized (this) {
+                if (distributedStrategy == null) {
+                    CacheProperties properties = SpringUtil.getBean(CacheProperties.class);
+                    backendType = properties.getL2Backend();
+                    distributedStrategy = createDistributedStrategy(backendType);
+                    Logs.info(EmojiSymbol.CACHE, "L2 缓存后端: {}", backendType);
+                }
+            }
+        }
+        return distributedStrategy;
+    }
+
+    /**
+     * 根据后端类型创建分布式缓存策略
+     */
+    private CacheStrategy createDistributedStrategy(L2Backend backend) {
+        return switch (backend) {
+            case REDIS -> new RedisStrategy();
+            case POSTGRES -> new PostgresStrategy();
+        };
+    }
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {
-        // 读写，查询 Caffeine
+        // 先查询 Caffeine 本地缓存
         T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
-        if (Objects.nonNull(caffeineCache)) {
+        if (caffeineCache != null) {
             Logs.debug(EmojiSymbol.CACHE, "从 Caffeine 中获取数据");
-            return clazz.cast(caffeineCache);
+            return caffeineCache;
         }
 
-        // 查询 Redis
-        T redisCache = redisStrategy.get(cacheName, key, clazz);
-        if (Objects.nonNull(redisCache)) {
-            Logs.debug(EmojiSymbol.CACHE, "从 Redis 获取数据");
-            redisStrategy.put(cacheName, key, redisCache);
-            return redisCache;
+        // 本地未命中，查询分布式缓存
+        CacheStrategy distributed = getDistributedStrategy();
+        T distributedCache = distributed.get(cacheName, key, clazz);
+        if (distributedCache != null) {
+            Logs.debug(EmojiSymbol.CACHE, "从 {} 获取数据", backendType);
+            // 回填到 Caffeine 本地缓存
+            caffeineStrategy.put(cacheName, key, distributedCache);
+            return distributedCache;
         }
+
         return null;
     }
 
     @Override
     public <T> T put(String cacheName, String key, T value, Duration expireTime) {
-        redisStrategy.put(cacheName, key, JsonUtil.toJson(value), expireTime);
+        getDistributedStrategy().put(cacheName, key, value, expireTime);
         caffeineStrategy.put(cacheName, key, value, expireTime);
         return value;
     }
 
     @Override
     public <T> T put(String cacheName, String key, T value) {
-        redisStrategy.put(cacheName, key, JsonUtil.toJson(value));
+        getDistributedStrategy().put(cacheName, key, value);
         caffeineStrategy.put(cacheName, key, value);
         return value;
     }
 
     @Override
     public void evict(String cacheName, String key) {
-        redisStrategy.evict(cacheName, key);
+        getDistributedStrategy().evict(cacheName, key);
         caffeineStrategy.evict(cacheName, key);
     }
 
     @Override
     public void clear(String cacheName) {
-        redisStrategy.clear(cacheName);
+        getDistributedStrategy().clear(cacheName);
         caffeineStrategy.clear(cacheName);
     }
 }

@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 @EnableScheduling
 @EnableConfigurationProperties(PostgresProperties.class)
 @ConditionalOnClass(DataSource.class)
-@ConditionalOnProperty(prefix = PostgresProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PostgresAutoConfiguration {
 
     public PostgresAutoConfiguration() {

@@ -1,14 +1,12 @@
-package ext.library.cache.annotion;
+package ext.library.cache.annotation;
 
 import ext.library.cache.enums.CacheType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -202,8 +200,6 @@ class CacheAnnotationTest {
     @Test
     @DisplayName("测试所有 TimeUnit 值可用")
     void testAllTimeUnits() {
-        TimeUnit[] units = TimeUnit.values();
-
         // 验证所有 TimeUnit 值都可以作为注解属性
         assertNotNull(TimeUnit.DAYS);
         assertNotNull(TimeUnit.HOURS);
