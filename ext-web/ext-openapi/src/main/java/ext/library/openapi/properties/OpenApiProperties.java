@@ -1,4 +1,4 @@
-package ext.library.properties;
+package ext.library.openapi.properties;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * openAPI 属性
+ * OpenAPI 配置属性
  */
 @ConfigurationProperties(OpenApiProperties.PREFIX)
 public class OpenApiProperties {
@@ -23,7 +23,7 @@ public class OpenApiProperties {
     public static final String PREFIX = "ext.openapi";
 
     /**
-     * 是否开启 openApi 文档
+     * 是否开启 OpenAPI 文档
      */
     private Boolean enabled = true;
 
@@ -40,44 +40,43 @@ public class OpenApiProperties {
     private ExternalDocumentation externalDocs;
 
     /**
-     * Api 服务
+     * API 服务器配置
      *
-     * @see <a href="https://swagger.io/docs/specification/api-host-and-base-path/">API
-     * Server and Base URL</a>
+     * @see <a href="https://swagger.io/docs/specification/api-host-and-base-path/">API Server and Base URL</a>
      */
-    private List<Server> servers = null;
+    private List<Server> servers;
 
     /**
      * 安全配置
      *
-     * @see <a href="https://swagger.io/docs/specification/authentication/">Authentication
+     * @see <a href="https://swagger.io/docs/specification/authentication/">Authentication</a>
      */
-    private List<SecurityRequirement> security = null;
+    private List<SecurityRequirement> security;
 
     /**
-     * 标签
+     * 标签列表
      */
-    private List<Tag> tags = null;
+    private List<Tag> tags;
 
     /**
-     * 路径
+     * 路径配置
      */
     @NestedConfigurationProperty
-    private Paths paths = null;
+    private Paths paths;
 
     /**
-     * 组件
+     * 组件配置
      */
     @NestedConfigurationProperty
-    private Components components = null;
+    private Components components;
 
     /**
      * 扩展信息
      * <p>
-     * map 类型属性没有 IDE
-     * 提示，<a href="https://github.com/spring-projects/spring-boot/issues/9945">gh-9945</a>
+     * Map 类型属性没有 IDE 提示，
+     * 参考 <a href="https://github.com/spring-projects/spring-boot/issues/9945">gh-9945</a>
      */
-    private Map<String, Object> extensions = null;
+    private Map<String, Object> extensions;
 
     public Boolean getEnabled() {
         return enabled;
@@ -152,13 +151,9 @@ public class OpenApiProperties {
     }
 
     /**
-     * <p>
-     * 文档的基础属性信息
-     * </p>
+     * 文档基础属性信息
      *
      * @see io.swagger.v3.oas.models.info.Info
-     * <p>
-     * 为了 springboot 自动生产配置提示信息，所以这里复制一个类出来
      */
     public static class InfoProperties {
 

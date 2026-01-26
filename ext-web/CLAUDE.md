@@ -50,8 +50,14 @@ OpenAPI 文档模块，提供：
 - Swagger UI 支持
 - JavaDoc 运行时读取 (therapi-runtime-javadoc)
 - API 文档自动生成
+- JavaDoc 注释自动转换为 Tag 名称
 
 **包结构**: `ext.library.openapi`
+
+**核心类**:
+- `OpenApiAutoConfig` - 自动配置类
+- `OpenApiProperties` - 配置属性 (`ext.openapi.*`)
+- `ExtOpenApiService` - 自定义 OpenAPI 服务实现
 
 ### ext-sse
 

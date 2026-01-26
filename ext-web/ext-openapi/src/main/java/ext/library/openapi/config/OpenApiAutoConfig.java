@@ -1,7 +1,7 @@
-package ext.library.config;
+package ext.library.openapi.config;
 
-import ext.library.handler.OpenApiHandler;
-import ext.library.properties.OpenApiProperties;
+import ext.library.openapi.properties.OpenApiProperties;
+import ext.library.openapi.service.ExtOpenApiService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
@@ -27,21 +27,21 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.annotation.Bean;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * OpenAPI 的自动配置类
+ * OpenAPI 自动配置类
  */
 @EnableConfigurationProperties(OpenApiProperties.class)
 @AutoConfigureBefore(SpringDocConfiguration.class)
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfig {
 
-    private final OpenApiProperties openApiProperties;
+    private static final Pattern ALPHA_NUMERIC_PATTERN = Pattern.compile("^[a-zA-Z0-9-]+$");
 
+    private final OpenApiProperties openApiProperties;
     private final ServerProperties serverProperties;
 
     public OpenApiAutoConfig(OpenApiProperties openApiProperties, ServerProperties serverProperties) {
@@ -51,9 +51,7 @@ public class OpenApiAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean(OpenAPI.class)
-    @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
     public OpenAPI openAPI() {
-
         OpenAPI openAPI = new OpenAPI();
 
         // 文档基本信息
@@ -86,91 +84,84 @@ public class OpenApiAutoConfig {
     }
 
     /**
-     * 自定义 openapi 处理器
+     * 自定义 OpenAPI 服务
      */
     @Bean
-    public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI, SecurityService securityParser, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils, Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers, Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers, Optional<JavadocProvider> javadocProvider) {
-        Logs.info(EmojiSymbol.OPENAPI, "OpenAPI 模块载入");
-        return new OpenApiHandler(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
+    public OpenAPIService openApiBuilder(
+            Optional<OpenAPI> openAPI,
+            SecurityService securityParser,
+            SpringDocConfigProperties springDocConfigProperties,
+            PropertyResolverUtils propertyResolverUtils,
+            Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers,
+            Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers,
+            Optional<JavadocProvider> javadocProvider) {
+        Logs.info(EmojiSymbol.OPENAPI, "OpenAPI module loaded");
+        return new ExtOpenApiService(openAPI, securityParser, springDocConfigProperties,
+                propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
     }
 
     /**
-     * 对已经生成好的 OpenApi 进行自定义操作
+     * 对已生成的 OpenAPI 进行自定义处理
      */
     @Bean
     public OpenApiCustomizer openApiCustomizer() {
         String contextPath = serverProperties.getServlet().getContextPath();
-        String finalContextPath;
-        if (ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath)) {
-            finalContextPath = "";
-        } else {
-            finalContextPath = contextPath;
-        }
+        String finalContextPath = ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath)
+                ? ""
+                : contextPath;
+
         return openApi -> {
             // 对所有路径增加前置上下文路径
             Paths oldPaths = openApi.getPaths();
-            if (oldPaths instanceof PlusPaths) {
+            if (oldPaths instanceof PrefixedPaths) {
                 return;
             }
-            PlusPaths newPaths = new PlusPaths();
+            PrefixedPaths newPaths = new PrefixedPaths();
             oldPaths.forEach((k, v) -> newPaths.addPathItem(finalContextPath + k, v));
             openApi.setPaths(newPaths);
 
-
-            // 把 controller 上面的注释 生成 TAG
-            // 官方默认是把注释弄成了 description，但是我们希望他的变成 tag
+            // 将 Controller 的 JavaDoc 注释转换为 Tag 名称
             if (openApi.getTags() == null) {
                 return;
             }
-            List<Tag> tags = openApi.getTags();
-            for (Tag tag : tags) {
-                if (Pattern.compile("^[a-zA-Z0-9-]+$").asPredicate().test(tag.getName()) && StringUtil.isNotEmpty(tag.getDescription())) {
-                    String newName = tag.getDescription();
-
-                    // 同步修改映射关系
-                    openApi.getPaths().forEach((s, pathItem) -> {
-                        List<Operation> operations = new ArrayList<>();
-                        addIfNotNull(operations, pathItem.getGet());
-                        addIfNotNull(operations, pathItem.getDelete());
-                        addIfNotNull(operations, pathItem.getDelete());
-                        addIfNotNull(operations, pathItem.getOptions());
-                        addIfNotNull(operations, pathItem.getPatch());
-                        addIfNotNull(operations, pathItem.getPost());
-                        addIfNotNull(operations, pathItem.getPut());
-                        addIfNotNull(operations, pathItem.getTrace());
-
-                        for (Operation operation : operations) {
-                            for (int i = 0; i < operation.getTags().size(); i++) {
-                                if (operation.getTags().get(i).equals(tag.getName())) {
-                                    operation.getTags().set(i, newName);
-                                }
-                            }
-                        }
-
-                    });
-                    tag.name(newName);
-                }
-            }
+            convertJavadocToTagName(openApi);
         };
     }
 
-    private <T> void addIfNotNull(List<T> original, T itemsToAdd) {
-        if (itemsToAdd != null) {
-            original.add(itemsToAdd);
+    /**
+     * 将 JavaDoc 描述转换为 Tag 名称
+     */
+    private void convertJavadocToTagName(OpenAPI openApi) {
+        for (Tag tag : openApi.getTags()) {
+            if (!ALPHA_NUMERIC_PATTERN.matcher(tag.getName()).matches()
+                    || StringUtil.isEmpty(tag.getDescription())) {
+                continue;
+            }
+            String oldName = tag.getName();
+            String newName = tag.getDescription();
+
+            // 同步修改所有 Operation 中的 Tag 引用
+            openApi.getPaths().forEach((path, pathItem) ->
+                    pathItem.readOperations().forEach(operation ->
+                            replaceTagName(operation, oldName, newName)));
+            tag.name(newName);
         }
     }
 
     /**
-     * 单独使用一个类便于判断 解决 springdoc 路径拼接重复问题
-     *
-     * @author Lion Li
+     * 替换 Operation 中的 Tag 名称
      */
-    static class PlusPaths extends Paths {
-
-        public PlusPaths() {
-            super();
+    private void replaceTagName(Operation operation, String oldName, String newName) {
+        if (operation.getTags() == null) {
+            return;
         }
+        operation.getTags().replaceAll(tagName -> tagName.equals(oldName) ? newName : tagName);
+    }
 
+    /**
+     * 标记已处理路径的 Paths 子类，用于避免重复添加 contextPath 前缀
+     */
+    static class PrefixedPaths extends Paths {
     }
 
 }
