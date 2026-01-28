@@ -1,6 +1,6 @@
 package ext.library.web.validation.constraints;
 
-import ext.library.web.validation.validator.EnumValueValidatorOfString;
+import ext.library.web.validation.validator.OneOfStringsValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -24,7 +24,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Repeatable(OneOfStrings.List.class)
 @Documented
-@Constraint(validatedBy = {EnumValueValidatorOfString.class})
+@Constraint(validatedBy = {OneOfStringsValidator.class})
 public @interface OneOfStrings {
 
     String message() default "{validation.annotation.OneOfStrings.message}";

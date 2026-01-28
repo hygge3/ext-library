@@ -8,8 +8,6 @@ import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -41,8 +39,6 @@ import java.util.Set;
 /**
  * 全局异常处理器
  */
-@AutoConfiguration
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -97,7 +93,7 @@ public class GlobalExceptionHandler {
      * 主动业务异常
      */
     @ExceptionHandler(BizException.class)
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
         Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());

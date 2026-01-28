@@ -6,11 +6,10 @@ import org.jspecify.annotations.NonNull;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-
 /**
- * 枚举值 Validator
+ * OneOfStrings 约束验证器
  */
-public class EnumValueValidatorOfString implements ConstraintValidator<OneOfStrings, String> {
+public class OneOfStringsValidator implements ConstraintValidator<OneOfStrings, String> {
 
     private String[] stringList;
 

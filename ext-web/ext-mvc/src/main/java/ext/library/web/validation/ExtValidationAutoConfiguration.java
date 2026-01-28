@@ -25,7 +25,7 @@ import java.util.Properties;
 @AutoConfiguration(before = ValidationAutoConfiguration.class)
 @ConditionalOnClass(ExecutableValidator.class)
 @ConditionalOnResource(resources = "classpath:META-INF/services/javax.validation.spi.ValidationProvider")
-public class ValidationAutoConfig {
+public class ExtValidationAutoConfiguration {
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

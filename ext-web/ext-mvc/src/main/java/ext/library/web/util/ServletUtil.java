@@ -206,11 +206,17 @@ public final class ServletUtil {
      * @param value 值
      */
     public static void setHeader(String name, String value) {
-        getResponse().setHeader(name, value);
+        HttpServletResponse response = getResponse();
+        if (response != null) {
+            response.setHeader(name, value);
+        }
     }
 
     public static void addHeader(String name, String value) {
-        getResponse().addHeader(name, value);
+        HttpServletResponse response = getResponse();
+        if (response != null) {
+            response.addHeader(name, value);
+        }
     }
 
     public static Map<String, String> getHeaders(HttpServletRequest request) {
@@ -260,11 +266,15 @@ public final class ServletUtil {
     }
 
     public static void addCookie(String name, @Nullable String value, Integer maxAge) {
+        HttpServletResponse response = getResponse();
+        if (response == null) {
+            return;
+        }
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(true);
-        getResponse().addCookie(cookie);
+        response.addCookie(cookie);
     }
 
     /**

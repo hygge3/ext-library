@@ -1,9 +1,10 @@
 package ext.library.web.config;
 
-
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
+import ext.library.web.handler.GlobalExceptionHandler;
+import ext.library.web.handler.GlobalResponseHandler;
 import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
 import ext.library.web.properties.WebMvcProperties;
 import org.jspecify.annotations.NonNull;
@@ -13,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
@@ -34,11 +36,12 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
 @AutoConfiguration
 @EnableConfigurationProperties({WebMvcProperties.class})
 @ConditionalOnWebApplication(type = SERVLET)
-public class WebMvcAutoConfig implements WebMvcConfigurer {
+@Import({GlobalExceptionHandler.class, GlobalResponseHandler.class})
+public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
     private final WebMvcProperties webMvcProperties;
 
-    public WebMvcAutoConfig(WebMvcProperties webMvcProperties) {
+    public WebMvcAutoConfiguration(WebMvcProperties webMvcProperties) {
         this.webMvcProperties = webMvcProperties;
     }
 
