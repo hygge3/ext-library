@@ -45,7 +45,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         this.webMvcProperties = webMvcProperties;
     }
 
-    private static CorsConfiguration getCorsConfiguration(WebMvcProperties.@NonNull CorsConfig corsConfig) {
+    private CorsConfiguration getCorsConfiguration(WebMvcProperties.@NonNull CorsConfig corsConfig) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(corsConfig.getAllowedOrigins());
         corsConfiguration.setAllowedOriginPatterns(corsConfig.getAllowedOriginPatterns());
