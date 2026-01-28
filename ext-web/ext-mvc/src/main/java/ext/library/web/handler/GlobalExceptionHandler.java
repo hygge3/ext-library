@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
      * @param e       e
      */
     private static void printLog(HttpServletRequest request, String message, Exception e) {
-        Logs.error(EmojiSymbol.WEB, e, "URI:{},{}", request.getRequestURI(), message);
+        Logs.error(EmojiSymbol.WARN, e, "URI:{},{}", request.getRequestURI(), message);
     }
 
     /**
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         String message = StringUtil.format("参数异常:{}", e.getMessage());
         printLog(request, message, e);
-        return R.failed(BizCode.ILLEGAL_ARGUMENT, e.getMessage());
+        return R.failed(BizCode.ILLEGAL_ARGUMENT, BizCode.ILLEGAL_ARGUMENT.getMsg());
     }
 
     /**
@@ -149,11 +149,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
     public R<Void> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
                                                        HttpServletRequest request) {
-        String message = StringUtil.format("方法参数类型不匹配：{}", e.getMessage());
-        printLog(request, message, e);
-        String detail = StringUtil.format("方法参数类型不匹配，参数 [{}] 要求类型为：'{}'，但输入值为：'{}'",
+        String message = StringUtil.format("参数 [{}] 类型不匹配，要求：'{}'，实际：'{}'",
                 e.getName(), e.getRequiredType().getName(), e.getValue());
-        return R.failed(HttpStatus.BAD_REQUEST, detail);
+        printLog(request, message, e);
+        return R.failed(HttpStatus.BAD_REQUEST, StringUtil.format("参数 [{}] 类型不匹配", e.getName()));
     }
 
     /**
@@ -208,7 +207,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public R<Void> noHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.NOT_FOUND, e.getMessage());
+        return R.failed(HttpStatus.NOT_FOUND, "请求的资源不存在");
     }
 
     /**
@@ -224,7 +223,7 @@ public class GlobalExceptionHandler {
     public R<Object> httpMessageNotReadableException(HttpMessageNotReadableException e,
                                                      HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, "请求体格式错误或无法解析");
     }
 
     /**
@@ -240,7 +239,7 @@ public class GlobalExceptionHandler {
     public R<Object> httpMessageConversionException(HttpMessageConversionException e,
                                                     HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, "请求数据转换失败");
     }
 
     /**
@@ -256,11 +255,11 @@ public class GlobalExceptionHandler {
     public R<Object> methodArgumentConversionNotSupportedException(MethodArgumentConversionNotSupportedException e,
                                                                    HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, e.getMessage());
+        return R.failed(HttpStatus.BAD_REQUEST, "参数类型转换不支持");
     }
 
     /**
-     * 请求使用的方法不被允许
+     * 请求使用的媒体类型不被支持
      *
      * @param e       e
      * @param request 请求
@@ -268,15 +267,15 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public R<Object> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e,
                                                         HttpServletRequest request) {
         printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.METHOD_NOT_ALLOWED, e.getMessage());
+        return R.failed(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "不支持的媒体类型");
     }
 
     /**
-     * 请求的媒体类型不被支持
+     * 请求的媒体类型不可接受
      *
      * @param e       e
      * @param request 请求
@@ -284,12 +283,12 @@ public class GlobalExceptionHandler {
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
-    @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public R<Object> httpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e,
                                                          HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
         String message = e.getMessage() + "，支持的媒体类型：" + StringUtil.join(e.getSupportedMediaTypes());
-        return R.failed(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
+        printLog(request, message, e);
+        return R.failed(HttpStatus.NOT_ACCEPTABLE, "请求的媒体类型不可接受");
     }
 
     /**
