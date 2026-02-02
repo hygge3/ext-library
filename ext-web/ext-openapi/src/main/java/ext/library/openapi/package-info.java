@@ -8,7 +8,7 @@
  *   <li>自动处理 context-path 前缀</li>
  * </ul>
  *
- * @see ext.library.openapi.config.OpenApiAutoConfig
+ * @see ext.library.openapi.config.OpenApiAutoConfiguration
  * @see ext.library.openapi.properties.OpenApiProperties
  */
 package ext.library.openapi;

@@ -37,14 +37,14 @@ import java.util.regex.Pattern;
 @EnableConfigurationProperties(OpenApiProperties.class)
 @AutoConfigureBefore(SpringDocConfiguration.class)
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-public class OpenApiAutoConfig {
+public class OpenApiAutoConfiguration {
 
     private static final Pattern ALPHA_NUMERIC_PATTERN = Pattern.compile("^[a-zA-Z0-9-]+$");
 
     private final OpenApiProperties openApiProperties;
     private final ServerProperties serverProperties;
 
-    public OpenApiAutoConfig(OpenApiProperties openApiProperties, ServerProperties serverProperties) {
+    public OpenApiAutoConfiguration(OpenApiProperties openApiProperties, ServerProperties serverProperties) {
         this.openApiProperties = openApiProperties;
         this.serverProperties = serverProperties;
     }
