@@ -13,6 +13,12 @@
         <dependency>
             <groupId>ext.library</groupId>
             <artifactId>ext-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-postgres</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>ext.library</groupId>
