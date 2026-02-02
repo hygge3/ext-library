@@ -4,17 +4,11 @@ import ext.library.json.util.JsonUtil;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.jdbc.core.simple.JdbcClient;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +21,12 @@ import java.util.Optional;
  */
 public class PostgresQueue {
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
 
-    public PostgresQueue(DataSource dataSource, PostgresProperties properties) {
-        this.dataSource = dataSource;
+    public PostgresQueue(JdbcClient jdbcClient, PostgresProperties properties) {
+        this.jdbcClient = jdbcClient;
         this.properties = properties;
         this.tableName = properties.getQueueTableName();
     }
@@ -82,29 +76,20 @@ public class PostgresQueue {
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload, Instant scheduledAt, int maxAttempts) {
-        String sql = """
+        Long id = jdbcClient.sql("""
                 INSERT INTO %s (queue, payload, scheduled_at, max_attempts)
                 VALUES (?, ?::jsonb, ?, ?)
                 RETURNING id
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            ps.setString(2, JsonUtil.toJson(payload));
-            ps.setTimestamp(3, Timestamp.from(scheduledAt));
-            ps.setInt(4, maxAttempts);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    long id = rs.getLong("id");
-                    Logs.debug(EmojiSymbol.POSTGRES, "任务入队: queue={}, id={}", queue, id);
-                    return id;
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "任务入队失败: queue={}", queue);
-            throw new RuntimeException("Failed to enqueue job to: " + queue, e);
-        }
-        return -1;
+                """.formatted(tableName))
+                .param(queue)
+                .param(JsonUtil.toJson(payload))
+                .param(Timestamp.from(scheduledAt))
+                .param(maxAttempts)
+                .query(Long.class)
+                .optional()
+                .orElse(-1L);
+        Logs.debug(EmojiSymbol.POSTGRES, "任务入队: queue={}, id={}", queue, id);
+        return id;
     }
 
     /**
@@ -114,7 +99,7 @@ public class PostgresQueue {
      * @return 任务，如果没有待处理任务则返回空
      */
     public Optional<Job> dequeue(String queue) {
-        String sql = """
+        return jdbcClient.sql("""
                 WITH next_job AS (
                     SELECT id FROM %s
                     WHERE queue = ?
@@ -132,22 +117,26 @@ public class PostgresQueue {
                 FROM next_job
                 WHERE %s.id = next_job.id
                 RETURNING %s.*
-                """.formatted(tableName, tableName, tableName, tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Job job = mapToJob(rs);
+                """.formatted(tableName, tableName, tableName, tableName))
+                .param(queue)
+                .query((rs, _) -> new Job(
+                        rs.getLong("id"),
+                        rs.getString("queue"),
+                        rs.getString("payload"),
+                        rs.getInt("attempts"),
+                        rs.getInt("max_attempts"),
+                        JobStatus.valueOf(rs.getString("status")),
+                        rs.getString("error"),
+                        getInstant(rs.getTimestamp("scheduled_at")),
+                        getInstant(rs.getTimestamp("started_at")),
+                        getInstant(rs.getTimestamp("completed_at")),
+                        getInstant(rs.getTimestamp("created_at"))
+                ))
+                .optional()
+                .map(job -> {
                     Logs.debug(EmojiSymbol.POSTGRES, "任务出队: queue={}, id={}, attempts={}", queue, job.id(), job.attempts());
-                    return Optional.of(job);
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "任务出队失败: queue={}", queue);
-            throw new RuntimeException("Failed to dequeue job from: " + queue, e);
-        }
-        return Optional.empty();
+                    return job;
+                });
     }
 
     /**
@@ -158,7 +147,7 @@ public class PostgresQueue {
      * @return 任务列表
      */
     public List<Job> dequeue(String queue, int limit) {
-        String sql = """
+        return jdbcClient.sql("""
                 WITH next_jobs AS (
                     SELECT id FROM %s
                     WHERE queue = ?
@@ -176,22 +165,23 @@ public class PostgresQueue {
                 FROM next_jobs
                 WHERE %s.id = next_jobs.id
                 RETURNING %s.*
-                """.formatted(tableName, tableName, tableName, tableName);
-        List<Job> jobs = new ArrayList<>();
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            ps.setInt(2, limit);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    jobs.add(mapToJob(rs));
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "批量任务出队失败: queue={}", queue);
-            throw new RuntimeException("Failed to dequeue jobs from: " + queue, e);
-        }
-        return jobs;
+                """.formatted(tableName, tableName, tableName, tableName))
+                .param(queue)
+                .param(limit)
+                .query((rs, _) -> new Job(
+                        rs.getLong("id"),
+                        rs.getString("queue"),
+                        rs.getString("payload"),
+                        rs.getInt("attempts"),
+                        rs.getInt("max_attempts"),
+                        JobStatus.valueOf(rs.getString("status")),
+                        rs.getString("error"),
+                        getInstant(rs.getTimestamp("scheduled_at")),
+                        getInstant(rs.getTimestamp("started_at")),
+                        getInstant(rs.getTimestamp("completed_at")),
+                        getInstant(rs.getTimestamp("created_at"))
+                ))
+                .list();
     }
 
     /**
@@ -200,16 +190,10 @@ public class PostgresQueue {
      * @param jobId 任务 ID
      */
     public void complete(long jobId) {
-        String sql = "UPDATE " + tableName + " SET status = 'COMPLETED', completed_at = NOW() WHERE id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, jobId);
-            ps.executeUpdate();
-            Logs.debug(EmojiSymbol.POSTGRES, "任务完成: id={}", jobId);
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "标记任务完成失败: id={}", jobId);
-            throw new RuntimeException("Failed to complete job: " + jobId, e);
-        }
+        jdbcClient.sql("UPDATE " + tableName + " SET status = 'COMPLETED', completed_at = NOW() WHERE id = ?")
+                .param(jobId)
+                .update();
+        Logs.debug(EmojiSymbol.POSTGRES, "任务完成: id={}", jobId);
     }
 
     /**
@@ -219,23 +203,17 @@ public class PostgresQueue {
      * @param error 错误信息
      */
     public void fail(long jobId, String error) {
-        String sql = """
+        jdbcClient.sql("""
                 UPDATE %s
                 SET status = CASE WHEN attempts >= max_attempts THEN 'FAILED' ELSE 'PENDING' END,
                     error = ?,
                     started_at = NULL
                 WHERE id = ?
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, error);
-            ps.setLong(2, jobId);
-            ps.executeUpdate();
-            Logs.debug(EmojiSymbol.POSTGRES, "任务失败: id={}, error={}", jobId, error);
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "标记任务失败失败: id={}", jobId);
-            throw new RuntimeException("Failed to mark job as failed: " + jobId, e);
-        }
+                """.formatted(tableName))
+                .param(error)
+                .param(jobId)
+                .update();
+        Logs.debug(EmojiSymbol.POSTGRES, "任务失败: id={}, error={}", jobId, error);
     }
 
     /**
@@ -255,15 +233,10 @@ public class PostgresQueue {
      * @return 是否删除成功
      */
     public boolean delete(long jobId) {
-        String sql = "DELETE FROM " + tableName + " WHERE id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, jobId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "删除任务失败: id={}", jobId);
-            throw new RuntimeException("Failed to delete job: " + jobId, e);
-        }
+        int rows = jdbcClient.sql("DELETE FROM " + tableName + " WHERE id = ?")
+                .param(jobId)
+                .update();
+        return rows > 0;
     }
 
     /**
@@ -273,20 +246,22 @@ public class PostgresQueue {
      * @return 任务详情
      */
     public Optional<Job> getJob(long jobId) {
-        String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, jobId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapToJob(rs));
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取任务失败: id={}", jobId);
-            throw new RuntimeException("Failed to get job: " + jobId, e);
-        }
-        return Optional.empty();
+        return jdbcClient.sql("SELECT * FROM " + tableName + " WHERE id = ?")
+                .param(jobId)
+                .query((rs, _) -> new Job(
+                        rs.getLong("id"),
+                        rs.getString("queue"),
+                        rs.getString("payload"),
+                        rs.getInt("attempts"),
+                        rs.getInt("max_attempts"),
+                        JobStatus.valueOf(rs.getString("status")),
+                        rs.getString("error"),
+                        getInstant(rs.getTimestamp("scheduled_at")),
+                        getInstant(rs.getTimestamp("started_at")),
+                        getInstant(rs.getTimestamp("completed_at")),
+                        getInstant(rs.getTimestamp("created_at"))
+                ))
+                .optional();
     }
 
     /**
@@ -296,20 +271,10 @@ public class PostgresQueue {
      * @return 待处理任务数量
      */
     public long countPending(String queue) {
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE queue = ? AND status = 'PENDING'";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取待处理任务数量失败: queue={}", queue);
-            throw new RuntimeException("Failed to count pending jobs in: " + queue, e);
-        }
-        return 0;
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE queue = ? AND status = 'PENDING'")
+                .param(queue)
+                .query(Long.class)
+                .single();
     }
 
     /**
@@ -319,7 +284,7 @@ public class PostgresQueue {
      * @return 各状态任务数量 [pending, processing, completed, failed]
      */
     public long[] getQueueStats(String queue) {
-        String sql = """
+        return jdbcClient.sql("""
                 SELECT
                     COUNT(*) FILTER (WHERE status = 'PENDING') AS pending,
                     COUNT(*) FILTER (WHERE status = 'PROCESSING') AS processing,
@@ -327,25 +292,16 @@ public class PostgresQueue {
                     COUNT(*) FILTER (WHERE status = 'FAILED') AS failed
                 FROM %s
                 WHERE queue = ?
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new long[]{
-                            rs.getLong("pending"),
-                            rs.getLong("processing"),
-                            rs.getLong("completed"),
-                            rs.getLong("failed")
-                    };
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取队列统计失败: queue={}", queue);
-            throw new RuntimeException("Failed to get queue stats: " + queue, e);
-        }
-        return new long[]{0, 0, 0, 0};
+                """.formatted(tableName))
+                .param(queue)
+                .query((rs, _) -> new long[]{
+                        rs.getLong("pending"),
+                        rs.getLong("processing"),
+                        rs.getLong("completed"),
+                        rs.getLong("failed")
+                })
+                .optional()
+                .orElse(new long[]{0, 0, 0, 0});
     }
 
     /**
@@ -356,20 +312,14 @@ public class PostgresQueue {
      * @return 清理的任务数量
      */
     public int cleanupCompleted(String queue, Duration olderThan) {
-        String sql = "DELETE FROM " + tableName + " WHERE queue = ? AND status = 'COMPLETED' AND completed_at < NOW() - ?::interval";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            ps.setString(2, olderThan.toSeconds() + " seconds");
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "清理已完成任务: queue={}, count={}", queue, deleted);
-            }
-            return deleted;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清理已完成任务失败: queue={}", queue);
-            throw new RuntimeException("Failed to cleanup completed jobs in: " + queue, e);
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE queue = ? AND status = 'COMPLETED' AND completed_at < NOW() - ?::interval")
+                .param(queue)
+                .param(olderThan.toSeconds() + " seconds")
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理已完成任务: queue={}, count={}", queue, deleted);
         }
+        return deleted;
     }
 
     /**
@@ -380,52 +330,26 @@ public class PostgresQueue {
      * @return 重置的任务数量
      */
     public int resetStuckJobs(String queue, Duration timeout) {
-        String sql = """
+        int reset = jdbcClient.sql("""
                 UPDATE %s
                 SET status = 'PENDING', started_at = NULL
                 WHERE queue = ?
                   AND status = 'PROCESSING'
                   AND started_at < NOW() - ?::interval
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, queue);
-            ps.setString(2, timeout.toSeconds() + " seconds");
-            int reset = ps.executeUpdate();
-            if (reset > 0) {
-                Logs.info(EmojiSymbol.POSTGRES, "重置超时任务: queue={}, count={}", queue, reset);
-            }
-            return reset;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "重置超时任务失败: queue={}", queue);
-            throw new RuntimeException("Failed to reset stuck jobs in: " + queue, e);
+                """.formatted(tableName))
+                .param(queue)
+                .param(timeout.toSeconds() + " seconds")
+                .update();
+        if (reset > 0) {
+            Logs.info(EmojiSymbol.POSTGRES, "重置超时任务: queue={}, count={}", queue, reset);
         }
+        return reset;
     }
 
     /**
-     * 将查询结果映射为任务对象
+     * 从时间戳获取 Instant，处理空值
      */
-    private Job mapToJob(ResultSet rs) throws SQLException {
-        return new Job(
-                rs.getLong("id"),
-                rs.getString("queue"),
-                rs.getString("payload"),
-                rs.getInt("attempts"),
-                rs.getInt("max_attempts"),
-                JobStatus.valueOf(rs.getString("status")),
-                rs.getString("error"),
-                getInstant(rs, "scheduled_at"),
-                getInstant(rs, "started_at"),
-                getInstant(rs, "completed_at"),
-                getInstant(rs, "created_at")
-        );
-    }
-
-    /**
-     * 从查询结果获取时间戳，处理空值
-     */
-    private Instant getInstant(ResultSet rs, String column) throws SQLException {
-        Timestamp ts = rs.getTimestamp(column);
+    private Instant getInstant(Timestamp ts) {
         return ts != null ? ts.toInstant() : null;
     }
 }

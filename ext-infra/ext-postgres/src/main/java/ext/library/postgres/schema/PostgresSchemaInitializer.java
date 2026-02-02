@@ -4,11 +4,7 @@ import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.beans.factory.InitializingBean;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.springframework.jdbc.core.simple.JdbcClient;
 
 /**
  * PostgreSQL 表结构初始化器
@@ -19,11 +15,11 @@ import java.sql.Statement;
  */
 public class PostgresSchemaInitializer implements InitializingBean {
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
 
-    public PostgresSchemaInitializer(DataSource dataSource, PostgresProperties properties) {
-        this.dataSource = dataSource;
+    public PostgresSchemaInitializer(JdbcClient jdbcClient, PostgresProperties properties) {
+        this.jdbcClient = jdbcClient;
         this.properties = properties;
     }
 
@@ -36,34 +32,29 @@ public class PostgresSchemaInitializer implements InitializingBean {
      * 初始化表结构
      */
     public void initSchema() {
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
+        // 创建缓存表
+        createCacheTable();
 
-            // 创建缓存表
-            createCacheTable(stmt);
+        // 创建队列表
+        createQueueTable();
 
-            // 创建队列表
-            createQueueTable(stmt);
+        // 创建限流表
+        createRateLimitTable();
 
-            // 创建限流表
-            createRateLimitTable(stmt);
+        // 创建会话表
+        createSessionTable();
 
-            Logs.info(EmojiSymbol.POSTGRES, "PostgreSQL 表结构初始化完成");
-
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "PostgreSQL 表结构初始化失败");
-            throw new RuntimeException("Failed to initialize PostgreSQL schema", e);
-        }
+        Logs.info(EmojiSymbol.POSTGRES, "PostgreSQL 表结构初始化完成");
     }
 
     /**
      * 创建缓存表 (UNLOGGED)
      */
-    private void createCacheTable(Statement stmt) throws SQLException {
+    private void createCacheTable() {
         String tableName = properties.getCacheTableName();
 
         // 创建表
-        String createTableSql = """
+        jdbcClient.sql("""
                 CREATE UNLOGGED TABLE IF NOT EXISTS %s (
                     key TEXT PRIMARY KEY,
                     value JSONB NOT NULL,
@@ -71,16 +62,16 @@ public class PostgresSchemaInitializer implements InitializingBean {
                     created_at TIMESTAMPTZ DEFAULT NOW(),
                     updated_at TIMESTAMPTZ DEFAULT NOW()
                 )
-                """.formatted(tableName);
-        stmt.execute(createTableSql);
+                """.formatted(tableName))
+                .update();
 
         // 创建过期时间索引
-        String createIndexSql = "CREATE INDEX IF NOT EXISTS idx_%s_expires ON %s(expires_at)"
-                .formatted(tableName, tableName);
-        stmt.execute(createIndexSql);
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_expires ON %s(expires_at)"
+                .formatted(tableName, tableName))
+                .update();
 
         // 创建更新时间触发器函数
-        String createFunctionSql = """
+        jdbcClient.sql("""
                 CREATE OR REPLACE FUNCTION update_%s_updated_at()
                 RETURNS TRIGGER AS $$
                 BEGIN
@@ -88,21 +79,21 @@ public class PostgresSchemaInitializer implements InitializingBean {
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql
-                """.formatted(tableName);
-        stmt.execute(createFunctionSql);
+                """.formatted(tableName))
+                .update();
 
         // 删除旧触发器并创建新触发器
-        String dropTriggerSql = "DROP TRIGGER IF EXISTS trg_%s_updated_at ON %s"
-                .formatted(tableName, tableName);
-        stmt.execute(dropTriggerSql);
+        jdbcClient.sql("DROP TRIGGER IF EXISTS trg_%s_updated_at ON %s"
+                .formatted(tableName, tableName))
+                .update();
 
-        String createTriggerSql = """
+        jdbcClient.sql("""
                 CREATE TRIGGER trg_%s_updated_at
                     BEFORE UPDATE ON %s
                     FOR EACH ROW
                     EXECUTE FUNCTION update_%s_updated_at()
-                """.formatted(tableName, tableName, tableName);
-        stmt.execute(createTriggerSql);
+                """.formatted(tableName, tableName, tableName))
+                .update();
 
         Logs.debug(EmojiSymbol.POSTGRES, "缓存表 {} 初始化完成", tableName);
     }
@@ -110,11 +101,11 @@ public class PostgresSchemaInitializer implements InitializingBean {
     /**
      * 创建队列表
      */
-    private void createQueueTable(Statement stmt) throws SQLException {
+    private void createQueueTable() {
         String tableName = properties.getQueueTableName();
 
         // 创建表
-        String createTableSql = """
+        jdbcClient.sql("""
                 CREATE TABLE IF NOT EXISTS %s (
                     id BIGSERIAL PRIMARY KEY,
                     queue TEXT NOT NULL,
@@ -128,20 +119,20 @@ public class PostgresSchemaInitializer implements InitializingBean {
                     completed_at TIMESTAMPTZ,
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
-                """.formatted(tableName);
-        stmt.execute(createTableSql);
+                """.formatted(tableName))
+                .update();
 
         // 创建待处理任务索引 (核心性能优化)
-        String createPendingIndexSql = """
+        jdbcClient.sql("""
                 CREATE INDEX IF NOT EXISTS idx_%s_pending ON %s(queue, scheduled_at)
                     WHERE status = 'PENDING' AND attempts < max_attempts
-                """.formatted(tableName, tableName);
-        stmt.execute(createPendingIndexSql);
+                """.formatted(tableName, tableName))
+                .update();
 
         // 创建状态索引
-        String createStatusIndexSql = "CREATE INDEX IF NOT EXISTS idx_%s_status ON %s(queue, status)"
-                .formatted(tableName, tableName);
-        stmt.execute(createStatusIndexSql);
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_status ON %s(queue, status)"
+                .formatted(tableName, tableName))
+                .update();
 
         Logs.debug(EmojiSymbol.POSTGRES, "队列表 {} 初始化完成", tableName);
     }
@@ -149,24 +140,87 @@ public class PostgresSchemaInitializer implements InitializingBean {
     /**
      * 创建限流表
      */
-    private void createRateLimitTable(Statement stmt) throws SQLException {
+    private void createRateLimitTable() {
         String tableName = properties.getRateLimitTableName();
 
         // 创建表
-        String createTableSql = """
+        jdbcClient.sql("""
                 CREATE TABLE IF NOT EXISTS %s (
                     key TEXT PRIMARY KEY,
                     request_count INT DEFAULT 0,
                     window_start TIMESTAMPTZ DEFAULT NOW()
                 )
-                """.formatted(tableName);
-        stmt.execute(createTableSql);
+                """.formatted(tableName))
+                .update();
 
         // 创建窗口过期索引
-        String createIndexSql = "CREATE INDEX IF NOT EXISTS idx_%s_window ON %s(window_start)"
-                .formatted(tableName, tableName);
-        stmt.execute(createIndexSql);
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_window ON %s(window_start)"
+                .formatted(tableName, tableName))
+                .update();
 
         Logs.debug(EmojiSymbol.POSTGRES, "限流表 {} 初始化完成", tableName);
+    }
+
+    /**
+     * 创建会话表
+     */
+    private void createSessionTable() {
+        String tableName = properties.getSessionTableName();
+
+        // 创建表
+        jdbcClient.sql("""
+                CREATE TABLE IF NOT EXISTS %s (
+                    session_id TEXT PRIMARY KEY,
+                    user_id TEXT,
+                    data JSONB DEFAULT '{}'::jsonb,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                )
+                """.formatted(tableName))
+                .update();
+
+        // 创建用户 ID 索引
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_user ON %s(user_id)"
+                .formatted(tableName, tableName))
+                .update();
+
+        // 创建过期时间索引
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_expires ON %s(expires_at)"
+                .formatted(tableName, tableName))
+                .update();
+
+        // 创建最后访问时间索引
+        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_accessed ON %s(last_accessed_at)"
+                .formatted(tableName, tableName))
+                .update();
+
+        // 创建更新时间触发器函数
+        jdbcClient.sql("""
+                CREATE OR REPLACE FUNCTION update_%s_updated_at()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    NEW.updated_at = NOW();
+                    RETURN NEW;
+                END;
+                $$ LANGUAGE plpgsql
+                """.formatted(tableName))
+                .update();
+
+        // 删除旧触发器并创建新触发器
+        jdbcClient.sql("DROP TRIGGER IF EXISTS trg_%s_updated_at ON %s"
+                .formatted(tableName, tableName))
+                .update();
+
+        jdbcClient.sql("""
+                CREATE TRIGGER trg_%s_updated_at
+                    BEFORE UPDATE ON %s
+                    FOR EACH ROW
+                    EXECUTE FUNCTION update_%s_updated_at()
+                """.formatted(tableName, tableName, tableName))
+                .update();
+
+        Logs.debug(EmojiSymbol.POSTGRES, "会话表 {} 初始化完成", tableName);
     }
 }

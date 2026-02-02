@@ -2,6 +2,7 @@ package ext.library.postgres.pubsub;
 
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
@@ -49,15 +50,13 @@ public class PostgresPubSub implements DisposableBean {
     public void publish(String channel, Object message) {
         String payload = message instanceof String s ? s : JsonUtil.toJson(message);
         String sql = "SELECT pg_notify(?, ?)";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, channel);
             ps.setString(2, payload);
             ps.execute();
             Logs.debug(EmojiSymbol.POSTGRES, "发布消息: channel={}, payload长度={}", channel, payload.length());
         } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "发布消息失败: channel={}", channel);
-            throw new RuntimeException("Failed to publish to channel: " + channel, e);
+            throw new ExtException(EmojiSymbol.POSTGRES, e, "发布消息失败: channel={}", channel);
         }
     }
 
@@ -77,8 +76,7 @@ public class PostgresPubSub implements DisposableBean {
             Logs.info(EmojiSymbol.POSTGRES, "订阅通道: {}", channel);
         } catch (SQLException e) {
             listeners.remove(channel);
-            Logs.error(EmojiSymbol.POSTGRES, e, "订阅通道失败: {}", channel);
-            throw new RuntimeException("Failed to subscribe to channel: " + channel, e);
+            throw new ExtException(EmojiSymbol.POSTGRES, e, "订阅通道失败: {}", channel);
         }
     }
 
@@ -126,6 +124,7 @@ public class PostgresPubSub implements DisposableBean {
      * 检查是否已订阅指定通道
      *
      * @param channel 通道名称
+     *
      * @return 是否已订阅
      */
     public boolean isSubscribed(String channel) {

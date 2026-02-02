@@ -5,17 +5,12 @@ import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.IdUtil;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,12 +31,12 @@ import java.util.Optional;
  */
 public class PostgresSessionManager {
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
 
-    public PostgresSessionManager(DataSource dataSource, PostgresProperties properties) {
-        this.dataSource = dataSource;
+    public PostgresSessionManager(JdbcClient jdbcClient, PostgresProperties properties) {
+        this.jdbcClient = jdbcClient;
         this.properties = properties;
         this.tableName = properties.getSessionTableName();
     }
@@ -86,31 +81,32 @@ public class PostgresSessionManager {
      */
     public Session createSession(String userId, Object initialData, Duration timeout) {
         String sessionId = IdUtil.getUUIDv7();
-        String sql = """
+
+        Session session = jdbcClient.sql("""
                 INSERT INTO %s (session_id, user_id, data, expires_at)
                 VALUES (?, ?, ?::jsonb, ?)
                 RETURNING *
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(sessionId)
+                .param(userId)
+                .param(JsonUtil.toJson(initialData))
+                .param(Timestamp.from(Instant.now().plus(timeout)))
+                .query((rs, _) -> new Session(
+                        rs.getString("session_id"),
+                        rs.getString("user_id"),
+                        rs.getString("data"),
+                        getInstant(rs.getTimestamp("expires_at")),
+                        getInstant(rs.getTimestamp("last_accessed_at")),
+                        getInstant(rs.getTimestamp("created_at")),
+                        getInstant(rs.getTimestamp("updated_at"))
+                ))
+                .optional()
+                .orElse(null);
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sessionId);
-            ps.setString(2, userId);
-            ps.setString(3, JsonUtil.toJson(initialData));
-            ps.setTimestamp(4, Timestamp.from(Instant.now().plus(timeout)));
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Session session = mapToSession(rs);
-                    Logs.debug(EmojiSymbol.POSTGRES, "创建会话: sessionId={}, userId={}", sessionId, userId);
-                    return session;
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "创建会话失败: userId={}", userId);
-            throw new RuntimeException("Failed to create session", e);
+        if (session != null) {
+            Logs.debug(EmojiSymbol.POSTGRES, "创建会话: sessionId={}, userId={}", sessionId, userId);
         }
-        return null;
+        return session;
     }
 
     /**
@@ -131,29 +127,26 @@ public class PostgresSessionManager {
      * @return 会话，不存在或已过期返回空
      */
     public Optional<Session> getSession(String sessionId, boolean updateAccess) {
-        String sql = """
+        Optional<Session> session = jdbcClient.sql("""
                 SELECT * FROM %s
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(sessionId)
+                .query((rs, _) -> new Session(
+                        rs.getString("session_id"),
+                        rs.getString("user_id"),
+                        rs.getString("data"),
+                        getInstant(rs.getTimestamp("expires_at")),
+                        getInstant(rs.getTimestamp("last_accessed_at")),
+                        getInstant(rs.getTimestamp("created_at")),
+                        getInstant(rs.getTimestamp("updated_at"))
+                ))
+                .optional();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sessionId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Session session = mapToSession(rs);
-                    if (updateAccess) {
-                        touchSession(sessionId);
-                    }
-                    return Optional.of(session);
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取会话失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to get session: " + sessionId, e);
+        if (session.isPresent() && updateAccess) {
+            touchSession(sessionId);
         }
-        return Optional.empty();
+        return session;
     }
 
     /**
@@ -164,24 +157,18 @@ public class PostgresSessionManager {
      * @return 是否更新成功
      */
     public boolean setSessionData(String sessionId, Object data) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET data = ?::jsonb, last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(JsonUtil.toJson(data))
+                .param(sessionId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, JsonUtil.toJson(data));
-            ps.setString(2, sessionId);
-            boolean updated = ps.executeUpdate() > 0;
-            if (updated) {
-                Logs.debug(EmojiSymbol.POSTGRES, "更新会话数据: sessionId={}", sessionId);
-            }
-            return updated;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "更新会话数据失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to update session data: " + sessionId, e);
+        if (rows > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "更新会话数据: sessionId={}", sessionId);
         }
+        return rows > 0;
     }
 
     /**
@@ -192,24 +179,18 @@ public class PostgresSessionManager {
      * @return 是否更新成功
      */
     public boolean mergeSessionData(String sessionId, Object data) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET data = data || ?::jsonb, last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(JsonUtil.toJson(data))
+                .param(sessionId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, JsonUtil.toJson(data));
-            ps.setString(2, sessionId);
-            boolean updated = ps.executeUpdate() > 0;
-            if (updated) {
-                Logs.debug(EmojiSymbol.POSTGRES, "合并会话数据: sessionId={}", sessionId);
-            }
-            return updated;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "合并会话数据失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to merge session data: " + sessionId, e);
+        if (rows > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "合并会话数据: sessionId={}", sessionId);
         }
+        return rows > 0;
     }
 
     /**
@@ -221,21 +202,15 @@ public class PostgresSessionManager {
      * @return 是否设置成功
      */
     public boolean setAttribute(String sessionId, String key, Object value) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET data = jsonb_set(data, ?::text[], ?::jsonb), last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "{" + key + "}");
-            ps.setString(2, JsonUtil.toJson(value));
-            ps.setString(3, sessionId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "设置会话属性失败: sessionId={}, key={}", sessionId, key);
-            throw new RuntimeException("Failed to set session attribute: " + sessionId, e);
-        }
+                """.formatted(tableName))
+                .param("{" + key + "}")
+                .param(JsonUtil.toJson(value))
+                .param(sessionId)
+                .update();
+        return rows > 0;
     }
 
     /**
@@ -247,30 +222,19 @@ public class PostgresSessionManager {
      * @return 属性值，不存在返回 null
      */
     public <T> T getAttribute(String sessionId, String key, Class<T> clazz) {
-        String sql = """
+        return jdbcClient.sql("""
                 SELECT data->? AS value FROM %s
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            ps.setString(2, sessionId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String value = rs.getString("value");
-                    if (value != null) {
-                        touchSession(sessionId);
-                        return JsonUtil.readObj(value, clazz);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取会话属性失败: sessionId={}, key={}", sessionId, key);
-            throw new RuntimeException("Failed to get session attribute: " + sessionId, e);
-        }
-        return null;
+                """.formatted(tableName))
+                .param(key)
+                .param(sessionId)
+                .query(String.class)
+                .optional()
+                .map(value -> {
+                    touchSession(sessionId);
+                    return JsonUtil.readObj(value, clazz);
+                })
+                .orElse(null);
     }
 
     /**
@@ -281,20 +245,14 @@ public class PostgresSessionManager {
      * @return 是否删除成功
      */
     public boolean removeAttribute(String sessionId, String key) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET data = data - ?, last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            ps.setString(2, sessionId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "删除会话属性失败: sessionId={}, key={}", sessionId, key);
-            throw new RuntimeException("Failed to remove session attribute: " + sessionId, e);
-        }
+                """.formatted(tableName))
+                .param(key)
+                .param(sessionId)
+                .update();
+        return rows > 0;
     }
 
     /**
@@ -304,16 +262,10 @@ public class PostgresSessionManager {
      * @return 是否更新成功
      */
     public boolean touchSession(String sessionId) {
-        String sql = "UPDATE " + tableName + " SET last_accessed_at = NOW() WHERE session_id = ?";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sessionId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "更新会话访问时间失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to touch session: " + sessionId, e);
-        }
+        int rows = jdbcClient.sql("UPDATE " + tableName + " SET last_accessed_at = NOW() WHERE session_id = ?")
+                .param(sessionId)
+                .update();
+        return rows > 0;
     }
 
     /**
@@ -334,24 +286,18 @@ public class PostgresSessionManager {
      * @return 是否续期成功
      */
     public boolean renewSession(String sessionId, Duration timeout) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET expires_at = NOW() + ?::interval, last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(timeout.toSeconds() + " seconds")
+                .param(sessionId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, timeout.toSeconds() + " seconds");
-            ps.setString(2, sessionId);
-            boolean renewed = ps.executeUpdate() > 0;
-            if (renewed) {
-                Logs.debug(EmojiSymbol.POSTGRES, "续期会话: sessionId={}, timeout={}", sessionId, timeout);
-            }
-            return renewed;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "续期会话失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to renew session: " + sessionId, e);
+        if (rows > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "续期会话: sessionId={}, timeout={}", sessionId, timeout);
         }
+        return rows > 0;
     }
 
     /**
@@ -362,24 +308,18 @@ public class PostgresSessionManager {
      * @return 是否绑定成功
      */
     public boolean bindUser(String sessionId, String userId) {
-        String sql = """
+        int rows = jdbcClient.sql("""
                 UPDATE %s SET user_id = ?, last_accessed_at = NOW()
                 WHERE session_id = ? AND expires_at > NOW()
-                """.formatted(tableName);
+                """.formatted(tableName))
+                .param(userId)
+                .param(sessionId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, userId);
-            ps.setString(2, sessionId);
-            boolean bound = ps.executeUpdate() > 0;
-            if (bound) {
-                Logs.debug(EmojiSymbol.POSTGRES, "绑定用户: sessionId={}, userId={}", sessionId, userId);
-            }
-            return bound;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "绑定用户失败: sessionId={}, userId={}", sessionId, userId);
-            throw new RuntimeException("Failed to bind user to session: " + sessionId, e);
+        if (rows > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "绑定用户: sessionId={}, userId={}", sessionId, userId);
         }
+        return rows > 0;
     }
 
     /**
@@ -389,20 +329,14 @@ public class PostgresSessionManager {
      * @return 是否删除成功
      */
     public boolean deleteSession(String sessionId) {
-        String sql = "DELETE FROM " + tableName + " WHERE session_id = ?";
+        int rows = jdbcClient.sql("DELETE FROM " + tableName + " WHERE session_id = ?")
+                .param(sessionId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sessionId);
-            boolean deleted = ps.executeUpdate() > 0;
-            if (deleted) {
-                Logs.debug(EmojiSymbol.POSTGRES, "删除会话: sessionId={}", sessionId);
-            }
-            return deleted;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "删除会话失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to delete session: " + sessionId, e);
+        if (rows > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "删除会话: sessionId={}", sessionId);
         }
+        return rows > 0;
     }
 
     /**
@@ -412,27 +346,22 @@ public class PostgresSessionManager {
      * @return 会话列表
      */
     public List<Session> getSessionsByUser(String userId) {
-        String sql = """
+        return jdbcClient.sql("""
                 SELECT * FROM %s
                 WHERE user_id = ? AND expires_at > NOW()
                 ORDER BY last_accessed_at DESC
-                """.formatted(tableName);
-
-        List<Session> sessions = new ArrayList<>();
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, userId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    sessions.add(mapToSession(rs));
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取用户会话列表失败: userId={}", userId);
-            throw new RuntimeException("Failed to get sessions by user: " + userId, e);
-        }
-        return sessions;
+                """.formatted(tableName))
+                .param(userId)
+                .query((rs, _) -> new Session(
+                        rs.getString("session_id"),
+                        rs.getString("user_id"),
+                        rs.getString("data"),
+                        getInstant(rs.getTimestamp("expires_at")),
+                        getInstant(rs.getTimestamp("last_accessed_at")),
+                        getInstant(rs.getTimestamp("created_at")),
+                        getInstant(rs.getTimestamp("updated_at"))
+                ))
+                .list();
     }
 
     /**
@@ -442,20 +371,14 @@ public class PostgresSessionManager {
      * @return 删除的会话数
      */
     public int deleteSessionsByUser(String userId) {
-        String sql = "DELETE FROM " + tableName + " WHERE user_id = ?";
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE user_id = ?")
+                .param(userId)
+                .update();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, userId);
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "删除用户所有会话: userId={}, count={}", userId, deleted);
-            }
-            return deleted;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "删除用户会话失败: userId={}", userId);
-            throw new RuntimeException("Failed to delete sessions by user: " + userId, e);
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "删除用户所有会话: userId={}, count={}", userId, deleted);
         }
+        return deleted;
     }
 
     /**
@@ -465,19 +388,11 @@ public class PostgresSessionManager {
      * @return 是否存在
      */
     public boolean exists(String sessionId) {
-        String sql = "SELECT 1 FROM " + tableName + " WHERE session_id = ? AND expires_at > NOW()";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sessionId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "检查会话是否存在失败: sessionId={}", sessionId);
-            throw new RuntimeException("Failed to check session existence: " + sessionId, e);
-        }
+        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE session_id = ? AND expires_at > NOW()")
+                .param(sessionId)
+                .query(Integer.class)
+                .optional()
+                .isPresent();
     }
 
     /**
@@ -486,16 +401,9 @@ public class PostgresSessionManager {
      * @return 有效会话数量
      */
     public long count() {
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE expires_at > NOW()";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getLong(1) : 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取会话数量失败");
-            throw new RuntimeException("Failed to count sessions", e);
-        }
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE expires_at > NOW()")
+                .query(Long.class)
+                .single();
     }
 
     /**
@@ -511,16 +419,10 @@ public class PostgresSessionManager {
      * 清理过期会话
      */
     private void cleanupExpired() {
-        String sql = "DELETE FROM " + tableName + " WHERE expires_at < NOW()";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "清理过期会话: {} 条", deleted);
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清理过期会话失败");
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE expires_at < NOW()")
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理过期会话: {} 条", deleted);
         }
     }
 
@@ -533,49 +435,21 @@ public class PostgresSessionManager {
             return;
         }
 
-        String sql = "DELETE FROM " + tableName + " WHERE last_accessed_at < NOW() - ?::interval";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, activityTimeout.toSeconds() + " seconds");
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "清理不活跃会话: {} 条", deleted);
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清理不活跃会话失败");
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE last_accessed_at < NOW() - ?::interval")
+                .param(activityTimeout.toSeconds() + " seconds")
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理不活跃会话: {} 条", deleted);
         }
     }
 
     /**
-     * 将查询结果映射为会话对象
+     * 从 Timestamp 获取 Instant 类型的时间戳
      *
-     * @param rs 查询结果集
-     * @return 会话对象
-     * @throws SQLException 如果读取结果集失败
-     */
-    private Session mapToSession(ResultSet rs) throws SQLException {
-        return new Session(
-                rs.getString("session_id"),
-                rs.getString("user_id"),
-                rs.getString("data"),
-                getInstant(rs, "expires_at"),
-                getInstant(rs, "last_accessed_at"),
-                getInstant(rs, "created_at"),
-                getInstant(rs, "updated_at")
-        );
-    }
-
-    /**
-     * 从 ResultSet 获取 Instant 类型的时间戳
-     *
-     * @param rs     查询结果集
-     * @param column 列名
+     * @param ts Timestamp 时间戳
      * @return Instant 时间戳，如果为 null 则返回 null
-     * @throws SQLException 如果读取结果集失败
      */
-    private Instant getInstant(ResultSet rs, String column) throws SQLException {
-        Timestamp ts = rs.getTimestamp(column);
+    private Instant getInstant(Timestamp ts) {
         return ts != null ? ts.toInstant() : null;
     }
 }

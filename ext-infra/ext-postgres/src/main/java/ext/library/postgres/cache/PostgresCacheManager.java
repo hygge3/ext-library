@@ -4,13 +4,9 @@ import ext.library.json.util.JsonUtil;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Duration;
 
 /**
@@ -22,12 +18,12 @@ import java.time.Duration;
  */
 public class PostgresCacheManager {
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
 
-    public PostgresCacheManager(DataSource dataSource, PostgresProperties properties) {
-        this.dataSource = dataSource;
+    public PostgresCacheManager(JdbcClient jdbcClient, PostgresProperties properties) {
+        this.jdbcClient = jdbcClient;
         this.properties = properties;
         this.tableName = properties.getCacheTableName();
     }
@@ -37,30 +33,18 @@ public class PostgresCacheManager {
      *
      * @param key   缓存 key
      * @param clazz 值类型
+     *
      * @return 缓存值，不存在或已过期返回 null
      */
     public <T> T get(String key, Class<T> clazz) {
-        String sql = "SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String json = rs.getString("value");
-                    return JsonUtil.readObj(json, clazz);
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取缓存失败: {}", key);
-            throw new RuntimeException("Failed to get cache: " + key, e);
-        }
-        return null;
+        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.readObj(json, clazz)).orElse(null);
     }
 
     /**
      * 获取缓存值（字符串）
      *
      * @param key 缓存 key
+     *
      * @return 缓存值，不存在或已过期返回 null
      */
     public String get(String key) {
@@ -75,22 +59,12 @@ public class PostgresCacheManager {
      * @param ttl   过期时间
      */
     public <T> void set(String key, T value, Duration ttl) {
-        String sql = """
+        jdbcClient.sql("""
                 INSERT INTO %s (key, value, expires_at)
                 VALUES (?, ?::jsonb, NOW() + ?::interval)
                 ON CONFLICT (key) DO UPDATE
                 SET value = EXCLUDED.value, expires_at = EXCLUDED.expires_at, updated_at = NOW()
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            ps.setString(2, JsonUtil.toJson(value));
-            ps.setString(3, ttl.toSeconds() + " seconds");
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "设置缓存失败: {}", key);
-            throw new RuntimeException("Failed to set cache: " + key, e);
-        }
+                """.formatted(tableName)).param(key).param(JsonUtil.toJson(value)).param(ttl.toSeconds() + " seconds").update();
     }
 
     /**
@@ -118,81 +92,46 @@ public class PostgresCacheManager {
      * 删除缓存
      *
      * @param key 缓存 key
+     *
      * @return 是否删除成功
      */
     public boolean delete(String key) {
-        String sql = "DELETE FROM " + tableName + " WHERE key = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "删除缓存失败: {}", key);
-            throw new RuntimeException("Failed to delete cache: " + key, e);
-        }
+        int rows = jdbcClient.sql("DELETE FROM " + tableName + " WHERE key = ?").param(key).update();
+        return rows > 0;
     }
 
     /**
      * 按模式删除缓存
      *
      * @param pattern 匹配模式（支持 * 通配符）
+     *
      * @return 删除的记录数
      */
     public int deleteByPattern(String pattern) {
-        String sql = "DELETE FROM " + tableName + " WHERE key LIKE ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            // 将 * 通配符转换为 SQL 的 %
-            ps.setString(1, pattern.replace("*", "%"));
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "按模式删除缓存失败: {}", pattern);
-            throw new RuntimeException("Failed to delete cache by pattern: " + pattern, e);
-        }
+        // 将 * 通配符转换为 SQL 的 %
+        return jdbcClient.sql("DELETE FROM " + tableName + " WHERE key LIKE ?").param(pattern.replace("*", "%")).update();
     }
 
     /**
      * 检查缓存是否存在且未过期
      *
      * @param key 缓存 key
+     *
      * @return 是否存在
      */
     public boolean exists(String key) {
-        String sql = "SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "检查缓存存在失败: {}", key);
-            throw new RuntimeException("Failed to check cache existence: " + key, e);
-        }
+        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(Integer.class).optional().isPresent();
     }
 
     /**
      * 获取缓存的剩余 TTL（秒）
      *
      * @param key 缓存 key
+     *
      * @return 剩余秒数，不存在返回 -2，永不过期返回 -1
      */
     public long ttl(String key) {
-        String sql = "SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    long ttl = rs.getLong("ttl");
-                    return Math.max(ttl, 0);
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取缓存 TTL 失败: {}", key);
-            throw new RuntimeException("Failed to get cache TTL: " + key, e);
-        }
-        return -2; // key 不存在
+        return jdbcClient.sql("SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?").param(key).query(Long.class).optional().map(ttl -> Math.max(ttl, 0)).orElse(-2L); // key 不存在
     }
 
     /**
@@ -200,19 +139,12 @@ public class PostgresCacheManager {
      *
      * @param key 缓存 key
      * @param ttl 新的过期时间
+     *
      * @return 是否更新成功
      */
     public boolean expire(String key, Duration ttl) {
-        String sql = "UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, ttl.toSeconds() + " seconds");
-            ps.setString(2, key);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "更新缓存过期时间失败: {}", key);
-            throw new RuntimeException("Failed to update cache expiration: " + key, e);
-        }
+        int rows = jdbcClient.sql("UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?").param(ttl.toSeconds() + " seconds").param(key).update();
+        return rows > 0;
     }
 
     /**
@@ -220,15 +152,9 @@ public class PostgresCacheManager {
      */
     @Scheduled(fixedDelayString = "#{@postgresProperties.cacheCleanupInterval.toMillis()}")
     public void cleanup() {
-        String sql = "DELETE FROM " + tableName + " WHERE expires_at < NOW()";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "清理过期缓存: {} 条", deleted);
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清理过期缓存失败");
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE expires_at < NOW()").update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理过期缓存: {} 条", deleted);
         }
     }
 
@@ -238,29 +164,14 @@ public class PostgresCacheManager {
      * @return 缓存记录总数
      */
     public long count() {
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE expires_at > NOW()";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getLong(1) : 0;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取缓存统计失败");
-            throw new RuntimeException("Failed to get cache count", e);
-        }
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE expires_at > NOW()").query(Long.class).single();
     }
 
     /**
      * 清空所有缓存
      */
     public void clear() {
-        String sql = "TRUNCATE TABLE " + tableName;
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.execute();
-            Logs.info(EmojiSymbol.POSTGRES, "已清空所有缓存");
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清空缓存失败");
-            throw new RuntimeException("Failed to clear cache", e);
-        }
+        jdbcClient.sql("TRUNCATE TABLE %s".formatted(tableName)).update();
+        Logs.info(EmojiSymbol.POSTGRES, "已清空所有缓存");
     }
 }

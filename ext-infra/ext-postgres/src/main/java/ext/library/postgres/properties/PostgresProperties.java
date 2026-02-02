@@ -15,6 +15,11 @@ public class PostgresProperties {
     public static final String PREFIX = "ext.postgres";
 
     /**
+     * 数据源配置（可选，不配置则使用应用主数据源）
+     */
+    private DataSourceConfig datasource;
+
+    /**
      * 是否自动初始化表结构
      */
     private boolean autoInitSchema = true;
@@ -85,6 +90,14 @@ public class PostgresProperties {
     private Duration sessionCleanupInterval = Duration.ofMinutes(10);
 
     // region Getters and Setters
+
+    public DataSourceConfig getDatasource() {
+        return datasource;
+    }
+
+    public void setDatasource(DataSourceConfig datasource) {
+        this.datasource = datasource;
+    }
 
     public boolean isAutoInitSchema() {
         return autoInitSchema;

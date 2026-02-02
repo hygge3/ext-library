@@ -3,13 +3,9 @@ package ext.library.postgres.ratelimit;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
 
@@ -22,12 +18,12 @@ import java.time.Duration;
  */
 public class PostgresRateLimiter {
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
 
-    public PostgresRateLimiter(DataSource dataSource, PostgresProperties properties) {
-        this.dataSource = dataSource;
+    public PostgresRateLimiter(JdbcClient jdbcClient, PostgresProperties properties) {
+        this.jdbcClient = jdbcClient;
         this.properties = properties;
         this.tableName = properties.getRateLimitTableName();
     }
@@ -51,7 +47,9 @@ public class PostgresRateLimiter {
      * @return 限流结果
      */
     public RateLimitResult checkAndIncrement(String key, int limit, Duration window) {
-        String sql = """
+        String interval = window.toSeconds() + " seconds";
+
+        return jdbcClient.sql("""
                 INSERT INTO %s (key, request_count, window_start)
                 VALUES (?, 1, NOW())
                 ON CONFLICT (key) DO UPDATE SET
@@ -64,17 +62,11 @@ public class PostgresRateLimiter {
                         ELSE %s.window_start
                     END
                 RETURNING request_count, window_start
-                """.formatted(tableName, tableName, tableName, tableName, tableName);
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            String interval = window.toSeconds() + " seconds";
-            ps.setString(1, key);
-            ps.setString(2, interval);
-            ps.setString(3, interval);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+                """.formatted(tableName, tableName, tableName, tableName, tableName))
+                .param(key)
+                .param(interval)
+                .param(interval)
+                .query((rs, _) -> {
                     int count = rs.getInt("request_count");
                     Timestamp windowStart = rs.getTimestamp("window_start");
                     boolean allowed = count <= limit;
@@ -88,15 +80,10 @@ public class PostgresRateLimiter {
                     }
 
                     return result;
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "限流检查失败: key={}", key);
-            throw new RuntimeException("Failed to check rate limit for: " + key, e);
-        }
-
-        // 默认允许（查询失败时的保守策略）
-        return new RateLimitResult(true, 0, limit, limit, System.currentTimeMillis() + window.toMillis());
+                })
+                .optional()
+                // 默认允许（查询失败时的保守策略）
+                .orElseGet(() -> new RateLimitResult(true, 0, limit, limit, System.currentTimeMillis() + window.toMillis()));
     }
 
     /**
@@ -118,24 +105,16 @@ public class PostgresRateLimiter {
      * @return 是否允许
      */
     public boolean isAllowed(String key, int limit, Duration window) {
-        String sql = """
+        return jdbcClient.sql("""
                 SELECT request_count FROM %s
                 WHERE key = ? AND window_start > NOW() - ?::interval
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            ps.setString(2, window.toSeconds() + " seconds");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("request_count") < limit;
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "限流检查失败: key={}", key);
-            throw new RuntimeException("Failed to check rate limit for: " + key, e);
-        }
-        return true; // 不存在记录，允许请求
+                """.formatted(tableName))
+                .param(key)
+                .param(window.toSeconds() + " seconds")
+                .query(Integer.class)
+                .optional()
+                .map(count -> count < limit)
+                .orElse(true); // 不存在记录，允许请求
     }
 
     /**
@@ -145,24 +124,15 @@ public class PostgresRateLimiter {
      * @return 当前计数，不存在返回 0
      */
     public int getCurrentCount(String key) {
-        String sql = """
+        return jdbcClient.sql("""
                 SELECT request_count FROM %s
                 WHERE key = ? AND window_start > NOW() - ?::interval
-                """.formatted(tableName);
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            ps.setString(2, properties.getRateLimitWindow().toSeconds() + " seconds");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("request_count");
-                }
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取限流计数失败: key={}", key);
-            throw new RuntimeException("Failed to get rate limit count for: " + key, e);
-        }
-        return 0;
+                """.formatted(tableName))
+                .param(key)
+                .param(properties.getRateLimitWindow().toSeconds() + " seconds")
+                .query(Integer.class)
+                .optional()
+                .orElse(0);
     }
 
     /**
@@ -172,19 +142,13 @@ public class PostgresRateLimiter {
      * @return 是否重置成功
      */
     public boolean reset(String key) {
-        String sql = "DELETE FROM " + tableName + " WHERE key = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, key);
-            boolean deleted = ps.executeUpdate() > 0;
-            if (deleted) {
-                Logs.debug(EmojiSymbol.POSTGRES, "重置限流计数: key={}", key);
-            }
-            return deleted;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "重置限流计数失败: key={}", key);
-            throw new RuntimeException("Failed to reset rate limit for: " + key, e);
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE key = ?")
+                .param(key)
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "重置限流计数: key={}", key);
         }
+        return deleted > 0;
     }
 
     /**
@@ -194,19 +158,13 @@ public class PostgresRateLimiter {
      * @return 重置的记录数
      */
     public int resetByPattern(String pattern) {
-        String sql = "DELETE FROM " + tableName + " WHERE key LIKE ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, pattern.replace("*", "%"));
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "按模式重置限流计数: pattern={}, count={}", pattern, deleted);
-            }
-            return deleted;
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "按模式重置限流计数失败: pattern={}", pattern);
-            throw new RuntimeException("Failed to reset rate limit by pattern: " + pattern, e);
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE key LIKE ?")
+                .param(pattern.replace("*", "%"))
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "按模式重置限流计数: pattern={}, count={}", pattern, deleted);
         }
+        return deleted;
     }
 
     /**
@@ -215,16 +173,11 @@ public class PostgresRateLimiter {
     @Scheduled(fixedDelayString = "#{@postgresProperties.rateLimitWindow.toMillis() * 2}")
     public void cleanup() {
         // 清理超过两个窗口周期的旧记录
-        String sql = "DELETE FROM " + tableName + " WHERE window_start < NOW() - ?::interval";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, (properties.getRateLimitWindow().toSeconds() * 2) + " seconds");
-            int deleted = ps.executeUpdate();
-            if (deleted > 0) {
-                Logs.debug(EmojiSymbol.POSTGRES, "清理过期限流记录: {} 条", deleted);
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "清理过期限流记录失败");
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE window_start < NOW() - ?::interval")
+                .param((properties.getRateLimitWindow().toSeconds() * 2) + " seconds")
+                .update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理过期限流记录: {} 条", deleted);
         }
     }
 
@@ -234,16 +187,9 @@ public class PostgresRateLimiter {
      * @return 当前有效的限流记录数
      */
     public long count() {
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE window_start > NOW() - ?::interval";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, properties.getRateLimitWindow().toSeconds() + " seconds");
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getLong(1) : 0;
-            }
-        } catch (SQLException e) {
-            Logs.error(EmojiSymbol.POSTGRES, e, "获取限流统计失败");
-            throw new RuntimeException("Failed to get rate limit count", e);
-        }
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE window_start > NOW() - ?::interval")
+                .param(properties.getRateLimitWindow().toSeconds() + " seconds")
+                .query(Long.class)
+                .single();
     }
 }
