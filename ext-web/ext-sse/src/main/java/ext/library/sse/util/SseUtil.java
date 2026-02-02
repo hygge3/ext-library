@@ -11,7 +11,7 @@ import ext.library.tool.holder.Lazy;
 public final class SseUtil {
     private final static Lazy<SseEmitterManager> MANAGER = Lazy.of(() -> SpringUtil.getBean(SseEmitterManager.class));
     /**
-     * 向指定的 WebSocket 会话发送消息
+     * 向指定用户的 SSE 会话发送消息
      *
      * @param userId  要发送消息的用户 id
      * @param message 要发送的消息内容

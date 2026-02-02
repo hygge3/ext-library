@@ -1,6 +1,7 @@
 package ext.library.sse.listener;
 
-import ext.library.sse.manager.SseEmitterManager;
+import ext.library.sse.manager.SseConnectionManager;
+import ext.library.sse.manager.SseMessagePublisher;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
@@ -17,24 +18,25 @@ import jakarta.annotation.Resource;
 public class SseTopicListener implements ApplicationRunner {
 
     @Resource
-    private SseEmitterManager sseEmitterManager;
+    private SseConnectionManager connectionManager;
+
+    @Resource
+    private SseMessagePublisher messagePublisher;
 
     /**
      * 在 Spring Boot 应用程序启动时初始化 SSE 主题订阅监听器
      *
      * @param args 应用程序参数
-     *
-     * @throws Exception 初始化过程中可能抛出的异常
      */
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        sseEmitterManager.subscribeMessage((message) -> {
-            Logs.info(EmojiSymbol.SSE, "SSE 主题订阅收到消息，session keys:{},message:{}", message.getUserIds(), message.getMessage());
-            // 如果 key 不为空就按照 key 发消息 如果为空就群发
+    public void run(ApplicationArguments args) {
+        messagePublisher.subscribe(message -> {
+            Logs.info(EmojiSymbol.SSE, "SSE 收到订阅消息，userIds:{}, message:{}", message.getUserIds(), message.getMessage());
+            // 如果 userIds 不为空就按用户发消息，否则群发
             if (ObjectUtil.isNotEmpty(message.getUserIds())) {
-                message.getUserIds().forEach(key -> sseEmitterManager.sendMessage(key, message.getMessage()));
+                message.getUserIds().forEach(userId -> connectionManager.sendMessage(userId, message.getMessage()));
             } else {
-                sseEmitterManager.sendMessage(message.getMessage());
+                connectionManager.sendMessageToAll(message.getMessage());
             }
         });
         Logs.info(EmojiSymbol.SSE, "初始化 SSE 主题订阅监听器成功");

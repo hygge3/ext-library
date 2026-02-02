@@ -1,11 +1,19 @@
 package ext.library.sse.config;
 
+import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.sse.controller.SseController;
 import ext.library.sse.listener.SseTopicListener;
+import ext.library.sse.manager.SseConnectionManager;
 import ext.library.sse.manager.SseEmitterManager;
+import ext.library.sse.manager.SseMessagePublisher;
 import ext.library.sse.properties.SseProperties;
+import ext.library.sse.properties.SseProperties.PubSubBackend;
+import ext.library.sse.pubsub.PostgresPubSubService;
+import ext.library.sse.pubsub.PubSubService;
+import ext.library.sse.pubsub.RedisPubSubService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,8 +28,33 @@ import org.springframework.context.annotation.Bean;
 public class SseAutoConfig {
 
     @Bean
-    public SseEmitterManager sseEmitterManager() {
-        return new SseEmitterManager();
+    public SseConnectionManager sseConnectionManager() {
+        return new SseConnectionManager();
+    }
+
+    @Bean
+    public PubSubService ssePubSubService(SseProperties properties, ObjectProvider<PostgresPubSub> postgresPubSubProvider) {
+        if (properties.getBackend() == PubSubBackend.POSTGRES) {
+            PostgresPubSub postgresPubSub = postgresPubSubProvider.getIfAvailable();
+            if (postgresPubSub == null) {
+                throw new IllegalStateException("SSE 配置使用 POSTGRES 后端，但未找到 PostgresPubSub Bean。请确保已启用 ext-postgres 模块。");
+            }
+            Logs.info(EmojiSymbol.SSE, "SSE 使用 PostgreSQL LISTEN/NOTIFY 作为发布订阅后端");
+            return new PostgresPubSubService(postgresPubSub);
+        }
+        Logs.info(EmojiSymbol.SSE, "SSE 使用 Redis 作为发布订阅后端");
+        return new RedisPubSubService();
+    }
+
+    @Bean
+    public SseMessagePublisher sseMessagePublisher(SseConnectionManager connectionManager, PubSubService pubSubService, SseProperties properties) {
+        return new SseMessagePublisher(connectionManager, pubSubService, properties.getTopic());
+    }
+
+    @Bean
+    public SseEmitterManager sseEmitterManager(SseConnectionManager connectionManager, SseMessagePublisher messagePublisher) {
+        Logs.info(EmojiSymbol.SSE, "载入模块:SSE");
+        return new SseEmitterManager(connectionManager, messagePublisher);
     }
 
     @Bean
@@ -31,7 +64,6 @@ public class SseAutoConfig {
 
     @Bean
     public SseController sseController(SseEmitterManager sseEmitterManager) {
-        Logs.info(EmojiSymbol.SSE, "载入模块:SSE");
         return new SseController(sseEmitterManager);
     }
 

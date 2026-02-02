@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 消息的 dto
+ * SSE 消息传输对象，用于跨服务器消息推送
  */
 public class SseMessage implements Serializable {
 
@@ -14,16 +14,14 @@ public class SseMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 需要推送到的 session key 列表
+     * 需要推送到的用户 ID 列表，为空时表示群发
      */
     private List<String> userIds;
 
     /**
-     * 需要发送的消息
+     * 需要发送的消息内容
      */
     private String message;
-
-    public SseMessage() {}
 
     public List<String> getUserIds() {
         return userIds;
@@ -41,19 +39,6 @@ public class SseMessage implements Serializable {
         this.message = message;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (o == this) return true;
-        if (!(o instanceof SseMessage other)) return false;
-        if (!other.canEqual(this)) return false;
-        final Object this$userIds = this.getUserIds();
-        final Object other$userIds = other.getUserIds();
-        if (!Objects.equals(this$userIds, other$userIds)) return false;
-        final Object this$message = this.getMessage();
-        final Object other$message = other.getMessage();
-        return Objects.equals(this$message, other$message);
-    }
-
     protected boolean canEqual(final Object other) {
         return other instanceof SseMessage;
     }
@@ -67,6 +52,19 @@ public class SseMessage implements Serializable {
         final Object $message = this.getMessage();
         result = result * PRIME + ($message == null ? 43 : $message.hashCode());
         return result;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SseMessage other)) return false;
+        if (!other.canEqual(this)) return false;
+        final Object this$userIds = this.getUserIds();
+        final Object other$userIds = other.getUserIds();
+        if (!Objects.equals(this$userIds, other$userIds)) return false;
+        final Object this$message = this.getMessage();
+        final Object other$message = other.getMessage();
+        return Objects.equals(this$message, other$message);
     }
 
     @Override
