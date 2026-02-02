@@ -16,12 +16,20 @@ public class SseConnectionManager {
 
     private static final Map<String, Map<String, SseEmitter>> userTokenEmitters = new ConcurrentHashMap<>();
 
+    private SseHeartbeatManager heartbeatManager;
+
+    /**
+     * 设置心跳管理器（由 AutoConfig 注入）
+     */
+    public void setHeartbeatManager(SseHeartbeatManager heartbeatManager) {
+        this.heartbeatManager = heartbeatManager;
+    }
+
     /**
      * 建立与指定用户的 SSE 连接
      *
      * @param userId 用户的唯一标识符，用于区分不同用户的连接
      * @param token  用户的唯一令牌，用于识别具体的连接
-     *
      * @return 返回一个 SseEmitter 实例，客户端可以通过该实例接收 SSE 事件
      */
     public SseEmitter connect(String userId, String token) {
@@ -39,6 +47,11 @@ public class SseConnectionManager {
             Logs.warn(EmojiSymbol.SSE, "SSE 连接异常，userId:{}, token:{}, error:{}", userId, token, e.getMessage());
             emitters.remove(token);
         });
+
+        // 注册到心跳管理器
+        if (heartbeatManager != null) {
+            heartbeatManager.register(userId, token, emitter);
+        }
 
         try {
             emitter.send(SseEmitter.event().comment("connected").data("connected"));
@@ -68,6 +81,10 @@ public class SseConnectionManager {
                 Logs.warn(EmojiSymbol.SSE, "SSE 断开连接异常，userId:{}, token:{}, error:{}", userId, token, e.getMessage());
             } finally {
                 emitters.remove(token);
+                // 从心跳管理器移除
+                if (heartbeatManager != null) {
+                    heartbeatManager.unregister(userId, token);
+                }
             }
         }
     }
@@ -76,7 +93,6 @@ public class SseConnectionManager {
      * 检查用户是否在当前服务实例中有连接
      *
      * @param userId 用户 ID
-     *
      * @return 是否存在连接
      */
     public boolean hasConnection(String userId) {

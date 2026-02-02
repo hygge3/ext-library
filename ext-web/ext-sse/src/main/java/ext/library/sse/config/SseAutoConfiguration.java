@@ -5,6 +5,7 @@ import ext.library.sse.controller.SseController;
 import ext.library.sse.listener.SseTopicListener;
 import ext.library.sse.manager.SseConnectionManager;
 import ext.library.sse.manager.SseEmitterManager;
+import ext.library.sse.manager.SseHeartbeatManager;
 import ext.library.sse.manager.SseMessagePublisher;
 import ext.library.sse.properties.SseProperties;
 import ext.library.sse.properties.SseProperties.PubSubBackend;
@@ -25,11 +26,20 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @ConditionalOnProperty(value = SseProperties.PREFIX + ".enabled", havingValue = "true")
 @EnableConfigurationProperties(SseProperties.class)
-public class SseAutoConfig {
+public class SseAutoConfiguration {
 
     @Bean
     public SseConnectionManager sseConnectionManager() {
         return new SseConnectionManager();
+    }
+
+    @Bean
+    public SseHeartbeatManager sseHeartbeatManager(SseConnectionManager connectionManager, SseProperties properties) {
+        SseHeartbeatManager heartbeatManager = new SseHeartbeatManager(properties.getHeartbeat());
+        // 将心跳管理器注入到连接管理器
+        connectionManager.setHeartbeatManager(heartbeatManager);
+        heartbeatManager.start();
+        return heartbeatManager;
     }
 
     @Bean
@@ -52,8 +62,8 @@ public class SseAutoConfig {
     }
 
     @Bean
-    public SseEmitterManager sseEmitterManager(SseConnectionManager connectionManager, SseMessagePublisher messagePublisher) {
-        Logs.info(EmojiSymbol.SSE, "载入模块:SSE");
+    public SseEmitterManager sseEmitterManager(SseConnectionManager connectionManager, SseMessagePublisher messagePublisher, SseProperties properties) {
+        Logs.info(EmojiSymbol.SSE, "载入模块:SSE，连接路径:{}", properties.getPath());
         return new SseEmitterManager(connectionManager, messagePublisher);
     }
 

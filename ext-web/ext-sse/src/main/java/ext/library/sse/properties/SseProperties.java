@@ -40,6 +40,11 @@ public class SseProperties {
      */
     private PubSubBackend backend = PubSubBackend.REDIS;
 
+    /**
+     * 心跳配置
+     */
+    private Heartbeat heartbeat = new Heartbeat();
+
     public Boolean getEnabled() {
         return enabled;
     }
@@ -72,6 +77,14 @@ public class SseProperties {
         this.backend = backend;
     }
 
+    public Heartbeat getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(Heartbeat heartbeat) {
+        this.heartbeat = heartbeat;
+    }
+
     /**
      * 发布订阅后端类型
      */
@@ -84,6 +97,39 @@ public class SseProperties {
          * 使用 PostgreSQL LISTEN/NOTIFY
          */
         POSTGRES
+    }
+
+    /**
+     * 心跳配置
+     */
+    public static class Heartbeat {
+
+        /**
+         * 是否启用心跳检测
+         */
+        private boolean enabled = true;
+
+        /**
+         * 心跳间隔时间，单位：秒
+         */
+        private int interval = 30;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public int getInterval() {
+            return interval;
+        }
+
+        public void setInterval(int interval) {
+            this.interval = interval;
+        }
+
     }
 
 }
