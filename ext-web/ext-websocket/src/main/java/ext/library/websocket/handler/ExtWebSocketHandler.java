@@ -1,14 +1,11 @@
 package ext.library.websocket.handler;
 
-import ext.library.core.util.SpringUtil;
 import ext.library.security.domain.SecuritySession;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
-import ext.library.tool.holder.Lazy;
-import ext.library.websocket.domain.WebSocketMessage;
-import ext.library.websocket.holder.WebSocketSessionHolder;
+import ext.library.websocket.manager.WebSocketConnectionManager;
+import ext.library.websocket.manager.WebSocketHeartbeatManager;
 import ext.library.websocket.properties.WebSocketProperties;
-import ext.library.websocket.util.WebSocketUtil;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
@@ -18,115 +15,107 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 
-import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
-
 /**
- * WebSocketHandler 实现类
+ * WebSocket 消息处理器
  */
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
 
-    private final Lazy<WebSocketProperties> properties = Lazy.of(() -> SpringUtil.getBean(WebSocketProperties.class));
+    private static final String LOGIN_USER_KEY = "loginUser";
+
+    private final WebSocketConnectionManager connectionManager;
+    private final WebSocketHeartbeatManager heartbeatManager;
+    private final WebSocketProperties properties;
+
+    public ExtWebSocketHandler(WebSocketConnectionManager connectionManager, WebSocketHeartbeatManager heartbeatManager, WebSocketProperties properties) {
+        this.connectionManager = connectionManager;
+        this.heartbeatManager = heartbeatManager;
+        this.properties = properties;
+    }
 
     /**
-     * 连接成功后
+     * 连接建立成功后
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
-        // 实现 session 支持并发，可参考 https://blog.csdn.net/abu935009066/article/details/131218149
-        session = new ConcurrentWebSocketSessionDecorator(session, properties.get().getSendTimeLimit(), properties.get().getBufferSizeLimit());
+        // 包装 session 支持并发发送
+        session = new ConcurrentWebSocketSessionDecorator(session, properties.getSendTimeLimit(), properties.getBufferSizeLimit());
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
-            Logs.info(EmojiSymbol.WEBSOCKET, "[连接] 无效的 token. sessionId: {}", session.getId());
+            Logs.info(EmojiSymbol.WEBSOCKET, "[连接] 无效的 token, sessionId: {}", session.getId());
             return;
         }
-        WebSocketSessionHolder.addSession(loginUser.getLoginId(), session);
-        Logs.info(EmojiSymbol.WEBSOCKET, "[连接] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        String sessionKey = loginUser.getLoginId();
+        connectionManager.addSession(sessionKey, session);
+        heartbeatManager.recordActivity(sessionKey);
+        Logs.info(EmojiSymbol.WEBSOCKET, "[连接] sessionId: {}, userId: {}", session.getId(), sessionKey);
     }
 
     /**
      * 处理接收到的文本消息
-     *
-     * @param session WebSocket 会话
-     * @param message 接收到的文本消息
-     *
-     * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // 从 WebSocket 会话中获取登录用户信息
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
-
-        // 创建 WebSocket 消息 DTO 对象
-        WebSocketMessage webSocketMessage = new WebSocketMessage();
-        webSocketMessage.setSessionKeys(List.of(loginUser.getLoginId()));
-        webSocketMessage.setMessage(message.getPayload());
-        WebSocketUtil.publishMessage(webSocketMessage);
+        String sessionKey = loginUser.getLoginId();
+        // 记录活动时间
+        heartbeatManager.recordActivity(sessionKey);
+        Logs.debug(EmojiSymbol.WEBSOCKET, "[消息] userId: {}, message: {}", sessionKey, message.getPayload());
     }
 
     /**
      * 处理接收到的二进制消息
-     *
-     * @param session WebSocket 会话
-     * @param message 接收到的二进制消息
-     *
-     * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        if (loginUser != null) {
+            heartbeatManager.recordActivity(loginUser.getLoginId());
+        }
         super.handleBinaryMessage(session, message);
     }
 
     /**
-     * 处理接收到的 Pong 消息（心跳监测）
-     *
-     * @param session WebSocket 会话
-     * @param message 接收到的 Pong 消息
-     *
-     * @throws Exception 处理消息过程中可能抛出的异常
+     * 处理接收到的 Pong 消息（心跳响应）
      */
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-        WebSocketUtil.sendPongMessage(session);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        if (loginUser != null) {
+            // 收到 Pong 表示客户端活跃
+            heartbeatManager.recordActivity(loginUser.getLoginId());
+            Logs.debug(EmojiSymbol.WEBSOCKET, "[心跳] 收到 Pong, userId: {}", loginUser.getLoginId());
+        }
     }
 
     /**
-     * 处理 WebSocket 传输错误
-     *
-     * @param session   WebSocket 会话
-     * @param exception 发生的异常
-     *
-     * @throws Exception 处理过程中可能抛出的异常
+     * 处理传输错误
      */
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        Logs.error(EmojiSymbol.WEBSOCKET, exception, "[传输错误] sessionId: {} , exception:{}", session.getId(), exception.getMessage());
+        Logs.warn(EmojiSymbol.WEBSOCKET, "[传输错误] sessionId: {}, error: {}", session.getId(), exception.getMessage());
     }
 
     /**
-     * 在 WebSocket 连接关闭后执行清理操作
-     *
-     * @param session WebSocket 会话
-     * @param status  关闭状态信息
+     * 连接关闭后
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
         if (Objects.isNull(loginUser)) {
-            Logs.info(EmojiSymbol.WEBSOCKET, "[断开] 无效的 token. sessionId: {}", session.getId());
+            Logs.info(EmojiSymbol.WEBSOCKET, "[断开] 无效的 token, sessionId: {}", session.getId());
             return;
         }
-        WebSocketSessionHolder.removeSession(loginUser.getLoginId());
-        Logs.info(EmojiSymbol.WEBSOCKET, "[断开] sessionId: {},userId:{}", session.getId(), loginUser.getLoginId());
+        String sessionKey = loginUser.getLoginId();
+        connectionManager.removeSession(sessionKey);
+        heartbeatManager.removeActivity(sessionKey);
+        Logs.info(EmojiSymbol.WEBSOCKET, "[断开] sessionId: {}, userId: {}", session.getId(), sessionKey);
     }
 
     /**
-     * 指示处理程序是否支持接收部分消息
-     *
-     * @return 如果支持接收部分消息，则返回 true；否则返回 false
+     * 是否支持部分消息
      */
     @Override
     public boolean supportsPartialMessages() {

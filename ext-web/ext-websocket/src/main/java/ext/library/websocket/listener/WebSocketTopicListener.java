@@ -3,11 +3,13 @@ package ext.library.websocket.listener;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
-import ext.library.websocket.holder.WebSocketSessionHolder;
-import ext.library.websocket.util.WebSocketUtil;
+import ext.library.websocket.manager.WebSocketConnectionManager;
+import ext.library.websocket.manager.WebSocketMessagePublisher;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+
+import jakarta.annotation.Resource;
 
 /**
  * WebSocket 主题订阅监听器
@@ -15,27 +17,30 @@ import org.springframework.core.annotation.Order;
 @Order(-1)
 public class WebSocketTopicListener implements ApplicationRunner {
 
+    @Resource
+    private WebSocketConnectionManager connectionManager;
+
+    @Resource
+    private WebSocketMessagePublisher messagePublisher;
+
     /**
-     * 在 Spring Boot 应用程序启动时初始化 WebSocket 主题订阅监听器
+     * 在应用程序启动时初始化 WebSocket 主题订阅监听器
      *
      * @param args 应用程序参数
-     *
-     * @throws Exception 初始化过程中可能抛出的异常
      */
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        // 订阅 WebSocket 消息
-        WebSocketUtil.subscribeMessage((message) -> {
-            Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 主题订阅收到消息，session keys:{},message:{}", message.getSessionKeys(), message.getMessage());
-            // 如果 key 不为空就按照 key 发消息 如果为空就群发
+    public void run(ApplicationArguments args) {
+        messagePublisher.subscribe(message -> {
+            Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 收到订阅消息，sessionKeys:{}, message:{}", message.getSessionKeys(), message.getMessage());
+            // 如果 sessionKeys 不为空就按会话发消息，否则群发
             if (ObjectUtil.isNotEmpty(message.getSessionKeys())) {
                 message.getSessionKeys().forEach(key -> {
-                    if (WebSocketSessionHolder.existSession(key)) {
-                        WebSocketUtil.sendMessage(key, message.getMessage());
+                    if (connectionManager.hasSession(key)) {
+                        connectionManager.sendMessage(key, message.getMessage());
                     }
                 });
             } else {
-                WebSocketSessionHolder.getSessionsAll().forEach(key -> WebSocketUtil.sendMessage(key, message.getMessage()));
+                connectionManager.sendMessageToAll(message.getMessage());
             }
         });
         Logs.info(EmojiSymbol.WEBSOCKET, "初始化 WebSocket 主题订阅监听器成功");

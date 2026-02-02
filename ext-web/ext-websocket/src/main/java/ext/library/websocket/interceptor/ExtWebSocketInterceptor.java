@@ -11,12 +11,14 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
 
-import static ext.library.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
-
 /**
  * WebSocket 握手请求的拦截器
  */
 public class ExtWebSocketInterceptor implements HandshakeInterceptor {
+    /**
+     * WebSocketSession 中存储登录用户的 key
+     */
+    String LOGIN_USER_KEY = "loginUser";
 
     /**
      * WebSocket 握手之前执行的前置处理方法

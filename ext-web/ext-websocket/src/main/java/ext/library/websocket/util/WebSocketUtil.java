@@ -1,133 +1,57 @@
 package ext.library.websocket.util;
 
-import ext.library.json.util.JsonUtil;
-import ext.library.redis.util.RedisUtil;
-import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.runtime.Logs;
-import ext.library.tool.runtime.VirtualThreadPools;
-import ext.library.tool.util.ObjectUtil;
+import ext.library.core.util.SpringUtil;
+import ext.library.tool.holder.Lazy;
 import ext.library.websocket.domain.WebSocketMessage;
-import ext.library.websocket.holder.WebSocketSessionHolder;
-import org.springframework.web.socket.PongMessage;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.SessionLimitExceededException;
-
-import jakarta.annotation.Nonnull;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static ext.library.websocket.constant.WebSocketConstants.WEB_SOCKET_TOPIC;
+import ext.library.websocket.manager.WebSocketConnectionManager;
+import ext.library.websocket.manager.WebSocketMessagePublisher;
 
 /**
- * 工具类
+ * WebSocket 工具类，提供消息发送和发布订阅功能
  */
 public final class WebSocketUtil {
 
+    private static final Lazy<WebSocketConnectionManager> CONNECTION_MANAGER = Lazy.of(() -> SpringUtil.getBean(WebSocketConnectionManager.class));
+    private static final Lazy<WebSocketMessagePublisher> MESSAGE_PUBLISHER = Lazy.of(() -> SpringUtil.getBean(WebSocketMessagePublisher.class));
+
+    private WebSocketUtil() {
+    }
+
     /**
-     * 向指定的 WebSocket 会话发送消息
+     * 向指定会话发送消息（仅本机）
      *
-     * @param sessionKey 要发送消息的用户 id
-     * @param message    要发送的消息内容
+     * @param sessionKey 会话键（用户 ID）
+     * @param message    消息内容
      */
     public static void sendMessage(String sessionKey, String message) {
-        WebSocketSession session = WebSocketSessionHolder.getSessions(sessionKey);
-        sendMessage(session, message);
+        CONNECTION_MANAGER.get().sendMessage(sessionKey, message);
     }
 
     /**
-     * 订阅 WebSocket 消息主题，并提供一个消费者函数来处理接收到的消息
+     * 向本机所有会话发送消息
      *
-     * @param consumer 处理 WebSocket 消息的消费者函数
+     * @param message 消息内容
      */
-    public static void subscribeMessage(Consumer<WebSocketMessage> consumer) {
-        RedisUtil.subscribe(WEB_SOCKET_TOPIC, WebSocketMessage.class, consumer);
+    public static void sendMessage(String message) {
+        CONNECTION_MANAGER.get().sendMessageToAll(message);
     }
 
     /**
-     * 发布 WebSocket 订阅消息
+     * 发布 WebSocket 消息到指定用户（支持跨服务器）
      *
-     * @param webSocketMessage 要发布的 WebSocket 消息对象
+     * @param webSocketMessage 消息对象
      */
-    public static void publishMessage(@Nonnull WebSocketMessage webSocketMessage) {
-        List<String> unsentSessionKeys = new ArrayList<>();
-        // 当前服务内 session，直接发送消息
-        for (String sessionKey : webSocketMessage.getSessionKeys()) {
-            if (WebSocketSessionHolder.existSession(sessionKey)) {
-                WebSocketUtil.sendMessage(sessionKey, webSocketMessage.getMessage());
-                continue;
-            }
-            unsentSessionKeys.add(sessionKey);
-        }
-        // 不在当前服务内 session，发布订阅消息
-        if (ObjectUtil.isNotEmpty(unsentSessionKeys)) {
-            WebSocketMessage broadcastMessage = new WebSocketMessage();
-            broadcastMessage.setMessage(webSocketMessage.getMessage());
-            broadcastMessage.setSessionKeys(unsentSessionKeys);
-            Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 发送主题订阅消息，topic:{},session keys:{},message:{}", WEB_SOCKET_TOPIC, unsentSessionKeys, webSocketMessage.getMessage());
-            RedisUtil.publish(WEB_SOCKET_TOPIC, JsonUtil.toJson(broadcastMessage));
-        }
+    public static void publishMessage(WebSocketMessage webSocketMessage) {
+        MESSAGE_PUBLISHER.get().publish(webSocketMessage);
     }
 
     /**
-     * 向所有的 WebSocket 会话发布订阅的消息 (群发)
+     * 向所有用户发布消息（群发，支持跨服务器）
      *
-     * @param message 要发布的消息内容
+     * @param message 消息内容
      */
     public static void publishAll(String message) {
-        WebSocketMessage broadcastMessage = new WebSocketMessage();
-        broadcastMessage.setMessage(message);
-        Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 发送主题订阅消息，topic:{},message:{}", WEB_SOCKET_TOPIC, message);
-        RedisUtil.publish(WEB_SOCKET_TOPIC, JsonUtil.toJson(broadcastMessage));
+        MESSAGE_PUBLISHER.get().publishToAll(message);
     }
 
-    /**
-     * 向指定的 WebSocket 会话发送 Pong 消息
-     *
-     * @param session 要发送 Pong 消息的 WebSocket 会话
-     */
-    public static void sendPongMessage(WebSocketSession session) {
-        sendMessage(session, new PongMessage());
-    }
-
-    /**
-     * 向指定的 WebSocket 会话发送文本消息
-     *
-     * @param session WebSocket 会话
-     * @param message 要发送的文本消息内容
-     */
-    public static void sendMessage(WebSocketSession session, String message) {
-        sendMessage(session, new TextMessage(message));
-    }
-
-    /**
-     * 向指定的 WebSocket 会话发送 WebSocket 消息对象
-     *
-     * @param session WebSocket 会话
-     * @param message 要发送的 WebSocket 消息对象
-     */
-    private static synchronized void sendMessage(WebSocketSession session, org.springframework.web.socket.WebSocketMessage<?> message) {
-        VirtualThreadPools.execute("WebSocket 发送", () -> {
-            if (session == null || !session.isOpen()) {
-                Logs.warn(EmojiSymbol.WEBSOCKET, "[发送] session 会话已经关闭");
-            } else {
-                try {
-                    session.sendMessage(message);
-                } catch (IOException e) {
-                    Logs.error(EmojiSymbol.WEBSOCKET, e, "[发送] session({}) 发送消息异常，message:{}", session, message);
-                } catch (SessionLimitExceededException ex) {
-                    // 一旦有一条消息发送超时，或者发送数据大于限制，limitExceeded 标志位就会被设置成 true，标志这这个 session 被关闭
-                    // 后面的发送调用都是直接返回不处理，但只是被标记为关闭连接本身可能实际上并没有关闭，这是一个坑需要注意。
-                    try {
-                        session.close();
-                    } catch (IOException e) {
-                        Logs.error(EmojiSymbol.WEBSOCKET, "[关闭] 主动关闭 session ({}) 连接失败", session.getId());
-                    }
-                    Logs.error(EmojiSymbol.WEBSOCKET, "[错误] session ({}) 发送消息失败", session.getId());
-                }
-            }
-        });
-    }
 }
