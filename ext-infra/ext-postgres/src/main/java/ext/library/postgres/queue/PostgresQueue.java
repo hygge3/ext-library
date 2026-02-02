@@ -4,6 +4,7 @@ import ext.library.json.util.JsonUtil;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.sql.Timestamp;
@@ -24,6 +25,23 @@ public class PostgresQueue {
     private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
+
+    /**
+     * Job 行映射器
+     */
+    private final RowMapper<Job> jobRowMapper = (rs, _) -> new Job(
+            rs.getLong("id"),
+            rs.getString("queue"),
+            rs.getString("payload"),
+            rs.getInt("attempts"),
+            rs.getInt("max_attempts"),
+            JobStatus.valueOf(rs.getString("status")),
+            rs.getString("error"),
+            getInstant(rs.getTimestamp("scheduled_at")),
+            getInstant(rs.getTimestamp("started_at")),
+            getInstant(rs.getTimestamp("completed_at")),
+            getInstant(rs.getTimestamp("created_at"))
+    );
 
     public PostgresQueue(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
@@ -119,19 +137,7 @@ public class PostgresQueue {
                 RETURNING %s.*
                 """.formatted(tableName, tableName, tableName, tableName))
                 .param(queue)
-                .query((rs, _) -> new Job(
-                        rs.getLong("id"),
-                        rs.getString("queue"),
-                        rs.getString("payload"),
-                        rs.getInt("attempts"),
-                        rs.getInt("max_attempts"),
-                        JobStatus.valueOf(rs.getString("status")),
-                        rs.getString("error"),
-                        getInstant(rs.getTimestamp("scheduled_at")),
-                        getInstant(rs.getTimestamp("started_at")),
-                        getInstant(rs.getTimestamp("completed_at")),
-                        getInstant(rs.getTimestamp("created_at"))
-                ))
+                .query(jobRowMapper)
                 .optional()
                 .map(job -> {
                     Logs.debug(EmojiSymbol.POSTGRES, "任务出队: queue={}, id={}, attempts={}", queue, job.id(), job.attempts());
@@ -168,19 +174,7 @@ public class PostgresQueue {
                 """.formatted(tableName, tableName, tableName, tableName))
                 .param(queue)
                 .param(limit)
-                .query((rs, _) -> new Job(
-                        rs.getLong("id"),
-                        rs.getString("queue"),
-                        rs.getString("payload"),
-                        rs.getInt("attempts"),
-                        rs.getInt("max_attempts"),
-                        JobStatus.valueOf(rs.getString("status")),
-                        rs.getString("error"),
-                        getInstant(rs.getTimestamp("scheduled_at")),
-                        getInstant(rs.getTimestamp("started_at")),
-                        getInstant(rs.getTimestamp("completed_at")),
-                        getInstant(rs.getTimestamp("created_at"))
-                ))
+                .query(jobRowMapper)
                 .list();
     }
 
@@ -248,19 +242,7 @@ public class PostgresQueue {
     public Optional<Job> getJob(long jobId) {
         return jdbcClient.sql("SELECT * FROM " + tableName + " WHERE id = ?")
                 .param(jobId)
-                .query((rs, _) -> new Job(
-                        rs.getLong("id"),
-                        rs.getString("queue"),
-                        rs.getString("payload"),
-                        rs.getInt("attempts"),
-                        rs.getInt("max_attempts"),
-                        JobStatus.valueOf(rs.getString("status")),
-                        rs.getString("error"),
-                        getInstant(rs.getTimestamp("scheduled_at")),
-                        getInstant(rs.getTimestamp("started_at")),
-                        getInstant(rs.getTimestamp("completed_at")),
-                        getInstant(rs.getTimestamp("created_at"))
-                ))
+                .query(jobRowMapper)
                 .optional();
     }
 

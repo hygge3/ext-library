@@ -37,7 +37,12 @@ public class PostgresCacheManager {
      * @return 缓存值，不存在或已过期返回 null
      */
     public <T> T get(String key, Class<T> clazz) {
-        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.readObj(json, clazz)).orElse(null);
+        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()")
+                .param(key)
+                .query(String.class)
+                .optional()
+                .map(json -> JsonUtil.readObj(json, clazz))
+                .orElse(null);
     }
 
     /**
@@ -120,7 +125,11 @@ public class PostgresCacheManager {
      * @return 是否存在
      */
     public boolean exists(String key) {
-        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(Integer.class).optional().isPresent();
+        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()")
+                .param(key)
+                .query(Integer.class)
+                .optional()
+                .isPresent();
     }
 
     /**
@@ -131,7 +140,12 @@ public class PostgresCacheManager {
      * @return 剩余秒数，不存在返回 -2，永不过期返回 -1
      */
     public long ttl(String key) {
-        return jdbcClient.sql("SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?").param(key).query(Long.class).optional().map(ttl -> Math.max(ttl, 0)).orElse(-2L); // key 不存在
+        return jdbcClient.sql("SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?")
+                .param(key)
+                .query(Long.class)
+                .optional()
+                .map(ttl -> Math.max(ttl, 0))
+                .orElse(-2L);
     }
 
     /**
@@ -143,7 +157,10 @@ public class PostgresCacheManager {
      * @return 是否更新成功
      */
     public boolean expire(String key, Duration ttl) {
-        int rows = jdbcClient.sql("UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?").param(ttl.toSeconds() + " seconds").param(key).update();
+        int rows = jdbcClient.sql("UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?")
+                .param(ttl.toSeconds() + " seconds")
+                .param(key)
+                .update();
         return rows > 0;
     }
 

@@ -5,6 +5,7 @@ import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.IdUtil;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -34,6 +35,19 @@ public class PostgresSessionManager {
     private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
+
+    /**
+     * Session 行映射器
+     */
+    private final RowMapper<Session> sessionRowMapper = (rs, _) -> new Session(
+            rs.getString("session_id"),
+            rs.getString("user_id"),
+            rs.getString("data"),
+            getInstant(rs.getTimestamp("expires_at")),
+            getInstant(rs.getTimestamp("last_accessed_at")),
+            getInstant(rs.getTimestamp("created_at")),
+            getInstant(rs.getTimestamp("updated_at"))
+    );
 
     public PostgresSessionManager(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
@@ -91,15 +105,7 @@ public class PostgresSessionManager {
                 .param(userId)
                 .param(JsonUtil.toJson(initialData))
                 .param(Timestamp.from(Instant.now().plus(timeout)))
-                .query((rs, _) -> new Session(
-                        rs.getString("session_id"),
-                        rs.getString("user_id"),
-                        rs.getString("data"),
-                        getInstant(rs.getTimestamp("expires_at")),
-                        getInstant(rs.getTimestamp("last_accessed_at")),
-                        getInstant(rs.getTimestamp("created_at")),
-                        getInstant(rs.getTimestamp("updated_at"))
-                ))
+                .query(sessionRowMapper)
                 .optional()
                 .orElse(null);
 
@@ -132,15 +138,7 @@ public class PostgresSessionManager {
                 WHERE session_id = ? AND expires_at > NOW()
                 """.formatted(tableName))
                 .param(sessionId)
-                .query((rs, _) -> new Session(
-                        rs.getString("session_id"),
-                        rs.getString("user_id"),
-                        rs.getString("data"),
-                        getInstant(rs.getTimestamp("expires_at")),
-                        getInstant(rs.getTimestamp("last_accessed_at")),
-                        getInstant(rs.getTimestamp("created_at")),
-                        getInstant(rs.getTimestamp("updated_at"))
-                ))
+                .query(sessionRowMapper)
                 .optional();
 
         if (session.isPresent() && updateAccess) {
@@ -352,15 +350,7 @@ public class PostgresSessionManager {
                 ORDER BY last_accessed_at DESC
                 """.formatted(tableName))
                 .param(userId)
-                .query((rs, _) -> new Session(
-                        rs.getString("session_id"),
-                        rs.getString("user_id"),
-                        rs.getString("data"),
-                        getInstant(rs.getTimestamp("expires_at")),
-                        getInstant(rs.getTimestamp("last_accessed_at")),
-                        getInstant(rs.getTimestamp("created_at")),
-                        getInstant(rs.getTimestamp("updated_at"))
-                ))
+                .query(sessionRowMapper)
                 .list();
     }
 
