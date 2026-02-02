@@ -69,25 +69,6 @@ public class PostgresProperties {
      */
     private int defaultRateLimit = 100;
 
-    /**
-     * 会话表名
-     */
-    private String sessionTableName = "pg_sessions";
-
-    /**
-     * 默认会话过期时间
-     */
-    private Duration defaultSessionTimeout = Duration.ofHours(24);
-
-    /**
-     * 会话活动超时时间（无活动后过期）
-     */
-    private Duration sessionActivityTimeout = Duration.ofMinutes(30);
-
-    /**
-     * 会话清理间隔
-     */
-    private Duration sessionCleanupInterval = Duration.ofMinutes(10);
 
     // region Getters and Setters
 
@@ -177,38 +158,6 @@ public class PostgresProperties {
 
     public void setDefaultRateLimit(int defaultRateLimit) {
         this.defaultRateLimit = defaultRateLimit;
-    }
-
-    public String getSessionTableName() {
-        return sessionTableName;
-    }
-
-    public void setSessionTableName(String sessionTableName) {
-        this.sessionTableName = sessionTableName;
-    }
-
-    public Duration getDefaultSessionTimeout() {
-        return defaultSessionTimeout;
-    }
-
-    public void setDefaultSessionTimeout(Duration defaultSessionTimeout) {
-        this.defaultSessionTimeout = defaultSessionTimeout;
-    }
-
-    public Duration getSessionActivityTimeout() {
-        return sessionActivityTimeout;
-    }
-
-    public void setSessionActivityTimeout(Duration sessionActivityTimeout) {
-        this.sessionActivityTimeout = sessionActivityTimeout;
-    }
-
-    public Duration getSessionCleanupInterval() {
-        return sessionCleanupInterval;
-    }
-
-    public void setSessionCleanupInterval(Duration sessionCleanupInterval) {
-        this.sessionCleanupInterval = sessionCleanupInterval;
     }
 
     // endregion

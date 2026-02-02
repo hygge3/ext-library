@@ -9,7 +9,6 @@ import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.schema.PostgresSchemaInitializer;
-import ext.library.postgres.session.PostgresSessionManager;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -37,6 +36,34 @@ public class PostgresAutoConfiguration {
 
     public PostgresAutoConfiguration() {
         Logs.info(EmojiSymbol.POSTGRES, "载入模块: ext-postgres (PostgreSQL 缓存/队列/发布订阅/限流/会话)");
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = PostgresProperties.PREFIX, name = "auto-init-schema", havingValue = "true", matchIfMissing = true)
+    public PostgresSchemaInitializer postgresSchemaInitializer(JdbcClient postgresJdbcClient, PostgresProperties properties) {
+        return new PostgresSchemaInitializer(postgresJdbcClient, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PostgresCacheManager postgresCacheManager(JdbcClient postgresJdbcClient, PostgresProperties properties) {
+        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresCacheManager");
+        return new PostgresCacheManager(postgresJdbcClient, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PostgresQueue postgresQueue(JdbcClient postgresJdbcClient, PostgresProperties properties) {
+        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresQueue");
+        return new PostgresQueue(postgresJdbcClient, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PostgresRateLimiter postgresRateLimiter(JdbcClient postgresJdbcClient, PostgresProperties properties) {
+        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresRateLimiter");
+        return new PostgresRateLimiter(postgresJdbcClient, properties);
     }
 
     /**
@@ -99,40 +126,5 @@ public class PostgresAutoConfiguration {
             Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresPubSub (主数据源)");
             return new PostgresPubSub(dataSource);
         }
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = PostgresProperties.PREFIX, name = "auto-init-schema", havingValue = "true", matchIfMissing = true)
-    public PostgresSchemaInitializer postgresSchemaInitializer(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        return new PostgresSchemaInitializer(postgresJdbcClient, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PostgresCacheManager postgresCacheManager(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresCacheManager");
-        return new PostgresCacheManager(postgresJdbcClient, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PostgresQueue postgresQueue(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresQueue");
-        return new PostgresQueue(postgresJdbcClient, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PostgresRateLimiter postgresRateLimiter(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresRateLimiter");
-        return new PostgresRateLimiter(postgresJdbcClient, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PostgresSessionManager postgresSessionManager(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresSessionManager");
-        return new PostgresSessionManager(postgresJdbcClient, properties);
     }
 }

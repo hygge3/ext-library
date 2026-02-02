@@ -7,8 +7,6 @@ import ext.library.postgres.queue.Job;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.ratelimit.RateLimitResult;
-import ext.library.postgres.session.PostgresSessionManager;
-import ext.library.postgres.session.Session;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -34,6 +32,7 @@ public final class PostgresUtil {
      * 获取缓存值
      *
      * @param key 缓存键
+     *
      * @return 缓存值，不存在返回 null
      */
     public static String cacheGet(String key) {
@@ -45,6 +44,7 @@ public final class PostgresUtil {
      *
      * @param key   缓存键
      * @param clazz 目标类型
+     *
      * @return 缓存值，不存在返回 null
      */
     public static <T> T cacheGet(String key, Class<T> clazz) {
@@ -76,6 +76,7 @@ public final class PostgresUtil {
      * 删除缓存
      *
      * @param key 缓存键
+     *
      * @return 是否删除成功
      */
     public static boolean cacheDelete(String key) {
@@ -86,6 +87,7 @@ public final class PostgresUtil {
      * 按模式删除缓存
      *
      * @param pattern 匹配模式（支持 * 通配符）
+     *
      * @return 删除的数量
      */
     public static int cacheDeleteByPattern(String pattern) {
@@ -96,6 +98,7 @@ public final class PostgresUtil {
      * 检查缓存是否存在
      *
      * @param key 缓存键
+     *
      * @return 是否存在
      */
     public static boolean cacheExists(String key) {
@@ -107,6 +110,7 @@ public final class PostgresUtil {
      *
      * @param key 缓存键
      * @param ttl 过期时间
+     *
      * @return 是否设置成功
      */
     public static boolean cacheExpire(String key, Duration ttl) {
@@ -120,6 +124,7 @@ public final class PostgresUtil {
      *
      * @param queue   队列名称
      * @param payload 任务负载
+     *
      * @return 任务 ID
      */
     public static long enqueue(String queue, Object payload) {
@@ -132,6 +137,7 @@ public final class PostgresUtil {
      * @param queue   队列名称
      * @param payload 任务负载
      * @param delay   延迟时间
+     *
      * @return 任务 ID
      */
     public static long enqueue(String queue, Object payload, Duration delay) {
@@ -144,6 +150,7 @@ public final class PostgresUtil {
      * @param queue       队列名称
      * @param payload     任务负载
      * @param scheduledAt 计划执行时间
+     *
      * @return 任务 ID
      */
     public static long enqueue(String queue, Object payload, Instant scheduledAt) {
@@ -154,6 +161,7 @@ public final class PostgresUtil {
      * 任务出队
      *
      * @param queue 队列名称
+     *
      * @return 任务，不存在返回空
      */
     public static Optional<Job> dequeue(String queue) {
@@ -165,6 +173,7 @@ public final class PostgresUtil {
      *
      * @param queue 队列名称
      * @param limit 最大获取数量
+     *
      * @return 任务列表
      */
     public static List<Job> dequeue(String queue, int limit) {
@@ -204,6 +213,7 @@ public final class PostgresUtil {
      * 获取队列待处理任务数量
      *
      * @param queue 队列名称
+     *
      * @return 待处理数量
      */
     public static long queuePendingCount(String queue) {
@@ -214,6 +224,7 @@ public final class PostgresUtil {
      * 获取队列统计信息
      *
      * @param queue 队列名称
+     *
      * @return [pending, processing, completed, failed]
      */
     public static long[] queueStats(String queue) {
@@ -266,6 +277,7 @@ public final class PostgresUtil {
      * 检查是否已订阅
      *
      * @param channel 通道名称
+     *
      * @return 是否已订阅
      */
     public static boolean isSubscribed(String channel) {
@@ -278,6 +290,7 @@ public final class PostgresUtil {
      * 检查并递增（使用默认配置）
      *
      * @param key 限流键
+     *
      * @return 限流结果
      */
     public static RateLimitResult rateLimit(String key) {
@@ -290,6 +303,7 @@ public final class PostgresUtil {
      * @param key    限流键
      * @param limit  限制阈值
      * @param window 时间窗口
+     *
      * @return 限流结果
      */
     public static RateLimitResult rateLimit(String key, int limit, Duration window) {
@@ -300,6 +314,7 @@ public final class PostgresUtil {
      * 仅检查是否允许（不递增）
      *
      * @param key 限流键
+     *
      * @return 是否允许
      */
     public static boolean isRateLimitAllowed(String key) {
@@ -312,6 +327,7 @@ public final class PostgresUtil {
      * @param key    限流键
      * @param limit  限制阈值
      * @param window 时间窗口
+     *
      * @return 是否允许
      */
     public static boolean isRateLimitAllowed(String key, int limit, Duration window) {
@@ -322,148 +338,11 @@ public final class PostgresUtil {
      * 重置限流计数
      *
      * @param key 限流键
+     *
      * @return 是否重置成功
      */
     public static boolean resetRateLimit(String key) {
         return getRateLimiter().reset(key);
-    }
-
-    // ==================== 会话操作 ====================
-
-    /**
-     * 创建新会话
-     *
-     * @return 新会话
-     */
-    public static Session createSession() {
-        return getSessionManager().createSession();
-    }
-
-    /**
-     * 创建新会话
-     *
-     * @param userId 用户 ID
-     * @return 新会话
-     */
-    public static Session createSession(String userId) {
-        return getSessionManager().createSession(userId);
-    }
-
-    /**
-     * 创建新会话
-     *
-     * @param userId      用户 ID
-     * @param initialData 初始数据
-     * @return 新会话
-     */
-    public static Session createSession(String userId, Object initialData) {
-        return getSessionManager().createSession(userId, initialData);
-    }
-
-    /**
-     * 获取会话
-     *
-     * @param sessionId 会话 ID
-     * @return 会话，不存在或已过期返回空
-     */
-    public static Optional<Session> getSession(String sessionId) {
-        return getSessionManager().getSession(sessionId);
-    }
-
-    /**
-     * 更新会话数据
-     *
-     * @param sessionId 会话 ID
-     * @param data      新数据
-     * @return 是否更新成功
-     */
-    public static boolean setSessionData(String sessionId, Object data) {
-        return getSessionManager().setSessionData(sessionId, data);
-    }
-
-    /**
-     * 合并更新会话数据
-     *
-     * @param sessionId 会话 ID
-     * @param data      要合并的数据
-     * @return 是否更新成功
-     */
-    public static boolean mergeSessionData(String sessionId, Object data) {
-        return getSessionManager().mergeSessionData(sessionId, data);
-    }
-
-    /**
-     * 设置会话属性
-     *
-     * @param sessionId 会话 ID
-     * @param key       属性键
-     * @param value     属性值
-     * @return 是否设置成功
-     */
-    public static boolean setSessionAttribute(String sessionId, String key, Object value) {
-        return getSessionManager().setAttribute(sessionId, key, value);
-    }
-
-    /**
-     * 获取会话属性
-     *
-     * @param sessionId 会话 ID
-     * @param key       属性键
-     * @param clazz     属性类型
-     * @return 属性值，不存在返回 null
-     */
-    public static <T> T getSessionAttribute(String sessionId, String key, Class<T> clazz) {
-        return getSessionManager().getAttribute(sessionId, key, clazz);
-    }
-
-    /**
-     * 续期会话
-     *
-     * @param sessionId 会话 ID
-     * @return 是否续期成功
-     */
-    public static boolean renewSession(String sessionId) {
-        return getSessionManager().renewSession(sessionId);
-    }
-
-    /**
-     * 删除会话
-     *
-     * @param sessionId 会话 ID
-     * @return 是否删除成功
-     */
-    public static boolean deleteSession(String sessionId) {
-        return getSessionManager().deleteSession(sessionId);
-    }
-
-    /**
-     * 获取用户的所有会话
-     *
-     * @param userId 用户 ID
-     * @return 会话列表
-     */
-    public static List<Session> getSessionsByUser(String userId) {
-        return getSessionManager().getSessionsByUser(userId);
-    }
-
-    /**
-     * 删除用户的所有会话
-     *
-     * @param userId 用户 ID
-     * @return 删除的会话数
-     */
-    public static int deleteSessionsByUser(String userId) {
-        return getSessionManager().deleteSessionsByUser(userId);
-    }
-
-    /**
-     * 检查会话是否存在
-     *
-     * @param sessionId 会话 ID
-     * @return 是否存在
-     */
-    public static boolean sessionExists(String sessionId) {
-        return getSessionManager().exists(sessionId);
     }
 
     // ==================== Bean 获取 ====================
@@ -494,12 +373,5 @@ public final class PostgresUtil {
      */
     public static PostgresRateLimiter getRateLimiter() {
         return SpringUtil.getBean(PostgresRateLimiter.class);
-    }
-
-    /**
-     * 获取会话管理器 Bean
-     */
-    public static PostgresSessionManager getSessionManager() {
-        return SpringUtil.getBean(PostgresSessionManager.class);
     }
 }
