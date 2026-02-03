@@ -5,6 +5,7 @@ import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.websocket.manager.WebSocketConnectionManager;
 import ext.library.websocket.manager.WebSocketMessagePublisher;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -29,7 +30,7 @@ public class WebSocketTopicListener implements ApplicationRunner {
      * @param args 应用程序参数
      */
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         messagePublisher.subscribe(message -> {
             Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 收到订阅消息，sessionKeys:{}, message:{}", message.getSessionKeys(), message.getMessage());
             // 如果 sessionKeys 不为空就按会话发消息，否则群发

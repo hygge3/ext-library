@@ -35,17 +35,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class BeanUtil {
 
+    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
+    private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
+
     private BeanUtil() {
     }
-
-    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
-
-    private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 对象转 Map
      *
      * @param obj 对象
+     *
      * @return Map
      */
     public static Map<String, @Nullable Object> beanToMap(Object obj) {
@@ -71,6 +71,7 @@ public final class BeanUtil {
      *
      * @param map         Map
      * @param targetClass 目标类型
+     *
      * @return 目标对象
      */
     public static <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
@@ -94,6 +95,7 @@ public final class BeanUtil {
      *
      * @param bean         bean
      * @param propertyName 属性名
+     *
      * @return 属性值
      */
     public static @Nullable Object getProperty(Object bean, String propertyName) {
@@ -118,6 +120,7 @@ public final class BeanUtil {
      * 深度拷贝
      *
      * @param source 待拷贝的对象
+     *
      * @return 拷贝之后的对象
      */
     @SuppressWarnings("unchecked")
@@ -141,6 +144,7 @@ public final class BeanUtil {
      *
      * @param source     数据来源实体
      * @param targetType 目标类型
+     *
      * @return 转换后的对象
      */
     @SuppressWarnings("unchecked")
@@ -165,7 +169,7 @@ public final class BeanUtil {
      * @param source 数据来源实体
      * @param target 目标对象，属性将被复制到此对象
      */
-    public static <S, T> void convert(S source, T target) {
+    public static <S, T> void convert(@Nullable S source, @Nullable T target) {
         if (source == null || target == null) {
             return;
         }
@@ -182,6 +186,7 @@ public final class BeanUtil {
      *
      * @param sourceList 数据来源实体列表
      * @param targetType 目标类型
+     *
      * @return 转换后的列表
      */
     @SuppressWarnings("unchecked")
@@ -207,6 +212,7 @@ public final class BeanUtil {
      *
      * @param map        数据来源
      * @param targetType 目标类型
+     *
      * @return 转换后的对象
      */
     public static <T> T convert(Map<String, Object> map, Class<T> targetType) {

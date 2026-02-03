@@ -24,25 +24,20 @@ import java.util.Properties;
  * 基于 OSHI 库，提供 CPU、内存、磁盘、网络 IO、JVM 等系统资源信息采集功能。
  * </p>
  */
-public class SystemMonitor {
+public record SystemMonitor(SystemInfo systemInfo) {
 
     private static final int DEFAULT_CPU_SAMPLE_MILLIS = 500;
     private static final int DEFAULT_NET_SAMPLE_MILLIS = 1000;
-
-    private final SystemInfo systemInfo;
 
     public SystemMonitor() {
         this(new SystemInfo());
     }
 
-    public SystemMonitor(SystemInfo systemInfo) {
-        this.systemInfo = systemInfo;
-    }
-
     /**
      * 获取底层 SystemInfo 对象
      */
-    public SystemInfo getSystemInfo() {
+    @Override
+    public SystemInfo systemInfo() {
         return systemInfo;
     }
 
@@ -109,6 +104,7 @@ public class SystemMonitor {
      * 获取 CPU 信息
      *
      * @param sampleMillis 采样时间（毫秒）
+     *
      * @return {@link CpuInfo}
      */
     public CpuInfo getCpuInfo(int sampleMillis) {
@@ -240,6 +236,7 @@ public class SystemMonitor {
      * 获取网络 IO 信息
      *
      * @param sampleMillis 采样时间（毫秒）
+     *
      * @return {@link NetIoInfo}
      */
     public NetIoInfo getNetIoInfo(int sampleMillis) {

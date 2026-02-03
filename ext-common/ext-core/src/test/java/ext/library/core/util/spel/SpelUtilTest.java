@@ -8,8 +8,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * SpelUtil 工具类测试
@@ -18,59 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SpelUtilTest {
 
     // ========== 测试辅助类 ==========
-
-    static class TestUser {
-        private String name;
-        private Integer age;
-
-        public TestUser() {
-        }
-
-        public TestUser(String name, Integer age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Integer getAge() {
-            return age;
-        }
-
-        public void setAge(Integer age) {
-            this.age = age;
-        }
-    }
-
-    static class TestService {
-        public String simpleMethod(String param) {
-            return "Hello " + param;
-        }
-
-        public String userMethod(TestUser user) {
-            return "User: " + user.getName();
-        }
-
-        public String multiParamMethod(String name, Integer age, Boolean active) {
-            return String.format("%s, %d, %b", name, age, active);
-        }
-
-        public TestUser createUser(String name, Integer age) {
-            return new TestUser(name, age);
-        }
-
-        public List<String> getList() {
-            return List.of("item1", "item2", "item3");
-        }
-    }
-
-    // ========== parseValueToString(rootObject, method, args, expression) 测试 ==========
 
     @Test
     @DisplayName("测试解析简单参数表达式")
@@ -95,6 +40,8 @@ class SpelUtilTest {
 
         assertEquals("测试", result, "应正确解析参数名 #param");
     }
+
+    // ========== parseValueToString(rootObject, method, args, expression) 测试 ==========
 
     @Test
     @DisplayName("测试解析对象属性表达式")
@@ -154,8 +101,6 @@ class SpelUtilTest {
         assertEquals("false", activeResult, "应正确解析参数名 #active");
     }
 
-    // ========== getSpelContext 测试 ==========
-
     @Test
     @DisplayName("测试获取 SpEL 上下文")
     void testGetSpelContext() throws Exception {
@@ -172,8 +117,6 @@ class SpelUtilTest {
         assertNotNull(result, "上下文应包含 user 变量");
     }
 
-    // ========== parseValueToString(context, expression) 测试 ==========
-
     @Test
     @DisplayName("测试使用上下文解析表达式")
     void testParseWithContext() throws Exception {
@@ -188,6 +131,8 @@ class SpelUtilTest {
         assertEquals("孙七", result, "应正确使用上下文解析表达式");
     }
 
+    // ========== getSpelContext 测试 ==========
+
     @Test
     @DisplayName("测试解析复杂表达式")
     void testParseComplexExpression() throws Exception {
@@ -199,6 +144,8 @@ class SpelUtilTest {
 
         assertEquals("周八:40", result, "应正确解析复杂表达式");
     }
+
+    // ========== parseValueToString(context, expression) 测试 ==========
 
     @Test
     @DisplayName("测试解析条件表达式")
@@ -212,8 +159,6 @@ class SpelUtilTest {
         assertEquals("吴九", result, "应正确解析条件表达式");
     }
 
-    // ========== parseValueToStringList 测试 ==========
-
     @Test
     @DisplayName("测试解析列表表达式")
     void testParseListExpression() throws Exception {
@@ -226,10 +171,8 @@ class SpelUtilTest {
 
         assertNotNull(list, "列表结果不应为 null");
         assertEquals(3, list.size(), "列表大小应为 3");
-        assertEquals("item1", list.get(0), "第一个元素应为 item1");
+        assertEquals("item1", list.getFirst(), "第一个元素应为 item1");
     }
-
-    // ========== 边界情况测试 ==========
 
     @Test
     @DisplayName("测试解析空字符串表达式")
@@ -243,6 +186,8 @@ class SpelUtilTest {
         assertEquals("", result, "空字符串应正确解析");
     }
 
+    // ========== parseValueToStringList 测试 ==========
+
     @Test
     @DisplayName("测试解析 null 参数")
     void testParseNullParameter() throws Exception {
@@ -255,6 +200,8 @@ class SpelUtilTest {
         // null 参数应该可以处理
         // Spring EL 会将 null 表达式解析为 null
     }
+
+    // ========== 边界情况测试 ==========
 
     @Test
     @DisplayName("测试解析数字运算表达式")
@@ -307,5 +254,56 @@ class SpelUtilTest {
         String result = SpelUtil.parseValueToString(context, "#list[0]");
 
         assertEquals("item1", result, "应正确解析索引访问表达式");
+    }
+
+    static class TestUser {
+        private String name;
+        private Integer age;
+
+        public TestUser() {
+        }
+
+        public TestUser(String name, Integer age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
+    }
+
+    static class TestService {
+        public String simpleMethod(String param) {
+            return "Hello " + param;
+        }
+
+        public String userMethod(TestUser user) {
+            return "User: " + user.getName();
+        }
+
+        public String multiParamMethod(String name, Integer age, Boolean active) {
+            return String.format("%s, %d, %b", name, age, active);
+        }
+
+        public TestUser createUser(String name, Integer age) {
+            return new TestUser(name, age);
+        }
+
+        public List<String> getList() {
+            return List.of("item1", "item2", "item3");
+        }
     }
 }

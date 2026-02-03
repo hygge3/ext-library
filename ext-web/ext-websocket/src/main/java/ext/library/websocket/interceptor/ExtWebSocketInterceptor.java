@@ -4,6 +4,7 @@ import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -18,7 +19,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
     /**
      * WebSocketSession 中存储登录用户的 key
      */
-    String LOGIN_USER_KEY = "loginUser";
+    private static final String LOGIN_USER_KEY = "loginUser";
 
     /**
      * WebSocket 握手之前执行的前置处理方法
@@ -52,7 +53,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
      * @param exception 握手过程中可能出现的异常
      */
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, @Nullable Exception exception) {
         // 在这个方法中可以执行一些握手成功后的后续处理逻辑，比如记录日志或者其他操作
         Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 连接成功 '{}'", SecurityUtil.getCurrentLoginId());
     }

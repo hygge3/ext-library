@@ -5,6 +5,7 @@ import ext.library.sse.manager.SseMessagePublisher;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -29,7 +30,7 @@ public class SseTopicListener implements ApplicationRunner {
      * @param args 应用程序参数
      */
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         messagePublisher.subscribe(message -> {
             Logs.info(EmojiSymbol.SSE, "SSE 收到订阅消息，userIds:{}, message:{}", message.getUserIds(), message.getMessage());
             // 如果 userIds 不为空就按用户发消息，否则群发

@@ -70,6 +70,7 @@ public final class JsonUtil {
      * 将对象序列化成 JSON 字符串
      *
      * @param obj 对象
+     *
      * @return JSON 字符串，null 返回空字符串
      */
     public static String toJson(@Nullable Object obj) {
@@ -80,6 +81,7 @@ public final class JsonUtil {
      * 将对象序列化成格式化的 JSON 字符串
      *
      * @param obj 对象
+     *
      * @return 格式化的 JSON 字符串，null 返回空字符串
      */
     public static String toPrettyJson(@Nullable Object obj) {
@@ -94,6 +96,7 @@ public final class JsonUtil {
      * @param obj             对象
      * @param filterName      过滤器名称（需与类上的 @JsonFilter 值一致）
      * @param fieldsToExclude 要排除的字段名
+     *
      * @return JSON 字符串
      */
     public static String toJsonExcluding(Object obj, String filterName, String... fieldsToExclude) {
@@ -107,14 +110,18 @@ public final class JsonUtil {
     }
 
     private static String serialize(@Nullable Object obj, boolean pretty) {
-        if (obj == null) {
-            return "";
-        }
-        if (obj instanceof String str) {
-            return str;
-        }
-        if (obj instanceof BigDecimal bd) {
-            return bd.toPlainString();
+        switch (obj) {
+            case null -> {
+                return "";
+            }
+            case String str -> {
+                return str;
+            }
+            case BigDecimal bd -> {
+                return bd.toPlainString();
+            }
+            default -> {
+            }
         }
         try {
             return pretty
@@ -135,6 +142,7 @@ public final class JsonUtil {
      * @param json      JSON 字符串
      * @param valueType 目标类型
      * @param <T>       泛型
+     *
      * @return 反序列化对象
      */
     public static <T> T readObj(String json, Class<T> valueType) {
@@ -151,6 +159,7 @@ public final class JsonUtil {
      * @param json         JSON 字符串
      * @param elementClass 元素类型
      * @param <T>          泛型
+     *
      * @return List 集合
      */
     public static <T> List<T> readList(String json, Class<T> elementClass) {
@@ -161,6 +170,7 @@ public final class JsonUtil {
      * JSON 字符串反序列化为 Map
      *
      * @param json JSON 字符串
+     *
      * @return Map 集合
      */
     public static Map<String, Object> readMap(String json) {
@@ -173,6 +183,7 @@ public final class JsonUtil {
      * @param json       JSON 字符串
      * @param valueClass 值类型
      * @param <V>        值泛型
+     *
      * @return Map 集合
      */
     public static <V> Map<String, V> readMap(String json, Class<V> valueClass) {
@@ -187,6 +198,7 @@ public final class JsonUtil {
      * @param valueClass 值类型
      * @param <K>        键泛型
      * @param <V>        值泛型
+     *
      * @return Map 集合
      */
     public static <K, V> Map<K, V> readMap(String json, Class<K> keyClass, Class<V> valueClass) {
@@ -201,6 +213,7 @@ public final class JsonUtil {
      * @param json          JSON 字符串
      * @param typeReference 类型引用
      * @param <T>           泛型
+     *
      * @return 反序列化对象
      */
     public static <T> T readGeneric(String json, TypeReference<T> typeReference) {
@@ -231,6 +244,7 @@ public final class JsonUtil {
      * @param fromValue   源对象
      * @param toValueType 目标类型
      * @param <T>         泛型
+     *
      * @return 转换后的对象
      */
     public static <T> T convert(Object fromValue, Class<T> toValueType) {
@@ -245,6 +259,7 @@ public final class JsonUtil {
      * 校验 JSON 格式是否有效
      *
      * @param json JSON 字符串
+     *
      * @return 格式有效返回 true，否则返回 false
      */
     public static boolean isValidJson(String json) {

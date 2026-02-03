@@ -66,6 +66,7 @@ public final class ClassUtil {
      *
      * @param superType 父类型
      * @param subType   子类型
+     *
      * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Class<?> superType, Class<?> subType) {
@@ -88,6 +89,7 @@ public final class ClassUtil {
      *
      * @param superType 父类型
      * @param subType   子类型
+     *
      * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Type superType, Type subType) {
@@ -159,6 +161,7 @@ public final class ClassUtil {
      * @param clazz      类
      * @param methodName 方法名
      * @param paramTypes 参数类型（可为 null 表示任意签名）
+     *
      * @return 方法，未找到返回 null
      */
     public static @Nullable Method getMethod(Class<?> clazz, String methodName, Class<?> @Nullable ... paramTypes) {
@@ -196,6 +199,7 @@ public final class ClassUtil {
      *
      * @param constructor    构造函数
      * @param parameterIndex 参数索引
+     *
      * @return 参数对象
      */
     public static Parameter getParameter(Constructor<?> constructor, int parameterIndex) {
@@ -207,6 +211,7 @@ public final class ClassUtil {
      *
      * @param method         方法
      * @param parameterIndex 参数索引
+     *
      * @return 参数对象
      */
     public static Parameter getMethodParameter(Method method, int parameterIndex) {
@@ -223,6 +228,7 @@ public final class ClassUtil {
      * @param element        注解元素
      * @param annotationType 注解类型
      * @param <A>            注解类型
+     *
      * @return 注解实例，未找到返回 null
      */
     public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationType) {
@@ -237,6 +243,7 @@ public final class ClassUtil {
      * @param method         方法
      * @param annotationType 注解类型
      * @param <A>            注解类型
+     *
      * @return 注解实例，未找到返回 null
      */
     public static @Nullable <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
@@ -256,6 +263,7 @@ public final class ClassUtil {
      *
      * @param clazz 类
      * @param <T>   对象类型
+     *
      * @return 新实例
      */
     @SuppressWarnings("unchecked")
@@ -273,6 +281,7 @@ public final class ClassUtil {
      *
      * @param className 完全限定类名
      * @param <T>       对象类型
+     *
      * @return 新实例
      */
     public static <T> T newInstance(String className) {
@@ -292,6 +301,7 @@ public final class ClassUtil {
      *
      * @param bean         Bean 对象
      * @param propertyName 属性名
+     *
      * @return 属性值
      */
     public static Object getProperty(Object bean, String propertyName) {
@@ -332,6 +342,7 @@ public final class ClassUtil {
      *
      * @param source 源对象
      * @param <T>    对象类型
+     *
      * @return 复制后的新对象，源对象为 null 时返回 null
      */
     @SuppressWarnings("unchecked")
@@ -365,9 +376,10 @@ public final class ClassUtil {
      * 获取类型的默认值
      *
      * @param type 类型
+     *
      * @return 默认值
      */
-    private static Object getDefaultValue(Class<?> type) {
+    private static @Nullable Object getDefaultValue(Class<?> type) {
         if (!type.isPrimitive()) {
             return null;
         }

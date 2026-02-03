@@ -162,18 +162,12 @@ class MongoObjectIdTest {
     @DisplayName("测试 toHex 抛出异常")
     void testToHexThrowsException() {
         // null 参数
-        assertThrows(NullPointerException.class, () -> {
-            MongoObjectId.toHex(null);
-        }, "传入 null 应抛出 NullPointerException");
+        assertThrows(NullPointerException.class, () -> MongoObjectId.toHex(null), "传入 null 应抛出 NullPointerException");
 
         // 长度不正确的字节数组
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.toHex(new byte[11]);
-        }, "长度为 11 的字节数组应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.toHex(new byte[11]), "长度为 11 的字节数组应抛出 IllegalArgumentException");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.toHex(new byte[13]);
-        }, "长度为 13 的字节数组应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.toHex(new byte[13]), "长度为 13 的字节数组应抛出 IllegalArgumentException");
     }
 
     @Test
@@ -223,21 +217,13 @@ class MongoObjectIdTest {
     @DisplayName("测试 fromHex 抛出异常")
     void testFromHexThrowsException() {
         // 无效的十六进制字符串
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.fromHex(null);
-        }, "传入 null 应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.fromHex(null), "传入 null 应抛出 IllegalArgumentException");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.fromHex("507f1f77bcf86cd79943901");
-        }, "长度不足 24 应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.fromHex("507f1f77bcf86cd79943901"), "长度不足 24 应抛出 IllegalArgumentException");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.fromHex("507f1f77bcf86cd79943901g");
-        }, "包含非十六进制字符应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.fromHex("507f1f77bcf86cd79943901g"), "包含非十六进制字符应抛出 IllegalArgumentException");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            MongoObjectId.fromHex("507f1f77bcf86cd79943901@");
-        }, "包含特殊字符应抛出 IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> MongoObjectId.fromHex("507f1f77bcf86cd79943901@"), "包含特殊字符应抛出 IllegalArgumentException");
     }
 
     @Test

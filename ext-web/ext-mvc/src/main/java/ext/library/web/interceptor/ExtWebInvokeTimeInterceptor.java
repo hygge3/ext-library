@@ -4,6 +4,7 @@ import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -51,7 +52,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-                                Object handler, Exception ex) throws Exception {
+                                Object handler, @Nullable Exception ex) throws Exception {
         StopWatch stopWatch = KEY_CACHE.get();
         stopWatch.stop();
         Logs.info(EmojiSymbol.WEB, "{}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());

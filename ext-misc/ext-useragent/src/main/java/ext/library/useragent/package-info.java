@@ -15,13 +15,13 @@
  *
  * <h2>类结构</h2>
  * <ul>
- *   <li>{@link UserAgentParser} - 解析器，提供 User-Agent 解析入口</li>
- *   <li>{@link UserAgent} - 解析结果数据模型</li>
- *   <li>{@link UserAgentInfo} - 信息基类，提供模式匹配和版本解析基础功能</li>
- *   <li>{@link Browser} - 浏览器信息组件</li>
- *   <li>{@link OS} - 操作系统信息组件</li>
- *   <li>{@link Platform} - 平台信息组件</li>
- *   <li>{@link Engine} - 渲染引擎信息组件</li>
+ *   <li>{@link ext.library.useragent.UserAgentParser} - 解析器，提供 User-Agent 解析入口</li>
+ *   <li>{@link ext.library.useragent.UserAgent} - 解析结果数据模型</li>
+ *   <li>{@link ext.library.useragent.UserAgentInfo} - 信息基类，提供模式匹配和版本解析基础功能</li>
+ *   <li>{@link ext.library.useragent.Browser} - 浏览器信息组件</li>
+ *   <li>{@link ext.library.useragent.OS} - 操作系统信息组件</li>
+ *   <li>{@link ext.library.useragent.Platform} - 平台信息组件</li>
+ *   <li>{@link ext.library.useragent.Engine} - 渲染引擎信息组件</li>
  * </ul>
  *
  * <h2>使用示例</h2>

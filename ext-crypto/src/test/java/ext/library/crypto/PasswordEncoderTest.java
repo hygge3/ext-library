@@ -3,6 +3,7 @@ package ext.library.crypto;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,7 +29,7 @@ class PasswordEncoderTest {
         String encoded2 = PasswordEncoder.encode(rawPassword);
 
         // BCrypt 使用随机盐，相同密码产生不同哈希
-        assertFalse(encoded1.equals(encoded2));
+        assertNotEquals(encoded1, encoded2);
 
         // 但两者都能验证
         assertTrue(PasswordEncoder.matches(rawPassword, encoded1));

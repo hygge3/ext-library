@@ -208,6 +208,7 @@ public final class HttpUtil {
      * 创建通用请求构建器
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request request(String url) {
@@ -218,6 +219,7 @@ public final class HttpUtil {
      * 创建 GET 请求
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request get(String url) {
@@ -228,6 +230,7 @@ public final class HttpUtil {
      * 创建 POST 请求
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request post(String url) {
@@ -238,6 +241,7 @@ public final class HttpUtil {
      * 创建 PUT 请求
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request put(String url) {
@@ -248,6 +252,7 @@ public final class HttpUtil {
      * 创建 DELETE 请求
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request delete(String url) {
@@ -258,6 +263,7 @@ public final class HttpUtil {
      * 创建 PATCH 请求
      *
      * @param url 请求 URL
+     *
      * @return 请求构建器
      */
     public static Request patch(String url) {
@@ -317,6 +323,7 @@ public final class HttpUtil {
          * 设置 HTTP 方法
          *
          * @param method HTTP 方法
+         *
          * @return this
          */
         public Request method(HttpMethod method) {
@@ -374,6 +381,7 @@ public final class HttpUtil {
          *
          * @param name  头名称
          * @param value 头值
+         *
          * @return this
          */
         public Request header(String name, String value) {
@@ -385,6 +393,7 @@ public final class HttpUtil {
          * 批量添加请求头
          *
          * @param headers 请求头 Map
+         *
          * @return this
          */
         public Request headers(Map<String, String> headers) {
@@ -396,6 +405,7 @@ public final class HttpUtil {
          * 设置 Content-Type
          *
          * @param contentType Content-Type 值
+         *
          * @return this
          */
         public Request contentType(String contentType) {
@@ -407,6 +417,7 @@ public final class HttpUtil {
          * 设置 Accept
          *
          * @param accept Accept 值
+         *
          * @return this
          */
         public Request accept(String accept) {
@@ -418,6 +429,7 @@ public final class HttpUtil {
          * 设置 Authorization
          *
          * @param token Authorization 值
+         *
          * @return this
          */
         public Request authorization(String token) {
@@ -429,6 +441,7 @@ public final class HttpUtil {
          * 设置 Bearer Token 认证
          *
          * @param token Token 值
+         *
          * @return this
          */
         public Request bearer(String token) {
@@ -440,6 +453,7 @@ public final class HttpUtil {
          *
          * @param name  参数名
          * @param value 参数值
+         *
          * @return this
          */
         public Request query(String name, String value) {
@@ -451,6 +465,7 @@ public final class HttpUtil {
          * 批量添加查询参数
          *
          * @param params 参数 Map
+         *
          * @return this
          */
         public Request query(Map<String, String> params) {
@@ -462,6 +477,7 @@ public final class HttpUtil {
          * 设置字符串请求体
          *
          * @param body 请求体
+         *
          * @return this
          */
         public Request body(String body) {
@@ -475,6 +491,7 @@ public final class HttpUtil {
          * 设置字节数组请求体
          *
          * @param body 请求体
+         *
          * @return this
          */
         public Request body(byte[] body) {
@@ -488,6 +505,7 @@ public final class HttpUtil {
          * 设置对象请求体
          *
          * @param body 请求体对象
+         *
          * @return this
          */
         public Request body(Object body) {
@@ -501,6 +519,7 @@ public final class HttpUtil {
          * 设置 BodyPublisher 请求体
          *
          * @param bodyPublisher BodyPublisher
+         *
          * @return this
          */
         public Request body(HttpRequest.BodyPublisher bodyPublisher) {
@@ -515,6 +534,7 @@ public final class HttpUtil {
          *
          * @param name  字段名
          * @param value 字段值
+         *
          * @return this
          */
         public Request form(String name, Object value) {
@@ -535,6 +555,7 @@ public final class HttpUtil {
          * 设置表单数据
          *
          * @param formData 表单数据
+         *
          * @return this
          */
         public Request form(Map<String, Object> formData) {
@@ -550,6 +571,7 @@ public final class HttpUtil {
          * @param name     字段名
          * @param filename 文件名
          * @param stream   文件流
+         *
          * @return this
          */
         public Request multipartForm(String name, String filename, InputStream stream) {
@@ -563,6 +585,7 @@ public final class HttpUtil {
          * 设置超时时间（毫秒）
          *
          * @param millis 超时毫秒数
+         *
          * @return this
          */
         public Request timeout(long millis) {
@@ -574,6 +597,7 @@ public final class HttpUtil {
          * 设置超时时间
          *
          * @param duration 超时时长
+         *
          * @return this
          */
         public Request timeout(Duration duration) {
@@ -610,6 +634,7 @@ public final class HttpUtil {
          *
          * @param type 目标类型
          * @param <T>  类型参数
+         *
          * @return 转换后的结果
          */
         public <T> T executeAs(Class<T> type) {
@@ -668,6 +693,7 @@ public final class HttpUtil {
          *
          * @param type 目标类型
          * @param <T>  类型参数
+         *
          * @return CompletableFuture
          */
         public <T> CompletableFuture<T> executeAsyncAs(Class<T> type) {
@@ -696,6 +722,7 @@ public final class HttpUtil {
          * 下载文件
          *
          * @param filePath 保存路径
+         *
          * @return 文件路径
          */
         public Path download(String filePath) {
@@ -713,6 +740,7 @@ public final class HttpUtil {
          * 设置错误处理器
          *
          * @param errorHandler 错误处理器
+         *
          * @return this
          */
         public Request onError(Consumer<Exception> errorHandler) {
@@ -724,6 +752,7 @@ public final class HttpUtil {
          * 设置响应处理器
          *
          * @param responseHandler 响应处理器
+         *
          * @return this
          */
         public Request onResponse(BiConsumer<HttpRequest, HttpResponse<?>> responseHandler) {
@@ -818,24 +847,28 @@ public final class HttpUtil {
         }
 
         private HttpRequest.BodyPublisher buildBodyPublisher() {
-            if (body == null) {
-                return HttpRequest.BodyPublishers.noBody();
-            }
-            if (body instanceof HttpRequest.BodyPublisher bp) {
-                return bp;
-            }
-            if (body instanceof String s) {
-                return HttpRequest.BodyPublishers.ofString(s, StandardCharsets.UTF_8);
-            }
-            if (body instanceof byte[] bytes) {
-                return HttpRequest.BodyPublishers.ofByteArray(bytes);
-            }
-            if (body instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> form = (Map<String, Object>) body;
-                StringJoiner sj = new StringJoiner("&");
-                form.forEach((k, v) -> sj.add(k + "=" + java.net.URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
-                return HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
+            switch (body) {
+                case null -> {
+                    return HttpRequest.BodyPublishers.noBody();
+                }
+                case HttpRequest.BodyPublisher bp -> {
+                    return bp;
+                }
+                case String s -> {
+                    return HttpRequest.BodyPublishers.ofString(s, StandardCharsets.UTF_8);
+                }
+                case byte[] bytes -> {
+                    return HttpRequest.BodyPublishers.ofByteArray(bytes);
+                }
+                case Map map -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> form = (Map<String, Object>) body;
+                    StringJoiner sj = new StringJoiner("&");
+                    form.forEach((k, v) -> sj.add(k + "=" + java.net.URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
+                    return HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
+                }
+                default -> {
+                }
             }
             return HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8);
         }
@@ -960,7 +993,7 @@ public final class HttpUtil {
          *
          * @return 请求体
          */
-        public Object getBody() {
+        public @Nullable Object getBody() {
             return body;
         }
 
@@ -1089,6 +1122,7 @@ public final class HttpUtil {
          * 获取响应头
          *
          * @param name 头名称
+         *
          * @return 头值
          */
         public String header(String name) {
@@ -1126,6 +1160,7 @@ public final class HttpUtil {
          *
          * @param type 目标类型
          * @param <T>  类型参数
+         *
          * @return 转换后的响应体
          */
         @SuppressWarnings("unchecked")

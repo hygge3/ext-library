@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +34,7 @@ class SM3UtilTest {
         String hash1 = SM3Util.hash("hello");
         String hash2 = SM3Util.hash("world");
 
-        assertFalse(hash1.equals(hash2));
+        assertNotEquals(hash1, hash2);
     }
 
     @Test

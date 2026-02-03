@@ -7,7 +7,6 @@ import ext.library.apicrypto.strategy.CryptoStrategy;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import jakarta.annotation.Nonnull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -45,8 +44,8 @@ public class ResponseEncryptHandler implements ResponseBodyAdvice<Object> {
     public @Nullable Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType,
                                             MediaType selectedContentType,
                                             Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                            @Nonnull ServerHttpRequest request,
-                                            @Nonnull ServerHttpResponse response) {
+                                            ServerHttpRequest request,
+                                            ServerHttpResponse response) {
         if (body == null) {
             return null;
         }

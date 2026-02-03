@@ -131,26 +131,30 @@ public final class ObjectUtil {
      * @return 如果对象为空返回 true
      */
     public static boolean isEmpty(@Nullable Object obj) {
-        if (obj == null) {
-            return true;
-        }
-        if (obj instanceof Optional<?> optional) {
-            return optional.isEmpty();
-        }
-        if (obj instanceof CharSequence cs) {
-            return cs.isEmpty();
-        }
-        if (obj instanceof Collection<?> coll) {
-            return coll.isEmpty();
-        }
-        if (obj instanceof Map<?, ?> map) {
-            return map.isEmpty();
-        }
-        if (obj instanceof Iterable<?> iter) {
-            return !iter.iterator().hasNext();
-        }
-        if (obj instanceof Iterator<?> iter) {
-            return !iter.hasNext();
+        switch (obj) {
+            case null -> {
+                return true;
+            }
+            case Optional<?> optional -> {
+                return optional.isEmpty();
+            }
+            case CharSequence cs -> {
+                return cs.isEmpty();
+            }
+            case Collection<?> coll -> {
+                return coll.isEmpty();
+            }
+            case Map<?, ?> map -> {
+                return map.isEmpty();
+            }
+            case Iterable<?> iter -> {
+                return !iter.iterator().hasNext();
+            }
+            case Iterator<?> iter -> {
+                return !iter.hasNext();
+            }
+            default -> {
+            }
         }
         if (obj.getClass().isArray()) {
             return Array.getLength(obj) == 0;

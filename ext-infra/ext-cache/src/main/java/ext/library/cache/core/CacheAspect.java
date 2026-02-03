@@ -1,7 +1,6 @@
 package ext.library.cache.core;
 
 import ext.library.cache.annotation.Cache;
-import ext.library.cache.enums.CacheType;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.tool.constant.EmojiSymbol;

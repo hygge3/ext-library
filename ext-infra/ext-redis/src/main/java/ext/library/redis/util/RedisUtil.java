@@ -58,7 +58,6 @@ import java.util.stream.Collectors;
 /**
  * Redis 操作的辅助类
  */
-@SuppressWarnings("ConstantConditions")
 public final class RedisUtil {
     private static final RedisTemplate<String, String> redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
 
@@ -94,7 +93,7 @@ public final class RedisUtil {
         try (Cursor<String> cursor = scan(pattern)) {
             cursor.forEachRemaining(RedisUtil::unlink);
         } catch (Exception e) {
-            throw new ToolException(EmojiSymbol.REDIS,e);
+            throw new ToolException(EmojiSymbol.REDIS, e);
         }
     }
 

@@ -9,7 +9,11 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 @DisplayName("HttpUtil 工具类测试")
 class HttpUtilTest {
@@ -273,7 +277,7 @@ class HttpUtilTest {
                     .form("username", "admin")
                     .form("password", "123456");
 
-            assertTrue(request.getBody() instanceof Map);
+            assertInstanceOf(Map.class, request.getBody());
             @SuppressWarnings("unchecked")
             Map<String, Object> form = (Map<String, Object>) request.getBody();
             assertEquals("admin", form.get("username"));

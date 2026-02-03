@@ -5,13 +5,16 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("QrCode 测试")
 class QrCodeTest {
@@ -32,7 +35,6 @@ class QrCodeTest {
 
         @Test
         @DisplayName("form() 已废弃方法仍可用")
-        @SuppressWarnings("deprecation")
         void deprecatedFormStillWorks() {
             QrCode qrCode = QrCode.form("test content");
             assertNotNull(qrCode);

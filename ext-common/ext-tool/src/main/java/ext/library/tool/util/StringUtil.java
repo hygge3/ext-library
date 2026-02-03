@@ -13,9 +13,9 @@ import java.util.stream.Stream;
 
 /**
  * 字符串工具类，提供各种字符串处理方法
- * 
+ *
  * <p>设计目的：封装常用的字符串操作，简化字符串处理逻辑，提高开发效率</p>
- * 
+ *
  * <p>核心功能：
  * <ul>
  *   <li>字符串判空、转换、拼接等基本操作</li>
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  *   <li>HTML转义、安全过滤等安全相关操作</li>
  * </ul>
  * </p>
- * 
+ *
  * <p>使用场景：
  * <ul>
  *   <li>数据验证：验证字符串是否为空、是否符合特定格式</li>
@@ -292,7 +292,7 @@ public final class StringUtil {
      * @return {boolean}
      */
     public static boolean startWith(CharSequence cs, char c) {
-        return cs != null && cs.length() > 0 && cs.charAt(0) == c;
+        return !cs.isEmpty() && cs.charAt(0) == c;
     }
 
     /**
@@ -319,7 +319,7 @@ public final class StringUtil {
      * @return {boolean}
      */
     public static boolean endWith(CharSequence cs, char c) {
-        return cs != null && cs.length() > 0 && cs.charAt(cs.length() - 1) == c;
+        return !cs.isEmpty() && cs.charAt(cs.length() - 1) == c;
     }
 
     /**

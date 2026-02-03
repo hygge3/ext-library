@@ -1,9 +1,9 @@
 package ext.library.web.handler;
 
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.runtime.Logs;
 import ext.library.tool.exception.BizCode;
 import ext.library.tool.exception.BizException;
+import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
      * 主动业务异常
      */
     @ExceptionHandler(BizException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
         Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());
