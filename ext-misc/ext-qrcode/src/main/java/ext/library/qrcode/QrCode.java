@@ -154,22 +154,11 @@ public class QrCode {
      * 创建二维码生成器
      *
      * @param content 二维码内容
+     *
      * @return QrCode 实例
      */
     public static QrCode from(String content) {
         return new QrCode(content);
-    }
-
-    /**
-     * 创建二维码生成器（兼容旧 API）
-     *
-     * @param content 二维码内容
-     * @return QrCode 实例
-     * @deprecated 使用 {@link #from(String)} 代替
-     */
-    @Deprecated(since = "4.0.0")
-    public static QrCode form(String content) {
-        return from(content);
     }
 
     // ==================== 读取二维码 ====================
@@ -178,6 +167,7 @@ public class QrCode {
      * 从文件路径读取二维码内容
      *
      * @param qrCodeFile 二维码图片文件路径
+     *
      * @return 二维码内容
      */
     public static String read(String qrCodeFile) {
@@ -188,6 +178,7 @@ public class QrCode {
      * 从文件读取二维码内容
      *
      * @param qrCodeFile 二维码图片文件
+     *
      * @return 二维码内容
      */
     public static String read(File qrCodeFile) {
@@ -198,6 +189,7 @@ public class QrCode {
      * 从 URL 读取二维码内容
      *
      * @param qrCodeUrl 二维码图片 URL
+     *
      * @return 二维码内容
      */
     public static String read(URL qrCodeUrl) {
@@ -208,6 +200,7 @@ public class QrCode {
      * 从输入流读取二维码内容
      *
      * @param inputStream 二维码图片输入流
+     *
      * @return 二维码内容
      */
     public static String read(InputStream inputStream) {
@@ -218,6 +211,7 @@ public class QrCode {
      * 从图像对象读取二维码内容
      *
      * @param qrCodeImage 二维码图像对象
+     *
      * @return 二维码内容
      */
     public static String read(BufferedImage qrCodeImage) {
@@ -229,6 +223,7 @@ public class QrCode {
      *
      * @param qrCodeFile 二维码图片文件路径
      * @param charset    字符编码
+     *
      * @return 二维码内容
      */
     public static String read(String qrCodeFile, Charset charset) {
@@ -240,6 +235,7 @@ public class QrCode {
      *
      * @param qrCodeFile 二维码图片文件
      * @param charset    字符编码
+     *
      * @return 二维码内容
      */
     public static String read(File qrCodeFile, Charset charset) {
@@ -251,6 +247,7 @@ public class QrCode {
      *
      * @param qrCodeUrl 二维码图片 URL
      * @param charset   字符编码
+     *
      * @return 二维码内容
      */
     public static String read(URL qrCodeUrl, Charset charset) {
@@ -262,6 +259,7 @@ public class QrCode {
      *
      * @param inputStream 二维码图片输入流
      * @param charset     字符编码
+     *
      * @return 二维码内容
      */
     public static String read(InputStream inputStream, Charset charset) {
@@ -273,6 +271,7 @@ public class QrCode {
      *
      * @param qrCodeImage 二维码图像对象
      * @param charset     字符编码
+     *
      * @return 二维码内容
      */
     public static String read(BufferedImage qrCodeImage, Charset charset) {
@@ -286,6 +285,7 @@ public class QrCode {
      *
      * @param qrCodeImage 二维码图像对象
      * @param hints       解码提示参数
+     *
      * @return 二维码内容
      */
     public static String read(BufferedImage qrCodeImage, @Nullable Map<DecodeHintType, ?> hints) {
@@ -305,6 +305,7 @@ public class QrCode {
      * 从文件路径读取二维码原始字节
      *
      * @param qrCodeFile 二维码图片文件路径
+     *
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(String qrCodeFile) {
@@ -315,6 +316,7 @@ public class QrCode {
      * 从文件读取二维码原始字节
      *
      * @param qrCodeFile 二维码图片文件
+     *
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(File qrCodeFile) {
@@ -325,6 +327,7 @@ public class QrCode {
      * 从 URL 读取二维码原始字节
      *
      * @param qrCodeUrl 二维码图片 URL
+     *
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(URL qrCodeUrl) {
@@ -335,6 +338,7 @@ public class QrCode {
      * 从输入流读取二维码原始字节
      *
      * @param inputStream 二维码图片输入流
+     *
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(InputStream inputStream) {
@@ -345,6 +349,7 @@ public class QrCode {
      * 从图像对象读取二维码原始字节
      *
      * @param qrCodeImage 二维码图像对象
+     *
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(BufferedImage qrCodeImage) {
@@ -363,9 +368,41 @@ public class QrCode {
     // ==================== 链式配置方法 ====================
 
     /**
+     * 解析十六进制颜色字符串
+     */
+    private static Color parseColor(String hexString, Color defaultColor) {
+        try {
+            String normalized = hexString.startsWith("#") ? hexString : "#" + hexString;
+            return new Color(Long.decode(normalized).intValue());
+        } catch (NumberFormatException e) {
+            return defaultColor;
+        }
+    }
+
+    /**
+     * 删除二维码白边
+     */
+    private static BitMatrix deleteWhiteMargin(BitMatrix matrix) {
+        int[] rec = matrix.getEnclosingRectangle();
+        int resWidth = rec[2] + 1;
+        int resHeight = rec[3] + 1;
+        BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
+        resMatrix.clear();
+        for (int i = 0; i < resWidth; i++) {
+            for (int j = 0; j < resHeight; j++) {
+                if (matrix.get(i + rec[0], j + rec[1])) {
+                    resMatrix.set(i, j);
+                }
+            }
+        }
+        return resMatrix;
+    }
+
+    /**
      * 设置图片大小（像素）
      *
      * @param size 图片大小（必须大于 0）
+     *
      * @return this
      */
     public QrCode size(int size) {
@@ -380,6 +417,7 @@ public class QrCode {
      * 设置内容编码格式
      *
      * @param charset 编码格式
+     *
      * @return this
      */
     public QrCode encode(Charset charset) {
@@ -397,6 +435,7 @@ public class QrCode {
      * </ul>
      *
      * @param level 错误修正等级
+     *
      * @return this
      */
     public QrCode errorCorrectionLevel(ErrorCorrectionLevel level) {
@@ -414,6 +453,7 @@ public class QrCode {
      * 设置前景色（十六进制字符串）
      *
      * @param hexColor 十六进制颜色值（如 "#000000" 或 "000000"）
+     *
      * @return this
      */
     public QrCode foreGroundColor(String hexColor) {
@@ -425,6 +465,7 @@ public class QrCode {
      * 设置前景色
      *
      * @param color 颜色
+     *
      * @return this
      */
     public QrCode foreGroundColor(Color color) {
@@ -436,6 +477,7 @@ public class QrCode {
      * 设置背景色（十六进制字符串）
      *
      * @param hexColor 十六进制颜色值（如 "#FFFFFF" 或 "FFFFFF"）
+     *
      * @return this
      */
     public QrCode backGroundColor(String hexColor) {
@@ -447,6 +489,7 @@ public class QrCode {
      * 设置背景色
      *
      * @param color 颜色
+     *
      * @return this
      */
     public QrCode backGroundColor(Color color) {
@@ -458,6 +501,7 @@ public class QrCode {
      * 设置输出图片格式
      *
      * @param format 图片格式（如 "png", "jpg"）
+     *
      * @return this
      */
     public QrCode imageFormat(String format) {
@@ -469,6 +513,7 @@ public class QrCode {
      * 设置是否删除白边
      *
      * @param deleteMargin true 删除，false 保留
+     *
      * @return this
      */
     public QrCode deleteMargin(boolean deleteMargin) {
@@ -480,6 +525,7 @@ public class QrCode {
      * 设置 Logo 图片
      *
      * @param logo Logo 图像
+     *
      * @return this
      */
     public QrCode logo(BufferedImage logo) {
@@ -491,6 +537,7 @@ public class QrCode {
      * 设置 Logo 图片（从文件）
      *
      * @param logoFile Logo 文件
+     *
      * @return this
      */
     public QrCode logo(File logoFile) {
@@ -501,16 +548,20 @@ public class QrCode {
      * 设置 Logo 图片（从 URL）
      *
      * @param logoUrl Logo URL
+     *
      * @return this
      */
     public QrCode logo(URL logoUrl) {
         return logo(ImageUtil.read(logoUrl));
     }
 
+    // ==================== 输出方法 ====================
+
     /**
      * 设置 Logo 图片（从文件路径）
      *
      * @param logoPath Logo 文件路径
+     *
      * @return this
      */
     public QrCode logo(String logoPath) {
@@ -521,18 +572,18 @@ public class QrCode {
      * 设置 Logo 图片（从输入流）
      *
      * @param logoStream Logo 输入流
+     *
      * @return this
      */
     public QrCode logo(InputStream logoStream) {
         return logo(ImageUtil.read(logoStream));
     }
 
-    // ==================== 输出方法 ====================
-
     /**
      * 输出到流
      *
      * @param output 输出流
+     *
      * @return 是否成功
      */
     public boolean write(OutputStream output) {
@@ -544,6 +595,7 @@ public class QrCode {
      * 输出到文件
      *
      * @param filePath 文件路径
+     *
      * @return 文件对象
      */
     public File toFile(String filePath) {
@@ -554,6 +606,7 @@ public class QrCode {
      * 输出到文件
      *
      * @param file 文件对象
+     *
      * @return 文件对象
      */
     public File toFile(File file) {
@@ -585,6 +638,8 @@ public class QrCode {
         BufferedImage image = this.toImage();
         return ImageUtil.writeAsBytes(image, this.imageFormat);
     }
+
+    // ==================== 内部方法 ====================
 
     /**
      * 输出为输入流
@@ -633,8 +688,6 @@ public class QrCode {
         return image;
     }
 
-    // ==================== 内部方法 ====================
-
     /**
      * 获取编码器参数
      */
@@ -657,37 +710,6 @@ public class QrCode {
             case "webp" -> "image/webp";
             default -> "image/png";
         };
-    }
-
-    /**
-     * 解析十六进制颜色字符串
-     */
-    private static Color parseColor(String hexString, Color defaultColor) {
-        try {
-            String normalized = hexString.startsWith("#") ? hexString : "#" + hexString;
-            return new Color(Long.decode(normalized).intValue());
-        } catch (NumberFormatException e) {
-            return defaultColor;
-        }
-    }
-
-    /**
-     * 删除二维码白边
-     */
-    private static BitMatrix deleteWhiteMargin(BitMatrix matrix) {
-        int[] rec = matrix.getEnclosingRectangle();
-        int resWidth = rec[2] + 1;
-        int resHeight = rec[3] + 1;
-        BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
-        resMatrix.clear();
-        for (int i = 0; i < resWidth; i++) {
-            for (int j = 0; j < resHeight; j++) {
-                if (matrix.get(i + rec[0], j + rec[1])) {
-                    resMatrix.set(i, j);
-                }
-            }
-        }
-        return resMatrix;
     }
 
     /**
