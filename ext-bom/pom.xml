@@ -11,7 +11,6 @@
     <description>Ext Library BOM - 依赖版本统一管理</description>
 
     <properties>
-        <revision>4.0.0</revision>
         <!-- 第三方依赖版本 -->
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.42</swagger.version>
@@ -191,5 +190,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
 
+    </build>
 </project>
