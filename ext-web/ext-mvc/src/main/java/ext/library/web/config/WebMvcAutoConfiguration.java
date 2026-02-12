@@ -3,9 +3,10 @@ package ext.library.web.config;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
+import ext.library.web.filter.TraceFilter;
 import ext.library.web.handler.GlobalExceptionHandler;
 import ext.library.web.handler.GlobalResponseHandler;
-import ext.library.web.interceptor.ExtWebInvokeTimeInterceptor;
+import ext.library.web.interceptor.WebInvokeTimeInterceptor;
 import ext.library.web.properties.WebMvcProperties;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -82,7 +83,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         if (webMvcProperties.getInvokeTimeEnabled()) {
             Logs.info("⏱️", "载入模块：请求调用时间统计");
             // 全局访问性能拦截
-            registry.addInterceptor(new ExtWebInvokeTimeInterceptor()).addPathPatterns("/**");
+            registry.addInterceptor(new WebInvokeTimeInterceptor()).addPathPatterns("/**");
         }
     }
 
@@ -103,6 +104,11 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
     public void addArgumentResolvers(@NonNull List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
         WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
+    }
+
+    @Bean
+    public TraceFilter traceFilter(WebMvcProperties webMvcProperties) {
+        return new TraceFilter(webMvcProperties);
     }
 
     /**

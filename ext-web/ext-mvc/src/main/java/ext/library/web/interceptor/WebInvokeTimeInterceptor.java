@@ -17,8 +17,9 @@ import java.util.Map;
 /**
  * web 的调用时间统计拦截器
  */
-public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
-    private final static ThreadLocal<StopWatch> KEY_CACHE = new InheritableThreadLocal<>();
+public class WebInvokeTimeInterceptor implements HandlerInterceptor {
+
+    private static final String stopWatchAttr = WebInvokeTimeInterceptor.class.getName() + ".stopWatch";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
@@ -45,7 +46,7 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
         }
 
         StopWatch stopWatch = new StopWatch();
-        KEY_CACHE.set(stopWatch);
+        request.setAttribute(stopWatchAttr, stopWatch);
         stopWatch.start();
         return true;
     }
@@ -53,10 +54,10 @@ public class ExtWebInvokeTimeInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, @Nullable Exception ex) throws Exception {
-        StopWatch stopWatch = KEY_CACHE.get();
-        stopWatch.stop();
-        Logs.info(EmojiSymbol.WEB, "{}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
-        KEY_CACHE.remove();
+        if (request.getAttribute(stopWatchAttr) instanceof StopWatch stopWatch) {
+            stopWatch.stop();
+            Logs.info(EmojiSymbol.WEB, "{}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());
+        }
     }
 
     /**
