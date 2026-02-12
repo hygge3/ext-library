@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Logs {
 
-    private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+    private static final StackWalker stackWalker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
     /**
      * 获取调用者的类名
@@ -20,7 +20,7 @@ public final class Logs {
      * @return 调用者类名
      */
     private static String getCallerClassName() {
-        return STACK_WALKER.walk(frames -> frames
+        return stackWalker.walk(frames -> frames
                 .map(StackWalker.StackFrame::getClassName)
                 .filter(className -> !className.equals(Logs.class.getName()))
                 .findFirst()
@@ -71,6 +71,27 @@ public final class Logs {
         getLogger().debug("[{}] " + message, allArgs);
     }
 
+    /**
+     * 打印 DEBUG 级别日志（不带模块名）
+     *
+     * @param message 日志内容
+     */
+    public static void debug(String message) {
+        getLogger().debug(message);
+    }
+
+    /**
+     * 打印 DEBUG 级别日志（不带模块名，带异常堆栈）
+     *
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void debug(Throwable throwable, String message, Object... args) {
+        Object[] allArgs = appendThrowable(throwable, args);
+        getLogger().debug(message, allArgs);
+    }
+
     // endregion
 
     // region INFO
@@ -108,6 +129,27 @@ public final class Logs {
     public static void info(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
         getLogger().info("[{}] " + message, allArgs);
+    }
+
+    /**
+     * 打印 INFO 级别日志（不带模块名）
+     *
+     * @param message 日志内容
+     */
+    public static void info(String message) {
+        getLogger().info(message);
+    }
+
+    /**
+     * 打印 INFO 级别日志（不带模块名，带异常堆栈）
+     *
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void info(Throwable throwable, String message, Object... args) {
+        Object[] allArgs = appendThrowable(throwable, args);
+        getLogger().info(message, allArgs);
     }
 
     // endregion
@@ -149,6 +191,27 @@ public final class Logs {
         getLogger().warn("[{}] " + message, allArgs);
     }
 
+    /**
+     * 打印 WARN 级别日志（不带模块名）
+     *
+     * @param message 日志内容
+     */
+    public static void warn(String message) {
+        getLogger().warn(message);
+    }
+
+    /**
+     * 打印 WARN 级别日志（不带模块名，带异常堆栈）
+     *
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void warn(Throwable throwable, String message, Object... args) {
+        Object[] allArgs = appendThrowable(throwable, args);
+        getLogger().warn(message, allArgs);
+    }
+
     // endregion
 
     // region ERROR
@@ -188,9 +251,42 @@ public final class Logs {
         getLogger().error("[{}] " + message, allArgs);
     }
 
+    /**
+     * 打印 ERROR 级别日志（不带模块名）
+     *
+     * @param message 日志内容
+     */
+    public static void error(String message) {
+        getLogger().error(message);
+    }
+
+    /**
+     * 打印 ERROR 级别日志（不带模块名，带异常堆栈）
+     *
+     * @param throwable 异常对象
+     * @param message   日志内容（支持 {} 占位符）
+     * @param args      格式化参数
+     */
+    public static void error(Throwable throwable, String message, Object... args) {
+        Object[] allArgs = appendThrowable(throwable, args);
+        getLogger().error(message, allArgs);
+    }
+
     // endregion
 
     // region 辅助方法
+
+    /**
+     * 将 throwable 添加到参数数组末尾
+     * <p>
+     * SLF4J 会将最后一个 Throwable 参数特殊处理，打印堆栈
+     */
+    private static Object[] appendThrowable(Throwable throwable, Object[] args) {
+        Object[] allArgs = new Object[args.length + 1];
+        System.arraycopy(args, 0, allArgs, 0, args.length);
+        allArgs[args.length] = throwable;
+        return allArgs;
+    }
 
     /**
      * 将 module 添加到参数数组开头
