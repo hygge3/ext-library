@@ -8,7 +8,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 
 /**
@@ -19,11 +18,11 @@ import java.lang.reflect.Method;
 public class DefaultKeyGenerator implements KeyGenerator {
 
     @Override
-    public String generate(JoinPoint joinPoint, @Nonnull Idempotent idempotent) {
+    public String generate(JoinPoint joinPoint, Idempotent idempotent) {
         String uniqueExpression = idempotent.uniqueExpression();
 
         // 如果没有填写表达式，直接返回 prefix
-        if (uniqueExpression.isEmpty()) {
+        if (uniqueExpression.isBlank()) {
             return idempotent.prefix();
         }
 

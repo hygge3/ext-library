@@ -1,5 +1,6 @@
 package ext.library.idempotent;
 
+import ext.library.idempotent.store.KeyStore;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.DateUtil;

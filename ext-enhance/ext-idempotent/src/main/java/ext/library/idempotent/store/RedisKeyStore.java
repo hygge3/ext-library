@@ -1,4 +1,4 @@
-package ext.library.idempotent;
+package ext.library.idempotent.store;
 
 import ext.library.redis.util.RedisUtil;
 

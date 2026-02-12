@@ -19,8 +19,18 @@
             <artifactId>ext-json</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>ext.library</groupId>
             <artifactId>ext-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-postgres</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -31,11 +41,6 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 

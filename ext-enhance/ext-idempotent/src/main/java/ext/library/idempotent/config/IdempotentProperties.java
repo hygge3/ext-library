@@ -1,4 +1,4 @@
-package ext.library.idempotent;
+package ext.library.idempotent.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

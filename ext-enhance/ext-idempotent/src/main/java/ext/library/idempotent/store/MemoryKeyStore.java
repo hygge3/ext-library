@@ -1,10 +1,9 @@
-package ext.library.idempotent;
+package ext.library.idempotent.store;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import com.github.benmanes.caffeine.cache.Scheduler;
-import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 
@@ -14,22 +13,22 @@ import java.time.Duration;
  * 使用 Caffeine 缓存实现，支持按 key 独立设置过期时间。
  * 适用于单机部署场景。
  */
-public class InMemoryKeyStore implements KeyStore {
+public class MemoryKeyStore implements KeyStore {
 
     /**
      * 默认最大缓存条目数
      */
-    private static final int DEFAULT_MAXIMUM_SIZE = 10_000;
+    private static final int defaultMaximumSize = 10_000;
 
-    private final Cache<@NonNull String, Long> cache;
+    private final Cache<String, Long> cache;
 
-    public InMemoryKeyStore() {
-        this(DEFAULT_MAXIMUM_SIZE);
+    public MemoryKeyStore() {
+        this(defaultMaximumSize);
     }
 
-    public InMemoryKeyStore(int maximumSize) {
+    public MemoryKeyStore(int maximumSize) {
         this.cache = Caffeine.newBuilder()
-                .expireAfter(new Expiry<@NonNull String, @NonNull Long>() {
+                .expireAfter(new Expiry<String, Long>() {
                     @Override
                     public long expireAfterCreate(String key, Long durationNanos, long currentTime) {
                         return durationNanos;
@@ -51,15 +50,8 @@ public class InMemoryKeyStore implements KeyStore {
     }
 
     @Override
-    public synchronized boolean saveIfAbsent(String key, Duration duration) {
-        Long value = cache.getIfPresent(key);
-        if (value == null) {
-            cache.policy()
-                    .expireVariably()
-                    .ifPresent(policy -> policy.put(key, duration.toNanos(), duration));
-            return true;
-        }
-        return false;
+    public boolean saveIfAbsent(String key, Duration duration) {
+        return cache.asMap().putIfAbsent(key, duration.toNanos()) == null;
     }
 
     @Override
