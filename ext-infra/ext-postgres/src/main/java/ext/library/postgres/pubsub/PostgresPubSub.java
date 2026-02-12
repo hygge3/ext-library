@@ -54,9 +54,9 @@ public class PostgresPubSub implements DisposableBean {
             ps.setString(1, channel);
             ps.setString(2, payload);
             ps.execute();
-            Logs.debug(EmojiSymbol.POSTGRES, "发布消息: channel={}, payload长度={}", channel, payload.length());
+            Logs.debug(EmojiSymbol.POSTGRES, "发布消息：channel={}, payload 长度={}", channel, payload.length());
         } catch (SQLException e) {
-            throw new ExtException(EmojiSymbol.POSTGRES, e, "发布消息失败: channel={}", channel);
+            throw new ExtException(EmojiSymbol.POSTGRES, e, "发布消息失败：channel={}", channel);
         }
     }
 
@@ -73,10 +73,10 @@ public class PostgresPubSub implements DisposableBean {
             try (Statement stmt = listenerConnection.createStatement()) {
                 stmt.execute("LISTEN " + sanitizeChannel(channel));
             }
-            Logs.info(EmojiSymbol.POSTGRES, "订阅通道: {}", channel);
+            Logs.info(EmojiSymbol.POSTGRES, "订阅通道：{}", channel);
         } catch (SQLException e) {
             listeners.remove(channel);
-            throw new ExtException(EmojiSymbol.POSTGRES, e, "订阅通道失败: {}", channel);
+            throw new ExtException(EmojiSymbol.POSTGRES, e, "订阅通道失败：{}", channel);
         }
     }
 
@@ -114,9 +114,9 @@ public class PostgresPubSub implements DisposableBean {
                     stmt.execute("UNLISTEN " + sanitizeChannel(channel));
                 }
             }
-            Logs.info(EmojiSymbol.POSTGRES, "取消订阅: {}", channel);
+            Logs.info(EmojiSymbol.POSTGRES, "取消订阅：{}", channel);
         } catch (SQLException e) {
-            Logs.warn(EmojiSymbol.POSTGRES, "取消订阅失败: {}", channel);
+            Logs.warn(EmojiSymbol.POSTGRES, "取消订阅失败：{}", channel);
         }
     }
 
@@ -165,7 +165,7 @@ public class PostgresPubSub implements DisposableBean {
                                     try {
                                         listener.accept(payload);
                                     } catch (Exception e) {
-                                        Logs.error(EmojiSymbol.POSTGRES, e, "处理通知失败: channel={}", channel);
+                                        Logs.error(EmojiSymbol.POSTGRES, e, "处理通知失败：channel={}", channel);
                                     }
                                 });
                             }
@@ -226,7 +226,7 @@ public class PostgresPubSub implements DisposableBean {
     private String sanitizeChannel(String channel) {
         // PostgreSQL 通道名称只允许字母、数字和下划线
         if (!channel.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
-            throw new IllegalArgumentException("无效的通道名称: " + channel + "。通道名称必须以字母或下划线开头，且只能包含字母、数字和下划线。");
+            throw new IllegalArgumentException("无效的通道名称：" + channel + "。通道名称必须以字母或下划线开头，且只能包含字母、数字和下划线。");
         }
         return channel;
     }

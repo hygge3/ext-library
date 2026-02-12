@@ -1,6 +1,5 @@
 package ext.library.sse.config;
 
-import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.sse.controller.SseController;
 import ext.library.sse.listener.SseTopicListener;
 import ext.library.sse.manager.SseConnectionManager;
@@ -14,7 +13,6 @@ import ext.library.sse.pubsub.PubSubService;
 import ext.library.sse.pubsub.RedisPubSubService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,14 +41,10 @@ public class SseAutoConfiguration {
     }
 
     @Bean
-    public PubSubService ssePubSubService(SseProperties properties, ObjectProvider<PostgresPubSub> postgresPubSubProvider) {
+    public PubSubService ssePubSubService(SseProperties properties) {
         if (properties.getBackend() == PubSubBackend.POSTGRES) {
-            PostgresPubSub postgresPubSub = postgresPubSubProvider.getIfAvailable();
-            if (postgresPubSub == null) {
-                throw new IllegalStateException("SSE 配置使用 POSTGRES 后端，但未找到 PostgresPubSub Bean。请确保已启用 ext-postgres 模块。");
-            }
             Logs.info(EmojiSymbol.SSE, "SSE 使用 PostgreSQL LISTEN/NOTIFY 作为发布订阅后端");
-            return new PostgresPubSubService(postgresPubSub);
+            return new PostgresPubSubService();
         }
         Logs.info(EmojiSymbol.SSE, "SSE 使用 Redis 作为发布订阅后端");
         return new RedisPubSubService();

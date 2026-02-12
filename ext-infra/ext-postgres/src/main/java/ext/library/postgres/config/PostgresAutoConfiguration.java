@@ -35,7 +35,7 @@ import javax.sql.DataSource;
 public class PostgresAutoConfiguration {
 
     public PostgresAutoConfiguration() {
-        Logs.info(EmojiSymbol.POSTGRES, "载入模块: ext-postgres (PostgreSQL 缓存/队列/发布订阅/限流/会话)");
+        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 缓存/队列/发布订阅/限流/会话");
     }
 
     @Bean
@@ -76,7 +76,7 @@ public class PostgresAutoConfiguration {
         @Bean(name = "postgresDataSource", destroyMethod = "close")
         HikariDataSource postgresDataSource(PostgresProperties properties) {
             DataSourceConfig config = properties.getDatasource();
-            Logs.info(EmojiSymbol.POSTGRES, "创建专用数据源: {}", config.getUrl());
+            Logs.info(EmojiSymbol.POSTGRES, "创建专用数据源：{}", config.getUrl());
 
             HikariConfig hikariConfig = new HikariConfig();
             hikariConfig.setJdbcUrl(config.getUrl());

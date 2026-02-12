@@ -1,6 +1,5 @@
 package ext.library.websocket.config;
 
-import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.websocket.handler.ExtWebSocketHandler;
@@ -15,7 +14,6 @@ import ext.library.websocket.pubsub.PostgresPubSubService;
 import ext.library.websocket.pubsub.PubSubService;
 import ext.library.websocket.pubsub.RedisPubSubService;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -47,14 +45,10 @@ public class WebSocketAutoConfiguration {
     }
 
     @Bean
-    public PubSubService webSocketPubSubService(WebSocketProperties properties, ObjectProvider<PostgresPubSub> postgresPubSubProvider) {
+    public PubSubService webSocketPubSubService(WebSocketProperties properties) {
         if (properties.getBackend() == PubSubBackend.POSTGRES) {
-            PostgresPubSub postgresPubSub = postgresPubSubProvider.getIfAvailable();
-            if (postgresPubSub == null) {
-                throw new IllegalStateException("WebSocket 配置使用 POSTGRES 后端，但未找到 PostgresPubSub Bean。请确保已启用 ext-postgres 模块。");
-            }
             Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 使用 PostgreSQL LISTEN/NOTIFY 作为发布订阅后端");
-            return new PostgresPubSubService(postgresPubSub);
+            return new PostgresPubSubService();
         }
         Logs.info(EmojiSymbol.WEBSOCKET, "WebSocket 使用 Redis 作为发布订阅后端");
         return new RedisPubSubService();
@@ -68,10 +62,7 @@ public class WebSocketAutoConfiguration {
     @Bean
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor handshakeInterceptor, WebSocketHandler webSocketHandler, @NonNull WebSocketProperties properties) {
         Logs.info(EmojiSymbol.WEBSOCKET, "载入模块：WebSocket，连接路径:{}", properties.getPath());
-        return registry -> registry
-                .addHandler(webSocketHandler, properties.getPath())
-                .addInterceptors(handshakeInterceptor)
-                .setAllowedOrigins(properties.getAllowedOrigins());
+        return registry -> registry.addHandler(webSocketHandler, properties.getPath()).addInterceptors(handshakeInterceptor).setAllowedOrigins(properties.getAllowedOrigins());
     }
 
     @Bean

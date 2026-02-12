@@ -29,19 +29,7 @@ public class PostgresQueue {
     /**
      * Job 行映射器
      */
-    private final RowMapper<Job> jobRowMapper = (rs, _) -> new Job(
-            rs.getLong("id"),
-            rs.getString("queue"),
-            rs.getString("payload"),
-            rs.getInt("attempts"),
-            rs.getInt("max_attempts"),
-            JobStatus.valueOf(rs.getString("status")),
-            rs.getString("error"),
-            getInstant(rs.getTimestamp("scheduled_at")),
-            getInstant(rs.getTimestamp("started_at")),
-            getInstant(rs.getTimestamp("completed_at")),
-            getInstant(rs.getTimestamp("created_at"))
-    );
+    private final RowMapper<Job> jobRowMapper = (rs, _) -> new Job(rs.getLong("id"), rs.getString("queue"), rs.getString("payload"), rs.getInt("attempts"), rs.getInt("max_attempts"), JobStatus.valueOf(rs.getString("status")), rs.getString("error"), getInstant(rs.getTimestamp("scheduled_at")), getInstant(rs.getTimestamp("started_at")), getInstant(rs.getTimestamp("completed_at")), getInstant(rs.getTimestamp("created_at")));
 
     public PostgresQueue(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
@@ -54,6 +42,7 @@ public class PostgresQueue {
      *
      * @param queue   队列名称
      * @param payload 任务负载
+     *
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload) {
@@ -66,6 +55,7 @@ public class PostgresQueue {
      * @param queue   队列名称
      * @param payload 任务负载
      * @param delay   延迟时间
+     *
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload, Duration delay) {
@@ -78,6 +68,7 @@ public class PostgresQueue {
      * @param queue       队列名称
      * @param payload     任务负载
      * @param scheduledAt 计划执行时间
+     *
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload, Instant scheduledAt) {
@@ -91,6 +82,7 @@ public class PostgresQueue {
      * @param payload     任务负载
      * @param scheduledAt 计划执行时间
      * @param maxAttempts 最大重试次数
+     *
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload, Instant scheduledAt, int maxAttempts) {
@@ -98,15 +90,8 @@ public class PostgresQueue {
                 INSERT INTO %s (queue, payload, scheduled_at, max_attempts)
                 VALUES (?, ?::jsonb, ?, ?)
                 RETURNING id
-                """.formatted(tableName))
-                .param(queue)
-                .param(JsonUtil.toJson(payload))
-                .param(Timestamp.from(scheduledAt))
-                .param(maxAttempts)
-                .query(Long.class)
-                .optional()
-                .orElse(-1L);
-        Logs.debug(EmojiSymbol.POSTGRES, "任务入队: queue={}, id={}", queue, id);
+                """.formatted(tableName)).param(queue).param(JsonUtil.toJson(payload)).param(Timestamp.from(scheduledAt)).param(maxAttempts).query(Long.class).optional().orElse(-1L);
+        Logs.debug(EmojiSymbol.POSTGRES, "任务入队：queue={}, id={}", queue, id);
         return id;
     }
 
@@ -114,6 +99,7 @@ public class PostgresQueue {
      * 出队 - 获取一个待处理任务（使用 SKIP LOCKED）
      *
      * @param queue 队列名称
+     *
      * @return 任务，如果没有待处理任务则返回空
      */
     public Optional<Job> dequeue(String queue) {
@@ -135,14 +121,10 @@ public class PostgresQueue {
                 FROM next_job
                 WHERE %s.id = next_job.id
                 RETURNING %s.*
-                """.formatted(tableName, tableName, tableName, tableName))
-                .param(queue)
-                .query(jobRowMapper)
-                .optional()
-                .map(job -> {
-                    Logs.debug(EmojiSymbol.POSTGRES, "任务出队: queue={}, id={}, attempts={}", queue, job.id(), job.attempts());
-                    return job;
-                });
+                """.formatted(tableName, tableName, tableName, tableName)).param(queue).query(jobRowMapper).optional().map(job -> {
+            Logs.debug(EmojiSymbol.POSTGRES, "任务出队：queue={}, id={}, attempts={}", queue, job.id(), job.attempts());
+            return job;
+        });
     }
 
     /**
@@ -150,6 +132,7 @@ public class PostgresQueue {
      *
      * @param queue 队列名称
      * @param limit 最大获取数量
+     *
      * @return 任务列表
      */
     public List<Job> dequeue(String queue, int limit) {
@@ -171,11 +154,7 @@ public class PostgresQueue {
                 FROM next_jobs
                 WHERE %s.id = next_jobs.id
                 RETURNING %s.*
-                """.formatted(tableName, tableName, tableName, tableName))
-                .param(queue)
-                .param(limit)
-                .query(jobRowMapper)
-                .list();
+                """.formatted(tableName, tableName, tableName, tableName)).param(queue).param(limit).query(jobRowMapper).list();
     }
 
     /**
@@ -184,10 +163,8 @@ public class PostgresQueue {
      * @param jobId 任务 ID
      */
     public void complete(long jobId) {
-        jdbcClient.sql("UPDATE " + tableName + " SET status = 'COMPLETED', completed_at = NOW() WHERE id = ?")
-                .param(jobId)
-                .update();
-        Logs.debug(EmojiSymbol.POSTGRES, "任务完成: id={}", jobId);
+        jdbcClient.sql("UPDATE " + tableName + " SET status = 'COMPLETED', completed_at = NOW() WHERE id = ?").param(jobId).update();
+        Logs.debug(EmojiSymbol.POSTGRES, "任务完成：id={}", jobId);
     }
 
     /**
@@ -203,11 +180,8 @@ public class PostgresQueue {
                     error = ?,
                     started_at = NULL
                 WHERE id = ?
-                """.formatted(tableName))
-                .param(error)
-                .param(jobId)
-                .update();
-        Logs.debug(EmojiSymbol.POSTGRES, "任务失败: id={}, error={}", jobId, error);
+                """.formatted(tableName)).param(error).param(jobId).update();
+        Logs.debug(EmojiSymbol.POSTGRES, "任务失败：id={}, error={}", jobId, error);
     }
 
     /**
@@ -224,12 +198,11 @@ public class PostgresQueue {
      * 删除任务
      *
      * @param jobId 任务 ID
+     *
      * @return 是否删除成功
      */
     public boolean delete(long jobId) {
-        int rows = jdbcClient.sql("DELETE FROM " + tableName + " WHERE id = ?")
-                .param(jobId)
-                .update();
+        int rows = jdbcClient.sql("DELETE FROM " + tableName + " WHERE id = ?").param(jobId).update();
         return rows > 0;
     }
 
@@ -237,32 +210,29 @@ public class PostgresQueue {
      * 获取任务详情
      *
      * @param jobId 任务 ID
+     *
      * @return 任务详情
      */
     public Optional<Job> getJob(long jobId) {
-        return jdbcClient.sql("SELECT * FROM " + tableName + " WHERE id = ?")
-                .param(jobId)
-                .query(jobRowMapper)
-                .optional();
+        return jdbcClient.sql("SELECT * FROM " + tableName + " WHERE id = ?").param(jobId).query(jobRowMapper).optional();
     }
 
     /**
      * 获取队列中待处理任务数量
      *
      * @param queue 队列名称
+     *
      * @return 待处理任务数量
      */
     public long countPending(String queue) {
-        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE queue = ? AND status = 'PENDING'")
-                .param(queue)
-                .query(Long.class)
-                .single();
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE queue = ? AND status = 'PENDING'").param(queue).query(Long.class).single();
     }
 
     /**
      * 获取队列统计信息
      *
      * @param queue 队列名称
+     *
      * @return 各状态任务数量 [pending, processing, completed, failed]
      */
     public long[] getQueueStats(String queue) {
@@ -274,16 +244,7 @@ public class PostgresQueue {
                     COUNT(*) FILTER (WHERE status = 'FAILED') AS failed
                 FROM %s
                 WHERE queue = ?
-                """.formatted(tableName))
-                .param(queue)
-                .query((rs, _) -> new long[]{
-                        rs.getLong("pending"),
-                        rs.getLong("processing"),
-                        rs.getLong("completed"),
-                        rs.getLong("failed")
-                })
-                .optional()
-                .orElse(new long[]{0, 0, 0, 0});
+                """.formatted(tableName)).param(queue).query((rs, _) -> new long[]{rs.getLong("pending"), rs.getLong("processing"), rs.getLong("completed"), rs.getLong("failed")}).optional().orElse(new long[]{0, 0, 0, 0});
     }
 
     /**
@@ -291,15 +252,13 @@ public class PostgresQueue {
      *
      * @param queue     队列名称
      * @param olderThan 清理多久之前完成的任务
+     *
      * @return 清理的任务数量
      */
     public int cleanupCompleted(String queue, Duration olderThan) {
-        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE queue = ? AND status = 'COMPLETED' AND completed_at < NOW() - ?::interval")
-                .param(queue)
-                .param(olderThan.toSeconds() + " seconds")
-                .update();
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE queue = ? AND status = 'COMPLETED' AND completed_at < NOW() - ?::interval").param(queue).param(olderThan.toSeconds() + " seconds").update();
         if (deleted > 0) {
-            Logs.debug(EmojiSymbol.POSTGRES, "清理已完成任务: queue={}, count={}", queue, deleted);
+            Logs.debug(EmojiSymbol.POSTGRES, "清理已完成任务：queue={}, count={}", queue, deleted);
         }
         return deleted;
     }
@@ -309,6 +268,7 @@ public class PostgresQueue {
      *
      * @param queue   队列名称
      * @param timeout 超时时间
+     *
      * @return 重置的任务数量
      */
     public int resetStuckJobs(String queue, Duration timeout) {
@@ -318,12 +278,9 @@ public class PostgresQueue {
                 WHERE queue = ?
                   AND status = 'PROCESSING'
                   AND started_at < NOW() - ?::interval
-                """.formatted(tableName))
-                .param(queue)
-                .param(timeout.toSeconds() + " seconds")
-                .update();
+                """.formatted(tableName)).param(queue).param(timeout.toSeconds() + " seconds").update();
         if (reset > 0) {
-            Logs.info(EmojiSymbol.POSTGRES, "重置超时任务: queue={}, count={}", queue, reset);
+            Logs.info(EmojiSymbol.POSTGRES, "重置超时任务：queue={}, count={}", queue, reset);
         }
         return reset;
     }
