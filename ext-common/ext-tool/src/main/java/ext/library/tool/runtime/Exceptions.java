@@ -1,7 +1,5 @@
 package ext.library.tool.runtime;
 
-import ext.library.tool.constant.EmojiSymbol;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -90,16 +88,4 @@ public final class Exceptions {
             }
         }
     }
-
-    /**
-     * 打印异常信息（含堆栈）
-     *
-     * @param e 异常
-     */
-    public static void log(Throwable e) {
-        Throwable cause = e.getCause();
-        Throwable target = (cause != null) ? cause : e;
-        Logs.error(EmojiSymbol.EXT, target, target.getMessage());
-    }
-
 }

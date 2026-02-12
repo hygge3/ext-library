@@ -2,6 +2,7 @@ package ext.library.tool.util;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
+import ext.library.tool.runtime.Logs;
 import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -30,7 +31,7 @@ public final class IOUtil {
     /**
      * 默认缓冲区大小：4KB
      */
-    private static final int BUFFER_SIZE = 4096;
+    private static final int bufferSize = 4096;
 
     private IOUtil() {
         // 防止实例化
@@ -71,7 +72,9 @@ public final class IOUtil {
      * 从输入流读取字符串（UTF-8 编码）
      *
      * @param input 输入流
+     *
      * @return 读取的字符串
+     *
      * @throws ToolException 如果读取失败
      */
     public static String readToString(InputStream input) {
@@ -83,7 +86,9 @@ public final class IOUtil {
      *
      * @param input   输入流
      * @param charset 字符编码
+     *
      * @return 读取的字符串
+     *
      * @throws ToolException 如果读取失败
      */
     public static String readToString(InputStream input, Charset charset) {
@@ -98,7 +103,9 @@ public final class IOUtil {
      * 读取文件内容为字符串（UTF-8 编码）
      *
      * @param file 文件
+     *
      * @return 文件内容
+     *
      * @throws ToolException 如果读取失败
      */
     public static String readToString(File file) {
@@ -114,7 +121,9 @@ public final class IOUtil {
      *
      * @param file    文件
      * @param charset 字符编码
+     *
      * @return 文件内容
+     *
      * @throws ToolException 如果读取失败
      */
     public static String readToString(File file, Charset charset) {
@@ -133,7 +142,9 @@ public final class IOUtil {
      * 从输入流读取字节数组
      *
      * @param input 输入流
+     *
      * @return 字节数组
+     *
      * @throws ToolException 如果读取失败
      */
     public static byte[] readToByteArray(InputStream input) {
@@ -148,7 +159,9 @@ public final class IOUtil {
      * 读取文件内容为字节数组
      *
      * @param file 文件
+     *
      * @return 字节数组
+     *
      * @throws ToolException 如果读取失败
      */
     public static byte[] readToByteArray(File file) {
@@ -178,6 +191,7 @@ public final class IOUtil {
      * 如果父目录不存在，会自动创建
      *
      * @param subPath 子路径（相对于临时目录）
+     *
      * @return 完整路径的 File 对象
      */
     public static File toTempDir(String subPath) {
@@ -185,7 +199,10 @@ public final class IOUtil {
         File fullPath = new File(tempDir, subPath);
         File parentDir = fullPath.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
+            boolean mkdirsed = parentDir.mkdirs();
+            if (!mkdirsed) {
+                Logs.warn(EmojiSymbol.TOOL, "无法创建临时目录：{}", fullPath.getAbsolutePath());
+            }
         }
         return fullPath;
     }
@@ -194,6 +211,7 @@ public final class IOUtil {
      * 获取临时目录下子路径的绝对路径字符串
      *
      * @param subPath 子路径（相对于临时目录）
+     *
      * @return 绝对路径字符串
      */
     public static String toTempDirPath(String subPath) {
@@ -211,13 +229,15 @@ public final class IOUtil {
      *
      * @param in  输入流
      * @param out 输出流
+     *
      * @return 复制的字节数
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static long copy(InputStream in, OutputStream out) throws IOException {
         try (in; out) {
             long byteCount = 0;
-            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[bufferSize];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
@@ -235,6 +255,7 @@ public final class IOUtil {
      *
      * @param in  字节数组
      * @param out 输出流
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static void copy(byte[] in, OutputStream out) throws IOException {
@@ -249,11 +270,13 @@ public final class IOUtil {
      * 完成后会关闭输入流
      *
      * @param in 输入流
+     *
      * @return 字节数组
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static byte[] copyToBytes(InputStream in) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(bufferSize);
         copy(in, out);
         return out.toByteArray();
     }
@@ -265,13 +288,15 @@ public final class IOUtil {
      *
      * @param in      输入流
      * @param charset 字符编码
+     *
      * @return 字符串
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static String copyToString(InputStream in, Charset charset) throws IOException {
-        StringBuilder out = new StringBuilder(BUFFER_SIZE);
+        StringBuilder out = new StringBuilder(bufferSize);
         try (in; InputStreamReader reader = new InputStreamReader(in, charset)) {
-            char[] buffer = new char[BUFFER_SIZE];
+            char[] buffer = new char[bufferSize];
             int charsRead;
             while ((charsRead = reader.read(buffer)) != -1) {
                 out.append(buffer, 0, charsRead);
@@ -289,6 +314,7 @@ public final class IOUtil {
      *
      * @param data   字符串数据
      * @param output 输出流
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static void writeString(String data, OutputStream output) throws IOException {
@@ -303,6 +329,7 @@ public final class IOUtil {
      * @param data    字符串数据
      * @param output  输出流
      * @param charset 字符编码
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static void writeString(String data, OutputStream output, Charset charset) throws IOException {
@@ -314,6 +341,7 @@ public final class IOUtil {
      *
      * @param lines  行集合
      * @param output 输出流
+     *
      * @throws IOException 如果发生 IO 错误
      */
     public static void writeLines(Collection<?> lines, OutputStream output) throws IOException {
@@ -327,10 +355,10 @@ public final class IOUtil {
      * @param lineEnding 行结束符（null 使用系统默认）
      * @param output     输出流
      * @param charset    字符编码（null 使用 UTF-8）
+     *
      * @throws IOException 如果发生 IO 错误
      */
-    public static void writeLines(Collection<?> lines, @Nullable String lineEnding,
-                                  OutputStream output, @Nullable Charset charset) throws IOException {
+    public static void writeLines(Collection<?> lines, @Nullable String lineEnding, OutputStream output, @Nullable Charset charset) throws IOException {
         if (lineEnding == null) {
             lineEnding = System.lineSeparator();
         }

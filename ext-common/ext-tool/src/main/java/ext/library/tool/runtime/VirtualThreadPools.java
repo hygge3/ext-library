@@ -18,10 +18,10 @@ import java.util.function.Supplier;
  */
 public final class VirtualThreadPools {
     /** 默认任务名称，用于标识虚拟线程任务的默认名称 */
-    private static final String DEFAULT_NAME = "task";
+    private static final String defaultName = "task";
 
     /** 单例模式的线程池实例，每个任务分配一个虚拟线程执行 */
-    private static final ExecutorService INSTANCE = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("virtual-", 0).factory());
+    private static final ExecutorService instance = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("virtual-", 0).factory());
 
     private VirtualThreadPools() {
     }
@@ -32,7 +32,7 @@ public final class VirtualThreadPools {
      * @return 如果线程池正在运行返回 true，否则返回 false
      */
     public static boolean isRunning() {
-        return !INSTANCE.isShutdown() && !INSTANCE.isTerminated();
+        return !instance.isShutdown() && !instance.isTerminated();
     }
 
     /**
@@ -43,7 +43,7 @@ public final class VirtualThreadPools {
      * @param runnable 要执行的任务
      */
     public static void execute(Runnable runnable) {
-        execute(DEFAULT_NAME, runnable);
+        execute(defaultName, runnable);
     }
 
     /**
@@ -53,7 +53,7 @@ public final class VirtualThreadPools {
      * @param runnable 要执行的任务
      */
     public static void execute(String name, Runnable runnable) {
-        INSTANCE.execute(wrapRunnable(name, runnable));
+        instance.execute(wrapRunnable(name, runnable));
     }
 
     /**
@@ -67,7 +67,7 @@ public final class VirtualThreadPools {
      * @return 返回一个 CompletableFuture 对象，用于处理异步任务的结果
      */
     public static <T> CompletableFuture<T> async(Supplier<T> supplier) {
-        return async(DEFAULT_NAME, supplier);
+        return async(defaultName, supplier);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class VirtualThreadPools {
      * @return 返回一个 CompletableFuture 对象，用于处理异步任务的结果
      */
     public static <T> CompletableFuture<T> async(String name, Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(wrapSupplier(name, supplier), INSTANCE);
+        return CompletableFuture.supplyAsync(wrapSupplier(name, supplier), instance);
     }
 
     /**
@@ -95,7 +95,7 @@ public final class VirtualThreadPools {
      * @return 与提交任务关联的 Future 对象
      */
     public static <T> Future<T> submit(Callable<T> callable) {
-        return submit(DEFAULT_NAME, callable);
+        return submit(defaultName, callable);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class VirtualThreadPools {
      * @return 一个 Future 对象，用于获取任务执行结果
      */
     public static <T> Future<T> submit(String name, Callable<T> callable) {
-        return INSTANCE.submit(wrapCallable(name, callable));
+        return instance.submit(wrapCallable(name, callable));
     }
 
     /**
@@ -120,7 +120,7 @@ public final class VirtualThreadPools {
      * 调用此方法将关闭指定的线程池，并确保所有已提交的任务执行完毕。
      */
     public static void shutdown() {
-        Threads.shutdownAndAwaitTermination(INSTANCE);
+        Threads.shutdownAndAwaitTermination(instance);
     }
 
     // region 包装方法

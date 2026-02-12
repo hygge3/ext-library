@@ -5,6 +5,7 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.runtime.Runtimes;
 import ext.library.tool.runtime.Threads;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,7 +26,7 @@ public class ThreadPoolConfiguration {
 
     @ConditionalOnProperty(prefix = "ext.thread-pool", name = "enabled", havingValue = "true")
     @Bean(name = "threadPoolTaskExecutor")
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor(ThreadPoolProperties threadPoolProperties) {
+    public ThreadPoolTaskExecutor threadPoolTaskExecutor(@NonNull ThreadPoolProperties threadPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix("pool-");
         executor.setCorePoolSize(threadPoolProperties.getCorePoolSize());
@@ -35,7 +36,7 @@ public class ThreadPoolConfiguration {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
-        Logs.info(EmojiSymbol.CORE, "载入模块: Spring 线程池");
+        Logs.info(EmojiSymbol.CORE, "载入模块：Spring 线程池");
         return executor;
     }
 
@@ -54,7 +55,7 @@ public class ThreadPoolConfiguration {
                     t.setUncaughtExceptionHandler(Threads::printException);
                     return t;
                 });
-        Logs.info(EmojiSymbol.CORE, "载入模块: Spring 调度线程池");
+        Logs.info(EmojiSymbol.CORE, "载入模块：Spring 调度线程池");
         return executor;
     }
 

@@ -28,7 +28,7 @@ public class JsonAutoConfiguration {
 
     @Bean
     public JsonMapperBuilderCustomizer extJsonCustomizer() {
-        Logs.info(EmojiSymbol.JSON, "载入模块: JSON");
+        Logs.info(EmojiSymbol.JSON, "载入模块：JSON");
         return builder -> builder
                 // 注册扩展模块
                 .findAndAddModules().addModules(new ExtJacksonModule())

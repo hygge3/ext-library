@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *   <li>字符串判空、转换、拼接等基本操作</li>
  *   <li>字符串格式化、模板替换功能</li>
  *   <li>字符串匹配、分割、清理等高级操作</li>
- *   <li>HTML转义、安全过滤等安全相关操作</li>
+ *   <li>HTML 转义、安全过滤等安全相关操作</li>
  * </ul>
  * </p>
  *
@@ -30,17 +30,17 @@ import java.util.stream.Stream;
  *   <li>数据验证：验证字符串是否为空、是否符合特定格式</li>
  *   <li>数据转换：将其他类型数据转换为字符串，或进行字符串格式转换</li>
  *   <li>模板处理：处理字符串模板，进行变量替换</li>
- *   <li>安全处理：对用户输入进行HTML转义，防止XSS攻击</li>
+ *   <li>安全处理：对用户输入进行 HTML 转义，防止 XSS 攻击</li>
  * </ul>
  * </p>
  */
 public final class StringUtil {
 
     /** 用于清理文本的正则表达式 */
-    private static final Pattern CLEAN_TEXT_PATTERN = Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]");
+    private static final Pattern cleanTextPattern = Pattern.compile("[`'\"|/,;()-+*%#·•�　\\s]");
 
     /** HTML 转义映射表 */
-    private static final Map<Character, String> HTML_ESCAPE_MAP = Map.of(
+    private static final Map<Character, String> htmlEscapeMap = Map.of(
             '&', "&amp;",
             '<', "&lt;",
             '>', "&gt;",
@@ -59,7 +59,7 @@ public final class StringUtil {
      * @return 首字母小写后的字符串
      */
     public static String firstCharToLower(String str) {
-        if (str == null || str.isEmpty()) {
+        if (str.isEmpty()) {
             return str;
         }
         char firstChar = str.charAt(0);
@@ -79,7 +79,7 @@ public final class StringUtil {
      * @return 首字母大写后的字符串
      */
     public static String firstCharToUpper(String str) {
-        if (str == null || str.isEmpty()) {
+        if (str.isEmpty()) {
             return str;
         }
         char firstChar = str.charAt(0);
@@ -212,7 +212,7 @@ public final class StringUtil {
      * @return boolean
      */
     public static boolean isAnyBlank(String... strs) {
-        if (strs == null || strs.length == 0) {
+        if (strs.length == 0) {
             return true;
         }
         return Stream.of(strs).anyMatch(StringUtil::isBlank);
@@ -262,7 +262,7 @@ public final class StringUtil {
      * @return boolean
      */
     public static boolean isAnyNotBlank(String... strs) {
-        if (strs == null || strs.length == 0) {
+        if (strs.length == 0) {
             return false;
         }
         return Stream.of(strs).anyMatch(StringUtil::isNotBlank);
@@ -397,10 +397,7 @@ public final class StringUtil {
      * @return {String}
      */
     public static String cleanText(String txt) {
-        if (txt == null) {
-            return null;
-        }
-        return CLEAN_TEXT_PATTERN.matcher(txt).replaceAll("");
+        return cleanTextPattern.matcher(txt).replaceAll("");
     }
 
     /**
@@ -609,7 +606,7 @@ public final class StringUtil {
         StringBuilder sb = new StringBuilder(html.length());
         for (int i = 0; i < html.length(); i++) {
             char c = html.charAt(i);
-            String replacement = HTML_ESCAPE_MAP.get(c);
+            String replacement = htmlEscapeMap.get(c);
             if (replacement != null) {
                 sb.append(replacement);
             } else {

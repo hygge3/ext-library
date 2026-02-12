@@ -14,10 +14,10 @@ import java.util.HexFormat;
  */
 public final class HexUtil {
 
+    private static final HexFormat hexFormat = HexFormat.of();
+
     private HexUtil() {
     }
-
-    private static final HexFormat HEX_FORMAT = HexFormat.of();
 
     /**
      * 字节数组转十六进制字符串
@@ -27,7 +27,7 @@ public final class HexUtil {
      * @return 十六进制字符串（小写）
      */
     public static String encode(byte[] bytes) {
-        return HEX_FORMAT.formatHex(bytes);
+        return hexFormat.formatHex(bytes);
     }
 
     /**
@@ -38,7 +38,7 @@ public final class HexUtil {
      * @return 字节数组
      */
     public static byte[] decode(String hex) {
-        return HEX_FORMAT.parseHex(hex);
+        return hexFormat.parseHex(hex);
     }
 
     /**

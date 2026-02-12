@@ -1,6 +1,7 @@
 package ext.library.tool.util;
 
 import ext.library.tool.constant.PatternPool;
+import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ public final class ValidatorUtil {
      *
      * @return 是否匹配正则
      */
-    public static boolean isMatchRegex(Pattern pattern, CharSequence value) {
+    public static boolean isMatchRegex(@Nullable Pattern pattern, @Nullable CharSequence value) {
         if (pattern == null || value == null) {
             return false;
         }
@@ -67,7 +68,7 @@ public final class ValidatorUtil {
      *
      * @return 是否包含 XSS 攻击
      */
-    public static boolean hasXss(CharSequence value) {
+    public static boolean hasXss(@Nullable CharSequence value) {
         if (value == null || value.isEmpty()) {
             return false;
         }

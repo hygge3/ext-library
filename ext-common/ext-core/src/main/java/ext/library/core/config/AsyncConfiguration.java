@@ -45,8 +45,8 @@ public class AsyncConfiguration implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, args) -> {
             String message = ObjectUtil.isNotEmpty(args)
-                    ? StringUtil.format("异步方法 [{}] 抛出异常: {}, 参数: {}", method.getName(), throwable.getMessage(), Arrays.toString(args))
-                    : StringUtil.format("异步方法 [{}] 抛出异常: {}", method.getName(), throwable.getMessage());
+                    ? StringUtil.format("异步方法 [{}] 抛出异常：{}, 参数：{}", method.getName(), throwable.getMessage(), Arrays.toString(args))
+                    : StringUtil.format("异步方法 [{}] 抛出异常：{}", method.getName(), throwable.getMessage());
             Logs.error(EmojiSymbol.CORE, throwable, message);
         };
     }

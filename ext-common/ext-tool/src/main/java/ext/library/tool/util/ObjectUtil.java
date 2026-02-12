@@ -23,12 +23,12 @@ public final class ObjectUtil {
     /**
      * 表示"真"的字符串集合（不区分大小写匹配建议使用 {@link #isTrue(Object)}）
      */
-    private static final List<String> STR_TRUE = List.of("1", "true", "yes", "ok", "y");
+    private static final List<String> strTrue = List.of("1", "true", "yes", "ok", "y");
 
     /**
      * 表示"假"的字符串集合
      */
-    private static final List<String> STR_FALSE = List.of("0", "false", "no", "n");
+    private static final List<String> strFalse = List.of("0", "false", "no", "n");
 
     private ObjectUtil() {
         // 防止实例化
@@ -51,7 +51,7 @@ public final class ObjectUtil {
      */
     public static boolean isTrue(@Nullable Object object) {
         return switch (object) {
-            case String str -> STR_TRUE.contains(str.toLowerCase());
+            case String str -> strTrue.contains(str.toLowerCase());
             case Number num -> num.doubleValue() > 0;
             case Boolean bool -> bool;
             case null, default -> false;
@@ -73,7 +73,7 @@ public final class ObjectUtil {
      */
     public static boolean isFalse(@Nullable Object object) {
         return switch (object) {
-            case String str -> STR_FALSE.contains(str.toLowerCase());
+            case String str -> strFalse.contains(str.toLowerCase());
             case Number num -> num.doubleValue() <= 0;
             case Boolean bool -> !bool;
             case null, default -> false;

@@ -17,34 +17,34 @@ import org.springframework.util.Assert;
  */
 public final class SnowflakeId {
     /** 自定义纪元（epoch）：2025-01-01T00:00:00Z */
-    private static final long EPOCH = 1735689600000L;
+    private static final long epoch = 1735689600000L;
 
     /** 机器 ID 所占的位数 */
-    private static final int WORKER_ID_BITS = 5;
+    private static final int workerIdBits = 5;
 
     /** 数据中心 ID 所占的位数 */
-    private static final int DATACENTER_ID_BITS = 5;
+    private static final int datacenterIdBits = 5;
 
     /** 序列号所占的位数 */
-    private static final int SEQUENCE_BITS = 12;
+    private static final int sequenceBits = 12;
 
     /** 支持的最大机器 ID，结果是 31 */
-    private static final long MAX_WORKER_ID = ~(-1L << WORKER_ID_BITS);
+    private static final long maxWorkerId = ~(-1L << workerIdBits);
 
     /** 支持的最大数据中心 ID，结果是 31 */
-    private static final long MAX_DATACENTER_ID = ~(-1L << DATACENTER_ID_BITS);
+    private static final long maxDatacenterId = ~(-1L << datacenterIdBits);
 
     /** 序列号掩码，用于限制序列号范围 (0~4095) */
-    private static final long SEQUENCE_MASK = ~(-1L << SEQUENCE_BITS);
+    private static final long sequenceMask = ~(-1L << sequenceBits);
 
     /** 机器 ID 左移位数 (12 位) */
-    private static final int WORKER_ID_SHIFT = SEQUENCE_BITS;
+    private static final int workerIdShift = sequenceBits;
 
     /** 数据中心 ID 左移位数 (17 位) */
-    private static final int DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
+    private static final int datacenterIdShift = sequenceBits + workerIdBits;
 
     /** 时间戳左移位数 (22 位) */
-    private static final int TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
+    private static final int timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
 
     /** 数据中心 ID (0~31) */
     private final long datacenterId;
@@ -63,12 +63,13 @@ public final class SnowflakeId {
      *
      * @param datacenterId 数据中心 ID，范围 [0, 31]
      * @param workerId     工作节点 ID，范围 [0, 31]
+     *
      * @throws IllegalArgumentException 如果 ID 超出有效范围
      */
     public SnowflakeId(long datacenterId, long workerId) {
-        Assert.isTrue(datacenterId >= 0 && datacenterId <= MAX_DATACENTER_ID,
+        Assert.isTrue(datacenterId >= 0 && datacenterId <= maxDatacenterId,
                 StringUtil.format("datacenterId 超出范围：{}", datacenterId));
-        Assert.isTrue(workerId >= 0 && workerId <= MAX_WORKER_ID,
+        Assert.isTrue(workerId >= 0 && workerId <= maxWorkerId,
                 StringUtil.format("workerId 超出范围：{}", workerId));
         this.datacenterId = datacenterId;
         this.workerId = workerId;
@@ -88,7 +89,7 @@ public final class SnowflakeId {
         }
 
         if (timestamp == lastTimestamp) {
-            sequence = (sequence + 1) & SEQUENCE_MASK;
+            sequence = (sequence + 1) & sequenceMask;
             if (sequence == 0) {
                 // 序列溢出，等待到下一毫秒
                 timestamp = waitNextMillis(lastTimestamp);
@@ -100,9 +101,9 @@ public final class SnowflakeId {
 
         lastTimestamp = timestamp;
 
-        return ((timestamp - EPOCH) << TIMESTAMP_LEFT_SHIFT)
-                | (datacenterId << DATACENTER_ID_SHIFT)
-                | (workerId << WORKER_ID_SHIFT)
+        return ((timestamp - epoch) << timestampLeftShift)
+                | (datacenterId << datacenterIdShift)
+                | (workerId << workerIdShift)
                 | sequence;
     }
 
@@ -121,6 +122,7 @@ public final class SnowflakeId {
      * 当同一毫秒内序列号溢出时调用，阻塞等待到下一毫秒
      *
      * @param lastTs 上次生成 ID 的时间戳
+     *
      * @return 下一毫秒的时间戳
      */
     private long waitNextMillis(long lastTs) {
@@ -137,6 +139,7 @@ public final class SnowflakeId {
      * 当检测到时钟回拨时调用，阻塞等待直到时间恢复
      *
      * @param targetTs 目标时间戳
+     *
      * @return 达到或超过目标的时间戳
      */
     private long waitUntil(long targetTs) {

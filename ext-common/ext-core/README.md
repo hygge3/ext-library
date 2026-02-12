@@ -11,6 +11,7 @@
 ### Maven
 
 ```xml
+
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-core</artifactId>
@@ -25,13 +26,12 @@ implementation("ext.library:ext-core")
 
 ## 依赖说明
 
-| 依赖 | 说明 |
-|------|------|
-| ext-tool | 基础工具类 |
-| spring-boot-starter-validation | 参数校验 |
-| mapstruct-plus-spring-boot-starter | 对象映射 |
-| spring-boot-starter-aspectj | AOP 支持 |
-| spring-web | Web 工具 |
+| 依赖                                 | 说明     |
+|------------------------------------|--------|
+| ext-tool                           | 基础工具类  |
+| spring-boot-starter-validation     | 参数校验   |
+| mapstruct-plus-spring-boot-starter | 对象映射   |
+| spring-boot-starter-aspectj        | AOP 支持 |
 
 ## 包结构
 
@@ -47,33 +47,33 @@ ext.library.core
 
 ### SpEL 表达式支持 (util/spel)
 
-| 类名 | 说明 |
-|------|------|
-| `SpelUtil` | SpEL 表达式工具类 |
-| `ExtExpressionEvaluator` | 增强的表达式求值器 |
-| `ExtExpressionRootObject` | 表达式根对象 |
+| 类名                        | 说明          |
+|---------------------------|-------------|
+| `SpelUtil`                | SpEL 表达式工具类 |
+| `ExtExpressionEvaluator`  | 增强的表达式求值器   |
+| `ExtExpressionRootObject` | 表达式根对象      |
 
 ### 工具类 (util)
 
-| 类名 | 说明 |
-|------|------|
-| `SpringUtil` | Spring 上下文工具 |
-| `BeanUtil` | Bean 操作工具 (MapStruct Plus 增强) |
-| `ServletUtil` | Servlet 请求响应工具 |
-| `MethodUtil` | 方法操作工具 |
-| `AspectUtil` | AOP 切面工具 |
+| 类名            | 说明                            |
+|---------------|-------------------------------|
+| `SpringUtil`  | Spring 上下文工具                  |
+| `BeanUtil`    | Bean 操作工具 (MapStruct Plus 增强) |
+| `ServletUtil` | Servlet 请求响应工具                |
+| `MethodUtil`  | 方法操作工具                        |
+| `AspectUtil`  | AOP 切面工具                      |
 
 ### 配置类 (config)
 
-| 类名 | 说明 |
-|------|------|
+| 类名                 | 说明    |
+|--------------------|-------|
 | `ThreadPoolConfig` | 线程池配置 |
-| `AsyncConfig` | 异步配置 |
+| `AsyncConfig`      | 异步配置  |
 
 ### 配置属性 (properties)
 
-| 类名 | 说明 |
-|------|------|
+| 类名                     | 说明      |
+|------------------------|---------|
 | `ThreadPoolProperties` | 线程池配置属性 |
 
 ## 使用示例
@@ -99,20 +99,7 @@ String result = SpelUtil.parse("#user.name", context);
 
 // 在注解中使用 SpEL
 @Cache(key = "#user.id")
-public User getUser(User user) { ... }
-```
-
-### Servlet 工具
-
-```java
-// 获取当前请求
-HttpServletRequest request = ServletUtil.getRequest();
-
-// 获取客户端 IP
-String clientIp = ServletUtil.getClientIp();
-
-// 获取请求参数
-String param = ServletUtil.getParameter("key");
+public User getUser(User user) { ...}
 ```
 
 ### Bean 操作 (MapStruct Plus)

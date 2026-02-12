@@ -47,6 +47,5 @@ public final class EmojiSymbol {
     private EmojiSymbol() {
         // 防止实例化
     }
-    // endregion
 
 }

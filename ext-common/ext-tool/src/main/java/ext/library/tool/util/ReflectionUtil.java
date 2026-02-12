@@ -1,5 +1,7 @@
 package ext.library.tool.util;
 
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
@@ -15,6 +17,9 @@ import java.util.List;
 import java.util.function.Function;
 
 
+/**
+ * 反射工具类
+ */
 public final class ReflectionUtil {
 
     private ReflectionUtil() {
@@ -23,23 +28,22 @@ public final class ReflectionUtil {
     // ---------------------- Info ----------------------
 
     /**
-     * Returns the package name of {@code clazz}
+     * 获取类的包名
      *
-     * @param clazz the class to introspect
+     * @param clazz 目标类
      *
-     * @return package name of {@code clazz}
+     * @return 包名
      */
     public static String getPackageName(Class<?> clazz) {
         return getPackageName(clazz.getName());
     }
 
-
     /**
-     * Returns the package name of {@code classFullName}
+     * 获取类全限定名对应的包名
      *
-     * @param classFullName the class to introspect
+     * @param classFullName 类全限定名
      *
-     * @return package name of {@code classFullName}
+     * @return 包名
      */
     public static String getPackageName(String classFullName) {
         int lastDot = classFullName.lastIndexOf('.');
@@ -49,13 +53,13 @@ public final class ReflectionUtil {
     // ---------------------- Method ----------------------
 
     /**
-     * find method of class by method method name and params
+     * 根据方法名和参数类型查找方法
      *
-     * @param clazz      the class to introspect
-     * @param name       the name of the method
-     * @param paramTypes the parameter types of the method
+     * @param clazz      目标类
+     * @param name       方法名
+     * @param paramTypes 参数类型列表
      *
-     * @return the Method object, or {@code null} if none found
+     * @return Method 对象，未找到时返回 {@code null}
      */
     public static @Nullable Method findMethod(Class<?> clazz, String name, Class<?> @Nullable ... paramTypes) {
         Class<?> searchType = clazz;
@@ -72,14 +76,14 @@ public final class ReflectionUtil {
     }
 
     /**
-     * check if method has same params
+     * 检查方法的参数类型是否匹配
      */
     private static boolean hasSameParams(Method method, Class<?>[] paramTypes) {
         return (paramTypes.length == method.getParameterCount() && Arrays.equals(paramTypes, method.getParameterTypes()));
     }
 
     /**
-     * get declared methods
+     * 获取类声明的所有方法（包括接口默认方法）
      */
     private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
         Method[] result;
@@ -98,13 +102,13 @@ public final class ReflectionUtil {
                 result = declaredMethods;
             }
         } catch (Throwable ex) {
-            throw new IllegalStateException(StringUtil.format("无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader()), ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader());
         }
         return (result.length == 0 || !defensive) ? result : result.clone();
     }
 
     /**
-     * find concrete（default） methods on interfaces
+     * 查找接口中的具体（default）方法
      */
     private static @Nullable List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
         List<Method> result = null;
@@ -122,9 +126,9 @@ public final class ReflectionUtil {
     }
 
     /**
-     * make method accessible
+     * 设置方法为可访问
      *
-     * @param method the method to make accessible
+     * @param method 目标方法
      */
     public static void makeAccessible(Method method) {
         if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
@@ -133,19 +137,19 @@ public final class ReflectionUtil {
     }
 
     /**
-     * invoke method
+     * 调用方法
      *
-     * @param method method to invoke
-     * @param target target object to invoke
-     * @param args   arguments to pass into method
+     * @param method 目标方法
+     * @param target 目标对象
+     * @param args   方法参数
      *
-     * @return method invoke result
+     * @return 方法调用结果
      */
     public static Object invokeMethod(Method method, Object target, Object @Nullable ... args) {
         try {
             return args != null ? method.invoke(target, args) : method.invoke(target);
         } catch (Exception ex) {
-            throw new IllegalStateException("无法调用方法 [" + method + "]", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法调用方法 [{}]", method);
         }
     }
 
@@ -153,25 +157,25 @@ public final class ReflectionUtil {
     // ---------------------- Field ----------------------
 
     /**
-     * find field of class by field name
+     * 根据字段名查找字段
      *
-     * @param clazz class to introspect
-     * @param name  name of the field
+     * @param clazz 目标类
+     * @param name  字段名
      *
-     * @return field object, or {@code null} if none found
+     * @return Field 对象，未找到时返回 {@code null}
      */
     public static @Nullable Field findField(Class<?> clazz, String name) {
         return findField(clazz, name, null);
     }
 
     /**
-     * find field of class by field name and field type
+     * 根据字段名和类型查找字段
      *
-     * @param clazz class to introspect
-     * @param name  name of the field
-     * @param type  type of the field
+     * @param clazz 目标类
+     * @param name  字段名
+     * @param type  字段类型
      *
-     * @return field object, or {@code null} if none found
+     * @return Field 对象，未找到时返回 {@code null}
      */
     public static @Nullable Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
         Assert.isTrue(name != null || type != null, "必须指定字段的名称或类型");
@@ -189,26 +193,26 @@ public final class ReflectionUtil {
     }
 
     /**
-     * find all fields on the given class and superclasses
+     * 获取类声明的所有字段
      *
-     * @param clazz the class to introspect
+     * @param clazz 目标类
      *
-     * @return fields
+     * @return 字段数组
      */
     private static Field[] getDeclaredFields(Class<?> clazz) {
         Field[] result;
         try {
             result = clazz.getDeclaredFields();
         } catch (Throwable ex) {
-            throw new IllegalStateException(StringUtil.format("无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader()), ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法从类加载器 [{}] 检查 Class [{}]", clazz.getName(), clazz.getClassLoader());
         }
         return result;
     }
 
     /**
-     * make field accessible
+     * 设置字段为可访问
      *
-     * @param field field to make accessible
+     * @param field 目标字段
      */
     public static void makeAccessible(Field field) {
         if (!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) || Modifier.isFinal(field.getModifiers())) {
@@ -217,33 +221,33 @@ public final class ReflectionUtil {
     }
 
     /**
-     * set field value
+     * 设置字段值
      *
-     * @param field  field to set
-     * @param target target object to set
-     * @param value  value to set
+     * @param field  目标字段
+     * @param target 目标对象
+     * @param value  要设置的值
      */
     public static void setField(Field field, Object target, Object value) {
         try {
             field.set(target, value);
         } catch (IllegalAccessException ex) {
-            throw new IllegalStateException("无法将值设置为字段 [" + field + "]", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法将值设置为字段 [{}]", field);
         }
     }
 
     /**
-     * get field value
+     * 获取字段值
      *
-     * @param field  field to get
-     * @param target target object to get
+     * @param field  目标字段
+     * @param target 目标对象
      *
-     * @return field value
+     * @return 字段值
      */
     public static Object getField(Field field, Object target) {
         try {
             return field.get(target);
         } catch (IllegalAccessException ex) {
-            throw new IllegalStateException("无法从字段获取值 [" + field + "]", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法从字段获取值 [{}]", field);
         }
     }
 
@@ -261,16 +265,16 @@ public final class ReflectionUtil {
             SerializedLambda serializedLambda = (SerializedLambda) replaceMethod.invoke(lambda);
             return serializedLambda.getImplMethodName();
         } catch (ReflectiveOperationException ex) {
-            throw new IllegalStateException("无法解析 Lambda 表达式", ex);
+            throw new ToolException(EmojiSymbol.TOOL, ex, "无法解析 Lambda 表达式");
         }
     }
 
     /**
-     * check field is public static final
+     * 检查字段是否为 public static final
      *
-     * @param field field to check
+     * @param field 目标字段
      *
-     * @return true if field is public static final
+     * @return 如果字段为 public static final 则返回 true
      */
     public static boolean isPublicStaticFinal(Field field) {
         int modifiers = field.getModifiers();
@@ -278,13 +282,12 @@ public final class ReflectionUtil {
     }
 
     /**
-     * iterate processing fields
+     * 遍历类的所有字段并执行回调（包括父类，不含 Object）
      *
-     * @param clazz class to introspect
-     * @param fc    callback to invoke for each field
+     * @param clazz 目标类
+     * @param fc    字段回调
      */
     public static void doWithFields(Class<?> clazz, FieldCallback fc) {
-        // Keep backing up the inheritance hierarchy.
         Class<?> targetClass = clazz;
         do {
             Field[] fields = getDeclaredFields(targetClass);
@@ -292,7 +295,7 @@ public final class ReflectionUtil {
                 try {
                     fc.doWith(field);
                 } catch (IllegalAccessException ex) {
-                    throw new IllegalStateException("不允许访问字段 '" + field.getName() + "': " + ex);
+                    throw new ToolException(EmojiSymbol.TOOL, ex, "不允许访问字段 '{}'", field.getName());
                 }
             }
             targetClass = targetClass.getSuperclass();
@@ -300,13 +303,13 @@ public final class ReflectionUtil {
     }
 
     /**
-     * return a proxy instance that implements the specified interfaceType
+     * 创建指定接口的代理实例
      *
-     * @param interfaceType interfaceType to implement
-     * @param handler       handler to handle method invocation
-     * @param <T>           the type of the proxy
+     * @param interfaceType 接口类型
+     * @param handler       调用处理器
+     * @param <T>           代理类型
      *
-     * @return a proxy instance
+     * @return 代理实例
      */
     public static <T> T newProxy(Class<T> interfaceType, InvocationHandler handler) {
         Assert.isTrue(interfaceType.isInterface(), interfaceType + " 不是接口");
@@ -315,14 +318,14 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Callback interface invoked on each field in the hierarchy.
+     * 字段回调接口，用于遍历字段时执行操作
      */
     public interface FieldCallback {
 
         /**
-         * Perform an operation using the given field.
+         * 对给定字段执行操作
          *
-         * @param field the field to operate on
+         * @param field 目标字段
          */
         void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
     }

@@ -1,4 +1,4 @@
 @NullMarked
-package ext.library.tool.util;
+package ext.library.tool.domain;
 
 import org.jspecify.annotations.NullMarked;

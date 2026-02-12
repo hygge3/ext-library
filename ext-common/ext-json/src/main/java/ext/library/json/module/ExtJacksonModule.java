@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 public class ExtJacksonModule extends SimpleModule {
 
     public ExtJacksonModule() {
-        super("ExtJacksonModule");
+        super("extJacksonModule");
         // BigDecimal 处理
         addSerializer(BigDecimal.class, new BigDecimalPlainSerializer());
         // 添加超出 JS 精度大数字处理

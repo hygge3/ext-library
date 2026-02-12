@@ -14,8 +14,8 @@ import java.util.Enumeration;
  */
 public final class NetUtil {
 
-    private static final String LOCAL_HOST = "127.0.0.1";
-    private static final String LOCAL_HOST_IPv6 = "[::1]";
+    private static final String localHost = "127.0.0.1";
+    private static final String localHostIPv6 = "[::1]";
 
     private NetUtil() {
     }
@@ -35,7 +35,7 @@ public final class NetUtil {
                 hostname = address.toString();
             }
         } catch (UnknownHostException ignore) {
-            hostname = LOCAL_HOST;
+            hostname = localHost;
         }
         return hostname;
     }
@@ -55,7 +55,7 @@ public final class NetUtil {
                 hostAddress = address.toString();
             }
         } catch (UnknownHostException ignore) {
-            hostAddress = LOCAL_HOST;
+            hostAddress = localHost;
         }
         return hostAddress;
     }
@@ -230,9 +230,6 @@ public final class NetUtil {
      * @return 是否为内网 ip
      */
     public static boolean isInternalIp(byte[] addr) {
-        if (addr == null) {
-            return false;
-        }
         return switch (addr.length) {
             case 4 -> isInternalIpv4(addr);
             case 16 -> isInternalIpv6(addr);

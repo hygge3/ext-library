@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class Threads {
     /** 原始堆栈索引位置，用于获取调用方法的堆栈信息 */
-    private static final int ORIGIN_STACK_INDEX = 2;
+    private static final int originStackIndex = 2;
 
     private Threads() {
     }
@@ -73,7 +73,7 @@ public final class Threads {
     /**
      * 打印线程异常信息
      */
-    public static void printException(@Nullable Runnable r, @Nullable Throwable t) {
+    public static void printException(Runnable r, @Nullable Throwable t) {
         if (t == null && r instanceof Future<?> future) {
             try {
                 if (future.isDone()) {
@@ -98,7 +98,7 @@ public final class Threads {
      * @return 文件名
      */
     public static @Nullable String getFileName() {
-        return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getFileName();
+        return Thread.currentThread().getStackTrace()[originStackIndex].getFileName();
     }
 
     /**
@@ -107,7 +107,7 @@ public final class Threads {
      * @return 类名称
      */
     public static String getClassName() {
-        return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getClassName();
+        return Thread.currentThread().getStackTrace()[originStackIndex].getClassName();
     }
 
     /**
@@ -116,7 +116,7 @@ public final class Threads {
      * @return 方法名称
      */
     public static String getMethodName() {
-        return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getMethodName();
+        return Thread.currentThread().getStackTrace()[originStackIndex].getMethodName();
     }
 
     /**
@@ -125,6 +125,6 @@ public final class Threads {
      * @return 行号
      */
     public static int getLineNumber() {
-        return Thread.currentThread().getStackTrace()[ORIGIN_STACK_INDEX].getLineNumber();
+        return Thread.currentThread().getStackTrace()[originStackIndex].getLineNumber();
     }
 }

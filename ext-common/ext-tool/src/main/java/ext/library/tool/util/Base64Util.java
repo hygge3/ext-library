@@ -29,6 +29,7 @@ public final class Base64Util {
      * 适用场景：JWT、URL 参数、文件名
      *
      * @param data 原始字符串
+     *
      * @return 编码后的字符串
      */
     public static String encodeUrlSafeToStr(String data) {
@@ -39,6 +40,7 @@ public final class Base64Util {
      * URL 安全的 Base64 编码（无填充）
      *
      * @param data 原始字节数组
+     *
      * @return 编码后的字符串
      */
     public static String encodeUrlSafeToStr(byte[] data) {
@@ -49,6 +51,7 @@ public final class Base64Util {
      * URL 安全的 Base64 编码（无填充）
      *
      * @param data 原始字符串
+     *
      * @return 编码后的字节数组
      */
     public static byte[] encodeUrlSafe(String data) {
@@ -59,6 +62,7 @@ public final class Base64Util {
      * URL 安全的 Base64 编码（无填充）
      *
      * @param data 原始字节数组
+     *
      * @return 编码后的字节数组
      */
     public static byte[] encodeUrlSafe(byte[] data) {
@@ -73,6 +77,7 @@ public final class Base64Util {
      * URL 安全的 Base64 解码
      *
      * @param data 编码后的字符串
+     *
      * @return 解码后的原始字符串
      */
     public static String decodeUrlSafeToStr(String data) {
@@ -83,6 +88,7 @@ public final class Base64Util {
      * URL 安全的 Base64 解码
      *
      * @param data 编码后的字节数组
+     *
      * @return 解码后的原始字符串
      */
     public static String decodeUrlSafeToStr(byte[] data) {
@@ -93,6 +99,7 @@ public final class Base64Util {
      * URL 安全的 Base64 解码
      *
      * @param data 编码后的字符串
+     *
      * @return 解码后的字节数组
      */
     public static byte[] decodeUrlSafe(String data) {
@@ -103,6 +110,7 @@ public final class Base64Util {
      * URL 安全的 Base64 解码
      *
      * @param data 编码后的字节数组
+     *
      * @return 解码后的字节数组
      */
     public static byte[] decodeUrlSafe(byte[] data) {
@@ -121,6 +129,7 @@ public final class Base64Util {
      * 适用场景：通用数据传输、邮件附件
      *
      * @param data 原始字符串
+     *
      * @return 编码后的字符串
      */
     public static String encodeToStr(String data) {
@@ -131,6 +140,7 @@ public final class Base64Util {
      * 标准 Base64 编码
      *
      * @param data 原始字节数组
+     *
      * @return 编码后的字符串
      */
     public static String encodeToStr(byte[] data) {
@@ -141,6 +151,7 @@ public final class Base64Util {
      * 标准 Base64 编码
      *
      * @param data 原始字符串
+     *
      * @return 编码后的字节数组
      */
     public static byte[] encode(String data) {
@@ -151,6 +162,7 @@ public final class Base64Util {
      * 标准 Base64 编码
      *
      * @param data 原始字节数组
+     *
      * @return 编码后的字节数组
      */
     public static byte[] encode(byte[] data) {
@@ -165,6 +177,7 @@ public final class Base64Util {
      * 标准 Base64 解码
      *
      * @param data 编码后的字符串
+     *
      * @return 解码后的原始字符串
      */
     public static String decodeToStr(String data) {
@@ -175,6 +188,7 @@ public final class Base64Util {
      * 标准 Base64 解码
      *
      * @param data 编码后的字节数组
+     *
      * @return 解码后的原始字符串
      */
     public static String decodeToStr(byte[] data) {
@@ -185,6 +199,7 @@ public final class Base64Util {
      * 标准 Base64 解码
      *
      * @param data 编码后的字符串
+     *
      * @return 解码后的字节数组
      */
     public static byte[] decode(String data) {
@@ -195,6 +210,7 @@ public final class Base64Util {
      * 标准 Base64 解码
      *
      * @param data 编码后的字节数组
+     *
      * @return 解码后的字节数组
      */
     public static byte[] decode(byte[] data) {

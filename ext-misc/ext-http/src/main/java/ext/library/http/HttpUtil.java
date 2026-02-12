@@ -2,7 +2,6 @@ package ext.library.http;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.runtime.Exceptions;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,7 +198,6 @@ public final class HttpUtil {
                     .executor(Executors.newVirtualThreadPerTaskExecutor())
                     .build();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            Exceptions.log(e);
             throw new ExtException(EmojiSymbol.HTTP, "创建不安全 HttpClient 失败", e);
         }
     }

@@ -21,7 +21,7 @@ import java.util.Objects;
  */
 public final class Version {
 
-    private static final String DELIMITER = "\\.";
+    private static final String delimiter = "\\.";
 
     /** 版本号 */
     private final String version;
@@ -37,93 +37,11 @@ public final class Version {
      * 创建 Version 实例
      *
      * @param version 版本号字符串
+     *
      * @return Version 实例
      */
     public static Version of(String version) {
         return new Version(version);
-    }
-
-    /**
-     * 设置为不完整模式
-     * <p>
-     * 不完整模式下，只比较两个版本号的公共部分。
-     * 例如 "1.0" 和 "1.0.1" 在不完整模式下视为相等。
-     *
-     * @return 当前 Version 实例
-     */
-    public Version incomplete() {
-        this.complete = false;
-        return this;
-    }
-
-    /**
-     * 判断版本号是否相等
-     *
-     * @param version 要比较的版本号
-     * @return 如果相等返回 true
-     */
-    public boolean eq(String version) {
-        return compare(version) == 0;
-    }
-
-    /**
-     * 判断版本号是否不相等
-     *
-     * @param version 要比较的版本号
-     * @return 如果不相等返回 true
-     */
-    public boolean ne(String version) {
-        return compare(version) != 0;
-    }
-
-    /**
-     * 判断是否大于指定版本
-     *
-     * @param version 要比较的版本号
-     * @return 如果大于返回 true
-     */
-    public boolean gt(String version) {
-        return compare(version) > 0;
-    }
-
-    /**
-     * 判断是否大于或等于指定版本
-     *
-     * @param version 要比较的版本号
-     * @return 如果大于或等于返回 true
-     */
-    public boolean gte(String version) {
-        return compare(version) >= 0;
-    }
-
-    /**
-     * 判断是否小于指定版本
-     *
-     * @param version 要比较的版本号
-     * @return 如果小于返回 true
-     */
-    public boolean lt(String version) {
-        return compare(version) < 0;
-    }
-
-    /**
-     * 判断是否小于或等于指定版本
-     *
-     * @param version 要比较的版本号
-     * @return 如果小于或等于返回 true
-     */
-    public boolean lte(String version) {
-        return compare(version) <= 0;
-    }
-
-    /**
-     * 与另一个版本号进行比较
-     *
-     * @param version 要比较的版本号
-     * @return 比较结果：小于返回负数，等于返回 0，大于返回正数
-     */
-    private int compare(String version) {
-        return compare(this.version, version, complete);
     }
 
     /**
@@ -132,6 +50,7 @@ public final class Version {
      * @param v1       第一个版本号
      * @param v2       第二个版本号
      * @param complete 是否完整比较（true: 比较所有段，false: 只比较公共段）
+     *
      * @return 比较结果：v1 < v2 返回负数，v1 == v2 返回 0，v1 > v2 返回正数
      */
     private static int compare(String v1, String v2, boolean complete) {
@@ -151,8 +70,8 @@ public final class Version {
             return 0;
         }
 
-        String[] v1s = v1.split(DELIMITER);
-        String[] v2s = v2.split(DELIMITER);
+        String[] v1s = v1.split(delimiter);
+        String[] v2s = v2.split(delimiter);
         int v1sLen = v1s.length;
         int v2sLen = v2s.length;
         int len = complete ? Math.max(v1sLen, v2sLen) : Math.min(v1sLen, v2sLen);
@@ -177,6 +96,7 @@ public final class Version {
      *
      * @param s1 第一个段
      * @param s2 第二个段
+     *
      * @return 比较结果
      */
     private static int compareSegment(String s1, String s2) {
@@ -197,7 +117,9 @@ public final class Version {
      * 支持带前缀的版本号（如 "v1"、"r2"）
      *
      * @param segment 版本号段
+     *
      * @return 解析后的数字
+     *
      * @throws NumberFormatException 如果无法解析为数字
      */
     private static int parseVersionNumber(String segment) {
@@ -207,5 +129,95 @@ public final class Version {
         // 移除常见前缀（v, r, V, R）
         String numeric = segment.replaceFirst("^[vVrR]", "");
         return Integer.parseInt(numeric);
+    }
+
+    /**
+     * 设置为不完整模式
+     * <p>
+     * 不完整模式下，只比较两个版本号的公共部分。
+     * 例如 "1.0" 和 "1.0.1" 在不完整模式下视为相等。
+     *
+     * @return 当前 Version 实例
+     */
+    public Version incomplete() {
+        this.complete = false;
+        return this;
+    }
+
+    /**
+     * 判断版本号是否相等
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果相等返回 true
+     */
+    public boolean eq(String version) {
+        return compare(version) == 0;
+    }
+
+    /**
+     * 判断版本号是否不相等
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果不相等返回 true
+     */
+    public boolean ne(String version) {
+        return compare(version) != 0;
+    }
+
+    /**
+     * 判断是否大于指定版本
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果大于返回 true
+     */
+    public boolean gt(String version) {
+        return compare(version) > 0;
+    }
+
+    /**
+     * 判断是否大于或等于指定版本
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果大于或等于返回 true
+     */
+    public boolean gte(String version) {
+        return compare(version) >= 0;
+    }
+
+    /**
+     * 判断是否小于指定版本
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果小于返回 true
+     */
+    public boolean lt(String version) {
+        return compare(version) < 0;
+    }
+
+    /**
+     * 判断是否小于或等于指定版本
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 如果小于或等于返回 true
+     */
+    public boolean lte(String version) {
+        return compare(version) <= 0;
+    }
+
+    /**
+     * 与另一个版本号进行比较
+     *
+     * @param version 要比较的版本号
+     *
+     * @return 比较结果：小于返回负数，等于返回 0，大于返回正数
+     */
+    private int compare(String version) {
+        return compare(this.version, version, complete);
     }
 }

@@ -2,7 +2,6 @@ package ext.library.tool.util;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
-import org.springframework.util.Assert;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -37,7 +36,9 @@ public final class ImageUtil {
      * 从文件读取图片
      *
      * @param input 图片文件
+     *
      * @return BufferedImage 对象
+     *
      * @throws ToolException 如果读取失败
      */
     public static BufferedImage read(File input) {
@@ -52,7 +53,9 @@ public final class ImageUtil {
      * 从输入流读取图片
      *
      * @param input 图片输入流
+     *
      * @return BufferedImage 对象
+     *
      * @throws ToolException 如果读取失败
      */
     public static BufferedImage read(InputStream input) {
@@ -69,12 +72,13 @@ public final class ImageUtil {
      * 支持 http/https 网络地址和本地文件路径
      *
      * @param url 图片地址（http/https URL 或本地文件路径）
+     *
      * @return BufferedImage 对象
+     *
      * @throws IllegalArgumentException 如果 url 为空
      * @throws ToolException            如果读取失败
      */
     public static BufferedImage read(String url) {
-        Assert.hasText(url, "图片地址不能为空");
         if (url.startsWith("http://") || url.startsWith("https://")) {
             return readUrl(url);
         }
@@ -85,7 +89,9 @@ public final class ImageUtil {
      * 从 URL 对象读取图片
      *
      * @param url 图片 URL
+     *
      * @return BufferedImage 对象
+     *
      * @throws ToolException 如果读取失败
      */
     public static BufferedImage read(URL url) {
@@ -114,7 +120,9 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标输出流
+     *
      * @return 如果找到合适的 writer 返回 true，否则返回 false
+     *
      * @throws ToolException 如果写出失败
      */
     public static boolean write(RenderedImage image, String formatName, ImageOutputStream output) {
@@ -131,7 +139,9 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标文件
+     *
      * @return 如果找到合适的 writer 返回 true，否则返回 false
+     *
      * @throws ToolException 如果写出失败
      */
     public static boolean write(RenderedImage image, String formatName, File output) {
@@ -148,7 +158,9 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标输出流
+     *
      * @return 如果找到合适的 writer 返回 true，否则返回 false
+     *
      * @throws ToolException 如果写出失败
      */
     public static boolean write(RenderedImage image, String formatName, OutputStream output) {
@@ -164,7 +176,9 @@ public final class ImageUtil {
      *
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
+     *
      * @return 图片字节数组
+     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static byte[] writeAsBytes(RenderedImage image, String formatName) {
@@ -172,7 +186,7 @@ public final class ImageUtil {
             if (ImageIO.write(image, formatName, output)) {
                 return output.toByteArray();
             }
-            throw new ToolException(EmojiSymbol.TOOL, "不支持的图片格式: {}", formatName);
+            throw new ToolException(EmojiSymbol.TOOL, "不支持的图片格式：{}", formatName);
         } catch (IOException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
@@ -183,7 +197,9 @@ public final class ImageUtil {
      *
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
+     *
      * @return 包含图片数据的 ByteArrayInputStream
+     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static ByteArrayInputStream writeAsStream(RenderedImage image, String formatName) {
