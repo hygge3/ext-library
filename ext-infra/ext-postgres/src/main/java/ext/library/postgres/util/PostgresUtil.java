@@ -106,6 +106,66 @@ public final class PostgresUtil {
     }
 
     /**
+     * 设置缓存值并指定过期时间（SETEX 语义）
+     *
+     * @param key     缓存键
+     * @param value   字符串值
+     * @param timeout 过期时间
+     */
+    public static void cacheSetEx(String key, String value, Duration timeout) {
+        getCacheManager().setEx(key, value, timeout);
+    }
+
+    /**
+     * 设置缓存值并指定过期时间（SETEX 语义）
+     *
+     * @param key        缓存键
+     * @param value      字符串值
+     * @param ttlSeconds 过期时间（秒）
+     */
+    public static void cacheSetEx(String key, String value, long ttlSeconds) {
+        getCacheManager().setEx(key, value, ttlSeconds);
+    }
+
+    /**
+     * 当 key 不存在时设置缓存值（SETNX 语义，使用默认过期时间）
+     *
+     * @param key   缓存键
+     * @param value 字符串值
+     *
+     * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
+     */
+    public static boolean cacheSetNx(String key, String value) {
+        return getCacheManager().setNx(key, value);
+    }
+
+    /**
+     * 当 key 不存在时设置缓存值并指定过期时间（SETNX + EXPIRE 语义）
+     *
+     * @param key     缓存键
+     * @param value   字符串值
+     * @param timeout 过期时间
+     *
+     * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
+     */
+    public static boolean cacheSetNxEx(String key, String value, Duration timeout) {
+        return getCacheManager().setNxEx(key, value, timeout);
+    }
+
+    /**
+     * 当 key 不存在时设置缓存值并指定过期时间（SETNX + EXPIRE 语义）
+     *
+     * @param key        缓存键
+     * @param value      字符串值
+     * @param ttlSeconds 过期时间（秒）
+     *
+     * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
+     */
+    public static boolean cacheSetNxEx(String key, String value, long ttlSeconds) {
+        return getCacheManager().setNxEx(key, value, ttlSeconds);
+    }
+
+    /**
      * 设置缓存过期时间
      *
      * @param key 缓存键

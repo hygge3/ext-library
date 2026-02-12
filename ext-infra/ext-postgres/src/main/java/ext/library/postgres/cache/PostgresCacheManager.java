@@ -37,12 +37,7 @@ public class PostgresCacheManager {
      * @return 缓存值，不存在或已过期返回 null
      */
     public <T> T get(String key, Class<T> clazz) {
-        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()")
-                .param(key)
-                .query(String.class)
-                .optional()
-                .map(json -> JsonUtil.readObj(json, clazz))
-                .orElse(null);
+        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.readObj(json, clazz)).orElse(null);
     }
 
     /**
@@ -94,6 +89,79 @@ public class PostgresCacheManager {
     }
 
     /**
+     * 设置 value for key，同时为其设置过期时间（Redis SETEX 语义）
+     *
+     * @param key     缓存 key
+     * @param value   字符串值
+     * @param timeout 过期时间
+     */
+    public void setEx(String key, String value, Duration timeout) {
+        jdbcClient.sql("""
+                INSERT INTO %s (key, value, expires_at)
+                VALUES (?, ?::jsonb, NOW() + ?::interval)
+                ON CONFLICT (key) DO UPDATE
+                SET value = EXCLUDED.value, expires_at = EXCLUDED.expires_at, updated_at = NOW()
+                """.formatted(tableName)).param(key).param(JsonUtil.toJson(value)).param(timeout.toSeconds() + " seconds").update();
+    }
+
+    /**
+     * 设置 value for key，同时为其设置过期时间（Redis SETEX 语义）
+     *
+     * @param key        缓存 key
+     * @param value      字符串值
+     * @param ttlSeconds 过期时间（秒）
+     */
+    public void setEx(String key, String value, long ttlSeconds) {
+        setEx(key, value, Duration.ofSeconds(ttlSeconds));
+    }
+
+    /**
+     * 当 key 不存在时设置 value（Redis SETNX 语义）
+     *
+     * @param key   缓存 key
+     * @param value 字符串值
+     *
+     * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
+     */
+    public boolean setNx(String key, String value) {
+        return setNxEx(key, value, properties.getDefaultCacheExpireTime());
+    }
+
+    /**
+     * 当 key 不存在时设置 value 并指定过期时间（Redis SETNX + EXPIRE 语义）
+     *
+     * @param key     缓存 key
+     * @param value   字符串值
+     * @param timeout 过期时间
+     *
+     * @return true: 设置成功（key 不存在）false: 设置失败（key 已存在且未过期）
+     */
+    public boolean setNxEx(String key, String value, Duration timeout) {
+        int rows = jdbcClient.sql("""
+                WITH cleanup AS (
+                    DELETE FROM %s WHERE key = ? AND expires_at < NOW()
+                )
+                INSERT INTO %s (key, value, expires_at)
+                VALUES (?, ?::jsonb, NOW() + ?::interval)
+                ON CONFLICT (key) DO NOTHING
+                """.formatted(tableName, tableName)).param(key).param(key).param(JsonUtil.toJson(value)).param(timeout.toSeconds() + " seconds").update();
+        return rows > 0;
+    }
+
+    /**
+     * 当 key 不存在时设置 value 并指定过期时间（Redis SETNX + EXPIRE 语义）
+     *
+     * @param key        缓存 key
+     * @param value      字符串值
+     * @param ttlSeconds 过期时间（秒）
+     *
+     * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
+     */
+    public boolean setNxEx(String key, String value, long ttlSeconds) {
+        return setNxEx(key, value, Duration.ofSeconds(ttlSeconds));
+    }
+
+    /**
      * 删除缓存
      *
      * @param key 缓存 key
@@ -125,11 +193,7 @@ public class PostgresCacheManager {
      * @return 是否存在
      */
     public boolean exists(String key) {
-        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()")
-                .param(key)
-                .query(Integer.class)
-                .optional()
-                .isPresent();
+        return jdbcClient.sql("SELECT 1 FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(Integer.class).optional().isPresent();
     }
 
     /**
@@ -140,12 +204,7 @@ public class PostgresCacheManager {
      * @return 剩余秒数，不存在返回 -2，永不过期返回 -1
      */
     public long ttl(String key) {
-        return jdbcClient.sql("SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?")
-                .param(key)
-                .query(Long.class)
-                .optional()
-                .map(ttl -> Math.max(ttl, 0))
-                .orElse(-2L);
+        return jdbcClient.sql("SELECT EXTRACT(EPOCH FROM (expires_at - NOW()))::bigint AS ttl FROM " + tableName + " WHERE key = ?").param(key).query(Long.class).optional().map(ttl -> Math.max(ttl, 0)).orElse(-2L);
     }
 
     /**
@@ -157,10 +216,7 @@ public class PostgresCacheManager {
      * @return 是否更新成功
      */
     public boolean expire(String key, Duration ttl) {
-        int rows = jdbcClient.sql("UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?")
-                .param(ttl.toSeconds() + " seconds")
-                .param(key)
-                .update();
+        int rows = jdbcClient.sql("UPDATE " + tableName + " SET expires_at = NOW() + ?::interval WHERE key = ?").param(ttl.toSeconds() + " seconds").param(key).update();
         return rows > 0;
     }
 
@@ -171,7 +227,7 @@ public class PostgresCacheManager {
     public void cleanup() {
         int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE expires_at < NOW()").update();
         if (deleted > 0) {
-            Logs.debug(EmojiSymbol.POSTGRES, "清理过期缓存: {} 条", deleted);
+            Logs.debug(EmojiSymbol.POSTGRES, "清理过期缓存：{} 条", deleted);
         }
     }
 
