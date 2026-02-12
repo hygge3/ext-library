@@ -11,62 +11,12 @@
     <description>Ext Library BOM - 依赖版本统一管理</description>
 
     <properties>
-        <!-- 第三方依赖版本 -->
-        <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <swagger.version>2.2.42</swagger.version>
-        <bcprov.version>1.83</bcprov.version>
-        <oshi.version>6.9.3</oshi.version>
-        <springdoc.version>3.0.1</springdoc.version>
-        <zxing-core.version>3.5.4</zxing-core.version>
-        <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- ======================= 第三方依赖 ===================== -->
-            <!-- mapstruct-plus -->
-            <dependency>
-                <groupId>io.github.linpeilie</groupId>
-                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
-                <version>${mapstruct-plus.version}</version>
-            </dependency>
-            <!-- bouncy castle -->
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk18on</artifactId>
-                <version>${bcprov.version}</version>
-            </dependency>
-            <!-- swagger-annotations -->
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <!-- therapi-runtime-javadoc -->
-            <dependency>
-                <groupId>com.github.therapi</groupId>
-                <artifactId>therapi-runtime-javadoc</artifactId>
-                <version>${therapi-javadoc.version}</version>
-            </dependency>
-            <!-- oshi -->
-            <dependency>
-                <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java25</artifactId>
-                <version>${oshi.version}</version>
-            </dependency>
-            <!-- springdoc -->
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>${springdoc.version}</version>
-            </dependency>
-            <!-- google zxing -->
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>javase</artifactId>
-                <version>${zxing-core.version}</version>
-            </dependency>
-
             <!-- ======================= ext-common 层 ===================== -->
             <dependency>
                 <groupId>ext.library</groupId>
@@ -190,7 +140,21 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <build>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven-clean-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>

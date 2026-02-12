@@ -46,9 +46,13 @@
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
         <spring-boot.version>4.0.2</spring-boot.version>
-        <assertj.version>3.27.7</assertj.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
+        <swagger.version>2.2.42</swagger.version>
+        <bcprov.version>1.83</bcprov.version>
+        <oshi.version>6.9.3</oshi.version>
+        <springdoc.version>3.0.1</springdoc.version>
+        <zxing-core.version>3.5.4</zxing-core.version>
         <!-- plugins.version -->
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
@@ -71,20 +75,153 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- ext-bom 内联（避免 reactor 内 BOM import） -->
+            <!-- 第三方依赖 -->
             <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-bom</artifactId>
-                <version>${assertj.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.github.linpeilie</groupId>
+                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
+                <version>${mapstruct-plus.version}</version>
             </dependency>
-            <!-- ext-bom -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.therapi</groupId>
+                <artifactId>therapi-runtime-javadoc</artifactId>
+                <version>${therapi-javadoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core-java25</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing-core.version}</version>
+            </dependency>
+            <!-- ext 模块 -->
             <dependency>
                 <groupId>ext.library</groupId>
-                <artifactId>ext-bom</artifactId>
+                <artifactId>ext-tool</artifactId>
                 <version>${revision}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-json</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-cache</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-mail</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-postgres</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-crypto</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-mvc</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-openapi</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-sse</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-websocket</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-captcha</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-idempotent</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-desensitize</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-trans</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-api-crypto</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-http</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-qrcode</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>ext.library</groupId>
+                <artifactId>ext-holidays</artifactId>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
