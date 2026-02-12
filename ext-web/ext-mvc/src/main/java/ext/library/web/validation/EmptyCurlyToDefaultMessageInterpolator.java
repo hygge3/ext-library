@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessageInterpolator {
 
-    private static final String EMPTY_CURLY_BRACES = "{}";
+    private static final String emptyCurlyBraces = "{}";
 
     public EmptyCurlyToDefaultMessageInterpolator() {
     }
@@ -28,7 +28,7 @@ public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessag
     public String interpolate(@NonNull String message, Context context, Locale locale) {
 
         // 如果包含花括号占位符
-        if (message.contains(EMPTY_CURLY_BRACES)) {
+        if (message.contains(emptyCurlyBraces)) {
             // 获取注解类型
             Class<? extends Annotation> annotationType = context.getConstraintDescriptor()
                     .getAnnotation()
@@ -45,7 +45,7 @@ public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessag
             if (messageMethod.getDefaultValue() != null) {
                 Object defaultValue = messageMethod.getDefaultValue();
                 if (defaultValue instanceof String defaultMessage) {
-                    message = message.replace(EMPTY_CURLY_BRACES, defaultMessage);
+                    message = message.replace(emptyCurlyBraces, defaultMessage);
                 }
             }
         }

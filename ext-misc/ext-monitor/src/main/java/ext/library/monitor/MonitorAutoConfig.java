@@ -22,7 +22,7 @@ public class MonitorAutoConfig {
     @Bean
     @ConditionalOnMissingBean
     public SystemMonitor systemMonitor() {
-        log.info("[ext-monitor] System monitor initialized");
+        log.info("[📊] 加载模块：系统监控");
         return new SystemMonitor();
     }
 }

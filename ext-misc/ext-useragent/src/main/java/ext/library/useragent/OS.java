@@ -14,13 +14,20 @@ import java.util.List;
  */
 public class OS extends UserAgentInfo {
 
+    /**
+     * 所有支持的操作系统列表
+     */
+    public static final List<OS> OS_LIST;
+    /**
+     * 未知操作系统
+     */
+    public static final OS UNKNOWN = new OS(NAME_UNKNOWN, null, null);
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
      * 操作系统定义：名称、匹配正则、版本正则
      */
-    private static final String[][] OS_DEFINITIONS = {
+    private static final String[][] osDefinitions = {
             {"Windows 10 or Windows Server 2016", "windows nt 10\\.0", "windows nt (10\\.0)"},
             {"Windows 8.1 or Windows Server 2012R2", "windows nt 6\\.3", "windows nt (6\\.3)"},
             {"Windows 8 or Windows Server 2012", "windows nt 6\\.2", "windows nt (6\\.2)"},
@@ -47,23 +54,13 @@ public class OS extends UserAgentInfo {
             {"Java", "Java[\\s]+([\\d\\w\\.\\-]+)", "Java[\\s]+([\\d\\w\\.\\-]+)"}
     };
 
-    /**
-     * 所有支持的操作系统列表
-     */
-    public static final List<OS> OS_LIST;
-
     static {
-        List<OS> list = new ArrayList<>(OS_DEFINITIONS.length);
-        for (String[] def : OS_DEFINITIONS) {
+        List<OS> list = new ArrayList<>(osDefinitions.length);
+        for (String[] def : osDefinitions) {
             list.add(new OS(def[0], def[1], def[2]));
         }
         OS_LIST = List.copyOf(list);
     }
-
-    /**
-     * 未知操作系统
-     */
-    public static final OS UNKNOWN = new OS(NAME_UNKNOWN, null, null);
 
     /**
      * 构造操作系统

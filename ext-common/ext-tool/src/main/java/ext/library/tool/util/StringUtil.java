@@ -211,7 +211,7 @@ public final class StringUtil {
      *
      * @return boolean
      */
-    public static boolean isAnyBlank(String... strs) {
+    public static boolean isAnyBlank(@Nullable String... strs) {
         if (strs.length == 0) {
             return true;
         }

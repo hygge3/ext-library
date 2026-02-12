@@ -26,6 +26,7 @@ public final class HandlerMethodUtil {
      * @param handlerMethod  HandlerMethod
      * @param annotationType 注解类
      * @param <A>            泛型标记
+     *
      * @return 注解实例，未找到时返回 null
      */
     public static <A extends Annotation> @Nullable A getAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {

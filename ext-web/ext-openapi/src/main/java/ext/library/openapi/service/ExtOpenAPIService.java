@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tags;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.tags.Tag;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
@@ -18,6 +17,7 @@ import org.springdoc.core.utils.PropertyResolverUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
 
+import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  *   <li>优化 Tag 的自动生成逻辑</li>
  * </ul>
  */
-public class ExtOpenApiService extends OpenAPIService {
+public class ExtOpenAPIService extends OpenAPIService {
 
     private final SecurityService securityParser;
     private final PropertyResolverUtils propertyResolverUtils;
@@ -55,7 +55,7 @@ public class ExtOpenApiService extends OpenAPIService {
      * @param serverBaseUrlCustomizers  服务器基础 URL 自定义器
      * @param javadocProvider           JavaDoc 提供器
      */
-    public ExtOpenApiService(
+    public ExtOpenAPIService(
             Optional<OpenAPI> openAPI,
             SecurityService securityParser,
             SpringDocConfigProperties springDocConfigProperties,

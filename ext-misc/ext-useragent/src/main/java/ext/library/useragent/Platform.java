@@ -7,20 +7,35 @@ import java.util.List;
 /**
  * 平台信息
  * <p>
- * 识别设备平台类型（移动/桌面/iOS/Android等）。
+ * 识别设备平台类型（移动/桌面/iOS/Android 等）。
  * </p>
  *
  * @since 1.0.0
  */
 public class Platform extends UserAgentInfo {
 
+    /**
+     * 所有移动平台列表
+     */
+    public static final List<Platform> MOBILE_PLATFORM_LIST;
+    /**
+     * 所有桌面平台列表
+     */
+    public static final List<Platform> DESKTOP_PLATFORM_LIST;
+    /**
+     * 所有平台列表
+     */
+    public static final List<Platform> PLATFORM_LIST;
+    /**
+     * 未知平台
+     */
+    public static final Platform UNKNOWN = new Platform(NAME_UNKNOWN, null);
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
      * 移动平台定义
      */
-    private static final String[][] MOBILE_DEFINITIONS = {
+    private static final String[][] mobileDefinitions = {
             {"Windows Phone", "windows (ce|phone|mobile)( os)?"},
             {"iPad", "ipad"},
             {"iPod", "ipod"},
@@ -32,11 +47,10 @@ public class Platform extends UserAgentInfo {
             {"Symbian", "symbian(os)?"},
             {"Blackberry", "blackberry"}
     };
-
     /**
      * 桌面平台定义
      */
-    private static final String[][] DESKTOP_DEFINITIONS = {
+    private static final String[][] desktopDefinitions = {
             {"Windows", "windows"},
             {"Mac", "(macintosh|darwin)"},
             {"Linux", "linux"},
@@ -45,43 +59,15 @@ public class Platform extends UserAgentInfo {
             {"Java", "java"}
     };
 
-    /**
-     * 所有移动平台列表
-     */
-    public static final List<Platform> MOBILE_PLATFORM_LIST;
-
-    /**
-     * 所有桌面平台列表
-     */
-    public static final List<Platform> DESKTOP_PLATFORM_LIST;
-
-    /**
-     * 所有平台列表
-     */
-    public static final List<Platform> PLATFORM_LIST;
-
     static {
-        MOBILE_PLATFORM_LIST = createPlatforms(MOBILE_DEFINITIONS);
-        DESKTOP_PLATFORM_LIST = createPlatforms(DESKTOP_DEFINITIONS);
+        MOBILE_PLATFORM_LIST = createPlatforms(mobileDefinitions);
+        DESKTOP_PLATFORM_LIST = createPlatforms(desktopDefinitions);
 
         List<Platform> all = new ArrayList<>(MOBILE_PLATFORM_LIST.size() + DESKTOP_PLATFORM_LIST.size());
         all.addAll(MOBILE_PLATFORM_LIST);
         all.addAll(DESKTOP_PLATFORM_LIST);
         PLATFORM_LIST = List.copyOf(all);
     }
-
-    private static List<Platform> createPlatforms(String[][] definitions) {
-        List<Platform> list = new ArrayList<>(definitions.length);
-        for (String[] def : definitions) {
-            list.add(new Platform(def[0], def[1]));
-        }
-        return List.copyOf(list);
-    }
-
-    /**
-     * 未知平台
-     */
-    public static final Platform UNKNOWN = new Platform(NAME_UNKNOWN, null);
 
     /**
      * 构造平台
@@ -91,6 +77,14 @@ public class Platform extends UserAgentInfo {
      */
     private Platform(String name, String regex) {
         super(name, regex);
+    }
+
+    private static List<Platform> createPlatforms(String[][] definitions) {
+        List<Platform> list = new ArrayList<>(definitions.length);
+        for (String[] def : definitions) {
+            list.add(new Platform(def[0], def[1]));
+        }
+        return List.copyOf(list);
     }
 
     /**

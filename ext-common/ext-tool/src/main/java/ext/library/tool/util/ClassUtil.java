@@ -240,7 +240,7 @@ public final class ClassUtil {
      *
      * @return 注解实例，未找到返回 null
      */
-    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
+    public static <A extends Annotation> @Nullable A getAnnotation(Method method, Class<A> annotationType) {
         A annotation = method.getAnnotation(annotationType);
         if (annotation != null) {
             return annotation;
@@ -350,7 +350,7 @@ public final class ClassUtil {
         Object[] initArgs = new Object[paramTypes.length];
 
         for (int i = 0; i < paramTypes.length; i++) {
-            //noinspection DataFlowIssue
+            // noinspection DataFlowIssue
             initArgs[i] = getDefaultValue(paramTypes[i]);
         }
 

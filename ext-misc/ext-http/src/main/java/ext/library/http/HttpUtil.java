@@ -2,9 +2,9 @@ package ext.library.http;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
+import ext.library.tool.runtime.Logs;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.MimeTypeUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -71,27 +71,20 @@ import java.util.function.Consumer;
  */
 public final class HttpUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpUtil.class);
-
     /**
      * 默认连接超时（毫秒）
      */
-    private static final int DEFAULT_CONNECT_TIMEOUT = 10_000;
+    private static final int defaultConnectTimeout = 10_000;
 
     /**
      * 默认读取超时（毫秒）
      */
-    private static final long DEFAULT_READ_TIMEOUT = 120_000;
-
-    /**
-     * 默认 Content-Type
-     */
-    private static final String DEFAULT_CONTENT_TYPE = "application/json";
+    private static final long defaultReadTimeout = 120_000;
 
     private static volatile HttpClient client;
     private static volatile HttpClient insecureClient;
-    private static long defaultTimeout = DEFAULT_READ_TIMEOUT;
-    private static String defaultContentType = DEFAULT_CONTENT_TYPE;
+    private static long defaultTimeout = defaultReadTimeout;
+    private static String defaultContentType = MimeTypeUtils.APPLICATION_JSON_VALUE;
 
     static {
         initDefaultClient();
@@ -101,12 +94,7 @@ public final class HttpUtil {
     }
 
     private static void initDefaultClient() {
-        client = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(Duration.ofMillis(DEFAULT_CONNECT_TIMEOUT))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .build();
+        client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofMillis(defaultConnectTimeout)).followRedirects(HttpClient.Redirect.NORMAL).executor(Executors.newVirtualThreadPerTaskExecutor()).build();
     }
 
     /**
@@ -168,7 +156,7 @@ public final class HttpUtil {
      * 创建不安全的 HttpClient（禁用 SSL 验证）
      */
     private static HttpClient createInsecureClient() {
-        log.warn("⚠️ 创建不安全的 HttpClient，SSL 证书验证已禁用。仅用于开发/测试环境！");
+        Logs.warn(EmojiSymbol.HTTP, "创建不安全的 HttpClient，SSL 证书验证已禁用。仅用于开发/测试环境！");
         try {
             TrustManager[] trustAllCertificates = new TrustManager[]{new X509TrustManager() {
                 @Override
@@ -190,13 +178,7 @@ public final class HttpUtil {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllCertificates, new SecureRandom());
 
-            return HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .connectTimeout(Duration.ofMillis(DEFAULT_CONNECT_TIMEOUT))
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .sslContext(sslContext)
-                    .executor(Executors.newVirtualThreadPerTaskExecutor())
-                    .build();
+            return HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofMillis(defaultConnectTimeout)).followRedirects(HttpClient.Redirect.NORMAL).sslContext(sslContext).executor(Executors.newVirtualThreadPerTaskExecutor()).build();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new ExtException(EmojiSymbol.HTTP, "创建不安全 HttpClient 失败", e);
         }
@@ -272,13 +254,7 @@ public final class HttpUtil {
      * HTTP 方法枚举
      */
     public enum HttpMethod {
-        GET,
-        POST,
-        PUT,
-        DELETE,
-        PATCH,
-        HEAD,
-        OPTIONS
+        GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
     }
 
     /**
@@ -540,8 +516,7 @@ public final class HttpUtil {
                 this.body = new HashMap<String, Object>();
             }
             if (this.body instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> form = (Map<String, Object>) this.body;
+                @SuppressWarnings("unchecked") Map<String, Object> form = (Map<String, Object>) this.body;
                 form.put(name, value);
             }
             this.formUrlEncoded = true;
@@ -676,14 +651,12 @@ public final class HttpUtil {
          */
         public CompletableFuture<Response> executeAsync() {
             HttpRequest httpRequest = buildRequest();
-            return sendAsyncRequest(httpRequest)
-                    .thenApply(Response::new)
-                    .exceptionally(ex -> {
-                        if (errorHandler != null && ex instanceof Exception) {
-                            errorHandler.accept((Exception) ex);
-                        }
-                        return null;
-                    });
+            return sendAsyncRequest(httpRequest).thenApply(Response::new).exceptionally(ex -> {
+                if (errorHandler != null && ex instanceof Exception) {
+                    errorHandler.accept((Exception) ex);
+                }
+                return null;
+            });
         }
 
         /**
@@ -697,14 +670,12 @@ public final class HttpUtil {
         public <T> CompletableFuture<T> executeAsyncAs(Class<T> type) {
             this.responseType = type;
             HttpRequest httpRequest = buildRequest();
-            return sendAsyncRequest(httpRequest)
-                    .thenApply(response -> convertResponse(response, type))
-                    .exceptionally(ex -> {
-                        if (errorHandler != null && ex instanceof Exception) {
-                            errorHandler.accept((Exception) ex);
-                        }
-                        return null;
-                    });
+            return sendAsyncRequest(httpRequest).thenApply(response -> convertResponse(response, type)).exceptionally(ex -> {
+                if (errorHandler != null && ex instanceof Exception) {
+                    errorHandler.accept((Exception) ex);
+                }
+                return null;
+            });
         }
 
         /**
@@ -797,9 +768,7 @@ public final class HttpUtil {
         private HttpRequest buildRequest() {
             String requestUrl = buildUrl();
             Duration duration = Duration.ofMillis(timeout > 0 ? timeout : defaultTimeout);
-            HttpRequest.Builder builder = HttpRequest.newBuilder()
-                    .uri(URI.create(requestUrl))
-                    .timeout(duration);
+            HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(requestUrl)).timeout(duration);
             applyMethod(builder);
             applyHeaders(builder);
             return builder.build();
@@ -859,8 +828,7 @@ public final class HttpUtil {
                     return HttpRequest.BodyPublishers.ofByteArray(bytes);
                 }
                 case Map map -> {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> form = (Map<String, Object>) body;
+                    @SuppressWarnings("unchecked") Map<String, Object> form = (Map<String, Object>) body;
                     StringJoiner sj = new StringJoiner("&");
                     form.forEach((k, v) -> sj.add(k + "=" + java.net.URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
                     return HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
@@ -904,29 +872,26 @@ public final class HttpUtil {
         private CompletableFuture<HttpResponse<?>> sendAsyncRequest(HttpRequest httpRequest) {
             HttpClient httpClient = insecure ? getInsecureClient() : client;
             if (byte[].class == responseType) {
-                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
-                        .thenApply(response -> {
-                            if (responseHandler != null) {
-                                responseHandler.accept(httpRequest, response);
-                            }
-                            return response;
-                        });
+                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray()).thenApply(response -> {
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                });
             } else if (InputStream.class == responseType) {
-                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())
-                        .thenApply(response -> {
-                            if (responseHandler != null) {
-                                responseHandler.accept(httpRequest, response);
-                            }
-                            return response;
-                        });
+                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).thenApply(response -> {
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                });
             } else {
-                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-                        .thenApply(response -> {
-                            if (responseHandler != null) {
-                                responseHandler.accept(httpRequest, response);
-                            }
-                            return response;
-                        });
+                return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).thenApply(response -> {
+                    if (responseHandler != null) {
+                        responseHandler.accept(httpRequest, response);
+                    }
+                    return response;
+                });
             }
         }
 
@@ -1186,8 +1151,7 @@ public final class HttpUtil {
 
         @Override
         public String toString() {
-            return String.format("Response{statusCode=%d, contentType='%s', bodyLength=%d}",
-                    statusCode(), contentType(), contentLength());
+            return String.format("Response{statusCode=%d, contentType='%s', bodyLength=%d}", statusCode(), contentType(), contentLength());
         }
     }
 }

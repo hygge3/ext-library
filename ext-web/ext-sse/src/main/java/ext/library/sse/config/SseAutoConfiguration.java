@@ -57,7 +57,7 @@ public class SseAutoConfiguration {
 
     @Bean
     public SseEmitterManager sseEmitterManager(SseConnectionManager connectionManager, SseMessagePublisher messagePublisher, SseProperties properties) {
-        Logs.info(EmojiSymbol.SSE, "载入模块:SSE，连接路径:{}", properties.getPath());
+        Logs.info(EmojiSymbol.SSE, "载入模块：SSE，连接路径:{}", properties.getPath());
         return new SseEmitterManager(connectionManager, messagePublisher);
     }
 

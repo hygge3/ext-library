@@ -39,12 +39,12 @@ public final class ServletUtil {
      * 如果在前端和服务端中间还有一层 Node 服务，
      * 在 Node 对前端数据进行处理并发起新请求时，需携带此头部信息便于获取真实 IP
      */
-    private static final String NODE_FORWARDED_IP = "Node-Forwarded-IP";
+    private static final String nodeForwardedIp = "Node-Forwarded-IP";
 
     /**
      * 客户端 IP 获取优先级头列表
      */
-    private static final String[] CLIENT_IP_HEADERS = {
+    private static final String[] clientIpHeaders = {
             "X-Forwarded-For",
             "X-Real-IP",
             "Proxy-Client-IP",
@@ -294,14 +294,14 @@ public final class ServletUtil {
      * 获取客户端 IP
      */
     public static String getIpAddr() {
-        return getIpAddr(getRequest(), NODE_FORWARDED_IP);
+        return getIpAddr(getRequest(), nodeForwardedIp);
     }
 
     /**
      * 获取客户端 IP
      */
     public static String getIpAddr(HttpServletRequest request) {
-        return getIpAddr(request, NODE_FORWARDED_IP);
+        return getIpAddr(request, nodeForwardedIp);
     }
 
     /**
@@ -341,9 +341,9 @@ public final class ServletUtil {
 
     private static String[] mergeClientIpHeaders(String... otherHeaderNames) {
         if (ObjectUtils.isEmpty(otherHeaderNames)) {
-            return CLIENT_IP_HEADERS;
+            return clientIpHeaders;
         }
-        return Stream.concat(Stream.of(CLIENT_IP_HEADERS), Stream.of(otherHeaderNames)).toArray(String[]::new);
+        return Stream.concat(Stream.of(clientIpHeaders), Stream.of(otherHeaderNames)).toArray(String[]::new);
     }
 
     /**

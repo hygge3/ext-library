@@ -1,7 +1,7 @@
 package ext.library.openapi.config;
 
 import ext.library.openapi.properties.OpenApiProperties;
-import ext.library.openapi.service.ExtOpenApiService;
+import ext.library.openapi.service.ExtOpenAPIService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfiguration {
 
-    private static final Pattern ALPHA_NUMERIC_PATTERN = Pattern.compile("^[a-zA-Z0-9-]+$");
+    private static final Pattern alphaNumericPattern = Pattern.compile("^[a-zA-Z0-9-]+$");
 
     private final OpenApiProperties openApiProperties;
     private final ServerProperties serverProperties;
@@ -87,17 +87,9 @@ public class OpenApiAutoConfiguration {
      * 自定义 OpenAPI 服务
      */
     @Bean
-    public OpenAPIService openApiBuilder(
-            Optional<OpenAPI> openAPI,
-            SecurityService securityParser,
-            SpringDocConfigProperties springDocConfigProperties,
-            PropertyResolverUtils propertyResolverUtils,
-            Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers,
-            Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers,
-            Optional<JavadocProvider> javadocProvider) {
-        Logs.info(EmojiSymbol.OPENAPI, "OpenAPI module loaded");
-        return new ExtOpenApiService(openAPI, securityParser, springDocConfigProperties,
-                propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
+    public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI, SecurityService securityParser, SpringDocConfigProperties springDocConfigProperties, PropertyResolverUtils propertyResolverUtils, Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomizers, Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomizers, Optional<JavadocProvider> javadocProvider) {
+        Logs.info(EmojiSymbol.OPENAPI, "加载模块：OpenAPI");
+        return new ExtOpenAPIService(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomizers, serverBaseUrlCustomizers, javadocProvider);
     }
 
     /**
@@ -106,9 +98,7 @@ public class OpenApiAutoConfiguration {
     @Bean
     public OpenApiCustomizer openApiCustomizer() {
         String contextPath = serverProperties.getServlet().getContextPath();
-        String finalContextPath = ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath)
-                ? ""
-                : contextPath;
+        String finalContextPath = ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath) ? "" : contextPath;
 
         return openApi -> {
             // 对所有路径增加前置上下文路径
@@ -133,17 +123,14 @@ public class OpenApiAutoConfiguration {
      */
     private void convertJavadocToTagName(OpenAPI openApi) {
         for (Tag tag : openApi.getTags()) {
-            if (!ALPHA_NUMERIC_PATTERN.matcher(tag.getName()).matches()
-                    || StringUtil.isEmpty(tag.getDescription())) {
+            if (!alphaNumericPattern.matcher(tag.getName()).matches() || StringUtil.isEmpty(tag.getDescription())) {
                 continue;
             }
             String oldName = tag.getName();
             String newName = tag.getDescription();
 
             // 同步修改所有 Operation 中的 Tag 引用
-            openApi.getPaths().forEach((path, pathItem) ->
-                    pathItem.readOperations().forEach(operation ->
-                            replaceTagName(operation, oldName, newName)));
+            openApi.getPaths().forEach((path, pathItem) -> pathItem.readOperations().forEach(operation -> replaceTagName(operation, oldName, newName)));
             tag.name(newName);
         }
     }

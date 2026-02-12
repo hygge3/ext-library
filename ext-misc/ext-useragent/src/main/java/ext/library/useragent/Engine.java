@@ -14,13 +14,20 @@ import java.util.List;
  */
 public class Engine extends UserAgentInfo {
 
+    /**
+     * 所有支持的引擎列表
+     */
+    public static final List<Engine> ENGINE_LIST;
+    /**
+     * 未知引擎
+     */
+    public static final Engine UNKNOWN = new Engine(NAME_UNKNOWN, null, null);
     @Serial
     private static final long serialVersionUID = 1L;
-
     /**
      * 引擎定义：名称、匹配正则、版本正则
      */
-    private static final String[][] ENGINE_DEFINITIONS = {
+    private static final String[][] engineDefinitions = {
             {"Trident", "trident", "trident[/\\- ]([\\d\\w.\\-]+)"},
             {"Webkit", "webkit", "webkit[/\\- ]?([\\d\\w.\\-]+)"},
             {"Chrome", "chrome", "chrome[/\\- ]?([\\d\\w.\\-]+)"},
@@ -32,23 +39,13 @@ public class Engine extends UserAgentInfo {
             {"MIDP", "MIDP", "MIDP[/\\- ]?([\\d\\w.\\-]+)"}
     };
 
-    /**
-     * 所有支持的引擎列表
-     */
-    public static final List<Engine> ENGINE_LIST;
-
     static {
-        List<Engine> list = new ArrayList<>(ENGINE_DEFINITIONS.length);
-        for (String[] def : ENGINE_DEFINITIONS) {
+        List<Engine> list = new ArrayList<>(engineDefinitions.length);
+        for (String[] def : engineDefinitions) {
             list.add(new Engine(def[0], def[1], def[2]));
         }
         ENGINE_LIST = List.copyOf(list);
     }
-
-    /**
-     * 未知引擎
-     */
-    public static final Engine UNKNOWN = new Engine(NAME_UNKNOWN, null, null);
 
     /**
      * 构造引擎

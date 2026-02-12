@@ -26,8 +26,10 @@ import java.util.Properties;
  */
 public record SystemMonitor(SystemInfo systemInfo) {
 
-    private static final int DEFAULT_CPU_SAMPLE_MILLIS = 500;
-    private static final int DEFAULT_NET_SAMPLE_MILLIS = 1000;
+    public static final SystemMonitor INSTANCE = new SystemMonitor();
+
+    private static final int defaultCpuSampleMillis = 500;
+    private static final int defaultNetSampleMillis = 1000;
 
     public SystemMonitor() {
         this(new SystemInfo());
@@ -97,7 +99,7 @@ public record SystemMonitor(SystemInfo systemInfo) {
      * @return {@link CpuInfo}
      */
     public CpuInfo getCpuInfo() {
-        return getCpuInfo(DEFAULT_CPU_SAMPLE_MILLIS);
+        return getCpuInfo(defaultCpuSampleMillis);
     }
 
     /**
@@ -229,7 +231,7 @@ public record SystemMonitor(SystemInfo systemInfo) {
      * @return {@link NetIoInfo}
      */
     public NetIoInfo getNetIoInfo() {
-        return getNetIoInfo(DEFAULT_NET_SAMPLE_MILLIS);
+        return getNetIoInfo(defaultNetSampleMillis);
     }
 
     /**

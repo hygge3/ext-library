@@ -1,19 +1,18 @@
 package ext.library.sse.controller;
 
 import ext.library.security.util.SecurityUtil;
-import ext.library.sse.properties.SseProperties;
 import ext.library.sse.manager.SseEmitterManager;
-import ext.library.web.annotation.IgnoreRestWrapper;
+import ext.library.sse.properties.SseProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * SSE 控制器
  */
-@RestController
+@Controller
 @ConditionalOnProperty(value = SseProperties.PREFIX + ".enabled", havingValue = "true")
 public class SseController {
 
@@ -36,7 +35,6 @@ public class SseController {
     /**
      * 关闭 SSE 连接
      */
-    @IgnoreRestWrapper
     @GetMapping("${ext.sse.path}/close")
     public void close() {
         String tokenValue = SecurityUtil.getCurrentTokenValue();

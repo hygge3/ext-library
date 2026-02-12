@@ -19,7 +19,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
     /**
      * WebSocketSession 中存储登录用户的 key
      */
-    private static final String LOGIN_USER_KEY = "loginUser";
+    private static final String loginUserKey = "loginUser";
 
     /**
      * WebSocket 握手之前执行的前置处理方法
@@ -36,7 +36,7 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
         try {
             // 检查是否登录 是否有 token
             SecurityUtil.checkToken();
-            attributes.put(LOGIN_USER_KEY, SecurityUtil.getCurrentSecuritySession());
+            attributes.put(loginUserKey, SecurityUtil.getCurrentSecuritySession());
             return true;
         } catch (UnauthorizedException e) {
             Logs.error(EmojiSymbol.WEBSOCKET, e, "WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());

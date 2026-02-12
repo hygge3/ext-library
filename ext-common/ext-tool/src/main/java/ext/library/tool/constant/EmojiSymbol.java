@@ -41,6 +41,7 @@ public final class EmojiSymbol {
     public static final String API_CRYPTO = "🔏";
     // region ext-misc 层
     public static final String HTTP = "🖥️";
+    public static final String MONITOR = "📊";
     // endregion
     public static final String QRCODE = "📱";
 

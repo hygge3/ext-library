@@ -22,7 +22,7 @@ import java.util.Objects;
  */
 public class ExtWebSocketHandler extends AbstractWebSocketHandler {
 
-    private static final String LOGIN_USER_KEY = "loginUser";
+    private static final String loginUserKey = "loginUser";
 
     private final WebSocketConnectionManager connectionManager;
     private final WebSocketHeartbeatManager heartbeatManager;
@@ -41,7 +41,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         // 包装 session 支持并发发送
         session = new ConcurrentWebSocketSessionDecorator(session, properties.getSendTimeLimit(), properties.getBufferSizeLimit());
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (Objects.isNull(loginUser)) {
             session.close(CloseStatus.BAD_DATA);
             Logs.info(EmojiSymbol.WEBSOCKET, "[连接] 无效的 token, sessionId: {}", session.getId());
@@ -58,7 +58,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         String sessionKey = loginUser.getLoginId();
         // 记录活动时间
         heartbeatManager.recordActivity(sessionKey);
@@ -70,7 +70,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (loginUser != null) {
             heartbeatManager.recordActivity(loginUser.getLoginId());
         }
@@ -82,7 +82,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (loginUser != null) {
             // 收到 Pong 表示客户端活跃
             heartbeatManager.recordActivity(loginUser.getLoginId());
@@ -103,7 +103,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(LOGIN_USER_KEY);
+        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (Objects.isNull(loginUser)) {
             Logs.info(EmojiSymbol.WEBSOCKET, "[断开] 无效的 token, sessionId: {}", session.getId());
             return;
