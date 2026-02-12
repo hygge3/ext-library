@@ -15,15 +15,15 @@ public record RandomCaptchaDraw(int codeSize) implements CaptchaDraw {
     /**
      * 默认的验证码数量，由于字体大小定死，后期再扩展自动一数量
      */
-    private static final int CODE_SIZE = 4;
+    private static final int defaultCodeSize = 4;
 
     /**
      * 验证码随机字符数组
      */
-    private static final char[] CHAR_ARRAY = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+    private static final char[] charArray = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     public RandomCaptchaDraw() {
-        this(CODE_SIZE);
+        this(defaultCodeSize);
     }
 
     /**
@@ -36,7 +36,7 @@ public record RandomCaptchaDraw(int codeSize) implements CaptchaDraw {
     private static String generateCode(Random random, int size) {
         char[] buffer = new char[size];
         for (int i = 0; i < size; i++) {
-            buffer[i] = CHAR_ARRAY[random.nextInt(CHAR_ARRAY.length)];
+            buffer[i] = charArray[random.nextInt(charArray.length)];
         }
         return new String(buffer);
     }

@@ -1,11 +1,11 @@
 package ext.library.captcha.service;
 
+import ext.library.captcha.CaptchaProperties;
 import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.core.Captcha;
-import ext.library.captcha.CaptchaProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
-import ext.library.tool.util.ObjectUtil;
+import ext.library.tool.util.StringUtil;
 
 import java.io.OutputStream;
 
@@ -37,7 +37,7 @@ public class DefaultCaptchaService implements CaptchaWebService {
     public boolean validate(String uuid, String userInputCaptcha) {
         Logs.debug(EmojiSymbol.CAPTCHA, "验证验证码 uuid 是 {}，输入验证码是 {}", uuid, userInputCaptcha);
         String code = captchaCache.getAndRemove(properties.getCacheName(), uuid);
-        if (ObjectUtil.isEmpty(code)) {
+        if (StringUtil.isEmpty(code)) {
             return false;
         }
         return captcha.validate(code, userInputCaptcha);

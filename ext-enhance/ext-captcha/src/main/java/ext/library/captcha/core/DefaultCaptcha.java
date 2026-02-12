@@ -1,13 +1,13 @@
 package ext.library.captcha.core;
 
+import ext.library.captcha.CaptchaProperties;
+import ext.library.captcha.CaptchaType;
 import ext.library.captcha.draw.BackgroundDraw;
 import ext.library.captcha.draw.CaptchaDraw;
 import ext.library.captcha.draw.CubicCurveInterferenceDraw;
 import ext.library.captcha.draw.InterferenceDraw;
 import ext.library.captcha.draw.RandomCaptchaDraw;
 import ext.library.captcha.draw.SmallCharBackgroundDraw;
-import ext.library.captcha.CaptchaProperties;
-import ext.library.captcha.CaptchaType;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.constant.Singletons;
 import ext.library.tool.exception.ExtException;
@@ -32,19 +32,19 @@ public class DefaultCaptcha implements Captcha {
     /**
      * 默认图像宽度
      */
-    private static final int DEFAULT_WIDTH = 130;
+    private static final int defaultWidth = 130;
 
     /**
      * 默认图像高度
      */
-    private static final int DEFAULT_HEIGHT = 48;
+    private static final int defaultHeight = 48;
 
     /**
      * 默认图像格式
      */
-    private static final String DEFAULT_IMAGE_FORMAT = "JPEG";
+    private static final String defaultImageFormat = "JPEG";
 
-    private static final String[] FONT_NAMES = new String[]{"marker.ttf", "american.ttf", "papyrus.ttf"};
+    private static final String[] fontNames = new String[]{"marker.ttf", "american.ttf", "papyrus.ttf"};
 
     private final Font[] fonts;
     private final int width;
@@ -65,7 +65,7 @@ public class DefaultCaptcha implements Captcha {
 
     public DefaultCaptcha(CaptchaDraw captchaDraw) {
         this(SmallCharBackgroundDraw.INSTANCE, captchaDraw, CubicCurveInterferenceDraw.INSTANCE, Singletons.SECURE_RANDOM,
-                DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_IMAGE_FORMAT);
+                defaultWidth, defaultHeight, defaultImageFormat);
     }
 
     public DefaultCaptcha(CaptchaProperties properties) {
@@ -100,7 +100,7 @@ public class DefaultCaptcha implements Captcha {
     private static Font[] loadAndRegisterFont() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         List<Font> fontList = new ArrayList<>();
-        for (String fontName : FONT_NAMES) {
+        for (String fontName : fontNames) {
             String path = "fonts/" + fontName;
             // 加载字体
             Font font = loadFont(new ClassPathResource(path));

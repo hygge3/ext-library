@@ -80,6 +80,6 @@ class SM3UtilTest {
     void hashToBytesProducesCorrectLength() {
         byte[] hashBytes = SM3Util.hashToBytes("test".getBytes());
 
-        assertEquals(SM3Util.DIGEST_LENGTH, hashBytes.length);
+        assertEquals(32, hashBytes.length);
     }
 }

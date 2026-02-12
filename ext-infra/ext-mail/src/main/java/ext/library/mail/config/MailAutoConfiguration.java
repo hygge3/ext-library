@@ -23,7 +23,7 @@ public class MailAutoConfiguration {
     @ConditionalOnMissingBean(MailSender.class)
     @ConditionalOnProperty(prefix = "spring.mail", name = "host")
     public MailSender mailSender(JavaMailSender javaMailSender, ApplicationEventPublisher eventPublisher) {
-        Logs.info(EmojiSymbol.MAIL, "载入模块: 邮件");
+        Logs.info(EmojiSymbol.MAIL, "载入模块：邮件");
         return new MailSenderImpl(javaMailSender, eventPublisher);
     }
 

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class TranslatorRegistry {
 
-    private static final Map<String, Translator<?>> TRANSLATORS = new ConcurrentHashMap<>();
+    private static final Map<String, Translator<?>> translators = new ConcurrentHashMap<>();
 
     private TranslatorRegistry() {
         // 防止实例化
@@ -24,7 +24,7 @@ public final class TranslatorRegistry {
      * @param translator 翻译器实例
      */
     public static void register(String type, Translator<?> translator) {
-        TRANSLATORS.put(type, translator);
+        translators.put(type, translator);
     }
 
     /**
@@ -33,17 +33,18 @@ public final class TranslatorRegistry {
      * @param translators 翻译器映射
      */
     public static void registerAll(Map<String, Translator<?>> translators) {
-        TRANSLATORS.putAll(translators);
+        TranslatorRegistry.translators.putAll(translators);
     }
 
     /**
      * 获取翻译器
      *
      * @param type 翻译类型
+     *
      * @return 翻译器实例，不存在则返回 null
      */
     public static Translator<?> get(String type) {
-        return TRANSLATORS.get(type);
+        return translators.get(type);
     }
 
     /**
@@ -52,14 +53,14 @@ public final class TranslatorRegistry {
      * @return 翻译器映射的不可变视图
      */
     public static Map<String, Translator<?>> getTranslators() {
-        return Collections.unmodifiableMap(TRANSLATORS);
+        return Collections.unmodifiableMap(translators);
     }
 
     /**
      * 清空所有翻译器（仅用于测试）
      */
     static void clear() {
-        TRANSLATORS.clear();
+        translators.clear();
     }
 
 }

@@ -42,23 +42,23 @@ import java.security.spec.X509EncodedKeySpec;
  */
 public final class RSAUtil {
 
-    private static final String ALGO = "RSA";
+    private static final String algo = "RSA";
     /**
      * 默认密钥长度（位）
      */
-    private static final int DEFAULT_KEY_SIZE = 4096;
+    private static final int defaultKeySize = 4096;
     /**
      * RSA 最大加密明文大小（基于 4096 位密钥，PKCS1 填充需减去 11 字节）
      */
-    private static final int MAX_ENCRYPT_BLOCK = DEFAULT_KEY_SIZE / 8 - 11;
+    private static final int maxEncryptBlock = defaultKeySize / 8 - 11;
     /**
      * RSA 最大解密密文大小（基于 4096 位密钥）
      */
-    private static final int MAX_DECRYPT_BLOCK = DEFAULT_KEY_SIZE / 8;
+    private static final int maxDecryptBlock = defaultKeySize / 8;
     /**
      * 标准签名算法 RSA2（SHA256withRSA）
      */
-    private static final String SIGN_ALGO = "SHA256withRSA";
+    private static final String signAlgo = "SHA256withRSA";
 
     /**
      * 生成 RSA 密钥对
@@ -68,11 +68,11 @@ public final class RSAUtil {
     public static KeyPair generateKeyPair() {
         KeyPairGenerator generator;
         try {
-            generator = KeyPairGenerator.getInstance(ALGO);
+            generator = KeyPairGenerator.getInstance(algo);
         } catch (NoSuchAlgorithmException e) {
             throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
-        generator.initialize(DEFAULT_KEY_SIZE);
+        generator.initialize(defaultKeySize);
         return generator.generateKeyPair();
     }
 
@@ -86,7 +86,7 @@ public final class RSAUtil {
      */
     private static PublicKey castPublicKey(String publicKey) {
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
+            KeyFactory keyFactory = KeyFactory.getInstance(algo);
             byte[] decodedKey = Base64Util.decodeUrlSafe(publicKey.getBytes());
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
             return keyFactory.generatePublic(keySpec);
@@ -104,7 +104,7 @@ public final class RSAUtil {
      */
     private static PrivateKey castPrivateKey(String privateKey) {
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
+            KeyFactory keyFactory = KeyFactory.getInstance(algo);
             byte[] decodedKey = Base64Util.decodeUrlSafe(privateKey.getBytes());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             return keyFactory.generatePrivate(keySpec);
@@ -124,7 +124,7 @@ public final class RSAUtil {
      */
     public static String encrypt(String publicKey, String plainText) {
         try {
-            Cipher cipher = Cipher.getInstance(ALGO);
+            Cipher cipher = Cipher.getInstance(algo);
             cipher.init(Cipher.ENCRYPT_MODE, castPublicKey(publicKey));
             int inputLen = plainText.getBytes().length;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -133,14 +133,14 @@ public final class RSAUtil {
             int i = 0;
             // 对数据分段加密
             while (inputLen - offset > 0) {
-                if (inputLen - offset > MAX_ENCRYPT_BLOCK) {
-                    cache = cipher.doFinal(plainText.getBytes(), offset, MAX_ENCRYPT_BLOCK);
+                if (inputLen - offset > maxEncryptBlock) {
+                    cache = cipher.doFinal(plainText.getBytes(), offset, maxEncryptBlock);
                 } else {
                     cache = cipher.doFinal(plainText.getBytes(), offset, inputLen - offset);
                 }
                 out.write(cache, 0, cache.length);
                 i++;
-                offset = i * MAX_ENCRYPT_BLOCK;
+                offset = i * maxEncryptBlock;
             }
             byte[] encryptedData = out.toByteArray();
             out.close();
@@ -163,7 +163,7 @@ public final class RSAUtil {
      */
     public static String decrypt(String privateKey, String cipherText) {
         try {
-            Cipher cipher = Cipher.getInstance(ALGO);
+            Cipher cipher = Cipher.getInstance(algo);
             cipher.init(Cipher.DECRYPT_MODE, castPrivateKey(privateKey));
             byte[] dataBytes = Base64Util.decodeUrlSafe(cipherText);
             int inputLen = dataBytes.length;
@@ -173,14 +173,14 @@ public final class RSAUtil {
             int i = 0;
             // 对数据分段解密
             while (inputLen - offset > 0) {
-                if (inputLen - offset > MAX_DECRYPT_BLOCK) {
-                    cache = cipher.doFinal(dataBytes, offset, MAX_DECRYPT_BLOCK);
+                if (inputLen - offset > maxDecryptBlock) {
+                    cache = cipher.doFinal(dataBytes, offset, maxDecryptBlock);
                 } else {
                     cache = cipher.doFinal(dataBytes, offset, inputLen - offset);
                 }
                 out.write(cache, 0, cache.length);
                 i++;
-                offset = i * MAX_DECRYPT_BLOCK;
+                offset = i * maxDecryptBlock;
             }
             out.close();
             // 解密后的内容
@@ -203,9 +203,9 @@ public final class RSAUtil {
         try {
             byte[] keyBytes = castPrivateKey(privateKey).getEncoded();
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
+            KeyFactory keyFactory = KeyFactory.getInstance(algo);
             PrivateKey key = keyFactory.generatePrivate(keySpec);
-            Signature signature = Signature.getInstance(SIGN_ALGO);
+            Signature signature = Signature.getInstance(signAlgo);
             signature.initSign(key);
             signature.update(plainText.getBytes());
             return Base64Util.encodeUrlSafeToStr(signature.sign());
@@ -227,9 +227,9 @@ public final class RSAUtil {
         try {
             byte[] keyBytes = castPublicKey(publicKey).getEncoded();
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(ALGO);
+            KeyFactory keyFactory = KeyFactory.getInstance(algo);
             PublicKey key = keyFactory.generatePublic(keySpec);
-            Signature signer = Signature.getInstance(SIGN_ALGO);
+            Signature signer = Signature.getInstance(signAlgo);
             signer.initVerify(key);
             signer.update(plainText.getBytes());
             return signer.verify(Base64Util.decodeUrlSafe(signature.getBytes()));

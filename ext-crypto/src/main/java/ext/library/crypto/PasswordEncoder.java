@@ -59,7 +59,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
  */
 public final class PasswordEncoder {
 
-    private static final org.springframework.security.crypto.password.PasswordEncoder ENCODER =
+    private static final org.springframework.security.crypto.password.PasswordEncoder encoder =
             PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     private PasswordEncoder() {
@@ -72,10 +72,11 @@ public final class PasswordEncoder {
      * <p>默认使用 bcrypt 算法，输出格式为 {bcrypt}encodedPassword</p>
      *
      * @param rawPassword 明文密码
+     *
      * @return 哈希后的密码字符串（包含算法标识前缀）
      */
     public static String encode(CharSequence rawPassword) {
-        return ENCODER.encode(rawPassword);
+        return encoder.encode(rawPassword);
     }
 
     /**
@@ -85,10 +86,11 @@ public final class PasswordEncoder {
      *
      * @param rawPassword     明文密码
      * @param encodedPassword 哈希后的密码
+     *
      * @return 如果密码匹配返回 true，否则返回 false
      */
     public static boolean matches(CharSequence rawPassword, String encodedPassword) {
-        return ENCODER.matches(rawPassword, encodedPassword);
+        return encoder.matches(rawPassword, encodedPassword);
     }
 
     /**
@@ -97,10 +99,11 @@ public final class PasswordEncoder {
      * <p>用于检测使用旧算法或弱参数编码的密码，建议在用户登录成功后调用</p>
      *
      * @param encodedPassword 哈希后的密码
+     *
      * @return 如果密码需要使用更强算法重新编码返回 true
      */
     public static boolean upgradeEncoding(String encodedPassword) {
-        return ENCODER.upgradeEncoding(encodedPassword);
+        return encoder.upgradeEncoding(encodedPassword);
     }
 
     /**
@@ -111,6 +114,6 @@ public final class PasswordEncoder {
      * @return DelegatingPasswordEncoder 实例
      */
     public static org.springframework.security.crypto.password.PasswordEncoder getEncoder() {
-        return ENCODER;
+        return encoder;
     }
 }

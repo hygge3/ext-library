@@ -51,7 +51,7 @@ public final class SM3Util {
     /**
      * SM3 摘要长度（字节）
      */
-    public static final int DIGEST_LENGTH = 32;
+    private static final int digestLength = 32;
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -65,6 +65,7 @@ public final class SM3Util {
      * 计算字符串的 SM3 哈希值
      *
      * @param input 输入字符串
+     *
      * @return Hex 编码的哈希值（64 个十六进制字符）
      */
     public static String hash(String input) {
@@ -76,12 +77,13 @@ public final class SM3Util {
      * 计算字节数组的 SM3 哈希值
      *
      * @param input 输入字节数组
+     *
      * @return 哈希值字节数组（32 字节）
      */
     public static byte[] hashToBytes(byte[] input) {
         SM3Digest digest = new SM3Digest();
         digest.update(input, 0, input.length);
-        byte[] result = new byte[DIGEST_LENGTH];
+        byte[] result = new byte[digestLength];
         digest.doFinal(result, 0);
         return result;
     }
@@ -91,6 +93,7 @@ public final class SM3Util {
      *
      * @param key     密钥
      * @param message 消息
+     *
      * @return Hex 编码的 HMAC 值
      */
     public static String hmac(String key, String message) {
@@ -106,6 +109,7 @@ public final class SM3Util {
      *
      * @param key     密钥字节数组
      * @param message 消息字节数组
+     *
      * @return HMAC 值字节数组（32 字节）
      */
     public static byte[] hmacToBytes(byte[] key, byte[] message) {
@@ -122,6 +126,7 @@ public final class SM3Util {
      *
      * @param input        原始输入
      * @param expectedHash 期望的哈希值（Hex 编码）
+     *
      * @return 如果哈希值匹配返回 true
      */
     public static boolean verify(String input, String expectedHash) {
@@ -135,6 +140,7 @@ public final class SM3Util {
      * @param key          密钥
      * @param message      消息
      * @param expectedHmac 期望的 HMAC 值（Hex 编码）
+     *
      * @return 如果 HMAC 值匹配返回 true
      */
     public static boolean verifyHmac(String key, String message, String expectedHmac) {

@@ -65,13 +65,13 @@ import java.security.cert.X509Certificate;
 public final class SM2Util {
 
     // SM2 曲线参数
-    private static final SM2P256V1Curve CURVE = new SM2P256V1Curve();
-    private static final ECPoint EC_POINT = CURVE.createPoint(
+    private static final SM2P256V1Curve curve = new SM2P256V1Curve();
+    private static final ECPoint ecPoint = curve.createPoint(
             new BigInteger("32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16),
             new BigInteger("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16)
     );
-    private static final ECDomainParameters DOMAIN_PARAMS = new ECDomainParameters(
-            CURVE, EC_POINT, CURVE.getOrder(), CURVE.getCofactor()
+    private static final ECDomainParameters domainParams = new ECDomainParameters(
+            curve, ecPoint, curve.getOrder(), curve.getCofactor()
     );
 
     static {
@@ -83,15 +83,6 @@ public final class SM2Util {
     }
 
     /**
-     * SM2 密钥对
-     *
-     * @param privateKey 私钥（Base64 URL 安全编码）
-     * @param publicKey  公钥（Base64 URL 安全编码）
-     */
-    public record SM2KeyPair(String privateKey, String publicKey) {
-    }
-
-    /**
      * 生成 SM2 密钥对
      *
      * @return SM2 密钥对
@@ -99,7 +90,7 @@ public final class SM2Util {
     public static SM2KeyPair generateKeyPair() {
         // 初始化密钥对生成器
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
-        keyPairGenerator.init(new ECKeyGenerationParameters(DOMAIN_PARAMS, ext.library.tool.constant.Singletons.SECURE_RANDOM));
+        keyPairGenerator.init(new ECKeyGenerationParameters(domainParams, ext.library.tool.constant.Singletons.SECURE_RANDOM));
 
         // 生成密钥对
         org.bouncycastle.crypto.AsymmetricCipherKeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -124,13 +115,14 @@ public final class SM2Util {
      *
      * @param publicKey 公钥（Base64 URL 安全编码）
      * @param plainText 明文
+     *
      * @return 密文（Base64 URL 安全编码）
      */
     public static String encrypt(String publicKey, String plainText) {
         // 解析公钥
         byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
-        ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
-        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
+        ECPoint pubKeyPoint = curve.decodePoint(pubKeyBytes);
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, domainParams);
 
         // 初始化加密引擎
         SM2Engine sm2Engine = new SM2Engine();
@@ -151,13 +143,14 @@ public final class SM2Util {
      *
      * @param privateKey 私钥（Base64 URL 安全编码）
      * @param cipherText 密文（Base64 URL 安全编码）
+     *
      * @return 明文
      */
     public static String decrypt(String privateKey, String cipherText) {
         // 解析私钥
         byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
-        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
+        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, domainParams);
 
         // 初始化解密引擎
         SM2Engine sm2Engine = new SM2Engine();
@@ -181,13 +174,14 @@ public final class SM2Util {
      *
      * @param privateKey 私钥（Base64 URL 安全编码）
      * @param plainText  待签名数据
+     *
      * @return 签名值（Base64 URL 安全编码）
      */
     public static String sign(String privateKey, String plainText) {
         // 解析私钥
         byte[] priKeyBytes = Base64Util.decodeUrlSafe(privateKey);
         BigInteger priKeyBig = new BigInteger(1, priKeyBytes);
-        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, DOMAIN_PARAMS);
+        ECPrivateKeyParameters priKeyParams = new ECPrivateKeyParameters(priKeyBig, domainParams);
 
         // 初始化签名器
         SM2Signer signer = new SM2Signer();
@@ -211,13 +205,14 @@ public final class SM2Util {
      * @param publicKey 公钥（Base64 URL 安全编码）
      * @param plainText 待验证数据
      * @param signature 签名值（Base64 URL 安全编码）
+     *
      * @return 验签是否通过
      */
     public static boolean verify(String publicKey, String plainText, String signature) {
         // 解析公钥
         byte[] pubKeyBytes = Base64Util.decodeUrlSafe(publicKey);
-        ECPoint pubKeyPoint = CURVE.decodePoint(pubKeyBytes);
-        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, DOMAIN_PARAMS);
+        ECPoint pubKeyPoint = curve.decodePoint(pubKeyBytes);
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(pubKeyPoint, domainParams);
 
         // 初始化验签器
         SM2Signer signer = new SM2Signer();
@@ -236,6 +231,7 @@ public final class SM2Util {
      * @param certText  证书（Base64 URL 安全编码）
      * @param plainText 待验证数据
      * @param signature 签名值（Base64 URL 安全编码）
+     *
      * @return 验签是否通过
      */
     public static boolean verifyWithCertificate(String certText, String plainText, String signature) {
@@ -264,7 +260,7 @@ public final class SM2Util {
         }
 
         // 转换为 BC 的参数格式
-        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(ecPublicKey.getQ(), DOMAIN_PARAMS);
+        ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(ecPublicKey.getQ(), domainParams);
 
         // 初始化验签器
         SM2Signer signer = new SM2Signer();
@@ -282,6 +278,7 @@ public final class SM2Util {
      * 检查是否为 SM2 曲线
      *
      * @param parameterSpec EC 参数规范
+     *
      * @return 是否为 SM2 曲线
      */
     private static boolean isSM2Curve(ECParameterSpec parameterSpec) {
@@ -300,5 +297,14 @@ public final class SM2Util {
         BigInteger sm2Order = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16);
 
         return curveA.equals(sm2A) && curveB.equals(sm2B) && order.equals(sm2Order);
+    }
+
+    /**
+     * SM2 密钥对
+     *
+     * @param privateKey 私钥（Base64 URL 安全编码）
+     * @param publicKey  公钥（Base64 URL 安全编码）
+     */
+    public record SM2KeyPair(String privateKey, String publicKey) {
     }
 }

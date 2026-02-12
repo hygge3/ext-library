@@ -35,7 +35,7 @@ public class ApiCryptoAutoConfiguration {
      */
     @Bean
     public RequestDecryptHandler requestDecryptHandler(ApiCryptoProperties properties) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块: 请求解密");
+        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：请求解密");
         return new RequestDecryptHandler(properties);
     }
 
@@ -48,7 +48,7 @@ public class ApiCryptoAutoConfiguration {
      */
     @Bean
     public ResponseEncryptHandler responseEncryptHandler(ApiCryptoProperties properties) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块: 响应加密");
+        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：响应加密");
         return new ResponseEncryptHandler(properties);
     }
 }

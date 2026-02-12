@@ -34,7 +34,7 @@ public class RedisAutoConfiguration {
         StringRedisTemplate template = new StringRedisTemplate();
         template.setConnectionFactory(redisConnectionFactory);
         template.setKeySerializer(new PrefixStringRedisSerializer(prefixConverter));
-        Logs.info(EmojiSymbol.REDIS, "载入模块: Redis");
+        Logs.info(EmojiSymbol.REDIS, "载入模块：Redis");
         return template;
     }
 

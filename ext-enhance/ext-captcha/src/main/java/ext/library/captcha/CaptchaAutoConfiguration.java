@@ -28,7 +28,7 @@ public class CaptchaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CaptchaWebService captchaService(CaptchaProperties captchaProperties, CaptchaCache captchaCache, Captcha captcha) {
-        Logs.info(EmojiSymbol.CAPTCHA, "载入模块: 验证码");
+        Logs.info(EmojiSymbol.CAPTCHA, "载入模块：验证码");
         return new DefaultCaptchaService(captchaProperties, captchaCache, captcha);
     }
 

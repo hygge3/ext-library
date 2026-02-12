@@ -1,6 +1,5 @@
 package ext.library.captcha.service;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +18,7 @@ public interface CaptchaWebService extends CaptchaService {
      * 生成验证码 ByteArrayResource
      *
      * @param uuid 自定义缓存的 uuid
+     *
      * @return ByteArrayResource
      */
     default ByteArrayResource generateByteResource(String uuid) {
@@ -29,9 +29,10 @@ public interface CaptchaWebService extends CaptchaService {
      * 生成验证码 ResponseEntity
      *
      * @param uuid captcha uuid
+     *
      * @return ResponseEntity
      */
-    default ResponseEntity<@NonNull Resource> generateResponseEntity(String uuid) {
+    default ResponseEntity<Resource> generateResponseEntity(String uuid) {
         return new ResponseEntity<>(this.generateByteResource(uuid), getCaptchaHeaders(), HttpStatus.OK);
     }
 

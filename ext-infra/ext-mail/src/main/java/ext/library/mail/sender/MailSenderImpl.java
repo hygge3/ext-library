@@ -6,8 +6,6 @@ import ext.library.mail.model.MailSendResult;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailSendException;
@@ -22,8 +20,6 @@ import jakarta.mail.MessagingException;
  * 邮件发送器实现
  */
 public class MailSenderImpl implements MailSender {
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final JavaMailSender mailSender;
     private final ApplicationEventPublisher eventPublisher;
@@ -48,11 +44,10 @@ public class MailSenderImpl implements MailSender {
             // 2. 发送邮件
             sendMimeMessage(mailDetails);
             result = MailSendResult.success(mailDetails);
-            Logs.info(EmojiSymbol.MAIL, "邮件发送成功: subject={}, to={}", mailDetails.getSubject(), mailDetails.getTo());
+            Logs.info(EmojiSymbol.MAIL, "邮件发送成功：subject={}, to={}", mailDetails.getSubject(), mailDetails.getTo());
         } catch (MailSendException | MessagingException e) {
             result = MailSendResult.failure(mailDetails, e.getMessage());
-            Logs.error(EmojiSymbol.MAIL, e, "邮件发送失败: {}", e.getMessage());
-            throw new ExtException(EmojiSymbol.MAIL, "邮件发送失败");
+            throw new ExtException(EmojiSymbol.MAIL, e, "邮件发送失败");
         } finally {
             // 发布邮件发送事件
             if (result != null) {

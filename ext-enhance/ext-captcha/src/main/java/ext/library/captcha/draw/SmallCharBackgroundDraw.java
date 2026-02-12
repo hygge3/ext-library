@@ -18,7 +18,7 @@ public enum SmallCharBackgroundDraw implements BackgroundDraw {
     /**
      * 验证码随机字符数组
      */
-    private static final char[] CHAR_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+    private static final char[] charArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     @Override
     public void draw(Graphics2D g, int width, int height, Font[] fonts, Random random) {
@@ -34,7 +34,7 @@ public enum SmallCharBackgroundDraw implements BackgroundDraw {
         int charCount = 10;
         for (int i = 0; i < charCount; i++) {
             g.setColor(CaptchaUtil.randColor(random, 120, 200));
-            char ch = CHAR_ARRAY[random.nextInt(CHAR_ARRAY.length)];
+            char ch = charArray[random.nextInt(charArray.length)];
             int offset = fontMetrics.charWidth(ch);
             int x = CaptchaUtil.randNum(random, offset, width - offset);
             int y = CaptchaUtil.randNum(random, offset, height - offset);

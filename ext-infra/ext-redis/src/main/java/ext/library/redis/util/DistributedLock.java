@@ -6,8 +6,6 @@ import ext.library.tool.runtime.Logs;
 import ext.library.tool.runtime.Threads;
 import ext.library.tool.util.NetUtil;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
@@ -23,20 +21,19 @@ import java.util.concurrent.locks.Lock;
  */
 public final class DistributedLock implements Lock, AutoCloseable {
     /** 默认的锁超时时间 */
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30L);
+    private static final Duration defaultTimeout = Duration.ofSeconds(30L);
     /** 锁 key 前缀 */
-    private static final String LOCK_PREFIX = "distributed_lock";
+    private static final String lockPrefix = "distributed_lock";
     /** 默认的获取锁超时时间 */
-    private static final Duration DEFAULT_TRY_LOCK_TIMEOUT = Duration.ofSeconds(10L);
+    private static final Duration defaultTryLockTimeout = Duration.ofSeconds(10L);
     /** 等待锁时，自旋尝试的周期，默认 10 毫秒 */
-    private static final Duration DEFAULT_LOOP_INTERVAL = Duration.ofMillis(10L);
+    private static final Duration defaultLoopInterval = Duration.ofMillis(10L);
     /** 本机 host */
-    private static final String CURRENT_HOST = NetUtil.getHostIp();
+    private static final String currentHost = NetUtil.getHostIp();
     /** 序列值，用于确保锁 value 的唯一性 */
-    private static final AtomicLong SERIAL_NUM = new AtomicLong(0);
+    private static final AtomicLong serialNum = new AtomicLong(0);
     /** 最大序列值，预留一定空间防止溢出 */
-    private static final long MAX_SERIAL = Long.MAX_VALUE - 1_000_000;
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final long maxSerial = Long.MAX_VALUE - 1_000_000;
     /** 锁 Key */
     private final String lockKey;
     /** 锁超时时间 (单位毫秒) */
@@ -54,21 +51,21 @@ public final class DistributedLock implements Lock, AutoCloseable {
 
 
     public DistributedLock(String lockName) {
-        this(lockName, DEFAULT_TIMEOUT, DEFAULT_LOOP_INTERVAL);
+        this(lockName, defaultTimeout, defaultLoopInterval);
     }
 
     public DistributedLock(String lockName, Duration timeout) {
-        this(lockName, timeout, DEFAULT_LOOP_INTERVAL);
+        this(lockName, timeout, defaultLoopInterval);
     }
 
     public DistributedLock(String lockName, Duration timeout, Duration loopInterval) {
         if (lockName == null) {
             throw new ExtException(EmojiSymbol.LOCK, "lockName 必须分配");
         }
-        this.lockKey = LOCK_PREFIX + lockName;
+        this.lockKey = lockPrefix + lockName;
         this.timeout = timeout;
         this.loopInterval = loopInterval;
-        this.hostThreadId = CURRENT_HOST + ":" + Thread.currentThread().threadId();
+        this.hostThreadId = currentHost + ":" + Thread.currentThread().threadId();
         this.lockValue = this.hostThreadId + ":" + getNextSerial();
     }
 
@@ -76,10 +73,10 @@ public final class DistributedLock implements Lock, AutoCloseable {
      * @return 下一个序列值
      */
     private static synchronized long getNextSerial() {
-        long serial = SERIAL_NUM.incrementAndGet();
-        if (serial > MAX_SERIAL) {
-            serial = serial - MAX_SERIAL;
-            SERIAL_NUM.set(serial);
+        long serial = serialNum.incrementAndGet();
+        if (serial > maxSerial) {
+            serial = serial - maxSerial;
+            serialNum.set(serial);
         }
         return serial;
     }
@@ -97,9 +94,9 @@ public final class DistributedLock implements Lock, AutoCloseable {
                     local curValue = redis.call('GET', KEYS[1])
                     -- 修改点 1: 使用精确匹配，而不是前缀查找
                     if curValue == val then
-                        -- 获取当前TTL
+                        -- 获取当前 TTL
                         local curTtl = redis.call('TTL', KEYS[1])
-                        -- 修改点 2: 严谨处理TTL返回值
+                        -- 修改点 2: 严谨处理 TTL 返回值
                         if curTtl == -1 then
                             -- 如果键是永久有效的，直接设置新的 TTL
                             redis.call('EXPIRE', KEYS[1], ttl)
@@ -128,7 +125,7 @@ public final class DistributedLock implements Lock, AutoCloseable {
     @Override
     public void lock() {
         try {
-            if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT)) {
+            if (!tryLock(defaultTryLockTimeout)) {
                 throw new ExtException(EmojiSymbol.LOCK, "尝试加锁超时，key:{}", lockKey);
             }
         } catch (InterruptedException e) {
@@ -143,7 +140,7 @@ public final class DistributedLock implements Lock, AutoCloseable {
      */
     @Override
     public void lockInterruptibly() throws InterruptedException {
-        if (!tryLock(DEFAULT_TRY_LOCK_TIMEOUT, true)) {
+        if (!tryLock(defaultTryLockTimeout, true)) {
             throw new ExtException(EmojiSymbol.LOCK, "尝试加锁超时，key:{}", this.lockKey);
         }
     }
@@ -346,7 +343,7 @@ public final class DistributedLock implements Lock, AutoCloseable {
     /**
      * 实现 AutoCloseable，支持 try-with-resources 语法
      * <p>
-     * 示例:
+     * 示例：
      * <pre>{@code
      * try (DistributedLock lock = new DistributedLock("myLock")) {
      *     lock.lock();

@@ -77,7 +77,7 @@ public class SensitiveSerializer extends ValueSerializer<String> {
                 return customRuleClass.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException |
                      InvocationTargetException | NoSuchMethodException e) {
-                throw new ExtException(EmojiSymbol.DESENSITIZE, "实例化自定义脱敏规则失败: " + customRuleClass.getName(), e);
+                throw new ExtException(EmojiSymbol.DESENSITIZE, e, "实例化自定义脱敏规则失败：{}" + customRuleClass.getName());
             }
         }
 

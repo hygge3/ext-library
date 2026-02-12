@@ -37,7 +37,7 @@ public class TranslationAutoConfiguration {
             }
         }
         TranslatorRegistry.registerAll(translatorMap);
-        Logs.info(EmojiSymbol.TRANS, "载入模块: 翻译，已注册 {} 个翻译器", translatorMap.size());
+        Logs.info(EmojiSymbol.TRANS, "载入模块：翻译，已注册 {} 个翻译器", translatorMap.size());
     }
 
 }

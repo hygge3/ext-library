@@ -44,11 +44,11 @@ import java.util.Objects;
  */
 public final class SM4Util {
 
-    private static final String ALGORITHM = "SM4";
+    private static final String algorithm = "SM4";
     /** 电子密码本模式 */
-    private static final String SM4_ECB = "SM4/ECB/PKCS7Padding";
+    private static final String sm4Ecb = "SM4/ECB/PKCS7Padding";
     /** 密码分组链接模式 */
-    private static final String SM4_CBC = "SM4/CBC/PKCS7Padding";
+    private static final String sm4Cbc = "SM4/CBC/PKCS7Padding";
 
     static {
         if (Objects.isNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME))) {
@@ -64,12 +64,14 @@ public final class SM4Util {
      * 生成 SM4 密钥
      *
      * @param keySize 密钥大小（位），支持 128，为 null 时默认使用 128 位
+     *
      * @return Base64 URL 安全编码的密钥字符串
+     *
      * @throws ToolException 当密钥生成失败时抛出
      */
     public static String generateKey(Integer keySize) {
         try {
-            KeyGenerator kg = KeyGenerator.getInstance(ALGORITHM, BouncyCastleProvider.PROVIDER_NAME);
+            KeyGenerator kg = KeyGenerator.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
             kg.init(Objects.requireNonNullElse(keySize, 128), new SecureRandom());
             return Base64Util.encodeUrlSafeToStr(kg.generateKey().getEncoded());
         } catch (Exception e) {
@@ -87,8 +89,8 @@ public final class SM4Util {
      */
     public static String encryptByECB(String secretKey, String plainText) {
         try {
-            Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(sm4Ecb, BouncyCastleProvider.PROVIDER_NAME);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), algorithm);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
@@ -106,8 +108,8 @@ public final class SM4Util {
      */
     public static String decryptByECB(String secretKey, String cipherText) {
         try {
-            Cipher cipher = Cipher.getInstance(SM4_ECB, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(sm4Ecb, BouncyCastleProvider.PROVIDER_NAME);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), algorithm);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -125,8 +127,8 @@ public final class SM4Util {
      */
     public static String encryptByCBC(String secretKey, String iv, String plainText) {
         try {
-            Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(sm4Cbc, BouncyCastleProvider.PROVIDER_NAME);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), algorithm);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
             return Base64Util.encodeUrlSafeToStr(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
@@ -144,8 +146,8 @@ public final class SM4Util {
      */
     public static String decryptByCBC(String secretKey, String iv, String cipherText) {
         try {
-            Cipher cipher = Cipher.getInstance(SM4_CBC, BouncyCastleProvider.PROVIDER_NAME);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), ALGORITHM);
+            Cipher cipher = Cipher.getInstance(sm4Cbc, BouncyCastleProvider.PROVIDER_NAME);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64Util.decodeUrlSafe(secretKey), algorithm);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(Base64Util.decodeUrlSafe(iv)));
             return new String(cipher.doFinal(Base64Util.decodeUrlSafe(cipherText)), StandardCharsets.UTF_8);
         } catch (Exception e) {
