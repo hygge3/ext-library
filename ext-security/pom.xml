@@ -12,6 +12,10 @@
         </dependency>
         <dependency>
             <groupId>ext.library</groupId>
+            <artifactId>ext-tool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ext.library</groupId>
             <artifactId>ext-core</artifactId>
         </dependency>
         <dependency>

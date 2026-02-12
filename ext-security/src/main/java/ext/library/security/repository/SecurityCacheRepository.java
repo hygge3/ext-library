@@ -27,12 +27,12 @@ public class SecurityCacheRepository implements SecurityRepository {
     /**
      * Session 缓存名称
      */
-    private static final String SESSION_CACHE_NAME = "security:session";
+    private static final String sessionCacheName = "security:session";
 
     /**
      * Token 缓存名称
      */
-    private static final String TOKEN_CACHE_NAME = "security:token";
+    private static final String tokenCacheName = "security:token";
 
     /**
      * Token 索引（用于 queryTokenList）
@@ -49,7 +49,7 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     @Override
     public SecuritySession getSecuritySessionByLoginId(String loginId) {
-        SecuritySession session = cacheStrategy.get(SESSION_CACHE_NAME, loginId, SecuritySession.class);
+        SecuritySession session = cacheStrategy.get(sessionCacheName, loginId, SecuritySession.class);
         if (session == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         }
 
         Duration expireTime = calculateExpireDuration(session.getTimeout());
-        cacheStrategy.put(SESSION_CACHE_NAME, session.getLoginId(), session, expireTime);
+        cacheStrategy.put(sessionCacheName, session.getLoginId(), session, expireTime);
         return true;
     }
 
@@ -94,7 +94,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         session.getTokenInfoList().forEach(item -> removeTokenByTokenValue(item.getToken()));
 
         // 移除 Session
-        cacheStrategy.evict(SESSION_CACHE_NAME, loginId);
+        cacheStrategy.evict(sessionCacheName, loginId);
         return true;
     }
 
@@ -102,7 +102,7 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     @Override
     public SecurityToken getSecurityTokenByTokenValue(String tokenValue) {
-        return cacheStrategy.get(TOKEN_CACHE_NAME, tokenValue, SecurityToken.class);
+        return cacheStrategy.get(tokenCacheName, tokenValue, SecurityToken.class);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         }
 
         Duration expireTime = calculateExpireDuration(token.getTimeout());
-        cacheStrategy.put(TOKEN_CACHE_NAME, token.getToken(), token, expireTime);
+        cacheStrategy.put(tokenCacheName, token.getToken(), token, expireTime);
 
         // 更新 Token 索引
         tokenIndex.add(token.getToken());
@@ -152,7 +152,7 @@ public class SecurityCacheRepository implements SecurityRepository {
             return false;
         }
 
-        cacheStrategy.evict(TOKEN_CACHE_NAME, tokenValue);
+        cacheStrategy.evict(tokenCacheName, tokenValue);
         tokenIndex.remove(tokenValue);
         return true;
     }
@@ -203,6 +203,7 @@ public class SecurityCacheRepository implements SecurityRepository {
      * 检查 Session 是否已过期
      *
      * @param session 会话信息
+     *
      * @return true 已过期，false 未过期
      */
     private boolean isSessionExpired(SecuritySession session) {
@@ -216,6 +217,7 @@ public class SecurityCacheRepository implements SecurityRepository {
      * 计算过期时长
      *
      * @param timeoutSeconds 超时秒数
+     *
      * @return 过期时长
      */
     private Duration calculateExpireDuration(Long timeoutSeconds) {

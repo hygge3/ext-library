@@ -32,9 +32,8 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(SecurityService.class)
-    public SecurityService securityService() {
-        return new SecurityService() {
-        };
+    public SecurityService securityService(SecurityRepository repository, SecurityProperties properties) {
+        return new SecurityService(repository, properties);
     }
 
     /**
@@ -44,6 +43,7 @@ public class SecurityAutoConfiguration {
      * 支持 Caffeine、Redis、PostgreSQL、L2 等多种后端。
      *
      * @param cacheStrategy 缓存策略
+     *
      * @return {@code SecurityRepository }
      */
     @Bean
