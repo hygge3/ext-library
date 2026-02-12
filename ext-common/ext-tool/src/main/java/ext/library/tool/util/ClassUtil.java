@@ -3,7 +3,6 @@ package ext.library.tool.util;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.Assert;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -33,24 +32,24 @@ import java.util.Set;
 public final class ClassUtil {
 
     /** 包装类型 → 基本类型映射 */
-    private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = new IdentityHashMap<>(9);
+    private static final Map<Class<?>, Class<?>> wrapperToPrimitive = new IdentityHashMap<>(9);
 
     /** 基本类型 → 包装类型映射 */
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new IdentityHashMap<>(9);
+    private static final Map<Class<?>, Class<?>> primitiveToWrapper = new IdentityHashMap<>(9);
 
     static {
-        WRAPPER_TO_PRIMITIVE.put(Boolean.class, boolean.class);
-        WRAPPER_TO_PRIMITIVE.put(Byte.class, byte.class);
-        WRAPPER_TO_PRIMITIVE.put(Character.class, char.class);
-        WRAPPER_TO_PRIMITIVE.put(Double.class, double.class);
-        WRAPPER_TO_PRIMITIVE.put(Float.class, float.class);
-        WRAPPER_TO_PRIMITIVE.put(Integer.class, int.class);
-        WRAPPER_TO_PRIMITIVE.put(Long.class, long.class);
-        WRAPPER_TO_PRIMITIVE.put(Short.class, short.class);
-        WRAPPER_TO_PRIMITIVE.put(Void.class, void.class);
+        wrapperToPrimitive.put(Boolean.class, boolean.class);
+        wrapperToPrimitive.put(Byte.class, byte.class);
+        wrapperToPrimitive.put(Character.class, char.class);
+        wrapperToPrimitive.put(Double.class, double.class);
+        wrapperToPrimitive.put(Float.class, float.class);
+        wrapperToPrimitive.put(Integer.class, int.class);
+        wrapperToPrimitive.put(Long.class, long.class);
+        wrapperToPrimitive.put(Short.class, short.class);
+        wrapperToPrimitive.put(Void.class, void.class);
 
-        for (Map.Entry<Class<?>, Class<?>> entry : WRAPPER_TO_PRIMITIVE.entrySet()) {
-            PRIMITIVE_TO_WRAPPER.put(entry.getValue(), entry.getKey());
+        for (Map.Entry<Class<?>, Class<?>> entry : wrapperToPrimitive.entrySet()) {
+            primitiveToWrapper.put(entry.getValue(), entry.getKey());
         }
     }
 
@@ -70,16 +69,14 @@ public final class ClassUtil {
      * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Class<?> superType, Class<?> subType) {
-        Assert.notNull(superType, "父类型不得为 null");
-        Assert.notNull(subType, "子类型不得为 null");
         if (superType.isAssignableFrom(subType)) {
             return true;
         }
         if (superType.isPrimitive()) {
-            Class<?> resolvedPrimitive = WRAPPER_TO_PRIMITIVE.get(subType);
+            Class<?> resolvedPrimitive = wrapperToPrimitive.get(subType);
             return superType == resolvedPrimitive;
         } else {
-            Class<?> resolvedWrapper = PRIMITIVE_TO_WRAPPER.get(subType);
+            Class<?> resolvedWrapper = primitiveToWrapper.get(subType);
             return resolvedWrapper != null && superType.isAssignableFrom(resolvedWrapper);
         }
     }
@@ -93,9 +90,6 @@ public final class ClassUtil {
      * @return 如果子类型可分配给父类型返回 true
      */
     public static boolean isAssignable(Type superType, Type subType) {
-        Assert.notNull(superType, "父类型不得为 null");
-        Assert.notNull(subType, "子类型不得为 null");
-
         // 所有类型都可以分配给自身和 Object
         if (superType.equals(subType) || Object.class == superType) {
             return true;
@@ -246,7 +240,7 @@ public final class ClassUtil {
      *
      * @return 注解实例，未找到返回 null
      */
-    public static @Nullable <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
+    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
         A annotation = method.getAnnotation(annotationType);
         if (annotation != null) {
             return annotation;
@@ -356,6 +350,7 @@ public final class ClassUtil {
         Object[] initArgs = new Object[paramTypes.length];
 
         for (int i = 0; i < paramTypes.length; i++) {
+            //noinspection DataFlowIssue
             initArgs[i] = getDefaultValue(paramTypes[i]);
         }
 

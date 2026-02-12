@@ -115,14 +115,21 @@ public final class MapUtil {
     /**
      * 判断 Map 数组是否为空
      * <p>
-     * 弱判断：只检查数组本身和第一个元素
+     * 数组为 null、长度为 0 或所有元素均为空时返回 true
      *
      * @param paramMaps Map 数组
-     * @return 数组为 null、长度为 0 或第一个元素为空时返回 true
+     * @return 数组为空或所有元素均为空时返回 true
      */
     public static boolean isArrayEmpty(Map<?, ?> @Nullable [] paramMaps) {
-        return paramMaps == null || paramMaps.length == 0
-                || paramMaps[0] == null || paramMaps[0].isEmpty();
+        if (paramMaps == null || paramMaps.length == 0) {
+            return true;
+        }
+        for (Map<?, ?> map : paramMaps) {
+            if (map != null && !map.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -189,7 +196,14 @@ public final class MapUtil {
      * @param paramMap 待操作的 Map
      */
     public static <K> void trimStringValues(Map<K, String> paramMap) {
-        paramMap.replaceAll((key, value) -> value != null ? value.trim() : null);
+        paramMap.forEach((key, value) -> {
+            if (value != null) {
+                String trimmed = value.trim();
+                if (trimmed != value) {
+                    paramMap.put(key, trimmed);
+                }
+            }
+        });
     }
 
     /**
