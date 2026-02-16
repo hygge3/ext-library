@@ -93,7 +93,6 @@ public class GlobalExceptionHandler {
      * 主动业务异常
      */
     @ExceptionHandler(BizException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
         Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
         return R.failed(e.getCode(), e.getMessage());
