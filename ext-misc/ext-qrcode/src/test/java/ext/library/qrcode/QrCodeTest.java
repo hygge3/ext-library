@@ -36,7 +36,7 @@ class QrCodeTest {
         @Test
         @DisplayName("form() 已废弃方法仍可用")
         void deprecatedFormStillWorks() {
-            QrCode qrCode = QrCode.form("test content");
+            QrCode qrCode = QrCode.from("test content");
             assertNotNull(qrCode);
         }
 
