@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -30,12 +30,22 @@ import javax.sql.DataSource;
  */
 @AutoConfiguration
 @EnableScheduling
-@EnableConfigurationProperties(PostgresProperties.class)
 @ConditionalOnClass(DataSource.class)
 public class PostgresAutoConfiguration {
 
-    public PostgresAutoConfiguration() {
-        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 缓存/队列/发布订阅/限流/会话");
+    /**
+     * 显式注册 postgresProperties bean，确保 SpEL 表达式 #{@postgresProperties} 可正确引用。
+     * <p>
+     * Spring Boot 4.x 中 @EnableConfigurationProperties 注册的 bean 名称格式为
+     * "{prefix}-{fully-qualified-class-name}"，不再是类名首字母小写形式，
+     * 导致 @Scheduled SpEL 表达式无法通过 @postgresProperties 名称找到 bean。
+     * 改用 @Bean 方法显式命名，确保 bean 名称固定为 "postgresProperties"。
+     */
+    @Bean("postgresProperties")
+    @ConditionalOnMissingBean(PostgresProperties.class)
+    @ConfigurationProperties(prefix = PostgresProperties.PREFIX)
+    public PostgresProperties postgresProperties() {
+        return new PostgresProperties();
     }
 
     @Bean
@@ -48,21 +58,21 @@ public class PostgresAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PostgresCacheManager postgresCacheManager(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresCacheManager");
+        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 缓存");
         return new PostgresCacheManager(postgresJdbcClient, properties);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PostgresQueue postgresQueue(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresQueue");
+        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 队列");
         return new PostgresQueue(postgresJdbcClient, properties);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PostgresRateLimiter postgresRateLimiter(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresRateLimiter");
+        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 限流");
         return new PostgresRateLimiter(postgresJdbcClient, properties);
     }
 
@@ -101,7 +111,7 @@ public class PostgresAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         PostgresPubSub postgresPubSub(HikariDataSource postgresDataSource) {
-            Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresPubSub (专用数据源)");
+            Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 发布订阅 (专用数据源)");
             return new PostgresPubSub(postgresDataSource);
         }
     }
@@ -116,14 +126,13 @@ public class PostgresAutoConfiguration {
         @Bean(name = "postgresJdbcClient")
         @ConditionalOnMissingBean(name = "postgresJdbcClient")
         JdbcClient postgresJdbcClient(DataSource dataSource) {
-            Logs.debug(EmojiSymbol.POSTGRES, "使用应用主数据源");
             return JdbcClient.create(dataSource);
         }
 
         @Bean
         @ConditionalOnMissingBean
         PostgresPubSub postgresPubSub(DataSource dataSource) {
-            Logs.debug(EmojiSymbol.POSTGRES, "注册 Bean: PostgresPubSub (主数据源)");
+            Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 发布订阅 (主数据源)");
             return new PostgresPubSub(dataSource);
         }
     }
