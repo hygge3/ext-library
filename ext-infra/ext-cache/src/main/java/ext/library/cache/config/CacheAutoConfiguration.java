@@ -27,7 +27,7 @@ public class CacheAutoConfiguration {
 
     @Bean
     public CacheAspect cacheAspect(CacheStrategy cacheStrategy) {
-        Logs.info(EmojiSymbol.CACHE, "缓存模块载入成功");
+        Logs.info(EmojiSymbol.CACHE, "载入模块：缓存");
         return new CacheAspect(cacheStrategy);
     }
 }

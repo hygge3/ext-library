@@ -5,11 +5,10 @@ ${AnsiColor.BRIGHT_CYAN}
     ██╔══╝   ██╔██╗    ██║
     ███████╗██╔╝ ██╗   ██║
     ╚══════╝╚═╝  ╚═╝   ╚═╝   ${AnsiColor.BRIGHT_GREEN}LIBRARY${AnsiColor.DEFAULT}
-${AnsiColor.WHITE}    ┌─────────────────────────────────────────┐
-    │  ${AnsiColor.BRIGHT_YELLOW}Spring Boot Extension Library${AnsiColor.WHITE}            │
-    │  ${AnsiColor.CYAN}Modular ${AnsiColor.DEFAULT}• ${AnsiColor.CYAN}Enterprise-Grade ${AnsiColor.DEFAULT}• ${AnsiColor.CYAN}Modern${AnsiColor.WHITE}     │
-    └─────────────────────────────────────────┘${AnsiColor.DEFAULT}
+${AnsiColor.WHITE}    ┌─────────────────────────────────┐
+    │  ${AnsiColor.BRIGHT_YELLOW}Spring Boot Extension Library${AnsiColor.WHITE}  │
+    │  ${AnsiColor.CYAN}Modular ${AnsiColor.DEFAULT}• ${AnsiColor.CYAN}Enterprise ${AnsiColor.DEFAULT}• ${AnsiColor.CYAN}Modern${AnsiColor.WHITE}  │
+    └─────────────────────────────────┘${AnsiColor.DEFAULT}
 ${AnsiColor.BRIGHT_MAGENTA}    ⚡${AnsiColor.DEFAULT} Version: ${AnsiColor.GREEN}${revision}${AnsiColor.DEFAULT}
 ${AnsiColor.BRIGHT_BLUE}    🚀${AnsiColor.DEFAULT} Powered by Spring Boot${spring-boot.formatted-version}
 ${AnsiColor.BRIGHT_YELLOW}    📦${AnsiColor.DEFAULT} JDK ${java.version} | ${os.name}
-
