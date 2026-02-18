@@ -1,9 +1,9 @@
 package ext.library.security.listener;
 
-import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import ext.library.useragent.Platform;
 
 import java.util.Objects;
 
@@ -24,7 +24,7 @@ public interface SecurityListener {
      */
     default void doLogin(String loginId, String token, SecurityLoginParams loginModel) {
         Logs.info(EmojiSymbol.SECURITY, "登录成功，account:{},token:{},deviceType:{}", loginId, token,
-                Objects.nonNull(loginModel) ? loginModel.getDeviceType() : SecurityConstant.UNKNOWN);
+                Objects.nonNull(loginModel) ? loginModel.getDeviceType() : Platform.UNKNOWN);
     }
 
     /**

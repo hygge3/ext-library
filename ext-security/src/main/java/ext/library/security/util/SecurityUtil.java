@@ -1,14 +1,14 @@
 package ext.library.security.util;
 
 import ext.library.core.util.SpringUtil;
-import ext.library.useragent.UserAgent;
-import ext.library.useragent.UserAgentParser;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.service.SecurityService;
 import ext.library.tool.holder.Lazy;
+import ext.library.useragent.UserAgent;
+import ext.library.useragent.UserAgentParser;
 import ext.library.web.util.ServletUtil;
 
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ public final class SecurityUtil {
     private static String getPlatform() {
         String ua = ServletUtil.getUA();
         UserAgent userAgent = UserAgentParser.parse(ua);
-        return userAgent != null ? userAgent.getPlatform().getName() : "Unknown";
+        return userAgent.getPlatform().getName();
     }
 
     /**
