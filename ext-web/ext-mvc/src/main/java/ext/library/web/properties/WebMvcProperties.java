@@ -17,11 +17,6 @@ public class WebMvcProperties {
     public static final String PREFIX = "ext.web";
 
     /**
-     * traceId 的 http 头名称
-     */
-    private String traceIdHeaderName = "X-Trace-Id";
-
-    /**
      * 是否启用调用时间统计拦截器
      */
     private Boolean invokeTimeEnabled = false;
@@ -36,14 +31,6 @@ public class WebMvcProperties {
      * 跨域配置
      */
     private CorsConfig corsConfig;
-
-    public String getTraceIdHeaderName() {
-        return traceIdHeaderName;
-    }
-
-    public void setTraceIdHeaderName(String traceIdHeaderName) {
-        this.traceIdHeaderName = traceIdHeaderName;
-    }
 
     public Boolean getInvokeTimeEnabled() {
         return invokeTimeEnabled;

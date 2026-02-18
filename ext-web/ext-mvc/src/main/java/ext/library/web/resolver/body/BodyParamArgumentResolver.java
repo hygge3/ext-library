@@ -1,4 +1,4 @@
-package ext.library.web.body.resolver;
+package ext.library.web.resolver.body;
 
 import ext.library.json.util.JsonNodeUtil;
 import ext.library.tool.constant.EmojiSymbol;
@@ -23,7 +23,7 @@ import java.util.Objects;
 /**
  * BodyParam 参数解析器 实现 HandlerMethodArgumentResolver 接口
  */
-public class BodyParamHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class BodyParamArgumentResolver implements HandlerMethodArgumentResolver {
 
     /**
      * 判断是否需要处理该参数

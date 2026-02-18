@@ -2,12 +2,12 @@ package ext.library.web.config;
 
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
-import ext.library.web.body.resolver.BodyParamHandlerMethodArgumentResolver;
-import ext.library.web.filter.TraceFilter;
 import ext.library.web.handler.GlobalExceptionHandler;
 import ext.library.web.handler.GlobalResponseHandler;
 import ext.library.web.interceptor.WebInvokeTimeInterceptor;
 import ext.library.web.properties.WebMvcProperties;
+import ext.library.web.resolver.body.BodyParamArgumentResolver;
+import ext.library.web.resolver.page.PageQueryArgumentResolver;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -102,13 +102,9 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addArgumentResolvers(@NonNull List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(new BodyParamHandlerMethodArgumentResolver());
+        argumentResolvers.add(new BodyParamArgumentResolver());
+        argumentResolvers.add(new PageQueryArgumentResolver());
         WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
-    }
-
-    @Bean
-    public TraceFilter traceFilter(WebMvcProperties webMvcProperties) {
-        return new TraceFilter(webMvcProperties);
     }
 
     /**

@@ -4,7 +4,7 @@ package ext.library.web.response;
 /**
  * 分页查询参数
  */
-public class PageParam {
+public class PageQuery {
 
     /** 当前页码，从 1 开始 */
     private long page = 1;
@@ -16,7 +16,6 @@ public class PageParam {
      * 数据总量
      */
     private long total;
-
 
     public long getPage() {
         return page;

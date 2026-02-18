@@ -14,7 +14,7 @@ import java.util.List;
  */
 public record PageResult<T>(long page, long size, Long total, Long pages, List<T> records) {
 
-    public static <T> PageResult<T> empty(PageParam param) {
+    public static <T> PageResult<T> empty(PageQuery param) {
         return new PageResult<>(param.getPage(), param.getSize(), 0L, 0L, Collections.emptyList());
     }
 
