@@ -28,14 +28,19 @@ public final class UserAgentParser {
      * 解析 User-Agent 字符串
      *
      * @param userAgentString User-Agent 字符串
+     *
      * @return 解析结果，解析失败返回 null
      */
     public static UserAgent parse(String userAgentString) {
+        UserAgent userAgent = new UserAgent();
         if (ObjectUtil.isEmpty(userAgentString)) {
-            return null;
+            userAgent.setBrowser(Browser.UNKNOWN);
+            userAgent.setEngine(Engine.UNKNOWN);
+            userAgent.setOs(OS.UNKNOWN);
+            userAgent.setPlatform(Platform.UNKNOWN);
+            return userAgent;
         }
 
-        UserAgent userAgent = new UserAgent();
 
         Browser browser = parseBrowser(userAgentString);
         userAgent.setBrowser(browser);
