@@ -1,11 +1,7 @@
 package ext.library.security.domain;
 
-import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.security.enums.TokenState;
-import ext.library.security.repository.SecurityRepository;
-import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.exception.ExtException;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -166,25 +162,13 @@ public class SecurityToken implements Serializable {
         this.updateTime = updateTime;
     }
 
-    // ==================== 业务方法 ====================
-
-    /**
-     * 设置存储属性
-     *
-     * @param key   键
-     * @param value 值
-     * @return this
-     */
-    public SecurityToken setAttribute(String key, Object value) {
-        tokenMountData.put(key, value);
-        flushTokenStorage();
-        return this;
-    }
+    // ==================== 属性操作 ====================
 
     /**
      * 获取存储属性
      *
      * @param key 键
+     *
      * @return 值
      */
     public Object getAttribute(String key) {
@@ -197,21 +181,11 @@ public class SecurityToken implements Serializable {
      * @param key   键
      * @param clazz 目标类型
      * @param <T>   泛型
+     *
      * @return 转换后的对象
      */
     public <T> T getAttribute(String key, Class<T> clazz) {
         Object obj = getAttribute(key);
         return JsonUtil.readObj(JsonUtil.toJson(obj), clazz);
-    }
-
-    /**
-     * 刷新 Token 存储
-     */
-    public void flushTokenStorage() {
-        SecurityRepository repository = SpringUtil.getBean(SecurityRepository.class);
-        boolean result = repository.saveToken(this);
-        if (!result) {
-            throw new ExtException(EmojiSymbol.SECURITY, "保存 Token 认证数据失败");
-        }
     }
 }

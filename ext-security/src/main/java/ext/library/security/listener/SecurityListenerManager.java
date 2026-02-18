@@ -3,8 +3,8 @@ package ext.library.security.listener;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * <p>
@@ -13,10 +13,10 @@ import java.util.List;
  */
 public class SecurityListenerManager {
 
-    private static final List<SecurityListener> LISTENER_LIST = new ArrayList<>();
+    private static final List<SecurityListener> listenerList = new CopyOnWriteArrayList<>();
 
     static {
-        SecurityListenerManager.LISTENER_LIST.add(new SecurityListener() {
+        SecurityListenerManager.listenerList.add(new SecurityListener() {
         });
     }
 
@@ -26,7 +26,7 @@ public class SecurityListenerManager {
      * @return List<SecurityListener>
      */
     public static List<SecurityListener> getListener() {
-        return SecurityListenerManager.LISTENER_LIST;
+        return SecurityListenerManager.listenerList;
     }
 
     /**
@@ -38,7 +38,7 @@ public class SecurityListenerManager {
         if (null == listener) {
             throw new ExtException(EmojiSymbol.SECURITY, "要注册的监听器不能为 null");
         }
-        LISTENER_LIST.add(listener);
+        listenerList.add(listener);
     }
 
     /**
@@ -50,14 +50,14 @@ public class SecurityListenerManager {
         if (null == listener) {
             throw new ExtException(EmojiSymbol.SECURITY, "要移除的监听器不能为 null");
         }
-        LISTENER_LIST.remove(listener);
+        listenerList.remove(listener);
     }
 
     /**
      * 清空所有已注册的监听器
      */
     public static void clearListener() {
-        LISTENER_LIST.clear();
+        listenerList.clear();
     }
 
 }

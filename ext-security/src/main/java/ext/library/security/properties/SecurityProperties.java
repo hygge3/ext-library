@@ -1,11 +1,9 @@
 package ext.library.security.properties;
 
-import java.time.Duration;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.Pattern;
+import java.time.Duration;
 
 /**
  * 安全模块配置属性
@@ -18,12 +16,17 @@ import jakarta.validation.constraints.Pattern;
 @Validated
 public class SecurityProperties {
 
-    static final String PREFIX = "ext.security";
+    public static final String PREFIX = "ext.security";
 
     /**
-     * 认证名称
+     * token 在 HTTP Header / 请求参数中的键名
      */
-    private String securityName = "Authorization";
+    private String tokenName = "Authorization";
+
+    /**
+     * token 前缀，拼接在 token 值之前，默认 "Bearer "（含尾部空格）
+     */
+    private String tokenPrefix = "Bearer ";
 
     /**
      * 授权有效期，默认 30 天
@@ -83,16 +86,28 @@ public class SecurityProperties {
      */
     private CookieProperties cookieConfig = new CookieProperties();
 
-    public String getSecurityName() {
-        return securityName;
+    public String getTokenName() {
+        return tokenName;
     }
 
-    public void setSecurityName(String securityName) {
-        this.securityName = securityName;
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    public String getTokenPrefix() {
+        return tokenPrefix;
+    }
+
+    public void setTokenPrefix(String tokenPrefix) {
+        this.tokenPrefix = tokenPrefix;
     }
 
     public Duration getTimeout() {
         return timeout;
+    }
+
+    public void setTimeout(Duration timeout) {
+        this.timeout = timeout;
     }
 
     /**
@@ -104,12 +119,12 @@ public class SecurityProperties {
         return timeout.toSeconds();
     }
 
-    public void setTimeout(Duration timeout) {
-        this.timeout = timeout;
-    }
-
     public Duration getActivityTimeout() {
         return activityTimeout;
+    }
+
+    public void setActivityTimeout(Duration activityTimeout) {
+        this.activityTimeout = activityTimeout;
     }
 
     /**
@@ -119,10 +134,6 @@ public class SecurityProperties {
      */
     public long getActivityTimeoutSeconds() {
         return activityTimeout.toSeconds();
-    }
-
-    public void setActivityTimeout(Duration activityTimeout) {
-        this.activityTimeout = activityTimeout;
     }
 
     public Boolean getAutoRenewal() {
@@ -137,6 +148,10 @@ public class SecurityProperties {
         return autoRenewalInterval;
     }
 
+    public void setAutoRenewalInterval(Duration autoRenewalInterval) {
+        this.autoRenewalInterval = autoRenewalInterval;
+    }
+
     /**
      * 获取自动续约间隔时间（秒）
      *
@@ -144,10 +159,6 @@ public class SecurityProperties {
      */
     public long getAutoRenewalIntervalSeconds() {
         return autoRenewalInterval.toSeconds();
-    }
-
-    public void setAutoRenewalInterval(Duration autoRenewalInterval) {
-        this.autoRenewalInterval = autoRenewalInterval;
     }
 
     public Boolean getIsConcurrentLogin() {
@@ -198,61 +209,5 @@ public class SecurityProperties {
         this.cookieConfig = cookieConfig;
     }
 
-    public static class CookieProperties {
-
-        /**
-         * cookie 名称
-         */
-        private final String cookieName = "Token";
-        /**
-         * 是否禁止 js 操作 Cookie
-         */
-        private final Boolean httpOnly = true;
-        /**
-         * 域设置
-         */
-        private String domain;
-        /**
-         * 路径设置
-         */
-        @Pattern(regexp = "^/(?:[a-zA-Z0-9\\-._~!$&'()*+,;=:@/%]*|\\*{1,2})*$")
-        private String path;
-        /**
-         * 是否应该只在加密的（即 SSL）连接上发送
-         */
-        private Boolean secure;
-
-        public String getCookieName() {
-            return cookieName;
-        }
-
-        public Boolean getHttpOnly() {
-            return httpOnly;
-        }
-
-        public String getDomain() {
-            return domain;
-        }
-
-        public void setDomain(String domain) {
-            this.domain = domain;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
-
-        public Boolean getSecure() {
-            return secure;
-        }
-
-        public void setSecure(Boolean secure) {
-            this.secure = secure;
-        }
-    }
 
 }

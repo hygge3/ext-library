@@ -69,19 +69,22 @@ public final class PermissionUtil {
         }
 
         return switch (logical) {
-            case AND:
+            case AND -> {
                 for (String req : requires) {
                     if (!hasElement(has, req)) {
                         yield false;
                     }
                 }
-            case OR:
+                yield true;
+            }
+            case OR -> {
                 for (String req : requires) {
                     if (hasElement(has, req)) {
                         yield true;
                     }
                 }
                 yield false;
+            }
         };
     }
 

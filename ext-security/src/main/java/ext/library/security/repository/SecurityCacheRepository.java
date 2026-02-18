@@ -1,7 +1,6 @@
 package ext.library.security.repository;
 
 import ext.library.cache.strategy.CacheStrategy;
-import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.tool.util.StringUtil;
@@ -11,14 +10,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于 ext-cache 的安全存储实现
  * <p>
  * 使用 CacheStrategy 作为底层存储，支持多种缓存后端（Caffeine、Redis、PostgreSQL、L2）。
+ * tokenIndex 同样持久化到 CacheStrategy，支持分布式部署。
  *
  * @since 4.0.0
  */
@@ -35,9 +35,14 @@ public class SecurityCacheRepository implements SecurityRepository {
     private static final String tokenCacheName = "security:token";
 
     /**
-     * Token 索引（用于 queryTokenList）
+     * Token 索引缓存名称（持久化到 CacheStrategy，支持分布式）
      */
-    private final Set<String> tokenIndex = ConcurrentHashMap.newKeySet();
+    private static final String tokenIndexCacheName = "security:token:index";
+
+    /**
+     * Token 索引 key
+     */
+    private static final String tokenIndexKey = "all";
 
     private final CacheStrategy cacheStrategy;
 
@@ -56,7 +61,7 @@ public class SecurityCacheRepository implements SecurityRepository {
 
         // 检查是否已过期
         if (isSessionExpired(session)) {
-            session.destroySecuritySession();
+            removeSecuritySessionByLoginId(loginId);
             return null;
         }
 
@@ -69,7 +74,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         if (session == null) {
             return null;
         }
-        return SecurityConstant.calculateRemainingSeconds(session.getCreateTime(), session.getTimeout());
+        return calculateRemainingSeconds(session.getCreateTime(), session.getTimeout());
     }
 
     @Override
@@ -85,7 +90,7 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     @Override
     public boolean removeSecuritySessionByLoginId(String loginId) {
-        SecuritySession session = getSecuritySessionByLoginId(loginId);
+        SecuritySession session = cacheStrategy.get(sessionCacheName, loginId, SecuritySession.class);
         if (session == null) {
             return false;
         }
@@ -117,7 +122,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         if (token == null) {
             return null;
         }
-        return SecurityConstant.calculateRemainingSeconds(token.getCreateTime(), token.getTimeout());
+        return calculateRemainingSeconds(token.getCreateTime(), token.getTimeout());
     }
 
     @Override
@@ -126,7 +131,7 @@ public class SecurityCacheRepository implements SecurityRepository {
         if (token == null) {
             return null;
         }
-        return SecurityConstant.calculateRemainingSeconds(token.getActivityTime(), token.getActivityTimeout());
+        return calculateRemainingSeconds(token.getActivityTime(), token.getActivityTimeout());
     }
 
     @Override
@@ -138,8 +143,8 @@ public class SecurityCacheRepository implements SecurityRepository {
         Duration expireTime = calculateExpireDuration(token.getTimeout());
         cacheStrategy.put(tokenCacheName, token.getToken(), token, expireTime);
 
-        // 更新 Token 索引
-        tokenIndex.add(token.getToken());
+        // 更新持久化 Token 索引
+        addToTokenIndex(token.getToken());
         return true;
     }
 
@@ -147,13 +152,12 @@ public class SecurityCacheRepository implements SecurityRepository {
     public boolean removeTokenByTokenValue(String tokenValue) {
         SecurityToken token = getSecurityTokenByTokenValue(tokenValue);
         if (token == null) {
-            // 仍尝试从索引中移除
-            tokenIndex.remove(tokenValue);
+            removeFromTokenIndex(tokenValue);
             return false;
         }
 
         cacheStrategy.evict(tokenCacheName, tokenValue);
-        tokenIndex.remove(tokenValue);
+        removeFromTokenIndex(tokenValue);
         return true;
     }
 
@@ -170,10 +174,10 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     @Override
     public List<String> queryTokenList(String tokenValue, boolean sortedDesc) {
+        Set<String> index = getTokenIndex();
         List<String> result = new ArrayList<>();
 
-        for (String key : tokenIndex) {
-            // 按 tokenValue 过滤
+        for (String key : index) {
             if (StringUtil.isNotBlank(tokenValue) && !key.contains(tokenValue)) {
                 continue;
             }
@@ -184,11 +188,10 @@ public class SecurityCacheRepository implements SecurityRepository {
                 result.add(key);
             } else {
                 // 清理过期的索引条目
-                tokenIndex.remove(key);
+                removeFromTokenIndex(key);
             }
         }
 
-        // 排序
         result.sort(Comparator.naturalOrder());
         if (sortedDesc) {
             Collections.reverse(result);
@@ -201,30 +204,49 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     /**
      * 检查 Session 是否已过期
-     *
-     * @param session 会话信息
-     *
-     * @return true 已过期，false 未过期
      */
     private boolean isSessionExpired(SecuritySession session) {
-        if (session.getTimeout() == null || SecurityConstant.NON_EXPIRING.equals(session.getTimeout())) {
+        if (session.getTimeout() == null || NON_EXPIRING.equals(session.getTimeout())) {
             return false;
         }
-        return SecurityConstant.isExpired(session.getCreateTime(), session.getTimeout());
+        return isExpired(session.getCreateTime(), session.getTimeout());
     }
 
     /**
-     * 计算过期时长
-     *
-     * @param timeoutSeconds 超时秒数
-     *
-     * @return 过期时长
+     * 计算过期时长（永不过期时使用 365 天）
      */
     private Duration calculateExpireDuration(Long timeoutSeconds) {
-        if (timeoutSeconds == null || SecurityConstant.NON_EXPIRING.equals(timeoutSeconds)) {
-            // 永不过期时使用 365 天作为缓存时长
+        if (timeoutSeconds == null || NON_EXPIRING.equals(timeoutSeconds)) {
             return Duration.ofDays(365);
         }
         return Duration.ofSeconds(timeoutSeconds);
+    }
+
+    /**
+     * 获取持久化的 Token 索引
+     */
+    @SuppressWarnings("unchecked")
+    private Set<String> getTokenIndex() {
+        Set<String> index = cacheStrategy.get(tokenIndexCacheName, tokenIndexKey, Set.class);
+        return index != null ? index : new HashSet<>();
+    }
+
+    /**
+     * 向持久化索引中添加 token
+     */
+    private void addToTokenIndex(String tokenValue) {
+        Set<String> index = getTokenIndex();
+        index.add(tokenValue);
+        cacheStrategy.put(tokenIndexCacheName, tokenIndexKey, index, Duration.ofDays(365));
+    }
+
+    /**
+     * 从持久化索引中移除 token
+     */
+    private void removeFromTokenIndex(String tokenValue) {
+        Set<String> index = getTokenIndex();
+        if (index.remove(tokenValue)) {
+            cacheStrategy.put(tokenIndexCacheName, tokenIndexKey, index, Duration.ofDays(365));
+        }
     }
 }
