@@ -1,7 +1,6 @@
 package ext.library.security.repository;
 
 import ext.library.cache.strategy.CacheStrategy;
-import ext.library.security.constants.SecurityConstant;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.TokenState;
@@ -43,6 +42,26 @@ class SecurityCacheRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new SecurityCacheRepository(cacheStrategy);
+    }
+
+    private SecuritySession createSession(String loginId, Long timeout) {
+        SecuritySession session = new SecuritySession();
+        session.setLoginId(loginId);
+        session.setTimeout(timeout);
+        session.setCreateTime(LocalDateTime.now());
+        return session;
+    }
+
+    private SecurityToken createToken(String tokenValue, String loginId) {
+        SecurityToken token = new SecurityToken();
+        token.setToken(tokenValue);
+        token.setLoginId(loginId);
+        token.setTimeout(60L * 60 * 24 * 30);
+        token.setActivityTimeout(60L * 60);
+        token.setCreateTime(LocalDateTime.now());
+        token.setActivityTime(LocalDateTime.now().minusMinutes(1));
+        token.setState(TokenState.NORMAL);
+        return token;
     }
 
     @Nested
@@ -137,6 +156,8 @@ class SecurityCacheRepositoryTest {
             verify(cacheStrategy, never()).evict(anyString(), eq("user1"));
         }
     }
+
+    // Helper methods
 
     @Nested
     @DisplayName("Token 操作测试")
@@ -330,27 +351,5 @@ class SecurityCacheRepositoryTest {
             assertEquals("b-token", result.get(0));
             assertEquals("a-token", result.get(1));
         }
-    }
-
-    // Helper methods
-
-    private SecuritySession createSession(String loginId, Long timeout) {
-        SecuritySession session = new SecuritySession();
-        session.setLoginId(loginId);
-        session.setTimeout(timeout);
-        session.setCreateTime(LocalDateTime.now());
-        return session;
-    }
-
-    private SecurityToken createToken(String tokenValue, String loginId) {
-        SecurityToken token = new SecurityToken();
-        token.setToken(tokenValue);
-        token.setLoginId(loginId);
-        token.setTimeout(SecurityConstant.DEFAULT_TIMEOUT_SECONDS);
-        token.setActivityTimeout(SecurityConstant.DEFAULT_ACTIVITY_TIMEOUT_SECONDS);
-        token.setCreateTime(LocalDateTime.now());
-        token.setActivityTime(LocalDateTime.now().minusMinutes(1));
-        token.setState(TokenState.NORMAL);
-        return token;
     }
 }
