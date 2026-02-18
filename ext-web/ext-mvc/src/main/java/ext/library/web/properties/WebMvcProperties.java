@@ -24,8 +24,12 @@ public class WebMvcProperties {
     /** 是否打印启动信息 */
     private Boolean printStartupInfo = true;
 
-    /** 打开 REST 包装 */
-    private Boolean restWrapper = true;
+    /**
+     * 启用 REST 响应包装的包名列表，仅匹配列表中包（及子包）的 Controller 才会被包装。
+     * 未配置或为空时，所有 Controller 均不包装。
+     * 示例：["com.example.api", "com.example.admin"]
+     */
+    private List<String> restWrapperPackages;
 
     /**
      * 跨域配置
@@ -48,12 +52,12 @@ public class WebMvcProperties {
         this.printStartupInfo = printStartupInfo;
     }
 
-    public Boolean getRestWrapper() {
-        return restWrapper;
+    public List<String> getRestWrapperPackages() {
+        return restWrapperPackages;
     }
 
-    public void setRestWrapper(Boolean restWrapper) {
-        this.restWrapper = restWrapper;
+    public void setRestWrapperPackages(List<String> restWrapperPackages) {
+        this.restWrapperPackages = restWrapperPackages;
     }
 
     public CorsConfig getCorsConfig() {

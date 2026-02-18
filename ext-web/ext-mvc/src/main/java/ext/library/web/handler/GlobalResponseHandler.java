@@ -14,6 +14,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,8 +36,13 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
      */
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        // 需要包装的：开启且没有 IgnoreRestWrapper 注解
-        if (!webMvcProperties.getRestWrapper()) {
+        // 需要包装的：配置了包名列表，且当前 Controller 包在列表中，且没有 IgnoreRestWrapper 注解
+        List<String> packages = webMvcProperties.getRestWrapperPackages();
+        if (packages == null || packages.isEmpty()) {
+            return false;
+        }
+        String controllerPackage = returnType.getContainingClass().getPackageName();
+        if (packages.stream().noneMatch(controllerPackage::startsWith)) {
             return false;
         }
         if (returnType.hasMethodAnnotation(IgnoreRestWrapper.class)) {
