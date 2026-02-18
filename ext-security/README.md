@@ -11,6 +11,7 @@
 ### Maven
 
 ```xml
+
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-security</artifactId>
@@ -25,126 +26,167 @@ implementation("ext.library:ext-security")
 
 ## 依赖说明
 
-| 依赖 | 说明 |
-|------|------|
-| ext-useragent | UserAgent 解析 |
-| ext-core | 核心工具 |
-| ext-json | JSON 处理 |
-| ext-cache | 缓存支持（支持 Caffeine/Redis/PostgreSQL/L2） |
-| ext-mvc | MVC 支持 |
-| ext-crypto | 加密支持 |
-| spring-boot-starter-web | 可选，Web 支持 |
+| 依赖            | 说明                                    |
+|---------------|---------------------------------------|
+| ext-useragent | UserAgent 解析                          |
+| ext-core      | 核心工具                                  |
+| ext-json      | JSON 处理                               |
+| ext-cache     | 缓存支持（支持 Caffeine/Redis/PostgreSQL/L2） |
+| ext-mvc       | MVC 支持                                |
+| ext-crypto    | 加密支持                                  |
 
 ## 功能特性
 
-- 轻量级安全认证
-- 基于路由的权限控制
-- 基于注解的权限校验
+- 轻量级安全认证，基于 Token + Session 双层模型
+- 基于注解的权限校验（`@RequiresPermissions`、`@RequiresRoles`）
+- 多设备登录控制（并发登录数、设备类型数限制）
 - 多种缓存后端支持（Caffeine、Redis、PostgreSQL、L2 二级缓存）
-- 灵活的认证策略
+- Token 自动续约
 - 安全事件监听
-- 异常统一处理
+- 异常统一处理（401/403）
 
 ## 配置项
 
-| 配置项 | 默认值 | 说明 |
-|-------|-------|------|
-| ext.security.security-name | Authorization | 认证名称 |
-| ext.security.timeout | 30d | 授权有效期，支持 Duration 格式（30d, 720h, 2592000s） |
-| ext.security.activity-timeout | 1h | 最低活跃频率，支持 Duration 格式（1h, 60m, 3600s） |
-| ext.security.auto-renewal | true | 是否自动续约 |
-| ext.security.auto-renewal-interval | 3m | 自动续约间隔，支持 Duration 格式 |
-| ext.security.is-concurrent-login | true | 是否允许多地同时登录 |
-| ext.security.enable-cookie | true | 是否开启 cookie |
-
-存储配置通过 ext-cache 模块进行（参考 [ext-cache 配置](../ext-infra/ext-cache/)）：
-
-| 配置项 | 默认值 | 说明 |
-|-------|-------|------|
-| ext.cache.cache-storage | L2 | 缓存存储方式：CAFFEINE/REDIS/POSTGRES/L2 |
-| ext.cache.l2-backend | REDIS | L2 模式下的分布式后端：REDIS/POSTGRES |
+```yaml
+ext:
+  security:
+    token-name: Authorization          # token 在 Header/参数中的键名
+    token-prefix: "Bearer "            # token 前缀（含尾部空格）
+    timeout: 30d                       # 授权有效期，支持 Duration 格式
+    activity-timeout: 1h               # 最低活跃频率
+    auto-renewal: true                 # 是否自动续约
+    auto-renewal-interval: 3m          # 自动续约间隔
+    is-concurrent-login: true          # 是否允许多地同时登录
+    max-login-limit: -1                # 同一账号最大登录数，-1 不限制
+    max-login-device-type-limit: -1    # 同一账号允许的设备类型数，-1 不限制
+    issue-token-max-limit: -1          # 全局颁发 token 最大数，-1 不限制
+    enable-cookie: true                # 是否开启 cookie
+    cookie-config:
+      cookie-name: Token               # cookie 名称
+      http-only: true                  # 是否禁止 JS 操作
+      domain:                          # cookie 域
+      path:                            # cookie 路径
+      secure:                          # 是否仅 HTTPS 发送
+  cache:
+    cache-storage: L2                  # CAFFEINE/REDIS/POSTGRES/L2
+    l2-backend: REDIS                  # L2 模式下的分布式后端
+```
 
 ## 包结构
 
 ```
 ext.library.security
-├── annotion/          # 安全注解
-├── authority/         # 权限校验
+├── annotation/        # 安全注解
+├── authority/         # 权限校验接口
 ├── config/            # 自动配置
-├── constants/         # 常量定义
-├── domain/            # 领域模型
+├── domain/            # 领域模型（纯数据，无 Spring 依赖）
 ├── enums/             # 枚举
 ├── exception/         # 异常
 ├── handler/           # 异常处理器
 ├── interceptor/       # 拦截器
 ├── listener/          # 事件监听
 ├── properties/        # 配置属性
-├── repository/        # 存储接口
-├── router/            # 路由配置
-├── service/           # 服务接口
+├── repository/        # 存储接口与实现
+├── service/           # 服务（持久化编排层）
 └── util/              # 工具类
 ```
 
 ## 权限注解
 
-| 注解 | 说明 |
-|------|------|
-| `@RequiresPermissions` | 权限校验 |
-| `@RequiresRoles` | 角色校验 |
-| `@SecurityIgnore` | 忽略安全校验 |
+| 注解                     | 说明                 |
+|------------------------|--------------------|
+| `@RequiresPermissions` | 权限码校验，支持 AND/OR 逻辑 |
+| `@RequiresRoles`       | 角色码校验，支持 AND/OR 逻辑 |
+| `@SecurityIgnore`      | 忽略安全校验，直接放行        |
 
 ## 核心类说明
 
-| 类名 | 说明 |
-|------|------|
-| `SecurityService` | 安全服务 |
-| `SecurityRouter` | 路由安全配置 |
-| `SecurityAuthority` | 权限校验核心 |
-| `SecurityInterceptor` | 安全拦截器 |
-| `SecurityRepository` | 存储接口 |
-| `SecurityCacheRepository` | 基于 ext-cache 的存储实现 |
-| `SecurityListener` | 安全事件监听 |
-| `SecurityExceptionHandler` | 异常处理器 |
+| 类名                         | 说明                                     |
+|----------------------------|----------------------------------------|
+| `SecurityService`          | 安全服务，统一负责所有持久化编排                       |
+| `SecurityUtil`             | 静态工具类，封装常用操作                           |
+| `SecurityAuthority`        | 权限接口，业务方实现以提供角色/权限数据                   |
+| `SecurityInterceptor`      | 安全拦截器，校验 token 及注解权限                   |
+| `SecurityRepository`       | 存储接口                                   |
+| `SecurityCacheRepository`  | 基于 ext-cache 的存储实现，tokenIndex 持久化支持分布式 |
+| `SecurityListener`         | 安全事件监听接口                               |
+| `SecurityExceptionHandler` | 统一处理 401/403 异常                        |
 
 ## 使用示例
 
-### 基础配置
-
-```yaml
-ext:
-  security:
-    security-name: Authorization
-    timeout: 30d               # 授权有效期，支持 Duration 格式
-    activity-timeout: 1h       # 活跃超时时间
-    auto-renewal: true
-    auto-renewal-interval: 3m  # 自动续约间隔
-    is-concurrent-login: true
-    enable-cookie: true
-  cache:
-    cache-storage: L2          # CAFFEINE/REDIS/POSTGRES/L2
-    l2-backend: REDIS          # L2 模式下的分布式后端
-```
-
-### 路由权限配置
+### 实现权限接口
 
 ```java
-@Configuration
-public class SecurityConfig {
 
-    @Bean
-    public SecurityRouter securityRouter() {
-        return SecurityRouter.builder()
-            .request("/api/admin/**").hasRole("ADMIN")
-            .request("/api/user/**").hasAnyRole("USER", "ADMIN")
-            .request("/api/public/**").permitAll()
-            .build();
+@Component
+public class MySecurityAuthority implements SecurityAuthority {
+
+    @Override
+    public List<String> getPermissionCodeList(String loginId) {
+        return permissionService.listByUserId(loginId);
+    }
+
+    @Override
+    public List<String> getRoleCodeList(String loginId) {
+        return roleService.listByUserId(loginId);
     }
 }
 ```
 
-### 使用注解控制权限
+### 登录 / 退出
 
 ```java
+// 登录（自动识别设备类型）
+SecurityUtil.doLogin(userId.toString());
+
+// 登录并挂载自定义数据到 Session
+        SecurityUtil.
+
+doLogin(userId.toString(),userInfo);
+
+// 退出
+        SecurityUtil.
+
+logout();
+
+// 踢下线 / 顶下线 / 封禁 / 解封
+SecurityUtil.
+
+kickToken(token);
+SecurityUtil.
+
+replaceToken(token);
+SecurityUtil.
+
+bannedToken(token);
+SecurityUtil.
+
+unsealToken(token);
+```
+
+### 获取当前用户信息
+
+```java
+// 获取当前登录 ID
+String loginId = SecurityUtil.getCurrentLoginId();
+
+// 获取当前 Session
+SecuritySession session = SecurityUtil.getCurrentSecuritySession();
+
+// 获取 Session 挂载的自定义数据
+UserInfo userInfo = session.getAttributes(UserInfo.class);
+
+// 获取当前 token 值
+String token = SecurityUtil.getCurrentTokenValue();
+
+// 是否已登录
+boolean logged = SecurityUtil.isLogin();
+```
+
+### 注解权限控制
+
+```java
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -169,66 +211,26 @@ public class UserController {
 }
 ```
 
-### 自定义认证
-
-```java
-@Service
-public class AuthService {
-
-    @Autowired
-    private SecurityService securityService;
-
-    public String login(String username, String password) {
-        // 验证用户
-        User user = userService.validate(username, password);
-        // 生成 Token
-        return securityService.generateToken(user);
-    }
-
-    public void logout(String token) {
-        securityService.invalidate(token);
-    }
-}
-```
-
-### 获取当前用户
-
-```java
-public User getCurrentUser() {
-    return SecurityUtil.getCurrentUser();
-}
-
-public boolean hasRole(String role) {
-    return SecurityUtil.hasRole(role);
-}
-
-public boolean hasPermission(String permission) {
-    return SecurityUtil.hasPermission(permission);
-}
-```
-
 ### 事件监听
 
 ```java
+
 @Component
 public class MySecurityListener implements SecurityListener {
 
     @Override
-    public void onLoginSuccess(String userId) {
-        log.info("用户登录成功: {}", userId);
+    public void doLogin(String loginId, String token, SecurityLoginParams loginModel) {
+        log.info("登录成功：loginId={}, deviceType={}", loginId, loginModel.getDeviceType());
     }
 
     @Override
-    public void onLoginFailed(String username) {
-        log.warn("用户登录失败: {}", username);
-    }
-
-    @Override
-    public void onLogout(String userId) {
-        log.info("用户登出: {}", userId);
+    public void doLogout(String loginId, String token, String deviceType) {
+        log.info("退出登录：loginId={}", loginId);
     }
 }
 ```
+
+> 注册监听器：`SecurityListenerManager.registerListener(new MySecurityListener());`
 
 ## 许可证
 
