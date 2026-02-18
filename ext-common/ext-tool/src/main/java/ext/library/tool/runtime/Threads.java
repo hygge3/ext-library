@@ -28,6 +28,7 @@ public final class Threads {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            Logs.error(EmojiSymbol.TOOL, e, "线程异常睡眠，已打断");
         }
     }
 
@@ -41,6 +42,7 @@ public final class Threads {
             Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            Logs.error(EmojiSymbol.TOOL, e, "线程异常睡眠，已打断");
         }
     }
 
@@ -66,6 +68,7 @@ public final class Threads {
             } catch (InterruptedException ie) {
                 pool.shutdownNow();
                 Thread.currentThread().interrupt();
+                Logs.error(EmojiSymbol.TOOL, ie, "停止线程池异常，立即停止并打断");
             }
         }
     }
