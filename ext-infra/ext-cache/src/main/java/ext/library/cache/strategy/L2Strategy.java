@@ -5,6 +5,7 @@ import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.util.ClassUtils;
 
 import java.time.Duration;
 
@@ -16,7 +17,8 @@ import java.time.Duration;
  * <p>
  * 分布式缓存后端通过 {@code ext.cache.l2-backend} 配置项指定：
  * <ul>
- *     <li>{@link L2Backend#REDIS} - 使用 Redis（默认）</li>
+ *     <li>{@link L2Backend#AUTO} - 自动检测，优先 Redis，其次 PostgreSQL（默认）</li>
+ *     <li>{@link L2Backend#REDIS} - 使用 Redis</li>
  *     <li>{@link L2Backend#POSTGRES} - 使用 PostgreSQL</li>
  * </ul>
  *
@@ -37,8 +39,7 @@ public class L2Strategy implements CacheStrategy {
             synchronized (this) {
                 if (distributedStrategy == null) {
                     CacheProperties properties = SpringUtil.getBean(CacheProperties.class);
-                    backendType = properties.getL2Backend();
-                    distributedStrategy = createDistributedStrategy(backendType);
+                    distributedStrategy = createDistributedStrategy(properties.getL2Backend());
                     Logs.info(EmojiSymbol.CACHE, "L2 缓存后端: {}", backendType);
                 }
             }
@@ -48,11 +49,33 @@ public class L2Strategy implements CacheStrategy {
 
     /**
      * 根据后端类型创建分布式缓存策略
+     * <p>
+     * {@link L2Backend#AUTO} 时通过类路径检测自动选择，优先级：Redis > PostgreSQL。
      */
-    private CacheStrategy createDistributedStrategy(L2Backend backend) {
-        return switch (backend) {
-            case REDIS -> new RedisStrategy();
-            case POSTGRES -> new PostgresStrategy();
+    private CacheStrategy createDistributedStrategy(L2Backend configured) {
+        return switch (configured) {
+            case AUTO -> {
+                ClassLoader cl = getClass().getClassLoader();
+                if (ClassUtils.isPresent("ext.library.redis.util.RedisUtil", cl)) {
+                    backendType = L2Backend.REDIS;
+                    yield new RedisStrategy();
+                }
+                if (ClassUtils.isPresent("ext.library.postgres.util.PostgresUtil", cl)) {
+                    backendType = L2Backend.POSTGRES;
+                    yield new PostgresStrategy();
+                }
+                throw new IllegalStateException(
+                        "L2 后端自动检测失败：类路径中未找到 ext-redis 或 ext-postgres 依赖，" +
+                        "请引入相应模块或将 ext.cache.cache-storage 改为 CAFFEINE");
+            }
+            case REDIS -> {
+                backendType = L2Backend.REDIS;
+                yield new RedisStrategy();
+            }
+            case POSTGRES -> {
+                backendType = L2Backend.POSTGRES;
+                yield new PostgresStrategy();
+            }
         };
     }
 
@@ -103,4 +126,5 @@ public class L2Strategy implements CacheStrategy {
         getDistributedStrategy().clear(cacheName);
         caffeineStrategy.clear(cacheName);
     }
+
 }

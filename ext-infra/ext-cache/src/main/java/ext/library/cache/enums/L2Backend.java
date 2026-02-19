@@ -10,6 +10,14 @@ package ext.library.cache.enums;
 public enum L2Backend {
 
     /**
+     * 自动检测（默认）
+     * <p>
+     * 根据类路径中存在的依赖自动选择后端，优先级：Redis > PostgreSQL。
+     * 未配置 {@code ext.cache.l2-backend} 时默认使用此模式。
+     */
+    AUTO,
+
+    /**
      * Redis 作为分布式缓存后端
      * <p>
      * 需要引入 ext-redis 模块
@@ -22,4 +30,5 @@ public enum L2Backend {
      * 需要引入 ext-postgres 模块
      */
     POSTGRES
+
 }

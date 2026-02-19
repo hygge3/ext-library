@@ -29,20 +29,23 @@ public class CacheProperties {
     private Duration expireTime = Duration.ofSeconds(86400L);
 
     /**
-     * 缓存存储方式
+     * 缓存存储方式，默认为自动检测
+     * <p>
+     * {@link CacheStorage#AUTO} 时根据类路径中存在的依赖自动选择：有 ext-redis 或 ext-postgres 则使用 L2，否则使用 CAFFEINE。
      */
-    private CacheStorage cacheStorage = CacheStorage.L2;
+    private CacheStorage cacheStorage = CacheStorage.AUTO;
 
     /**
-     * 二级缓存后端类型
+     * 二级缓存后端类型，默认为自动检测
      * <p>
-     * 当 cacheStorage 为 L2 时，指定第二级（分布式）缓存的后端。
+     * 当 cacheStorage 为 {@link CacheStorage#L2} 或 {@link CacheStorage#AUTO} 时，指定第二级（分布式）缓存的后端。
      * <ul>
-     *     <li>{@link L2Backend#REDIS} - 使用 Redis（默认，需要 ext-redis 模块）</li>
+     *     <li>{@link L2Backend#AUTO} - 自动检测，优先 Redis，其次 PostgreSQL（默认）</li>
+     *     <li>{@link L2Backend#REDIS} - 使用 Redis（需要 ext-redis 模块）</li>
      *     <li>{@link L2Backend#POSTGRES} - 使用 PostgreSQL（需要 ext-postgres 模块）</li>
      * </ul>
      */
-    private L2Backend l2Backend = L2Backend.REDIS;
+    private L2Backend l2Backend = L2Backend.AUTO;
 
     /**
      * Caffeine 缓存配置

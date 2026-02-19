@@ -35,6 +35,7 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+            <optional>true</optional>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.errorprone</groupId>
