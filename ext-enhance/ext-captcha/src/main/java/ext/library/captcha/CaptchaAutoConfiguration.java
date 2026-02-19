@@ -1,5 +1,6 @@
 package ext.library.captcha;
 
+import ext.library.cache.strategy.CacheStrategy;
 import ext.library.captcha.cache.CaptchaCache;
 import ext.library.captcha.core.Captcha;
 import ext.library.captcha.core.DefaultCaptcha;
@@ -34,7 +35,7 @@ public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CaptchaCache captchaCache(CaptchaProperties captchaProperties) {
-        return new CaptchaCache(captchaProperties.getCacheStorage().getCacheStrategy(), captchaProperties.getExpireTime());
+    public CaptchaCache captchaCache(CacheStrategy cacheStrategy, CaptchaProperties captchaProperties) {
+        return new CaptchaCache(cacheStrategy, captchaProperties.getExpireTime());
     }
 }
