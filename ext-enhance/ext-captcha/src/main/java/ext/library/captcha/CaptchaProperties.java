@@ -1,6 +1,5 @@
 package ext.library.captcha;
 
-import ext.library.cache.enums.CacheStorage;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -17,11 +16,6 @@ public class CaptchaProperties {
      * 验证码类型，默认：随机数
      */
     private CaptchaType captchaType = CaptchaType.RANDOM;
-
-    /**
-     * 缓存存储方式
-     */
-    private CacheStorage cacheStorage = CacheStorage.CAFFEINE;
 
     /**
      * 验证码 cache 名，默认：captcha
@@ -62,14 +56,6 @@ public class CaptchaProperties {
 
     public void setCaptchaType(CaptchaType captchaType) {
         this.captchaType = captchaType;
-    }
-
-    public CacheStorage getCacheStorage() {
-        return cacheStorage;
-    }
-
-    public void setCacheStorage(CacheStorage cacheStorage) {
-        this.cacheStorage = cacheStorage;
     }
 
     public String getCacheName() {
