@@ -47,9 +47,8 @@
         <revision>4.0.0</revision>
         <spring-boot.version>4.0.3</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <swagger.version>2.2.43</swagger.version>
         <bcprov.version>1.83</bcprov.version>
-        <oshi.version>6.9.3</oshi.version>
+        <oshi.version>6.10.0</oshi.version>
         <springdoc.version>3.0.1</springdoc.version>
         <zxing-core.version>3.5.4</zxing-core.version>
         <!-- plugins.version -->
@@ -85,11 +84,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${bcprov.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.oshi</groupId>
