@@ -42,15 +42,15 @@ import java.security.spec.X509EncodedKeySpec;
  */
 public final class RSAUtil {
 
-    private static final String algo = "RSA";
+    private static final String algo = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
     /**
      * 默认密钥长度（位）
      */
     private static final int defaultKeySize = 4096;
     /**
-     * RSA 最大加密明文大小（基于 4096 位密钥，PKCS1 填充需减去 11 字节）
+     * RSA 最大加密明文大小（基于 4096 位密钥，OAEP/SHA-256 填充开销 2*32+2=66 字节）
      */
-    private static final int maxEncryptBlock = defaultKeySize / 8 - 11;
+    private static final int maxEncryptBlock = defaultKeySize / 8 - 66;
     /**
      * RSA 最大解密密文大小（基于 4096 位密钥）
      */
@@ -68,7 +68,7 @@ public final class RSAUtil {
     public static KeyPair generateKeyPair() {
         KeyPairGenerator generator;
         try {
-            generator = KeyPairGenerator.getInstance(algo);
+            generator = KeyPairGenerator.getInstance("RSA");
         } catch (NoSuchAlgorithmException e) {
             throw new ToolException(EmojiSymbol.CRYPTO, e);
         }
@@ -86,7 +86,7 @@ public final class RSAUtil {
      */
     private static PublicKey castPublicKey(String publicKey) {
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(algo);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             byte[] decodedKey = Base64Util.decodeUrlSafe(publicKey.getBytes());
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
             return keyFactory.generatePublic(keySpec);
@@ -104,7 +104,7 @@ public final class RSAUtil {
      */
     private static PrivateKey castPrivateKey(String privateKey) {
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance(algo);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             byte[] decodedKey = Base64Util.decodeUrlSafe(privateKey.getBytes());
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             return keyFactory.generatePrivate(keySpec);
@@ -203,7 +203,7 @@ public final class RSAUtil {
         try {
             byte[] keyBytes = castPrivateKey(privateKey).getEncoded();
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(algo);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PrivateKey key = keyFactory.generatePrivate(keySpec);
             Signature signature = Signature.getInstance(signAlgo);
             signature.initSign(key);
@@ -227,7 +227,7 @@ public final class RSAUtil {
         try {
             byte[] keyBytes = castPublicKey(publicKey).getEncoded();
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(algo);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey key = keyFactory.generatePublic(keySpec);
             Signature signer = Signature.getInstance(signAlgo);
             signer.initVerify(key);
