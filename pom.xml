@@ -58,7 +58,7 @@
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
         <swagger.version>2.2.40</swagger.version>
         <mybatis-flex.version>1.11.4</mybatis-flex.version>
-        <bcprov.version>1.82</bcprov.version>
+        <bcprov.version>1.84</bcprov.version>
         <oshi.version>6.9.1</oshi.version>
         <springdoc.version>2.8.14</springdoc.version>
         <zxing-core.version>3.5.4</zxing-core.version>
