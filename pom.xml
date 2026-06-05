@@ -45,11 +45,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
-        <spring-boot.version>4.0.3</spring-boot.version>
+        <spring-boot.version>4.0.6</spring-boot.version>
         <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
-        <bcprov.version>1.83</bcprov.version>
-        <oshi.version>6.10.0</oshi.version>
-        <springdoc.version>3.0.2</springdoc.version>
+        <bcprov.version>1.84</bcprov.version>
+        <oshi.version>7.0.0</oshi.version>
+        <springdoc.version>3.0.3</springdoc.version>
         <zxing-core.version>3.5.4</zxing-core.version>
         <!-- plugins.version -->
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
