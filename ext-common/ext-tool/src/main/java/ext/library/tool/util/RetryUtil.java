@@ -9,12 +9,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * <h2>重试工具类</h2>
- *
- * @author GFire
- * @since 2025/4/22 17:58
+ * 重试工具类
  */
-public abstract class RetryUtils {
+public abstract class RetryUtil {
     /**
      * 失败重试
      *
