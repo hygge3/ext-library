@@ -912,7 +912,9 @@ public final class HttpUtil {
             if (type == InputStream.class) {
                 return (T) response.body();
             }
-            throw new UnsupportedOperationException("Unsupported response type: " + type);
+            // 其他类型按 JSON 反序列化
+            String json = response.body() instanceof String s ? s : new String((byte[]) response.body(), StandardCharsets.UTF_8);
+            return JsonUtil.readObj(json, type);
         }
 
         /**
