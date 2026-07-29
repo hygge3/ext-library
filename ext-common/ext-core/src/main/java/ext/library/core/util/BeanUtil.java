@@ -6,7 +6,6 @@ import ext.library.tool.holder.Lazy;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
-import io.github.linpeilie.Converter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -35,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class BeanUtil {
 
-    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
     private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     private BeanUtil() {
@@ -155,11 +153,6 @@ public final class BeanUtil {
         if (targetType.equals(source.getClass())) {
             return (T) source;
         }
-        try {
-            return CONVERTER.get().convert(source, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-        }
         return copyByCopier(source, targetType);
     }
 
@@ -173,12 +166,7 @@ public final class BeanUtil {
         if (source == null || target == null) {
             return;
         }
-        try {
-            CONVERTER.get().convert(source, target);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
             copyByCopier(source, target);
-        }
     }
 
     /**
@@ -197,11 +185,6 @@ public final class BeanUtil {
         if (targetType.equals(sourceList.getFirst().getClass())) {
             return (List<T>) sourceList;
         }
-        try {
-            return CONVERTER.get().convert(sourceList, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-        }
         return sourceList.stream()
                 .map(source -> copyByCopier(source, targetType))
                 .toList();
@@ -218,11 +201,6 @@ public final class BeanUtil {
     public static <T> T convert(Map<String, Object> map, Class<T> targetType) {
         if (ObjectUtil.isEmpty(map)) {
             return ClassUtil.newInstance(targetType);
-        }
-        try {
-            return CONVERTER.get().convert(map, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
         }
         return mapToBean(map, targetType);
     }

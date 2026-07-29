@@ -45,17 +45,16 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- dependencies.version -->
         <revision>4.0.0</revision>
-        <spring-boot.version>4.0.6</spring-boot.version>
-        <mapstruct-plus.version>1.5.0</mapstruct-plus.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <bcprov.version>1.84</bcprov.version>
-        <oshi.version>7.0.0</oshi.version>
+        <oshi.version>7.4.1</oshi.version>
         <springdoc.version>3.0.3</springdoc.version>
         <zxing-core.version>3.5.4</zxing-core.version>
         <!-- plugins.version -->
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
@@ -74,12 +73,6 @@
                 <scope>import</scope>
             </dependency>
             <!-- ext-bom 内联（避免 reactor 内 BOM import） -->
-            <!-- 第三方依赖 -->
-            <dependency>
-                <groupId>io.github.linpeilie</groupId>
-                <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
-                <version>${mapstruct-plus.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
@@ -87,7 +80,7 @@
             </dependency>
             <dependency>
                 <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java25</artifactId>
+                <artifactId>oshi-core-ffm</artifactId>
                 <version>${oshi.version}</version>
             </dependency>
             <dependency>

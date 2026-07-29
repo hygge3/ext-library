@@ -37,3 +37,4 @@ build/
 /.claude/
 /.spec-workflow/
 /.serena/
+/.rtk/

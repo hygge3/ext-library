@@ -15,7 +15,6 @@ import java.util.Enumeration;
 public final class NetUtil {
 
     private static final String localHost = "127.0.0.1";
-    private static final String localHostIPv6 = "[::1]";
 
     private NetUtil() {
     }

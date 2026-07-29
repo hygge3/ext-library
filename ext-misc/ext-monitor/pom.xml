@@ -12,7 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-core-java25</artifactId>
+            <artifactId>oshi-core-ffm</artifactId>
         </dependency>
     </dependencies>
 

@@ -7,7 +7,6 @@ import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -34,6 +33,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.Set;
 
 /**
@@ -58,7 +58,6 @@ public class GlobalExceptionHandler {
      * 处理 BindingResult
      *
      * @param result BindingResult
-     *
      * @return R
      */
     private static R<Void> handleBindingResult(BindingResult result) {
@@ -79,12 +78,11 @@ public class GlobalExceptionHandler {
      * 处理 ConstraintViolation
      *
      * @param violations 校验结果
-     *
      * @return R
      */
     private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
         ConstraintViolation<?> violation = violations.iterator().next();
-        String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
+        String path = violation.getPropertyPath().toString();
         String message = StringUtil.format("{}:{}", path, violation.getMessage());
         return R.failed(HttpStatus.BAD_REQUEST, message);
     }
@@ -159,7 +157,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       参数校验未通过异常
      * @param request 请求
-     *
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -176,7 +173,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       参数校验未通过异常
      * @param request 请求
-     *
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -199,7 +195,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -214,7 +209,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -230,7 +224,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMessageConversionException.class)
@@ -246,7 +239,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(MethodArgumentConversionNotSupportedException.class)
@@ -262,7 +254,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -278,7 +269,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Object> }
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
@@ -295,7 +285,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(BindException.class)
@@ -311,7 +300,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(ConstraintViolationException.class)
@@ -328,7 +316,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       e
      * @param request 请求
-     *
      * @return {@code R<Void> }
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -345,7 +332,6 @@ public class GlobalExceptionHandler {
      *
      * @param e       超出最大上传大小异常
      * @param request 请求
-     *
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
