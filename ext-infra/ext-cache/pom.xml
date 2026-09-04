@@ -8,7 +8,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>ext-cache</artifactId>
-    <description>多级缓存抽象模块，支持 Caffeine + Redis/PostgreSQL</description>
+    <description>多级缓存抽象模块，支持进程内内存 + Redis/PostgreSQL</description>
 
     <dependencies>
         <dependency>
@@ -31,18 +31,6 @@
             <artifactId>ext-postgres</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- Caffeine 本地缓存 -->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.errorprone</groupId>
-                    <artifactId>error_prone_annotations</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-    </dependencies>
+        </dependencies>
 
 </project>

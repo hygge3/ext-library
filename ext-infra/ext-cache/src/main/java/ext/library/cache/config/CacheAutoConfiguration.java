@@ -2,11 +2,7 @@ package ext.library.cache.config;
 
 import ext.library.cache.core.CacheAspect;
 import ext.library.cache.properties.CacheProperties;
-import ext.library.cache.strategy.CacheStrategy;
-import ext.library.cache.strategy.CaffeineStrategy;
-import ext.library.cache.strategy.L2Strategy;
-import ext.library.cache.strategy.PostgresStrategy;
-import ext.library.cache.strategy.RedisStrategy;
+import ext.library.cache.strategy.*;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -43,18 +39,20 @@ public class CacheAutoConfiguration {
     // ──────────── 显式配置 ────────────
 
     /**
-     * 显式配置：Caffeine 本地缓存
+     * 显式配置：进程内内存缓存
      * <p>
      * 当 {@code ext.cache.cache-storage=CAFFEINE} 时生效。
+     * <p>
+     * 枚举值 {@code CAFFEINE} 仅为向后兼容保留，实际实现为 {@link InMemoryStrategy}。
      */
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = CacheProperties.PREFIX, name = "cache-storage", havingValue = "CAFFEINE")
-    static class CaffeineStrategyConfiguration {
+    @ConditionalOnProperty(prefix = CacheProperties.PREFIX, name = "cache-storage", havingValue = "MEMORY")
+    static class InMemoryStrategyConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(CacheStrategy.class)
         public CacheStrategy cacheStrategy() {
-            return new CaffeineStrategy();
+            return new InMemoryStrategy();
         }
 
     }
@@ -121,8 +119,8 @@ public class CacheAutoConfiguration {
      * 当 {@code ext.cache.cache-storage} 未配置或显式设置为 {@code AUTO} 时生效，
      * 根据类路径中可用的依赖自动选择：
      * <ul>
-     *     <li>存在 ext-redis 或 ext-postgres → {@link L2Strategy}（Caffeine + 分布式缓存）</li>
-     *     <li>仅有 Caffeine → {@link CaffeineStrategy}</li>
+     *     <li>存在 ext-redis 或 ext-postgres → {@link L2Strategy}（内存缓存 + 分布式缓存）</li>
+     *     <li>无分布式依赖 → {@link InMemoryStrategy}</li>
      * </ul>
      */
     @Configuration(proxyBeanMethods = false)
@@ -144,7 +142,7 @@ public class CacheAutoConfiguration {
                 // L2Strategy 内部通过 l2-backend 配置（默认 AUTO）进一步决定分布式后端
                 return new L2Strategy();
             }
-            return new CaffeineStrategy();
+            return new InMemoryStrategy();
         }
 
     }

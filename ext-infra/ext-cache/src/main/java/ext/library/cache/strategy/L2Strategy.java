@@ -12,7 +12,7 @@ import java.time.Duration;
 /**
  * 二级缓存策略
  * <p>
- * 结合 Caffeine 本地缓存和分布式缓存（Redis 或 PostgreSQL），实现多级缓存架构。
+ * 结合进程内内存缓存和分布式缓存（Redis 或 PostgreSQL），实现多级缓存架构。
  * 读取时先查询本地缓存，未命中则查询分布式缓存并回填本地缓存。
  * <p>
  * 分布式缓存后端通过 {@code ext.cache.l2-backend} 配置项指定：
@@ -26,7 +26,7 @@ import java.time.Duration;
  */
 public class L2Strategy implements CacheStrategy {
 
-    private final CacheStrategy caffeineStrategy = new CaffeineStrategy();
+    private final CacheStrategy localStrategy = new InMemoryStrategy();
 
     private volatile CacheStrategy distributedStrategy;
     private volatile L2Backend backendType;
@@ -81,11 +81,11 @@ public class L2Strategy implements CacheStrategy {
 
     @Override
     public <T> T get(String cacheName, String key, Class<T> clazz) {
-        // 先查询 Caffeine 本地缓存
-        T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
-        if (caffeineCache != null) {
-            Logs.debug(EmojiSymbol.CACHE, "从 Caffeine 中获取数据");
-            return caffeineCache;
+        // 先查询本地缓存
+        T localCache = localStrategy.get(cacheName, key, clazz);
+        if (localCache != null) {
+            Logs.debug(EmojiSymbol.CACHE, "从本地内存缓存中获取数据");
+            return localCache;
         }
 
         // 本地未命中，查询分布式缓存
@@ -93,8 +93,8 @@ public class L2Strategy implements CacheStrategy {
         T distributedCache = distributed.get(cacheName, key, clazz);
         if (distributedCache != null) {
             Logs.debug(EmojiSymbol.CACHE, "从 {} 获取数据", backendType);
-            // 回填到 Caffeine 本地缓存
-            caffeineStrategy.put(cacheName, key, distributedCache);
+            // 回填到本地缓存
+            localStrategy.put(cacheName, key, distributedCache);
             return distributedCache;
         }
 
@@ -104,27 +104,27 @@ public class L2Strategy implements CacheStrategy {
     @Override
     public <T> T put(String cacheName, String key, T value, Duration expireTime) {
         getDistributedStrategy().put(cacheName, key, value, expireTime);
-        caffeineStrategy.put(cacheName, key, value, expireTime);
+        localStrategy.put(cacheName, key, value, expireTime);
         return value;
     }
 
     @Override
     public <T> T put(String cacheName, String key, T value) {
         getDistributedStrategy().put(cacheName, key, value);
-        caffeineStrategy.put(cacheName, key, value);
+        localStrategy.put(cacheName, key, value);
         return value;
     }
 
     @Override
     public void evict(String cacheName, String key) {
         getDistributedStrategy().evict(cacheName, key);
-        caffeineStrategy.evict(cacheName, key);
+        localStrategy.evict(cacheName, key);
     }
 
     @Override
     public void clear(String cacheName) {
         getDistributedStrategy().clear(cacheName);
-        caffeineStrategy.clear(cacheName);
+        localStrategy.clear(cacheName);
     }
 
 }

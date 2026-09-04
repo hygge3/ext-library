@@ -31,7 +31,7 @@ public class CacheProperties {
     /**
      * 缓存存储方式，默认为自动检测
      * <p>
-     * {@link CacheStorage#AUTO} 时根据类路径中存在的依赖自动选择：有 ext-redis 或 ext-postgres 则使用 L2，否则使用 CAFFEINE。
+     * {@link CacheStorage#AUTO} 时根据类路径中存在的依赖自动选择：有 ext-redis 或 ext-postgres 则使用 L2，否则使用 CAFFEINE（即 {@link ext.library.cache.strategy.InMemoryStrategy} 进程内内存实现）。
      */
     private CacheStorage cacheStorage = CacheStorage.AUTO;
 
@@ -48,7 +48,9 @@ public class CacheProperties {
     private L2Backend l2Backend = L2Backend.AUTO;
 
     /**
-     * Caffeine 缓存配置
+     * 进程内内存缓存配置
+     * <p>
+     * 配置类名 {@code caffeine} 仅为向后兼容保留。
      */
     private CaffeineConfig caffeine = new CaffeineConfig();
 
@@ -93,18 +95,15 @@ public class CacheProperties {
     }
 
     /**
-     * Caffeine 缓存配置
+     * 进程内内存缓存配置
+     * <p>
+     * 类名 {@code CaffeineConfig} 仅为向后兼容保留。
      */
     public static class CaffeineConfig {
         /**
          * 最大缓存条目数
          */
         private long maximumSize = 10000L;
-
-        /**
-         * 访问后是否刷新过期时间
-         */
-        private boolean refreshOnAccess = true;
 
         public long getMaximumSize() {
             return maximumSize;
@@ -114,12 +113,5 @@ public class CacheProperties {
             this.maximumSize = maximumSize;
         }
 
-        public boolean isRefreshOnAccess() {
-            return refreshOnAccess;
-        }
-
-        public void setRefreshOnAccess(boolean refreshOnAccess) {
-            this.refreshOnAccess = refreshOnAccess;
-        }
     }
 }
