@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-web**
+[根目录](../AGENTS.md) > **ext-web**
 
 # ext-web - Web 层
 
@@ -11,7 +11,7 @@ ext-web 负责 Web 层的功能增强，提供统一的请求处理、API 文档
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | ext-mvc | Spring MVC 增强，自定义验证器、异常处理 | ext-core, ext-json, spring-webmvc |
 | ext-openapi | OpenAPI/Swagger 文档支持 | ext-core, springdoc-openapi |
 | ext-sse | Server-Sent Events 服务端推送 | ext-redis, ext-security, ext-mvc |
@@ -24,6 +24,7 @@ ext-web 负责 Web 层的功能增强，提供统一的请求处理、API 文档
 Spring MVC 增强模块，提供：
 
 **自定义验证约束**:
+
 - `@Chinese` - 中文字符校验
 - `@English` - 英文字符校验
 - `@Cellphone` - 手机号校验
@@ -35,9 +36,11 @@ Spring MVC 增强模块，提供：
 - `@Mutual` - 互斥字段校验
 
 **验证分组**:
+
 - `ValidationGroups` - 预定义验证分组
 
 **消息插值**:
+
 - `EmptyCurlyToDefaultMessageInterpolator` - 空大括号转默认消息
 
 **包结构**: `ext.library.web`
@@ -55,6 +58,7 @@ OpenAPI 文档模块，提供：
 **包结构**: `ext.library.openapi`
 
 **核心类**:
+
 - `OpenApiAutoConfig` - 自动配置类
 - `OpenApiProperties` - 配置属性 (`ext.openapi.*`)
 - `ExtOpenApiService` - 自定义 OpenAPI 服务实现
@@ -106,4 +110,4 @@ ext-websocket (依赖 ext-redis, ext-security)
 
 | 日期 | 变更内容 |
 |------|----------|
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-common**
+[根目录](../AGENTS.md) > **ext-common**
 
 # ext-common - 通用基础层
 
@@ -15,7 +15,7 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | ext-tool | 通用工具类库 (ID生成、重试、函数式接口等) | 无外部依赖 |
 | ext-core | 核心功能 (SpEL表达式、验证、AOP等) | ext-tool, spring-validation, mapstruct-plus |
 | ext-json | JSON 处理工具 (Jackson封装、JsonPath) | ext-tool, spring-boot-starter-json, json-path |
@@ -78,4 +78,4 @@ ext-tool (基础工具)
 | 日期 | 变更内容 |
 |------|----------|
 | 2026-01-19 | 移除 ext-pom，BOM 模块已迁移至根目录 ext-bom |
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

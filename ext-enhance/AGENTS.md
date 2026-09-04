@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-enhance**
+[根目录](../AGENTS.md) > **ext-enhance**
 
 # ext-enhance - 业务增强层
 
@@ -11,7 +11,7 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | ext-captcha | 图形验证码生成与校验 | ext-cache |
 | ext-idempotent | 接口幂等性控制 | ext-redis, caffeine(可选) |
 | ext-desensitize | 数据脱敏 (手机号、身份证等) | ext-tool, jackson |
@@ -25,6 +25,7 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 图形验证码模块，提供：
 
 **验证码绘制**:
+
 - `CaptchaDraw` - 验证码绘制接口
 - `RandomCaptchaDraw` - 随机字符验证码
 - `MathCaptchaDraw` - 数学表达式验证码
@@ -33,6 +34,7 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 - `CurveInterferenceDraw` - 曲线干扰
 
 **核心组件**:
+
 - `ICaptcha` - 验证码核心接口
 - `ICaptchaService` - 验证码服务接口
 - `CaptchaCache` - 验证码缓存
@@ -145,4 +147,4 @@ public Result getData() { ... }
 
 | 日期 | 变更内容 |
 |------|----------|
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

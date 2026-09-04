@@ -47,13 +47,13 @@ graph TD
     H --> H1["ext-http<br/>HTTP 客户端"]
     H --> H2["ext-qrcode<br/>二维码"]
     H --> H3["ext-monitor<br/>系统监控"]
-    click B "./ext-common/CLAUDE.md" "查看 ext-common 模块文档"
-    click C "./ext-infra/CLAUDE.md" "查看 ext-infra 模块文档"
-    click D "./ext-security/CLAUDE.md" "查看 ext-security 模块文档"
-    click E "./ext-crypto/CLAUDE.md" "查看 ext-crypto 模块文档"
-    click F "./ext-web/CLAUDE.md" "查看 ext-web 模块文档"
-    click G "./ext-enhance/CLAUDE.md" "查看 ext-enhance 模块文档"
-    click H "./ext-misc/CLAUDE.md" "查看 ext-misc 模块文档"
+    click B "./ext-common/AGENTS.md" "查看 ext-common 模块文档"
+    click C "./ext-infra/AGENTS.md" "查看 ext-infra 模块文档"
+    click D "./ext-security/AGENTS.md" "查看 ext-security 模块文档"
+    click E "./ext-crypto/AGENTS.md" "查看 ext-crypto 模块文档"
+    click F "./ext-web/AGENTS.md" "查看 ext-web 模块文档"
+    click G "./ext-enhance/AGENTS.md" "查看 ext-enhance 模块文档"
+    click H "./ext-misc/AGENTS.md" "查看 ext-misc 模块文档"
 ```
 
 ## 模块索引
@@ -61,13 +61,13 @@ graph TD
 | 模块                                       | 类型   | 描述                                 |
 |------------------------------------------|------|------------------------------------|
 | ext-bom                                  | 独立模块 | BOM 依赖管理，统一管理所有 ext 模块版本           |
-| [ext-common](./ext-common/CLAUDE.md)     | 聚合器  | 通用基础层，包含工具类、核心功能、JSON 处理           |
-| [ext-infra](./ext-infra/CLAUDE.md)       | 聚合器  | 基础设施层，包含 Redis、缓存、邮件支持             |
-| [ext-security](./ext-security/CLAUDE.md) | 独立模块 | 安全认证与授权框架                          |
-| [ext-crypto](./ext-crypto/CLAUDE.md)     | 独立模块 | 加密算法工具库 (AES/DES/RSA/SM2/SM4)      |
-| [ext-web](./ext-web/CLAUDE.md)           | 聚合器  | Web 层，包含 MVC、OpenAPI、SSE、WebSocket |
-| [ext-enhance](./ext-enhance/CLAUDE.md)   | 聚合器  | 业务增强层，包含验证码、幂等性、脱敏、翻译、API加密        |
-| [ext-misc](./ext-misc/CLAUDE.md)         | 聚合器  | 杂项工具层，包含 HTTP 客户端、二维码、系统监控         |
+| [ext-common](./ext-common/AGENTS.md)     | 聚合器  | 通用基础层，包含工具类、核心功能、JSON 处理           |
+| [ext-infra](./ext-infra/AGENTS.md)       | 聚合器  | 基础设施层，包含 Redis、缓存、邮件支持             |
+| [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架                          |
+| [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/DES/RSA/SM2/SM4)      |
+| [ext-web](./ext-web/AGENTS.md)           | 聚合器  | Web 层，包含 MVC、OpenAPI、SSE、WebSocket |
+| [ext-enhance](./ext-enhance/AGENTS.md)   | 聚合器  | 业务增强层，包含验证码、幂等性、脱敏、翻译、API加密        |
+| [ext-misc](./ext-misc/AGENTS.md)         | 聚合器  | 杂项工具层，包含 HTTP 客户端、二维码、系统监控         |
 
 ## 分层架构
 
@@ -143,7 +143,7 @@ export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 
 ## AI 使用指引
 
-1. **修改模块代码前**: 先阅读对应模块的 CLAUDE.md 了解模块职责和依赖关系
+1. **修改模块代码前**: 先阅读对应模块的 AGENTS.md 了解模块职责和依赖关系
 2. **添加新功能**: 根据功能类型选择合适的层级模块
 3. **添加新模块**: 在对应聚合器下创建，并更新 pom.xml 的 subprojects
 4. **版本更新**: 仅修改根 pom.xml 中的 `revision` 属性
@@ -152,4 +152,4 @@ export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 
 | 日期         | 变更内容             |
 |------------|------------------|
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

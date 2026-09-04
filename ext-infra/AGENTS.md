@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-infra**
+[根目录](../AGENTS.md) > **ext-infra**
 
 # ext-infra - 基础设施层
 
@@ -11,7 +11,7 @@ ext-infra 负责与外部基础设施的集成，为上层业务模块提供数�
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | ext-redis | Redis 操作封装，提供统一的 Redis 访问接口 | ext-core, ext-json, spring-data-redis |
 | ext-postgres | PostgreSQL 功能模块（缓存、队列、发布订阅、限流、会话） | ext-core, ext-json, postgresql |
 | ext-cache | 多级缓存抽象 (Caffeine + Redis/PostgreSQL) | ext-redis(可选), ext-postgres(可选), caffeine |
@@ -46,6 +46,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 **配置前缀**: `ext.postgres`
 
 **核心类**:
+
 - `PostgresCacheManager` - 缓存管理器
 - `PostgresQueue` - 任务队列
 - `PostgresPubSub` - 发布订阅管理器
@@ -53,6 +54,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 - `PostgresSessionManager` - 会话管理器
 
 **表结构**:
+
 - `pg_cache` - 缓存表（UNLOGGED）
 - `pg_jobs` - 任务队列表
 - `pg_rate_limits` - 限流记录表
@@ -65,7 +67,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 - **本地缓存**: Caffeine 高性能本地缓存
 - **分布式缓存**: Redis 或 PostgreSQL（可配置）
 - **二级缓存**: Caffeine + 分布式缓存（后端可切换）
-- **缓存策略**: `CaffeineStrategy`, `RedisStrategy`, `PostgresStrategy`, `L2Strategy`
+- **缓存策略**: `MemoryStrategy`, `RedisStrategy`, `PostgresStrategy`, `L2Strategy`
 - **注解支持**: `@Cache` 缓存注解
 
 **包结构**: `ext.library.cache`
@@ -73,6 +75,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 **配置前缀**: `ext.cache`
 
 **核心类**:
+
 - `CacheAutoConfig` - 自动配置类
 - `CacheProperties` - 缓存配置属性
 - `Cache` - 缓存注解
@@ -80,6 +83,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 - `L2Backend` - 二级缓存后端枚举
 
 **配置示例**:
+
 ```yaml
 ext:
   cache:
@@ -129,7 +133,7 @@ ext-mail (独立，仅依赖 spring-boot-starter-mail)
 ## 变更记录
 
 | 日期 | 变更内容 |
-|------|----------|
+| ------ | ---------- |
 | 2026-01-26 | ext-cache 支持 PostgreSQL 缓存后端，解除循环依赖 |
 | 2026-01-22 | 添加 ext-postgres 模块 |
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

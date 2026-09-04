@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-security**
+[根目录](../AGENTS.md) > **ext-security**
 
 # ext-security - 安全层
 
@@ -97,9 +97,9 @@ ext.library.security
 安全模块配置前缀：`ext.security`
 
 | 配置项 | 默认值 | 说明 |
-|-------|-------|------|
+| ------- | ------- | ------ |
 | token-name | Authorization | token 在 HTTP Header / 请求参数中的键名 |
-| token-prefix | Bearer  | token 前缀，拼接在 token 值之前（含尾部空格） |
+| token-prefix | Bearer | token 前缀，拼接在 token 值之前（含尾部空格） |
 | timeout | 30d | 授权有效期，支持 Duration 格式（30d, 720h） |
 | activity-timeout | 1h | 最低活跃频率，支持 Duration 格式（1h, 60m） |
 | auto-renewal | true | 是否自动续约 |
@@ -111,9 +111,9 @@ ext.library.security
 | enable-cookie | true | 是否开启 cookie |
 | cookie-config.cookie-name | Token | cookie 名称 |
 | cookie-config.http-only | true | 是否禁止 JS 操作 Cookie |
-| cookie-config.domain |  | cookie 域设置 |
-| cookie-config.path |  | cookie 路径设置 |
-| cookie-config.secure |  | 是否仅在 HTTPS 下发送 |
+| cookie-config.domain | | cookie 域设置 |
+| cookie-config.path | | cookie 路径设置 |
+| cookie-config.secure | | 是否仅在 HTTPS 下发送 |
 
 存储配置通过 ext-cache 模块的 `ext.cache` 前缀进行配置。
 
@@ -185,8 +185,8 @@ public class MySecurityAuthority implements SecurityAuthority {
 ## 变更记录
 
 | 日期 | 变更内容 |
-|------|----------|
+| ------ | ---------- |
 | 2026-02-18 | SRP 重构：领域对象移除 Spring 容器依赖，持久化逻辑统一收归 SecurityService；修复多处 bug（tokenIndex 分布式、createLoginByLoginId token 持久化、issueTokenMaxLimit 逻辑反向、PermissionUtil AND 分支）；修复 CookieProperties final 字段、SecurityExceptionHandler 注解、SecurityListenerManager 线程安全 |
 | 2026-01-26 | 时间配置改用 Duration 类型，支持 30d、1h、3m 等格式 |
 | 2026-01-26 | 重构存储层，改用 ext-cache 替代独立的 RAM/Redis 实现 |
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

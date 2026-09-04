@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-misc**
+[根目录](../AGENTS.md) > **ext-misc**
 
 # ext-misc - 杂项工具层
 
@@ -11,7 +11,7 @@ ext-misc 包含相对独立的工具模块，不属于特定业务领域，可�
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | ext-http | HTTP 客户端封装 | ext-tool |
 | ext-useragent | User-Agent 解析器 | ext-tool |
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
@@ -42,6 +42,7 @@ User-Agent 解析模块，提供：
 **包结构**: `ext.library.useragent`
 
 **使用示例**:
+
 ```java
 UserAgent ua = UserAgentParser.parse(userAgentString);
 if (ua != null) {
@@ -62,6 +63,7 @@ if (ua != null) {
 **包结构**: `ext.library.qrcode`
 
 **使用示例**:
+
 ```java
 // 生成二维码
 byte[] qrImage = QrCode.from("https://example.com")
@@ -90,6 +92,7 @@ String content = QrCode.read(inputStream);
 **包结构**: `ext.library.monitor`
 
 **使用示例**:
+
 ```java
 // 静态便捷方法（推荐）
 CpuInfo cpu = CpuInfo.get();
@@ -132,7 +135,7 @@ oshi-core-java25
 ## 变更记录
 
 | 日期 | 变更内容 |
-|------|----------|
+| ------ | ---------- |
 | 2026-01-26 | 重构 ext-qrcode：修复 API 命名(form→from)、NPE 问题、MIME 类型、添加参数验证 |
 | 2026-01-26 | 重构 ext-monitor：重命名类、修复计算错误、添加静态便捷方法 |
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |

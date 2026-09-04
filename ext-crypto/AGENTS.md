@@ -1,4 +1,4 @@
-[根目录](../CLAUDE.md) > **ext-crypto**
+[根目录](../AGENTS.md) > **ext-crypto**
 
 # ext-crypto - 加密层
 
@@ -155,7 +155,7 @@ String sha3 = DigestUtil.hash("SHA3-256", "data");
 ## 算法选择指南
 
 | 场景 | 推荐算法 | 工具类 |
-|------|---------|--------|
+| ------ | --------- | -------- |
 | 数据加密（通用） | AES-GCM 256 位 | `AESUtil` |
 | 数据加密（国密） | SM4-CBC | `SM4Util` |
 | 非对称加密（通用） | RSA 4096 位 | `RSAUtil` |
@@ -176,7 +176,7 @@ String sha3 = DigestUtil.hash("SHA3-256", "data");
 ## 变更记录
 
 | 日期 | 变更内容 |
-|------|----------|
+| ------ | ---------- |
 | 2026-01-20 | 重构：删除 DESUtil，AESUtil 改用 AES-GCM 256 位，简化 PasswordEncoder，新增 SM3Util |
 | 2026-01-20 | 重构 API：统一方法命名、修复一致性问题、完善文档 |
-| 2026-01-19 | 初始化 CLAUDE.md 文档 |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |
