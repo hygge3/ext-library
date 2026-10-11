@@ -34,7 +34,7 @@ public class SseConnectionManager {
      */
     public SseEmitter connect(String userId, String token) {
         // 获取或创建当前用户的 SseEmitter 映射表
-        Map<String, SseEmitter> emitters = userTokenEmitters.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
+        Map<String, SseEmitter> emitters = userTokenEmitters.computeIfAbsent(userId, _ -> new ConcurrentHashMap<>());
 
         // 创建一个新的 SseEmitter 实例，超时时间设置为 0 表示无限制
         SseEmitter emitter = new SseEmitter(0L);
