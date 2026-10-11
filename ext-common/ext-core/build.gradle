@@ -1,0 +1,7 @@
+description = '核心功能模块'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-aspectj'
+}

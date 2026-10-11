@@ -1,16 +1,15 @@
 package ext.library.security.domain;
 
-import com.google.common.collect.Maps;
-import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
-import ext.library.security.config.properties.SecurityProperties;
-import ext.library.security.constants.SecurityConstant;
-import ext.library.tool.util.DateUtil;
-import ext.library.tool.util.IDUtil;
+import ext.library.security.enums.TokenState;
+import ext.library.security.properties.SecurityProperties;
+import ext.library.tool.util.IdUtil;
+import ext.library.useragent.Platform;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -19,6 +18,7 @@ import java.util.Objects;
  * 登录参数
  * </p>
  */
+
 public class SecurityLoginParams implements Serializable {
 
     @Serial
@@ -26,11 +26,11 @@ public class SecurityLoginParams implements Serializable {
     /**
      * session 挂载数据
      */
-    private final Map<String, Object> mountData = Maps.newHashMap();
+    private final Map<String, Object> mountData = new HashMap<>();
     /**
      * token 挂载数据
      */
-    private final Map<String, Object> tokenMountData = Maps.newHashMap();
+    private final Map<String, Object> tokenMountData = new HashMap<>();
     /**
      * 设备类型
      */
@@ -45,13 +45,73 @@ public class SecurityLoginParams implements Serializable {
     private Long activityTimeout;
 
     /**
+     * 获取 session 挂载数据
+     *
+     * @return session 挂载数据
+     */
+    public Map<String, Object> getMountData() {
+        return mountData;
+    }
+
+    /**
+     * 获取 token 挂载数据
+     *
+     * @return token 挂载数据
+     */
+    public Map<String, Object> getTokenMountData() {
+        return tokenMountData;
+    }
+
+    /**
+     * 获取超时时间
+     *
+     * @return 超时时间
+     */
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * 设置超时时间
+     *
+     * @param timeout 超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setTimeout(Long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * 获取活跃超时时间
+     *
+     * @return 活跃超时时间
+     */
+    public Long getActivityTimeout() {
+        return activityTimeout;
+    }
+
+    /**
+     * 设置活跃超时时间
+     *
+     * @param activityTimeout 活跃超时时间
+     *
+     * @return SecurityLoginParams
+     */
+    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
+        this.activityTimeout = activityTimeout;
+        return this;
+    }
+
+    /**
      * 获取设备类型
      *
      * @return 设备类型
      */
     public String getDeviceType() {
         if (Objects.isNull(this.deviceType)) {
-            this.deviceType = SecurityConstant.UNKNOWN;
+            this.deviceType = Platform.UNKNOWN.getName();
         }
         return deviceType;
     }
@@ -141,73 +201,53 @@ public class SecurityLoginParams implements Serializable {
         return tokenMountData.get(key);
     }
 
-    public SecurityToken convert(String loginId) {
-        SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
-        SecurityToken securityToken = new SecurityToken();
-        securityToken.setToken(IDUtil.getUUIDv7());
-        securityToken.setLoginId(loginId);
-        securityToken.setDeviceType(Objects.toString(this.getDeviceType(), SecurityConstant.UNKNOWN));
-        securityToken.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
-        securityToken.setActivityTime(DateUtil.format(LocalDateTime.now()));
-        securityToken.setActivityTimeout(Objects.isNull(this.getActivityTimeout()) ? properties.getActivityTimeout() : this.getActivityTimeout());
-        securityToken.setState(SecurityConstant.TOKEN_STATE_NORMAL);
-        securityToken.setCreateTime(DateUtil.format(LocalDateTime.now()));
+    /**
+     * 转换为 SecurityToken
+     *
+     * @param loginId    登录 ID
+     * @param properties 安全配置
+     *
+     * @return SecurityToken
+     */
+    public SecurityToken convert(String loginId, SecurityProperties properties) {
+        LocalDateTime now = LocalDateTime.now();
 
-        // 设置 token 挂载数据
+        SecurityToken securityToken = new SecurityToken();
+        securityToken.setToken(IdUtil.getUUIDv7());
+        securityToken.setLoginId(loginId);
+        securityToken.setDeviceType(Objects.toString(this.getDeviceType()));
+        securityToken.setTimeout(this.getTimeout() != null ? this.getTimeout() : properties.getTimeoutSeconds());
+        securityToken.setActivityTime(now);
+        securityToken.setActivityTimeout(this.getActivityTimeout() != null ? this.getActivityTimeout() : properties.getActivityTimeoutSeconds());
+        securityToken.setState(TokenState.NORMAL);
+        securityToken.setCreateTime(now);
         securityToken.getTokenMountData().putAll(this.getTokenMountData());
+
         return securityToken;
     }
 
-    public SecuritySession convert(String loginId, SecurityToken securityToken) {
-        SecurityProperties properties = SpringUtil.getBean(SecurityProperties.class);
-        SecurityToken token = Objects.isNull(securityToken) ? this.convert(loginId) : securityToken;
-        SecuritySession session = new SecuritySession(true);
+    /**
+     * 转换为 SecuritySession
+     *
+     * @param loginId       登录 ID
+     * @param securityToken SecurityToken，若为 null 则自动创建
+     * @param properties    安全配置
+     *
+     * @return SecuritySession
+     */
+    public SecuritySession convert(String loginId, SecurityToken securityToken, SecurityProperties properties) {
+        SecurityToken token = securityToken != null ? securityToken : this.convert(loginId, properties);
+
+        SecuritySession session = new SecuritySession();
+        session.setSecuritySessionId(IdUtil.getUUIDv7());
         session.setLoginId(loginId);
         session.getMountData().putAll(this.getMountData());
-        session.setTimeout(Objects.isNull(this.getTimeout()) ? properties.getTimeout() : this.getTimeout());
+        session.setTimeout(this.getTimeout() != null ? this.getTimeout() : properties.getTimeoutSeconds());
         session.setCurrentSecurityToken(token);
+        session.setCreateTime(LocalDateTime.now());
         session.setVersion(0L);
         session.addTokenInfo(token);
+
         return session;
-    }
-
-    public Map<String, Object> getMountData() {
-        return mountData;
-    }
-
-    public Map<String, Object> getTokenMountData() {
-        return tokenMountData;
-    }
-
-    public Long getTimeout() {
-        return timeout;
-    }
-
-    /**
-     * 设置超时时间
-     *
-     * @param timeout 超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setTimeout(Long timeout) {
-        this.timeout = timeout;
-        return this;
-    }
-
-    public Long getActivityTimeout() {
-        return activityTimeout;
-    }
-
-    /**
-     * 设置活跃超时时间
-     *
-     * @param activityTimeout 活跃超时时间
-     *
-     * @return SecurityLoginParams
-     */
-    public SecurityLoginParams setActivityTimeout(Long activityTimeout) {
-        this.activityTimeout = activityTimeout;
-        return this;
     }
 }

@@ -1,0 +1,246 @@
+package ext.library.tool.util;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+/**
+ * Stream 流工具类
+ */
+public final class StreamUtil {
+
+    private StreamUtil() {
+    }
+
+    /**
+     * 将 collection 过滤
+     *
+     * @param collection 需要转化的集合
+     * @param predicate  过滤条件
+     *
+     * @return 过滤后的 list
+     */
+    public static <E> List<E> filter(Collection<E> collection, Predicate<E> predicate) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new ArrayList<>();
+        }
+        // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
+        return collection.stream().filter(predicate).collect(Collectors.toList());
+    }
+
+    /**
+     * 将 collection 拼接
+     *
+     * @param collection 需要转化的集合
+     * @param function   拼接方法
+     *
+     * @return 拼接后的 list
+     */
+    public static <E> String join(Collection<E> collection, Function<E, String> function) {
+        return join(collection, function, ",");
+    }
+
+    /**
+     * 将 collection 拼接
+     *
+     * @param collection 需要转化的集合
+     * @param function   拼接方法
+     * @param delimiter  拼接符
+     *
+     * @return 拼接后的 list
+     */
+    public static <E> String join(Collection<E> collection, Function<E, String> function, CharSequence delimiter) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return "";
+        }
+        return collection.stream().map(function).collect(Collectors.joining(delimiter));
+    }
+
+    /**
+     * 将 collection 排序
+     *
+     * @param collection 需要转化的集合
+     * @param comparing  排序方法
+     *
+     * @return 排序后的 list
+     */
+    public static <E> List<E> sorted(Collection<E> collection, Comparator<E> comparing) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new ArrayList<>();
+        }
+        // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
+        return collection.stream().sorted(comparing).collect(Collectors.toList());
+    }
+
+    /**
+     * 将 collection 转化为类型不变的 map<br>
+     * <B>{@code Collection<V>  ---->  Map<K,V>}</B>
+     *
+     * @param collection 需要转化的集合
+     * @param key        V 类型转化为 K 类型的 lambda 方法
+     * @param <V>        collection 中的泛型
+     * @param <K>        map 中的 key 类型
+     *
+     * @return 转化后的 map
+     */
+    public static <V, K> Map<K, V> toIdentityMap(Collection<V> collection, Function<V, K> key) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashMap<>();
+        }
+        return collection.stream().collect(Collectors.toMap(key, Function.identity(), (l, r) -> l));
+    }
+
+    /**
+     * 将 Collection 转化为 map(value 类型与 collection 的泛型不同)<br>
+     * <B>{@code Collection<E> -----> Map<K,V>  }</B>
+     *
+     * @param collection 需要转化的集合
+     * @param key        E 类型转化为 K 类型的 lambda 方法
+     * @param value      E 类型转化为 V 类型的 lambda 方法
+     * @param <E>        collection 中的泛型
+     * @param <K>        map 中的 key 类型
+     * @param <V>        map 中的 value 类型
+     *
+     * @return 转化后的 map
+     */
+    public static <E, K, V> Map<K, V> toMap(Collection<E> collection, Function<E, K> key, Function<E, V> value) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashMap<>();
+        }
+        return collection.stream().collect(Collectors.toMap(key, value, (l, r) -> l));
+    }
+
+    /**
+     * 将 collection 按照规则 (比如有相同的班级 id) 分类成 map<br>
+     * <B>{@code Collection<E> -------> Map<K,List<E>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key        分类的规则
+     * @param <E>        collection 中的泛型
+     * @param <K>        map 中的 key 类型
+     *
+     * @return 分类后的 map
+     */
+    public static <E, K> Map<K, List<E>> groupByKey(Collection<E> collection, Function<E, K> key) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashMap<>();
+        }
+        return collection.stream().collect(Collectors.groupingBy(key, LinkedHashMap::new, Collectors.toList()));
+    }
+
+    /**
+     * 将 collection 按照两个规则 (比如有相同的年级 id，班级 id) 分类成双层 map<br>
+     * <B>{@code Collection<E>  --->  Map<T,Map<U,List<E>>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key1       第一个分类的规则
+     * @param key2       第二个分类的规则
+     * @param <E>        集合元素类型
+     * @param <K>        第一个 map 中的 key 类型
+     * @param <U>        第二个 map 中的 key 类型
+     *
+     * @return 分类后的 map
+     */
+    public static <E, K, U> Map<K, Map<U, List<E>>> groupBy2Key(Collection<E> collection, Function<E, K> key1, Function<E, U> key2) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashMap<>();
+        }
+        return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.groupingBy(key2, LinkedHashMap::new, Collectors.toList())));
+    }
+
+    /**
+     * 将 collection 按照两个规则 (比如有相同的年级 id，班级 id) 分类成双层 map<br>
+     * <B>{@code Collection<E>  --->  Map<T,Map<U,E>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key1       第一个分类的规则
+     * @param key2       第二个分类的规则
+     * @param <T>        第一个 map 中的 key 类型
+     * @param <U>        第二个 map 中的 key 类型
+     * @param <E>        collection 中的泛型
+     *
+     * @return 分类后的 map
+     */
+    public static <E, T, U> Map<T, Map<U, E>> group2Map(Collection<E> collection, Function<E, T> key1, Function<E, U> key2) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashMap<>();
+        }
+        return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.toMap(key2, Function.identity(), (l, r) -> l)));
+    }
+
+    /**
+     * 将 collection 转化为 List 集合，但是两者的泛型不同<br>
+     * <B>{@code Collection<E>  ------>  List<T> } </B>
+     *
+     * @param collection 需要转化的集合
+     * @param function   collection 中的泛型转化为 list 泛型的 lambda 表达式
+     * @param <E>        collection 中的泛型
+     * @param <T>        List 中的泛型
+     *
+     * @return 转化后的 list
+     */
+    public static <E, T> List<T> toList(Collection<E> collection, Function<E, T> function) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new ArrayList<>();
+        }
+        return collection.stream().map(function)
+                // 注意此处不要使用 .toList() 新语法 因为返回的是不可变 List 会导致序列化问题
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 将 collection 转化为 Set 集合，但是两者的泛型不同<br>
+     * <B>{@code Collection<E>  ------>  Set<T> } </B>
+     *
+     * @param collection 需要转化的集合
+     * @param function   collection 中的泛型转化为 set 泛型的 lambda 表达式
+     * @param <E>        collection 中的泛型
+     * @param <T>        Set 中的泛型
+     *
+     * @return 转化后的 Set
+     */
+    public static <E, T> Set<T> toSet(Collection<E> collection, Function<E, T> function) {
+        if (ObjectUtil.isEmpty(collection)) {
+            return new HashSet<>();
+        }
+        return collection.stream().map(function).collect(Collectors.toSet());
+    }
+
+    /**
+     * 合并两个相同 key 类型的 map
+     *
+     * @param map1     第一个需要合并的 map
+     * @param map2     第二个需要合并的 map
+     * @param mergeFunc 合并函数，将 value1 和 value2 合并成最终类型，注意 value 可能为空
+     * @param <K>      map 中的 key 类型
+     * @param <X>      第一个 map 的 value 类型
+     * @param <Y>      第二个 map 的 value 类型
+     * @param <V>      最终 map 的 value 类型
+     *
+     * @return 合并后的 map
+     */
+    public static <K, X, Y, V> Map<K, V> merge(Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> mergeFunc) {
+        Map<K, X> m1 = ObjectUtil.isEmpty(map1) ? Map.of() : map1;
+        Map<K, Y> m2 = ObjectUtil.isEmpty(map2) ? Map.of() : map2;
+
+        Set<K> allKeys = new HashSet<>(m1.keySet());
+        allKeys.addAll(m2.keySet());
+
+        Map<K, V> result = new HashMap<>(allKeys.size());
+        for (K key : allKeys) {
+            result.put(key, mergeFunc.apply(m1.get(key), m2.get(key)));
+        }
+        return result;
+    }
+
+}

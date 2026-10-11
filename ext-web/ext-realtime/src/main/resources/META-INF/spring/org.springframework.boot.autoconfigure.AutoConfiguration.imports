@@ -1,0 +1,2 @@
+ext.library.sse.config.SseAutoConfiguration
+ext.library.websocket.config.WebSocketAutoConfiguration

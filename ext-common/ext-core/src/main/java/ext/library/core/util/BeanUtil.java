@@ -1,0 +1,223 @@
+package ext.library.core.util;
+
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ToolException;
+import ext.library.tool.util.ClassUtil;
+import ext.library.tool.util.ObjectUtil;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.ObjectUtils;
+
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Bean 工具类
+ */
+public final class BeanUtil {
+
+    private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
+
+    private BeanUtil() {
+    }
+
+    /**
+     * 对象转 Map
+     *
+     * @param obj 对象
+     * @return Map
+     */
+    public static Map<String, @Nullable Object> beanToMap(Object obj) {
+        Map<String, @Nullable Object> map = new HashMap<>();
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+                String key = property.getName();
+                if ("class".equalsIgnoreCase(key)) {
+                    continue;
+                }
+                Method getter = property.getReadMethod();
+                map.put(key, getter != null ? getter.invoke(obj) : null);
+            }
+        } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
+            throw new ToolException(EmojiSymbol.TOOL, e);
+        }
+        return map;
+    }
+
+    /**
+     * Map 转对象
+     *
+     * @param map         Map
+     * @param targetClass 目标类型
+     * @return 目标对象
+     */
+    public static <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
+        T object = org.springframework.beans.BeanUtils.instantiateClass(targetClass);
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
+            for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+                Method setter = property.getWriteMethod();
+                if (setter != null) {
+                    setter.invoke(object, map.get(property.getName()));
+                }
+            }
+        } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+            throw new ToolException(EmojiSymbol.TOOL, e);
+        }
+        return object;
+    }
+
+    /**
+     * 获取 Bean 的属性，支持 propertyName 多级：test.user.name
+     *
+     * @param bean         bean
+     * @param propertyName 属性名
+     * @return 属性值
+     */
+    public static @Nullable Object getProperty(Object bean, String propertyName) {
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
+        return beanWrapper.getPropertyValue(propertyName);
+    }
+
+    /**
+     * 设置 Bean 属性，支持 propertyName 多级：test.user.name
+     *
+     * @param bean         bean
+     * @param propertyName 属性名
+     * @param value        属性值
+     */
+    public static void setProperty(Object bean, String propertyName, Object value) {
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(
+                Objects.requireNonNull(bean, "Bean 不能为 null"));
+        beanWrapper.setPropertyValue(propertyName, value);
+    }
+
+    /**
+     * 深度拷贝
+     *
+     * @param source 待拷贝的对象
+     * @return 拷贝之后的对象
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T deepClone(T source) {
+        FastByteArrayOutputStream fBos = new FastByteArrayOutputStream(1024);
+        try (ObjectOutputStream oos = new ObjectOutputStream(fBos)) {
+            oos.writeObject(source);
+            oos.flush();
+        } catch (IOException ex) {
+            throw new ToolException(EmojiSymbol.TOOL, ex);
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream())) {
+            return (T) ois.readObject();
+        } catch (IOException | ClassNotFoundException ex) {
+            throw new ToolException(EmojiSymbol.TOOL, ex);
+        }
+    }
+
+    /**
+     * 将 S 类型对象，转换为 T 类型的对象并返回
+     *
+     * @param source     数据来源实体
+     * @param targetType 目标类型
+     * @return 转换后的对象
+     */
+    @SuppressWarnings("unchecked")
+    public static <S, T> T convert(S source, Class<T> targetType) {
+        if (ObjectUtils.isEmpty(source)) {
+            return ClassUtil.newInstance(targetType);
+        }
+        if (targetType.equals(source.getClass())) {
+            return (T) source;
+        }
+        T target = ClassUtil.newInstance(targetType);
+        copyProperties(source, target);
+        return target;
+    }
+
+    /**
+     * 将 S 类型对象的属性拷贝到 T 类型的对象
+     *
+     * @param source 数据来源实体
+     * @param target 目标对象，属性将被复制到此对象
+     */
+    public static <S, T> void convert(@Nullable S source, @Nullable T target) {
+        if (source == null || target == null) {
+            return;
+        }
+        copyProperties(source, target);
+    }
+
+    /**
+     * 将 S 类型的集合，转换为 T 类型的集合并返回
+     *
+     * @param sourceList 数据来源实体列表
+     * @param targetType 目标类型
+     * @return 转换后的列表
+     */
+    @SuppressWarnings("unchecked")
+    public static <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
+        if (ObjectUtil.isEmpty(sourceList)) {
+            return Collections.emptyList();
+        }
+        if (targetType.equals(sourceList.getFirst().getClass())) {
+            return (List<T>) sourceList;
+        }
+        return sourceList.stream()
+                .map(source -> {
+                    T target = ClassUtil.newInstance(targetType);
+                    copyProperties(source, target);
+                    return target;
+                })
+                .toList();
+    }
+
+    /**
+     * 将 Map 转换为指定类型的对象
+     *
+     * @param map        数据来源
+     * @param targetType 目标类型
+     * @return 转换后的对象
+     */
+    public static <T> T convert(Map<String, Object> map, Class<T> targetType) {
+        if (ObjectUtil.isEmpty(map)) {
+            return ClassUtil.newInstance(targetType);
+        }
+        return mapToBean(map, targetType);
+    }
+
+    /**
+     * 将 source 的属性拷贝到 target，优先使用字节码加速，失败时回落反射
+     *
+     * @param source 数据来源实体
+     * @param target 目标对象，属性将被复制到此对象
+     */
+    private static void copyProperties(Object source, Object target) {
+        String beanKey = source.getClass().getName() + target.getClass().getName();
+        BeanCopier copier = BEAN_COPIER_CACHE.computeIfAbsent(beanKey,
+                k -> BeanCopier.create(source.getClass(), target.getClass(), false));
+        try {
+            copier.copy(source, target, null);
+        } catch (Exception e) {
+            BeanUtils.copyProperties(source, target);
+        }
+    }
+
+}

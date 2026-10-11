@@ -1,0 +1,6 @@
+description = '二维码生成与识别'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api 'com.google.zxing:javase'
+}

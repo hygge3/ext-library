@@ -1,0 +1,103 @@
+plugins {
+    id 'java-platform'
+    id 'maven-publish'
+}
+
+description = 'Ext Library BOM - 依赖版本统一管理'
+
+javaPlatform {
+    allowDependencies()
+}
+
+// ===================== Spring Boot 全家桶 =====================
+// 由 spring-boot-dependencies 统一管理，避免每个模块重复导入
+dependencies {
+    constraints {
+        api "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+// ===================== 其他第三方依赖 =====================
+dependencies {
+    constraints {
+        api "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
+        api "com.github.oshi:oshi-core-java25:${oshiVersion}"
+        api "com.google.zxing:javase:${zxingVersion}"
+        api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
+        api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    }
+}
+
+// ======================= ext-common 层 =====================
+dependencies {
+    constraints {
+        api project(':ext-common:ext-tool')
+        api project(':ext-common:ext-core')
+        api project(':ext-common:ext-json')
+    }
+}
+
+// ======================= ext-infra 层 =====================
+dependencies {
+    constraints {
+        api project(':ext-infra:ext-redis')
+        api project(':ext-infra:ext-cache')
+        api project(':ext-infra:ext-mail')
+        api project(':ext-infra:ext-postgres')
+    }
+}
+
+// ======================= 安全/加密层 =====================
+dependencies {
+    constraints {
+        api project(':ext-security')
+        api project(':ext-crypto')
+    }
+}
+
+// ======================= ext-web 层 =====================
+dependencies {
+    constraints {
+        api project(':ext-web:ext-mvc')
+        api project(':ext-web:ext-realtime')
+    }
+}
+
+// ======================= ext-enhance 层 =====================
+dependencies {
+    constraints {
+        api project(':ext-enhance:ext-captcha')
+        api project(':ext-enhance:ext-idempotent')
+        api project(':ext-enhance:ext-api-crypto')
+    }
+}
+
+// ======================= ext-misc 层 =====================
+dependencies {
+    constraints {
+        api project(':ext-misc:ext-http')
+        api project(':ext-misc:ext-useragent')
+        api project(':ext-misc:ext-qrcode')
+        api project(':ext-misc:ext-monitor')
+    }
+}
+
+publishing {
+    publications {
+        bom(MavenPublication) {
+            from components.javaPlatform
+            artifactId = 'ext-bom'
+            pom {
+                name = 'ext-bom'
+                description = project.description
+                url = 'https://hygge.eu.org'
+                licenses {
+                    license {
+                        name = 'Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+            }
+        }
+    }
+}

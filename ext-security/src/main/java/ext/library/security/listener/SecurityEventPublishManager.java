@@ -93,8 +93,8 @@ public class SecurityEventPublishManager {
      * @param token      token 值
      * @param deviceType 设备类型
      */
-    public static void doLoginOut(String loginId, String token, String deviceType) {
-        SecurityListenerManager.getListener().forEach(item -> item.doLoginOut(loginId, token, deviceType));
+    public static void doLogout(String loginId, String token, String deviceType) {
+        SecurityListenerManager.getListener().forEach(item -> item.doLogout(loginId, token, deviceType));
     }
 
     /**

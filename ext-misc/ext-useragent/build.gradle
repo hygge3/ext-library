@@ -1,0 +1,5 @@
+description = 'UserAgent 解析'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+}

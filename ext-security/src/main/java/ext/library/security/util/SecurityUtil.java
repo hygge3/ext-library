@@ -1,15 +1,15 @@
 package ext.library.security.util;
 
-import ext.library.core.util.ServletUtil;
 import ext.library.core.util.SpringUtil;
-import ext.library.http.useragent.UserAgent;
-import ext.library.http.useragent.UserAgentUtil;
 import ext.library.security.domain.SecurityLoginParams;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.Logical;
 import ext.library.security.service.SecurityService;
 import ext.library.tool.holder.Lazy;
+import ext.library.useragent.UserAgent;
+import ext.library.useragent.UserAgentParser;
+import ext.library.web.util.ServletUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 认证便捷操作工具
  */
-public class SecurityUtil {
+public final class SecurityUtil {
 
     /**
      * 获取 service
@@ -32,7 +32,7 @@ public class SecurityUtil {
      */
     private static String getPlatform() {
         String ua = ServletUtil.getUA();
-        UserAgent userAgent = UserAgentUtil.parse(ua);
+        UserAgent userAgent = UserAgentParser.parse(ua);
         return userAgent.getPlatform().getName();
     }
 
@@ -108,8 +108,8 @@ public class SecurityUtil {
     /**
      * 退出操作
      */
-    public static void loginOut() {
-        SERVICE.get().loginOut();
+    public static void logout() {
+        SERVICE.get().logout();
     }
 
     /**
@@ -117,8 +117,8 @@ public class SecurityUtil {
      *
      * @param token token
      */
-    public static void loginOut(String token) {
-        SERVICE.get().loginOut(token);
+    public static void logout(String token) {
+        SERVICE.get().logout(token);
     }
 
     /**

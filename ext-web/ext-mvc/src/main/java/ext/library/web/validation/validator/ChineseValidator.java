@@ -1,0 +1,34 @@
+package ext.library.web.validation.validator;
+
+import ext.library.tool.util.StringUtil;
+import ext.library.tool.util.ValidatorUtil;
+import ext.library.web.validation.constraints.Chinese;
+import org.jspecify.annotations.NonNull;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+
+/**
+ * 汉字校验器
+ */
+public class ChineseValidator implements ConstraintValidator<Chinese, Object> {
+
+    private boolean notNull;
+
+    @Override
+    public void initialize(@NonNull Chinese constraintAnnotation) {
+        this.notNull = constraintAnnotation.notNull();
+    }
+
+    @Override
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
+        String validValue = String.valueOf(value);
+        if (StringUtil.isNotBlank(validValue)) {
+            return ValidatorUtil.isChinese(validValue);
+        }
+
+        return !notNull;
+    }
+
+}

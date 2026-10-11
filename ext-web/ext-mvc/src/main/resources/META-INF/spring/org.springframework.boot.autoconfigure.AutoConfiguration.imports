@@ -1,0 +1,4 @@
+ext.library.web.config.WebMvcAutoConfiguration
+ext.library.web.launch.StartupListener
+ext.library.web.validation.ExtValidationAutoConfiguration
+ext.library.openapi.config.OpenApiAutoConfiguration

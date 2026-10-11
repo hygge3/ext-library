@@ -1,0 +1,9 @@
+description = '实时通信支持 (Server-Sent Events + WebSocket)'
+
+dependencies {
+    api project(':ext-security')
+    api project(':ext-web:ext-mvc')
+    api 'org.springframework.boot:spring-boot-starter-websocket'
+    compileOnly project(':ext-infra:ext-redis')
+    compileOnly project(':ext-infra:ext-postgres')
+}

@@ -4,10 +4,10 @@ import ext.library.core.util.SpringUtil;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.enums.Logical;
-import ext.library.tool.constant.Symbol;
 import ext.library.tool.holder.Lazy;
 import ext.library.tool.util.ObjectUtil;
 import ext.library.tool.util.StringUtil;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 /**
  * 权限校验工具
  */
-public class PermissionUtil {
+public final class PermissionUtil {
 
     private static final Lazy<SecurityAuthority> authority = Lazy.of(() -> SpringUtil.getBean(SecurityAuthority.class));
 
@@ -69,19 +69,22 @@ public class PermissionUtil {
         }
 
         return switch (logical) {
-            case AND:
+            case AND -> {
                 for (String req : requires) {
                     if (!hasElement(has, req)) {
                         yield false;
                     }
                 }
-            case OR:
+                yield true;
+            }
+            case OR -> {
                 for (String req : requires) {
                     if (hasElement(has, req)) {
                         yield true;
                     }
                 }
                 yield false;
+            }
         };
     }
 
@@ -115,7 +118,7 @@ public class PermissionUtil {
     /**
      * 两个字符串是否匹配，支持正则表达式
      */
-    public static boolean strMatch(String s1, String s2) {
+    public static boolean strMatch(@Nullable String s1, @Nullable String s2) {
         // 两者均为 null 时，直接返回 true
         if (s1 == null && s2 == null) {
             return true;
@@ -125,10 +128,10 @@ public class PermissionUtil {
             return false;
         }
         // 如果表达式不带有*号，则只需简单 equals 即可 (这样可以使速度提升 200 倍左右)
-        if (!s2.contains(Symbol.ASTERISK)) {
-            return ObjectUtil.equalsSafe(s1, s2);
+        if (!s2.contains("*")) {
+            return ObjectUtil.equals(s1, s2);
         }
-        return Pattern.matches(s2.replace(Symbol.ASTERISK, ".*"), s1);
+        return Pattern.matches(s2.replace("*", ".*"), s1);
     }
 
 }

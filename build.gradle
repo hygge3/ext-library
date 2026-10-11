@@ -1,0 +1,78 @@
+plugins {
+    id 'base'
+}
+
+allprojects {
+    group = 'ext.library'
+}
+
+subprojects {
+    // 只有含 src 的叶子模块参与构建；ext-bom 和目录容器（ext-common 等）不套 java-library
+    if (file('src').exists()) {
+        apply plugin: 'java-library'
+    }
+
+    plugins.withId('java-library') {
+        apply plugin: 'maven-publish'
+
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = 'UTF-8'
+            options.compilerArgs << '-parameters'
+            // 告警在构建期暴露，不依赖 IDE 提示；deprecation 涉及跨版本 API 迁移时尤其重要
+            options.compilerArgs << '-Xlint:deprecation,unchecked,rawtypes'
+        }
+
+        tasks.withType(Javadoc).configureEach {
+            options.encoding = 'UTF-8'
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+
+        tasks.withType(Test).configureEach {
+            useJUnitPlatform()
+        }
+
+        dependencies {
+            api platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+            api platform(project(':ext-bom'))
+            api 'org.slf4j:slf4j-api'
+            api 'org.springframework.boot:spring-boot-starter'
+
+            testImplementation('org.springframework.boot:spring-boot-starter-test') {
+                exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+            }
+
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+            annotationProcessor platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+            annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+            annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
+        }
+
+        afterEvaluate {
+            publishing {
+                publications {
+                    library(MavenPublication) {
+                        from components.java
+                        pom {
+                            name = project.name
+                            description = project.description ?: project.name
+                            url = 'https://hygge.eu.org'
+                            licenses {
+                                license {
+                                    name = 'Apache License, Version 2.0'
+                                    url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

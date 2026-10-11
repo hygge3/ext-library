@@ -1,0 +1,8 @@
+description = 'PostgreSQL 替代 Redis 实现缓存、队列、发布订阅、限流等功能'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    api 'org.postgresql:postgresql'
+    api 'org.springframework.boot:spring-boot-starter-jdbc'
+}

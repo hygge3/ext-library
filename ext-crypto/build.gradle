@@ -1,0 +1,7 @@
+description = '加密算法工具库 (AES/DES/RSA/SM2/SM4)'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api 'org.bouncycastle:bcpkix-jdk18on'
+    api 'org.springframework.security:spring-security-crypto'
+}
