@@ -30,7 +30,6 @@ implementation("ext.library:ext-core")
 |------------------------------------|--------|
 | ext-tool                           | 基础工具类  |
 | spring-boot-starter-validation     | 参数校验   |
-| mapstruct-plus-spring-boot-starter | 对象映射   |
 | spring-boot-starter-aspectj        | AOP 支持 |
 
 ## 包结构
@@ -58,7 +57,7 @@ ext.library.core
 | 类名            | 说明                            |
 |---------------|-------------------------------|
 | `SpringUtil`  | Spring 上下文工具                  |
-| `BeanUtil`    | Bean 操作工具 (MapStruct Plus 增强) |
+| `BeanUtil`    | Bean 操作工具 (属性拷贝/转换)         |
 | `ServletUtil` | Servlet 请求响应工具                |
 | `MethodUtil`  | 方法操作工具                        |
 | `AspectUtil`  | AOP 切面工具                      |
@@ -102,14 +101,14 @@ String result = SpelUtil.parse("#user.name", context);
 public User getUser(User user) { ...}
 ```
 
-### Bean 操作 (MapStruct Plus)
+### Bean 操作
 
 ```java
 // 对象属性复制
-UserVO vo = BeanUtil.copy(user, UserVO.class);
+UserVO vo = BeanUtil.convert(user, UserVO.class);
 
-// 批量复制
-List<UserVO> voList = BeanUtil.copyList(userList, UserVO.class);
+// 批量属性复制
+List<UserVO> voList = BeanUtil.convert(userList, UserVO.class);
 ```
 
 ### 切面工具

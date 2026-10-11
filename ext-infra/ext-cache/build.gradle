@@ -1,0 +1,15 @@
+description = '多级缓存抽象模块，支持 Caffeine + Redis/PostgreSQL'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    // 可选后端
+    compileOnly project(':ext-infra:ext-redis')
+    compileOnly project(':ext-infra:ext-postgres')
+    compileOnly('com.github.ben-manes.caffeine:caffeine') {
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+    }
+    testImplementation project(':ext-infra:ext-redis')
+    testImplementation project(':ext-infra:ext-postgres')
+    testImplementation 'com.github.ben-manes.caffeine:caffeine'
+}

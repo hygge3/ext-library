@@ -1,10 +1,10 @@
 # ext-json
 
-> JSON 处理工具 - 提供 Jackson 增强配置和 JsonPath 查询支持
+> JSON 处理工具 - 提供 Jackson 增强配置、JsonPath 查询、字段翻译与数据脱敏
 
 ## 简介
 
-`ext-json` 是 ext-library 的 JSON 处理模块，封装了 Jackson ObjectMapper 的增强配置和 JsonPath 查询能力。
+`ext-json` 是 ext-library 的 JSON 处理模块，封装了 Jackson ObjectMapper 的增强配置、JsonPath 查询能力，以及基于 Jackson 的字段翻译 (`ext.library.trans`) 与数据脱敏 (`ext.library.desensitize`) 扩展。
 
 ## 快速开始
 
@@ -39,6 +39,9 @@ ext.library.json
 ├── module/         # Jackson 扩展模块
 ├── serializer/     # 序列化器
 └── util/           # 工具类
+
+ext.library.trans          # 字段翻译
+ext.library.desensitize    # 数据脱敏
 ```
 
 ## 功能模块
@@ -66,9 +69,10 @@ ext.library.json
 
 ### 自动配置 (config)
 
-| 类名 | 说明 |
-|------|------|
-| `JsonAutoConfig` | JSON 自动配置类 |
+| 类名                                | 说明                    |
+|-------------------------------------|-------------------------|
+| `JsonAutoConfig`                    | JSON 自动配置类          |
+| `TranslationAutoConfiguration`      | 字段翻译自动配置类       |
 
 ## 使用示例
 

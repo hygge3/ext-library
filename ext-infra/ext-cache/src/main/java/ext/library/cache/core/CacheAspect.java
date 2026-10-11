@@ -63,7 +63,7 @@ public class CacheAspect {
      */
     private Object getOrLoad(ProceedingJoinPoint point, MethodSignature signature,
                              String cacheName, String key, Cache annotation) throws Throwable {
-        Object cache = cacheStrategy.get(cacheName, key, signature.getReturnType());
+        Object cache = getCachedValue(cacheName, key, signature.getReturnType());
         if (cache != null) {
             return cache;
         }
@@ -74,5 +74,13 @@ public class CacheAspect {
             cacheStrategy.put(cacheName, key, result, DateUtil.convert(annotation.timeout(), annotation.timeUnit()));
         }
         return result;
+    }
+
+    /**
+     * 按方法返回类型读取缓存，缓存值只做类型转换不做序列化，转换失败由策略实现返回 null
+     */
+    @SuppressWarnings("unchecked")
+    private Object getCachedValue(String cacheName, String key, Class<?> returnType) {
+        return cacheStrategy.get(cacheName, key, (Class<Object>) returnType);
     }
 }

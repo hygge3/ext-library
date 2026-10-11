@@ -1,0 +1,43 @@
+rootProject.name = 'ext-library'
+
+dependencyResolutionManagement {
+    repositories {
+        maven { url = 'https://maven.aliyun.com/repository/public' }
+        mavenCentral()
+    }
+}
+
+// ==================== ext-bom ====================
+include 'ext-bom'
+
+// ==================== ext-common ====================
+include 'ext-common:ext-tool'
+include 'ext-common:ext-core'
+include 'ext-common:ext-json'
+
+// ==================== ext-infra ====================
+include 'ext-infra:ext-redis'
+include 'ext-infra:ext-cache'
+include 'ext-infra:ext-mail'
+include 'ext-infra:ext-postgres'
+
+// ==================== ext-security ====================
+include 'ext-security'
+
+// ==================== ext-crypto ====================
+include 'ext-crypto'
+
+// ==================== ext-web ====================
+include 'ext-web:ext-mvc'
+include 'ext-web:ext-realtime'
+
+// ==================== ext-enhance ====================
+include 'ext-enhance:ext-captcha'
+include 'ext-enhance:ext-idempotent'
+include 'ext-enhance:ext-api-crypto'
+
+// ==================== ext-misc ====================
+include 'ext-misc:ext-http'
+include 'ext-misc:ext-useragent'
+include 'ext-misc:ext-qrcode'
+include 'ext-misc:ext-monitor'

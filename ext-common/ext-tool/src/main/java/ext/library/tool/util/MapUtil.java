@@ -121,11 +121,11 @@ public final class MapUtil {
      * @return 数组为空或所有元素均为空时返回 true
      */
     public static boolean isArrayEmpty(Map<?, ?> @Nullable [] paramMaps) {
-        if (paramMaps == null || paramMaps.length == 0) {
+        if (paramMaps == null) {
             return true;
         }
         for (Map<?, ?> map : paramMaps) {
-            if (map != null && !map.isEmpty()) {
+            if (!map.isEmpty()) {
                 return false;
             }
         }
@@ -199,7 +199,7 @@ public final class MapUtil {
         paramMap.forEach((key, value) -> {
             if (value != null) {
                 String trimmed = value.trim();
-                if (trimmed != value) {
+                if (!trimmed.equals(value)) {
                     paramMap.put(key, trimmed);
                 }
             }
@@ -209,9 +209,9 @@ public final class MapUtil {
     /**
      * 替换 key（保留原值）
      *
-     * @param paramMap   待操作的 Map
-     * @param oldKey     原 key
-     * @param newKey     新 key
+     * @param paramMap 待操作的 Map
+     * @param oldKey   原 key
+     * @param newKey   新 key
      */
     public static <K, V> void replaceKey(Map<K, V> paramMap, K oldKey, K newKey) {
         if (paramMap.containsKey(oldKey)) {

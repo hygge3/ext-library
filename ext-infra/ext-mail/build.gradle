@@ -1,0 +1,6 @@
+description = '邮件支持'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api 'org.springframework.boot:spring-boot-starter-mail'
+}

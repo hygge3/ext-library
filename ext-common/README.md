@@ -11,7 +11,7 @@
 | 模块 | 说明 | 主要依赖 |
 |------|------|----------|
 | [ext-tool](ext-tool/README.md) | 通用工具类库 | 无外部依赖 |
-| [ext-core](ext-core/README.md) | 核心功能模块 | ext-tool, spring-validation, mapstruct-plus |
+| [ext-core](ext-core/README.md) | 核心功能模块 | ext-tool, spring-validation |
 | [ext-json](ext-json/README.md) | JSON 处理工具 | ext-tool, spring-boot-starter-json, json-path |
 
 ## 依赖关系

@@ -1,0 +1,5 @@
+description = 'HTTP 客户端封装'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+}

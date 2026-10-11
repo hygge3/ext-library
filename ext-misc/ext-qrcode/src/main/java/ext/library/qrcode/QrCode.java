@@ -133,7 +133,7 @@ public class QrCode {
      * @param content 二维码内容
      */
     private QrCode(String content) {
-        if (content.isBlank()) {
+        if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("二维码内容不能为空");
         }
         this.content = content;

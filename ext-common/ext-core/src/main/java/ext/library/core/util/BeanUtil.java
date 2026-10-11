@@ -2,12 +2,10 @@ package ext.library.core.util;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
-import ext.library.tool.holder.Lazy;
-import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ClassUtil;
 import ext.library.tool.util.ObjectUtil;
-import io.github.linpeilie.Converter;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanCopier;
@@ -35,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class BeanUtil {
 
-    private static final Lazy<Converter> CONVERTER = Lazy.of(() -> SpringUtil.getBean(Converter.class));
     private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     private BeanUtil() {
@@ -45,7 +42,6 @@ public final class BeanUtil {
      * 对象转 Map
      *
      * @param obj 对象
-     *
      * @return Map
      */
     public static Map<String, @Nullable Object> beanToMap(Object obj) {
@@ -71,7 +67,6 @@ public final class BeanUtil {
      *
      * @param map         Map
      * @param targetClass 目标类型
-     *
      * @return 目标对象
      */
     public static <T> T mapToBean(Map<String, Object> map, Class<T> targetClass) {
@@ -95,7 +90,6 @@ public final class BeanUtil {
      *
      * @param bean         bean
      * @param propertyName 属性名
-     *
      * @return 属性值
      */
     public static @Nullable Object getProperty(Object bean, String propertyName) {
@@ -120,7 +114,6 @@ public final class BeanUtil {
      * 深度拷贝
      *
      * @param source 待拷贝的对象
-     *
      * @return 拷贝之后的对象
      */
     @SuppressWarnings("unchecked")
@@ -144,7 +137,6 @@ public final class BeanUtil {
      *
      * @param source     数据来源实体
      * @param targetType 目标类型
-     *
      * @return 转换后的对象
      */
     @SuppressWarnings("unchecked")
@@ -155,16 +147,13 @@ public final class BeanUtil {
         if (targetType.equals(source.getClass())) {
             return (T) source;
         }
-        try {
-            return CONVERTER.get().convert(source, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-        }
-        return copyByCopier(source, targetType);
+        T target = ClassUtil.newInstance(targetType);
+        copyProperties(source, target);
+        return target;
     }
 
     /**
-     * 将 S 类型对象，按照配置的映射字段规则，给 T 类型的对象赋值
+     * 将 S 类型对象的属性拷贝到 T 类型的对象
      *
      * @param source 数据来源实体
      * @param target 目标对象，属性将被复制到此对象
@@ -173,12 +162,7 @@ public final class BeanUtil {
         if (source == null || target == null) {
             return;
         }
-        try {
-            CONVERTER.get().convert(source, target);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-            copyByCopier(source, target);
-        }
+        copyProperties(source, target);
     }
 
     /**
@@ -186,7 +170,6 @@ public final class BeanUtil {
      *
      * @param sourceList 数据来源实体列表
      * @param targetType 目标类型
-     *
      * @return 转换后的列表
      */
     @SuppressWarnings("unchecked")
@@ -197,13 +180,12 @@ public final class BeanUtil {
         if (targetType.equals(sourceList.getFirst().getClass())) {
             return (List<T>) sourceList;
         }
-        try {
-            return CONVERTER.get().convert(sourceList, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-        }
         return sourceList.stream()
-                .map(source -> copyByCopier(source, targetType))
+                .map(source -> {
+                    T target = ClassUtil.newInstance(targetType);
+                    copyProperties(source, target);
+                    return target;
+                })
                 .toList();
     }
 
@@ -212,36 +194,30 @@ public final class BeanUtil {
      *
      * @param map        数据来源
      * @param targetType 目标类型
-     *
      * @return 转换后的对象
      */
     public static <T> T convert(Map<String, Object> map, Class<T> targetType) {
         if (ObjectUtil.isEmpty(map)) {
             return ClassUtil.newInstance(targetType);
         }
-        try {
-            return CONVERTER.get().convert(map, targetType);
-        } catch (Exception e) {
-            Logs.warn(EmojiSymbol.CORE, e.getMessage());
-        }
         return mapToBean(map, targetType);
     }
 
-    private static void copyByCopier(Object source, Object target) {
+    /**
+     * 将 source 的属性拷贝到 target，优先使用字节码加速，失败时回落反射
+     *
+     * @param source 数据来源实体
+     * @param target 目标对象，属性将被复制到此对象
+     */
+    private static void copyProperties(Object source, Object target) {
         String beanKey = source.getClass().getName() + target.getClass().getName();
         BeanCopier copier = BEAN_COPIER_CACHE.computeIfAbsent(beanKey,
                 k -> BeanCopier.create(source.getClass(), target.getClass(), false));
         try {
             copier.copy(source, target, null);
         } catch (Exception e) {
-            org.springframework.beans.BeanUtils.copyProperties(source, target);
+            BeanUtils.copyProperties(source, target);
         }
-    }
-
-    private static <T> T copyByCopier(Object source, Class<T> targetType) {
-        T target = ClassUtil.newInstance(targetType);
-        copyByCopier(source, target);
-        return target;
     }
 
 }

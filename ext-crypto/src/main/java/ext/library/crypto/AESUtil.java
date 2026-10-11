@@ -1,7 +1,7 @@
 package ext.library.crypto;
 
+import org.springframework.security.crypto.encrypt.AesGcmBytesEncryptor;
 import org.springframework.security.crypto.encrypt.BytesEncryptor;
-import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 
 import java.nio.charset.StandardCharsets;
@@ -24,8 +24,8 @@ import java.util.HexFormat;
  * <p>技术实现：
  * <ul>
  *   <li>加密算法：AES-GCM 256 位（Galois/Counter Mode）</li>
- *   <li>密钥派生：PBKDF2</li>
- *   <li>每次加密使用随机 IV，确保相同明文产生不同密文</li>
+ *   <li>密钥派生：PBKDF2WithHmacSHA256，600000 次迭代</li>
+ *   <li>每次加密使用随机 16 字节 IV，确保相同明文产生不同密文</li>
  * </ul>
  * </p>
  *
@@ -48,10 +48,11 @@ import java.util.HexFormat;
  *   <li>密码和盐值必须妥善保管，两者都需要用于解密</li>
  *   <li>盐值为 16 字节（128 位）Hex 编码字符串</li>
  *   <li>AES-GCM 提供认证加密，可检测密文篡改</li>
+ *   <li>PBKDF2 迭代次数较高，实例创建较慢，应复用而非每次调用重建</li>
  * </ul>
  * </p>
  *
- * @see org.springframework.security.crypto.encrypt.Encryptors
+ * @see org.springframework.security.crypto.encrypt.AesGcmBytesEncryptor
  */
 public final class AESUtil {
 
@@ -79,7 +80,8 @@ public final class AESUtil {
      * @return Hex 编码的随机盐值（32 个十六进制字符）
      */
     public static String generateSalt() {
-        return KeyGenerators.string().generateKey();
+        byte[] salt = KeyGenerators.secureRandom(16).generateKey();
+        return HexFormat.of().formatHex(salt);
     }
 
     /**
@@ -91,7 +93,7 @@ public final class AESUtil {
      * @return Base64 URL 安全编码的密文
      */
     public static String encrypt(String password, String salt, String plainText) {
-        BytesEncryptor encryptor = Encryptors.stronger(password, salt);
+        BytesEncryptor encryptor = AesGcmBytesEncryptor.withPassword(password, salt).build();
         byte[] encrypted = encryptor.encrypt(plainText.getBytes(StandardCharsets.UTF_8));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
     }
@@ -105,7 +107,7 @@ public final class AESUtil {
      * @return 解密后的明文字符串
      */
     public static String decrypt(String password, String salt, String cipherText) {
-        BytesEncryptor encryptor = Encryptors.stronger(password, salt);
+        BytesEncryptor encryptor = AesGcmBytesEncryptor.withPassword(password, salt).build();
         byte[] decrypted = encryptor.decrypt(Base64.getUrlDecoder().decode(cipherText));
         return new String(decrypted, StandardCharsets.UTF_8);
     }

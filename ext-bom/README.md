@@ -18,7 +18,7 @@
         <dependency>
             <groupId>ext.library</groupId>
             <artifactId>ext-bom</artifactId>
-            <version>4.0.0</version>
+            <version>4.1.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -70,10 +70,8 @@
 
 | 模块 | 说明 |
 |------|------|
-| ext-mvc | Spring MVC 增强 |
-| ext-openapi | OpenAPI 文档支持 |
-| ext-sse | Server-Sent Events |
-| ext-websocket | WebSocket 支持 |
+| ext-mvc | Spring MVC 增强（含 OpenAPI 文档） |
+| ext-realtime | 实时通信，SSE 推送与 WebSocket |
 
 ### ext-enhance 层
 
@@ -81,8 +79,6 @@
 |------|------|
 | ext-captcha | 图形验证码 |
 | ext-idempotent | 接口幂等性控制 |
-| ext-desensitize | 数据脱敏 |
-| ext-trans | 字段翻译转换 |
 | ext-api-crypto | API 加解密 |
 
 ### ext-misc 层
@@ -97,11 +93,12 @@
 
 | 依赖 | 版本 | 说明 |
 |------|------|------|
-| MapStruct Plus | 1.5.0 | 对象映射框架 |
-| Swagger | 2.2.40 | API 注解 |
-| Bouncy Castle | 1.83 | 加密库 |
-| OSHI | 6.9.2 | 系统信息采集 |
-| SpringDoc | 3.0.0 | OpenAPI 文档 |
+| Spring Boot | 4.1.1 | 框架全家桶（BOM 引入） |
+| Swagger | 2.2.55 | API 注解 |
+| Bouncy Castle | 1.86 | 加密库 |
+| OSHI | 7.0.0 | 系统信息采集 |
+| SpringDoc | 3.1.1 | OpenAPI 文档 |
+| ZXing | 3.5.4 | 二维码 |
 | ZXing | 3.5.3 | 二维码生成 |
 | Therapi JavaDoc | 0.15.0 | 运行时 JavaDoc |
 

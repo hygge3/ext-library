@@ -1,6 +1,6 @@
 # ext-enhance
 
-> 业务增强层 - 提供验证码、幂等性、脱敏、翻译、API加密等业务增强功能
+> 业务增强层 - 提供验证码、幂等性、API加密等业务增强功能
 
 ## 简介
 
@@ -12,9 +12,9 @@
 |------|------|----------|
 | [ext-captcha](ext-captcha/README.md) | 图形验证码生成与校验 | ext-cache |
 | [ext-idempotent](ext-idempotent/README.md) | 接口幂等性控制 | ext-redis, caffeine (可选) |
-| [ext-desensitize](ext-desensitize/README.md) | 数据脱敏 | ext-tool, jackson |
-| [ext-trans](ext-trans/README.md) | 字段翻译/转换 | jackson |
 | [ext-api-crypto](ext-api-crypto/README.md) | API 请求/响应加解密 | ext-json, ext-crypto |
+
+> 字段翻译 (`ext.library.trans`) 与数据脱敏 (`ext.library.desensitize`) 已并入 ext-common/ext-json。
 
 ## 依赖关系
 
@@ -26,14 +26,6 @@ ext-cache
 ext-redis
     │
     └──> ext-idempotent
-
-ext-tool
-    │
-    └──> ext-desensitize
-
-jackson-databind
-    │
-    └──> ext-trans
 
 ext-json + ext-crypto
     │
@@ -57,24 +49,6 @@ ext-json + ext-crypto
 <dependency>
     <groupId>ext.library</groupId>
     <artifactId>ext-idempotent</artifactId>
-</dependency>
-```
-
-### 引入 ext-desensitize
-
-```xml
-<dependency>
-    <groupId>ext.library</groupId>
-    <artifactId>ext-desensitize</artifactId>
-</dependency>
-```
-
-### 引入 ext-trans
-
-```xml
-<dependency>
-    <groupId>ext.library</groupId>
-    <artifactId>ext-trans</artifactId>
 </dependency>
 ```
 

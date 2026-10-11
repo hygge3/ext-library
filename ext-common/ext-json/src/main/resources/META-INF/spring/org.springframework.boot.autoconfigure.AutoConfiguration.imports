@@ -1,1 +1,2 @@
 ext.library.json.config.JsonAutoConfiguration
+ext.library.trans.TranslationAutoConfiguration

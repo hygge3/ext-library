@@ -12,6 +12,7 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -782,7 +783,7 @@ public final class HttpUtil {
             String separator = url.contains("?") ? "&" : "?";
             sb.append(separator);
             queryParams.forEach((k, v) -> {
-                sb.append(k).append("=").append(java.net.URLEncoder.encode(v, StandardCharsets.UTF_8));
+                sb.append(k).append("=").append(URLEncoder.encode(v, StandardCharsets.UTF_8));
                 sb.append("&");
             });
             return sb.substring(0, sb.length() - 1);
@@ -827,10 +828,9 @@ public final class HttpUtil {
                 case byte[] bytes -> {
                     return HttpRequest.BodyPublishers.ofByteArray(bytes);
                 }
-                case Map map -> {
-                    @SuppressWarnings("unchecked") Map<String, Object> form = (Map<String, Object>) body;
+                case Map<?, ?> map -> {
                     StringJoiner sj = new StringJoiner("&");
-                    form.forEach((k, v) -> sj.add(k + "=" + java.net.URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
+                    map.forEach((k, v) -> sj.add(k + "=" + URLEncoder.encode(String.valueOf(v), StandardCharsets.UTF_8)));
                     return HttpRequest.BodyPublishers.ofString(sj.toString(), StandardCharsets.UTF_8);
                 }
                 default -> {

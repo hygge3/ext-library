@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -304,6 +306,8 @@ class SecurityCacheRepositoryTest {
             // Mock the get calls for verification
             when(cacheStrategy.get(anyString(), eq("token1"), eq(SecurityToken.class))).thenReturn(token1);
             when(cacheStrategy.get(anyString(), eq("token2"), eq(SecurityToken.class))).thenReturn(token2);
+            when(cacheStrategy.get(eq("security:token:index"), eq("all"), eq(Set.class)))
+                    .thenReturn(new HashSet<>(Set.of("token1", "token2")));
 
             List<String> result = repository.queryTokenList(null, false);
 
@@ -324,6 +328,8 @@ class SecurityCacheRepositoryTest {
 
             // Only stub the token that will be matched by the filter
             when(cacheStrategy.get(anyString(), eq("user-token-1"), eq(SecurityToken.class))).thenReturn(token1);
+            when(cacheStrategy.get(eq("security:token:index"), eq("all"), eq(Set.class)))
+                    .thenReturn(new HashSet<>(Set.of("user-token-1", "admin-token-1")));
 
             List<String> result = repository.queryTokenList("user", false);
 
@@ -343,6 +349,8 @@ class SecurityCacheRepositoryTest {
 
             when(cacheStrategy.get(anyString(), eq("a-token"), eq(SecurityToken.class))).thenReturn(tokenA);
             when(cacheStrategy.get(anyString(), eq("b-token"), eq(SecurityToken.class))).thenReturn(tokenB);
+            when(cacheStrategy.get(eq("security:token:index"), eq("all"), eq(Set.class)))
+                    .thenReturn(new HashSet<>(Set.of("a-token", "b-token")));
 
             List<String> result = repository.queryTokenList(null, true);
 

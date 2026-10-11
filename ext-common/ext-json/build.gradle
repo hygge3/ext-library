@@ -1,0 +1,7 @@
+description = 'JSON 处理工具'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api 'org.springframework.boot:spring-boot-starter-json'
+    api 'com.jayway.jsonpath:json-path'
+}

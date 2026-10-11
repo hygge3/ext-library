@@ -32,15 +32,11 @@ public final class UserAgentParser {
      * @return 解析结果，解析失败返回 null
      */
     public static UserAgent parse(String userAgentString) {
-        UserAgent userAgent = new UserAgent();
         if (ObjectUtil.isEmpty(userAgentString)) {
-            userAgent.setBrowser(Browser.UNKNOWN);
-            userAgent.setEngine(Engine.UNKNOWN);
-            userAgent.setOs(OS.UNKNOWN);
-            userAgent.setPlatform(Platform.UNKNOWN);
-            return userAgent;
+            return null;
         }
 
+        UserAgent userAgent = new UserAgent();
 
         Browser browser = parseBrowser(userAgentString);
         userAgent.setBrowser(browser);

@@ -7,7 +7,6 @@ import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import ext.library.web.response.R;
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -84,7 +83,9 @@ public class GlobalExceptionHandler {
      */
     private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
         ConstraintViolation<?> violation = violations.iterator().next();
-        String path = ((PathImpl) violation.getPropertyPath()).getLeafNode().getName();
+        String propertyPath = violation.getPropertyPath().toString();
+        int lastDot = propertyPath.lastIndexOf('.');
+        String path = lastDot < 0 ? propertyPath : propertyPath.substring(lastDot + 1);
         String message = StringUtil.format("{}:{}", path, violation.getMessage());
         return R.failed(HttpStatus.BAD_REQUEST, message);
     }

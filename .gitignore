@@ -1,9 +1,9 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-**/.flattened-pom.xml
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+.gradle/
 
 ### STS ###
 .apt_generated
@@ -34,6 +34,6 @@ build/
 .vscode/
 
 ### AI ###
-/.claude/
+/.pi/
 /.spec-workflow/
 /.serena/

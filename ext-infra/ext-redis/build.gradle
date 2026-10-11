@@ -1,0 +1,8 @@
+description = 'Redis 支持'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
+    api 'org.apache.commons:commons-pool2'
+}

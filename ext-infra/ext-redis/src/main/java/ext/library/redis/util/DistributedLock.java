@@ -268,7 +268,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
      *
      * @return 是否成功获取锁
      *
-     * @throws InterruptedException 被中断
      */
     private boolean tryLock(Duration time, boolean interruptibly) {
         long millis = time.toMillis();
@@ -294,7 +293,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
      *
      * @return 是否成功获取锁
      *
-     * @throws InterruptedException 被中断
      */
     private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) {
         long millis = unit.convert(time, TimeUnit.MILLISECONDS);

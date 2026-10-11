@@ -32,6 +32,7 @@ import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -249,7 +250,7 @@ public final class RedisUtil {
      * @param timeUnit 时间单位
      */
     public static boolean expire(String key, long timeout, TimeUnit timeUnit) {
-        return getRedisTemplate().expire(key, timeout, timeUnit);
+        return getRedisTemplate().expire(key, Expiration.from(timeout, timeUnit));
     }
 
     /**
@@ -475,7 +476,7 @@ public final class RedisUtil {
      * @see <a href="http://redis.io/commands/getex/">GetEx Command</a>
      */
     public static String getEx(String key, long timeout, TimeUnit timeUnit) {
-        return valueOps().getAndExpire(key, timeout, timeUnit);
+        return valueOps().getAndExpire(key, Expiration.from(timeout, timeUnit));
     }
 
     /**
@@ -693,7 +694,7 @@ public final class RedisUtil {
      * @see <a href="https://redis.io/commands/setex">SetEx Command</a>
      */
     public static void setEx(String key, String value, long timeout, TimeUnit timeUnit) {
-        valueOps().set(key, value, timeout, timeUnit);
+        valueOps().set(key, value, Expiration.from(timeout, timeUnit));
     }
 
     /**
@@ -788,7 +789,7 @@ public final class RedisUtil {
      * @see <a href="https://redis.io/commands/setnx">SetNX Command</a>
      */
     public static boolean setNxEx(String key, String value, long timeout, TimeUnit timeUnit) {
-        return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value, timeout, timeUnit));
+        return Boolean.TRUE.equals(valueOps().setIfAbsent(key, value, Expiration.from(timeout, timeUnit)));
     }
 
     /**
@@ -1952,12 +1953,12 @@ public final class RedisUtil {
         return streamOps().read(Consumer.from(group, consumer), streamReadOptions, streams);
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     private static RedisSerializer<String> getKeySerializer() {
         return (RedisSerializer<String>) getRedisTemplate().getKeySerializer();
     }
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     private static RedisSerializer<String> getValueSerializer() {
         return (RedisSerializer<String>) getRedisTemplate().getValueSerializer();
     }
