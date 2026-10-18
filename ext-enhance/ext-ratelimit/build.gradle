@@ -1,0 +1,11 @@
+description = '接口限流'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    compileOnly 'org.springframework:spring-web'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly project(':ext-infra:ext-redis')
+    compileOnly project(':ext-infra:ext-postgres')
+    testImplementation 'org.springframework:spring-web'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+}

@@ -1,0 +1,8 @@
+description = '分布式锁'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-infra:ext-redis')
+    compileOnly 'org.springframework:spring-web'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+}

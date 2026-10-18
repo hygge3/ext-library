@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>ext-library - Spring Boot Extension Library</title>
-    <meta content="A comprehensive Spring Boot extension library providing enterprise-grade modular components for modern Java development."
+    <title>ext-library - Spring Boot 扩展库</title>
+    <meta content="基于 Spring Boot 4 与 JDK 25 的模块化扩展库，提供缓存、安全、加密、实时通信等企业级通用能力。"
           name="description">
     <link href="assets/favicon.svg" rel="icon" type="image/svg+xml">
     <style>
@@ -14,6 +14,7 @@
             --accent: #22d3ee;
             --bg-dark: #0f172a;
             --bg-card: #1e293b;
+            --bg-code: #0d1117;
             --text: #e2e8f0;
             --text-muted: #94a3b8;
             --border: #334155;
@@ -24,6 +25,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -39,7 +44,7 @@
             padding: 0 24px;
         }
 
-        /* Hero Section */
+        /* Hero */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -54,10 +59,7 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             opacity: 0.5;
         }
@@ -71,7 +73,7 @@
             width: 120px;
             height: 120px;
             margin-bottom: 32px;
-            filter: drop-shadow(0 0 40px rgba(99, 102, 241, 0.4));
+            filter: drop-shadow(0 8px 30px rgba(99, 102, 241, 0.35));
         }
 
         .hero h1 {
@@ -85,11 +87,11 @@
             letter-spacing: -2px;
         }
 
-        .hero .tagline {
+        .tagline {
             font-size: 1.5rem;
             color: var(--text-muted);
             margin-bottom: 32px;
-            max-width: 600px;
+            max-width: 640px;
         }
 
         .badge-group {
@@ -109,12 +111,6 @@
             border: 1px solid var(--border);
             border-radius: 9999px;
             font-size: 0.875rem;
-            color: var(--text);
-        }
-
-        .badge {
-            width: 16px;
-            height: 16px;
         }
 
         .cta-group {
@@ -139,7 +135,6 @@
         .btn-primary {
             background: var(--gradient);
             color: white;
-            border: none;
         }
 
         .btn-primary:hover {
@@ -158,9 +153,13 @@
             border-color: var(--primary);
         }
 
-        /* Features Section */
-        .features {
+        /* Sections */
+        .section {
             padding: 120px 0;
+        }
+
+        .section-alt {
+            background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.05) 50%, transparent 100%);
         }
 
         .section-title {
@@ -175,14 +174,15 @@
             color: var(--text-muted);
             font-size: 1.125rem;
             margin-bottom: 64px;
-            max-width: 600px;
+            max-width: 640px;
             margin-left: auto;
             margin-right: auto;
         }
 
+        /* Features */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
         }
 
@@ -221,15 +221,85 @@
             font-size: 0.95rem;
         }
 
-        /* Modules Section */
-        .modules {
-            padding: 120px 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.05) 50%, transparent 100%);
+        /* Architecture */
+        .layers {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .layer {
+            width: 100%;
+            max-width: 880px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px 24px;
+        }
+
+        .layer-head {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .layer-head h3 {
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .layer-head span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 5px 12px;
+            background: rgba(34, 211, 238, 0.08);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        .layer-arrow {
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        /* Modules */
+        .module-group + .module-group {
+            margin-top: 48px;
+        }
+
+        .module-group-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .module-group-title span {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 8px;
         }
 
         .module-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
             gap: 16px;
         }
 
@@ -238,38 +308,82 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
-            text-align: center;
             transition: all 0.3s ease;
         }
 
         .module-item:hover {
             border-color: var(--accent);
-            background: rgba(34, 211, 238, 0.05);
+            transform: translateY(-2px);
         }
 
         .module-item .emoji {
-            font-size: 2rem;
-            margin-bottom: 12px;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
         }
 
         .module-item h4 {
-            font-size: 0.95rem;
-            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
             color: var(--accent);
         }
 
         .module-item p {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
         }
 
-        /* Quick Start */
-        .quickstart {
-            padding: 120px 0;
+        /* Code blocks & tabs */
+        /* 两个 label 纵向排在左列，代码块占右列；单选钮用 display:none 移出布局，
+           但仍参与 + 相邻兄弟选择器，实现零 JS 切换 */
+        .tabs {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 8px;
+            align-items: start;
+            margin-top: 32px;
+        }
+
+        .tabs input {
+            display: none;
+        }
+
+        .tabs label {
+            grid-column: 1;
+            padding: 10px 22px;
+            border-radius: 12px 0 0 12px;
+            border: 1px solid var(--border);
+            border-right: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tabs label:hover {
+            color: var(--text);
+        }
+
+        .tabs input:checked + label {
+            background: var(--bg-code);
+            color: var(--accent);
+        }
+
+        .tabs input:checked + label + .code-block {
+            display: block;
+        }
+
+        .tabs .code-block {
+            grid-column: 2;
+            display: none;
+            margin-top: 0;
+            border-radius: 0 12px 12px 0;
         }
 
         .code-block {
-            background: #0d1117;
+            background: var(--bg-code);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
@@ -303,6 +417,12 @@
             background: #28c840;
         }
 
+        .code-file {
+            margin-left: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
         .code-content {
             padding: 20px;
             overflow-x: auto;
@@ -331,14 +451,18 @@
             color: #79c0ff;
         }
 
+        .quickstart-note {
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
         /* Footer */
         footer {
             padding: 60px 0;
             border-top: 1px solid var(--border);
             text-align: center;
-        }
-
-        footer p {
             color: var(--text-muted);
         }
 
@@ -357,37 +481,35 @@
                 font-size: 2.5rem;
             }
 
-            .hero .tagline {
+            .tagline {
                 font-size: 1.125rem;
             }
 
-            .features-grid {
+            .features-grid,
+            .module-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-<!-- Hero Section -->
+
+<!-- Hero -->
 <section class="hero">
     <div class="hero-content">
         <img alt="ext-library logo" class="logo" src="assets/logo.svg">
         <h1>ext-library</h1>
-        <p class="tagline">Spring Boot Extension Library<br>为现代 Java 开发提供企业级模块化组件</p>
+        <p class="tagline">
+            Spring Boot 开发者的瑞士军刀<br>
+            22 个即插即用模块，覆盖缓存、安全、加密、实时通信等企业级通用能力
+        </p>
 
         <div class="badge-group">
-                <span class="badge">
-                    <span>☕</span> JDK 25
-                </span>
-            <span class="badge">
-                    <span>🍃</span> Spring Boot 4
-                </span>
-            <span class="badge">
-                    <span>📦</span> v4.0.0
-                </span>
-            <span class="badge">
-                    <span>⚡</span> 模块化设计
-                </span>
+            <span class="badge">☕ JDK 25</span>
+            <span class="badge">🍃 Spring Boot 4.1</span>
+            <span class="badge">📦 v4.1.0</span>
+            <span class="badge">🧱 Gradle 9.8.1</span>
+            <span class="badge">📄 Apache-2.0</span>
         </div>
 
         <div class="cta-group">
@@ -398,164 +520,326 @@
                 GitHub
             </a>
             <a class="btn btn-secondary" href="#quickstart">快速开始</a>
+            <a class="btn btn-secondary" href="#architecture">架构分层</a>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="features">
+<!-- Features -->
+<section class="section" id="features">
     <div class="container">
         <h2 class="section-title">为什么选择 ext-library？</h2>
-        <p class="section-subtitle">精心设计的扩展框架，以简洁直观的设计集成了强大的实用工具和功能</p>
+        <p class="section-subtitle">把每个项目都要重写一遍的通用能力，收敛成统一风格的模块</p>
 
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🧩</div>
-                <h3>模块化设计</h3>
-                <p>按需引入，只使用您需要的组件。每个模块独立开发、独立测试，保持应用程序轻量化和专注性。</p>
+                <h3>按需引入</h3>
+                <p>22 个独立模块，互不牵连。只依赖你真正用到的部分，ext-tool 零第三方依赖，不会给应用带来任何负担。</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔗</div>
+                <div class="feature-icon">🎯</div>
                 <h3>一致的 API</h3>
-                <p>所有模块遵循统一的设计模式和命名约定，学习一个模块的用法，就能快速上手其他模块。</p>
+                <p>统一的自动配置入口、配置前缀（ext.{module}）与命名约定。学习一个模块的用法，即可掌握其余全部。</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">⚡</div>
-                <h3>性能优化</h3>
-                <p>基于 JDK 25 虚拟线程和最新 Spring Boot 特性构建，充分利用现代 Java 的性能优势。</p>
+                <h3>面向现代 Java</h3>
+                <p>基于 JDK 25 虚拟线程与 Spring Boot 4.1 构建，HTTP 客户端默认走虚拟线程执行器，实时通信支持分布式扩展。</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🏢</div>
-                <h3>生产就绪</h3>
-                <p>经过充分测试并在多个生产环境中验证，稳定可靠，开箱即用。</p>
+                <div class="feature-icon">🔐</div>
+                <h3>安全与加密</h3>
+                <p>注解驱动的认证授权框架，配合国密 SM2/SM3/SM4 与 AES/RSA 工具库，请求解密、响应加密均可注解一行搞定。</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔄</div>
-                <h3>积极开发</h3>
-                <p>持续更新迭代，紧跟 Spring 生态系统发展，不断添加新功能和改进。</p>
+                <div class="feature-icon">💾</div>
+                <h3>基础设施可替换</h3>
+                <p>多级缓存抽象兼容 Caffeine、Redis 与 PostgreSQL；Redis 能力（缓存、队列、发布订阅、限流）均提供 PG 实现。</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📖</div>
-                <h3>完善文档</h3>
-                <p>每个模块都配有详细的 README、API 文档和使用示例，快速上手无障碍。</p>
+                <div class="feature-icon">📡</div>
+                <h3>实时通信</h3>
+                <p>SSE 单向推送与 WebSocket 全双工两套通道，均内置 pubsub 支持多实例分布式部署。</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Modules Section -->
-<section class="modules">
+<!-- Architecture -->
+<section class="section section-alt" id="architecture">
     <div class="container">
-        <h2 class="section-title">丰富的模块生态</h2>
-        <p class="section-subtitle">涵盖企业级开发的方方面面，从基础工具到高级功能一应俱全</p>
+        <h2 class="section-title">清晰的架构分层</h2>
+        <p class="section-subtitle">上层依赖下层，同层可相互依赖，下层不反向依赖上层</p>
 
-        <div class="module-grid">
-            <div class="module-item">
-                <div class="emoji">🔧</div>
-                <h4>ext-tool</h4>
-                <p>通用工具类</p>
+        <div class="layers">
+            <div class="layer">
+                <div class="layer-head">
+                    <h3>业务增强层</h3>
+                    <span>注解 + AOP 无侵入扩展</span>
+                </div>
+                <div class="chips">
+                    <span class="chip">ext-captcha</span>
+                    <span class="chip">ext-idempotent</span>
+                    <span class="chip">ext-api-crypto</span>
+                </div>
             </div>
-            <div class="module-item">
-                <div class="emoji">⚙️</div>
-                <h4>ext-core</h4>
-                <p>核心功能</p>
+            <div class="layer-arrow">↑</div>
+            <div class="layer">
+                <div class="layer-head">
+                    <h3>Web 层</h3>
+                    <span>统一请求处理、API 文档、实时通信</span>
+                </div>
+                <div class="chips">
+                    <span class="chip">ext-mvc</span>
+                    <span class="chip">ext-realtime</span>
+                </div>
             </div>
-            <div class="module-item">
-                <div class="emoji">📃</div>
-                <h4>ext-json</h4>
-                <p>JSON 处理</p>
+            <div class="layer-arrow">↑</div>
+            <div class="layer">
+                <div class="layer-head">
+                    <h3>安全 / 加密层</h3>
+                    <span>认证授权与密码学算法</span>
+                </div>
+                <div class="chips">
+                    <span class="chip">ext-security</span>
+                    <span class="chip">ext-crypto</span>
+                </div>
             </div>
-            <div class="module-item">
-                <div class="emoji">🔴</div>
-                <h4>ext-redis</h4>
-                <p>Redis 集成</p>
+            <div class="layer-arrow">↑</div>
+            <div class="layer">
+                <div class="layer-head">
+                    <h3>基础设施层</h3>
+                    <span>与外部基础设施集成</span>
+                </div>
+                <div class="chips">
+                    <span class="chip">ext-redis</span>
+                    <span class="chip">ext-cache</span>
+                    <span class="chip">ext-mail</span>
+                    <span class="chip">ext-postgres</span>
+                </div>
             </div>
-            <div class="module-item">
-                <div class="emoji">💾</div>
-                <h4>ext-cache</h4>
-                <p>多级缓存</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🛡️</div>
-                <h4>ext-security</h4>
-                <p>安全认证</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🔐</div>
-                <h4>ext-crypto</h4>
-                <p>加密算法</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🖼️</div>
-                <h4>ext-captcha</h4>
-                <p>验证码</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🔒</div>
-                <h4>ext-idempotent</h4>
-                <p>幂等处理</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">📧</div>
-                <h4>ext-mail</h4>
-                <p>邮件发送</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🌐</div>
-                <h4>ext-mvc</h4>
-                <p>MVC 增强</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">📡</div>
-                <h4>ext-openapi</h4>
-                <p>API 文档</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">📊</div>
-                <h4>ext-monitor</h4>
-                <p>系统监控</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🔳</div>
-                <h4>ext-qrcode</h4>
-                <p>二维码</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">📤</div>
-                <h4>ext-sse</h4>
-                <p>服务器推送</p>
-            </div>
-            <div class="module-item">
-                <div class="emoji">🔌</div>
-                <h4>ext-websocket</h4>
-                <p>实时通信</p>
+            <div class="layer-arrow">↑</div>
+            <div class="layer">
+                <div class="layer-head">
+                    <h3>通用基础层</h3>
+                    <span>所有模块的直接或间接依赖</span>
+                </div>
+                <div class="chips">
+                    <span class="chip">ext-tool</span>
+                    <span class="chip">ext-core</span>
+                    <span class="chip">ext-json</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Quick Start Section -->
-<section class="quickstart" id="quickstart">
+<!-- Modules -->
+<section class="section" id="modules">
+    <div class="container">
+        <h2 class="section-title">模块生态</h2>
+        <p class="section-subtitle">统一由 ext-bom 管理版本，坐标均为 ext.library:{模块名}</p>
+
+        <div class="module-group">
+            <div class="module-group-title">依赖管理 <span>统一约束版本，避免传递依赖冲突</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">📦</div>
+                    <h4>ext-bom</h4>
+                    <p>BOM 依赖管理，统一管理所有 ext 模块与第三方依赖版本</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">通用基础层 <span>ext-common</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">🔧</div>
+                    <h4>ext-tool</h4>
+                    <p>基础工具函数、函数式接口、异常体系，零第三方依赖</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">⚙️</div>
+                    <h4>ext-core</h4>
+                    <p>SpEL 支持、Spring 工具、异步配置</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">📃</div>
+                    <h4>ext-json</h4>
+                    <p>Jackson 增强配置、JsonPath 查询、字段翻译与数据脱敏</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">基础设施层 <span>ext-infra</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">🔴</div>
+                    <h4>ext-redis</h4>
+                    <p>Spring Data Redis 增强，键前缀管理、分布式锁、队列</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">💾</div>
+                    <h4>ext-cache</h4>
+                    <p>多级缓存抽象，支持 Caffeine + Redis/PostgreSQL 组合策略</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">📧</div>
+                    <h4>ext-mail</h4>
+                    <p>封装 Spring Boot Mail，简洁 API 与事件机制</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🐘</div>
+                    <h4>ext-postgres</h4>
+                    <p>以 PostgreSQL 替代 Redis 实现缓存、队列、发布订阅、限流</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🔗</div>
+                    <h4>ext-lock</h4>
+                    <p>注解式分布式锁，基于 Redis 的可重入锁，带限时等待</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">安全与加密 <span>独立模块</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">🛡️</div>
+                    <h4>ext-security</h4>
+                    <p>轻量级认证授权框架，注解声明权限，拦截器 + 会话/token 管理</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🔐</div>
+                    <h4>ext-crypto</h4>
+                    <p>加密算法工具库，基于 Bouncy Castle，支持 AES/RSA 与国密 SM2/SM3/SM4</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">Web 层 <span>ext-web</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">🌐</div>
+                    <h4>ext-mvc</h4>
+                    <p>MVC 增强：统一响应封装、自定义验证器、异常处理，含 OpenAPI 文档</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">📡</div>
+                    <h4>ext-realtime</h4>
+                    <p>实时通信：SSE 服务器推送 + WebSocket 双向通信，均支持分布式</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">业务增强层 <span>ext-enhance</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">🖼️</div>
+                    <h4>ext-captcha</h4>
+                    <p>图形验证码，随机字符与数学表达式两种类型，内置缓存</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🔒</div>
+                    <h4>ext-idempotent</h4>
+                    <p>幂等性控制，注解 + AOP 防止请求重复提交</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🧾</div>
+                    <h4>ext-api-crypto</h4>
+                    <p>注解实现请求自动解密、响应自动加密</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🚦</div>
+                    <h4>ext-ratelimit</h4>
+                    <p>注解式接口限流，支持 Redis、PostgreSQL 与内存三种存储</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">📋</div>
+                    <h4>ext-audit</h4>
+                    <p>注解式操作审计，记录操作人、入参、耗时与成败结果</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">杂项工具层 <span>ext-misc</span></div>
+            <div class="module-grid">
+                <div class="module-item">
+                    <div class="emoji">📤</div>
+                    <h4>ext-http</h4>
+                    <p>基于 JDK HttpClient 的流畅 API 封装，默认虚拟线程执行器</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🕵️</div>
+                    <h4>ext-useragent</h4>
+                    <p>解析浏览器、操作系统、设备平台与渲染引擎</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🔳</div>
+                    <h4>ext-qrcode</h4>
+                    <p>基于 Google ZXing 的二维码生成与识别，链式 API</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">📊</div>
+                    <h4>ext-monitor</h4>
+                    <p>基于 OSHI 采集 CPU、内存、磁盘、网络 IO 与 JVM 指标，跨平台</p>
+                </div>
+                <div class="module-item">
+                    <div class="emoji">🪪</div>
+                    <h4>ext-logback</h4>
+                    <p>Logback 脱敏转换器，与接口返回共用同一套脱敏口径</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Start -->
+<section class="section section-alt" id="quickstart">
     <div class="container">
         <h2 class="section-title">快速开始</h2>
-        <p class="section-subtitle">只需几行配置，即可开始使用 ext-library</p>
+        <p class="section-subtitle">引入 BOM 统一版本管理后，按需声明模块依赖即可</p>
 
-        <div class="code-block">
-            <div class="code-header">
-                <span class="code-dot red"></span>
-                <span class="code-dot yellow"></span>
-                <span class="code-dot green"></span>
-                <span style="margin-left: 12px; color: var(--text-muted); font-size: 0.85rem;">pom.xml</span>
+        <div class="tabs">
+            <input checked id="tab-gradle" name="build-tool" type="radio">
+            <label for="tab-gradle">Gradle</label>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                    <span class="code-file">build.gradle</span>
+                </div>
+                <div class="code-content">
+<pre><span class="code-keyword">dependencies</span> {
+    <span class="code-keyword">implementation platform</span>(<span class="code-string">'ext.library:ext-bom:4.1.0'</span>)
+    <span class="code-keyword">implementation</span> <span class="code-string">'ext.library:ext-core'</span>
+}</pre>
+                </div>
             </div>
-            <div class="code-content">
+
+            <input id="tab-maven" name="build-tool" type="radio">
+            <label for="tab-maven">Maven</label>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                    <span class="code-file">pom.xml</span>
+                </div>
+                <div class="code-content">
 <pre><span class="code-tag">&lt;dependencyManagement&gt;</span>
     <span class="code-tag">&lt;dependencies&gt;</span>
         <span class="code-tag">&lt;dependency&gt;</span>
-            <span class="code-tag">&lt;groupId&gt;</span><span class="code-string">ext.library</span><span
-            class="code-tag">&lt;/groupId&gt;</span>
-            <span class="code-tag">&lt;artifactId&gt;</span><span class="code-string">ext-bom</span><span
-            class="code-tag">&lt;/artifactId&gt;</span>
-            <span class="code-tag">&lt;version&gt;</span><span class="code-attr">4.0.0</span><span class="code-tag">&lt;/version&gt;</span>
+            <span class="code-tag">&lt;groupId&gt;</span><span class="code-string">ext.library</span><span class="code-tag">&lt;/groupId&gt;</span>
+            <span class="code-tag">&lt;artifactId&gt;</span><span class="code-string">ext-bom</span><span class="code-tag">&lt;/artifactId&gt;</span>
+            <span class="code-tag">&lt;version&gt;</span><span class="code-attr">4.1.0</span><span class="code-tag">&lt;/version&gt;</span>
             <span class="code-tag">&lt;type&gt;</span><span class="code-string">pom</span><span class="code-tag">&lt;/type&gt;</span>
             <span class="code-tag">&lt;scope&gt;</span><span class="code-keyword">import</span><span class="code-tag">&lt;/scope&gt;</span>
         <span class="code-tag">&lt;/dependency&gt;</span>
@@ -568,8 +852,11 @@
         <span class="code-tag">&lt;artifactId&gt;</span><span class="code-string">ext-core</span><span class="code-tag">&lt;/artifactId&gt;</span>
     <span class="code-tag">&lt;/dependency&gt;</span>
 <span class="code-tag">&lt;/dependencies&gt;</span></pre>
+                </div>
             </div>
         </div>
+
+        <p class="quickstart-note">模块均由 Spring Boot 自动配置装配，引入依赖后无需额外声明配置文件</p>
     </div>
 </section>
 
@@ -580,10 +867,11 @@
             Released under <a href="https://opensource.org/licenses/Apache-2.0">Apache License 2.0</a>
             <br>
             <span style="font-size: 0.9rem; margin-top: 8px; display: inline-block;">
-                    Made with ❤️ by <a href="https://github.com/hygge3">hygge3</a>
-                </span>
+                Made with ❤️ by <a href="https://github.com/hygge3">hygge3</a>
+            </span>
         </p>
     </div>
 </footer>
+
 </body>
 </html>

@@ -36,12 +36,15 @@ public final class EmojiSymbol {
     public static final String CAPTCHA = "🔢";
     // endregion
     public static final String IDEMPOTENT = "🔂";
+    public static final String RATELIMIT = "🚦";
+    public static final String AUDIT = "📋";
     public static final String DESENSITIZE = "🎭";
     public static final String TRANS = "🔁";
     public static final String API_CRYPTO = "🔏";
     // region ext-misc 层
     public static final String HTTP = "🖥️";
     public static final String MONITOR = "📊";
+    public static final String LOGBACK = "🧾";
     // endregion
     public static final String QRCODE = "📱";
 

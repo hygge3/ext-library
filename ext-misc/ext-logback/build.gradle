@@ -1,0 +1,6 @@
+description = '日志脱敏'
+
+dependencies {
+    api project(':ext-common:ext-json')
+    api 'ch.qos.logback:logback-classic'
+}

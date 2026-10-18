@@ -20,6 +20,7 @@ include 'ext-infra:ext-redis'
 include 'ext-infra:ext-cache'
 include 'ext-infra:ext-mail'
 include 'ext-infra:ext-postgres'
+include 'ext-infra:ext-lock'
 
 // ==================== ext-security ====================
 include 'ext-security'
@@ -35,9 +36,12 @@ include 'ext-web:ext-realtime'
 include 'ext-enhance:ext-captcha'
 include 'ext-enhance:ext-idempotent'
 include 'ext-enhance:ext-api-crypto'
+include 'ext-enhance:ext-ratelimit'
+include 'ext-enhance:ext-audit'
 
 // ==================== ext-misc ====================
 include 'ext-misc:ext-http'
 include 'ext-misc:ext-useragent'
 include 'ext-misc:ext-qrcode'
 include 'ext-misc:ext-monitor'
+include 'ext-misc:ext-logback'

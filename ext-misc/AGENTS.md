@@ -16,6 +16,7 @@ ext-misc 包含相对独立的工具模块，不属于特定业务领域，可�
 | ext-useragent | User-Agent 解析器 | ext-tool |
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
 | ext-monitor | 系统监控信息采集 | oshi-core |
+| ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
 
 ## 模块详情
 
@@ -106,6 +107,35 @@ private SystemMonitor monitor;
 CpuInfo cpu = monitor.getCpuInfo();
 ```
 
+### ext-logback
+
+日志脱敏模块，把 ext-json 的脱敏口径搬到日志输出上：
+
+- `LogMaskConverter` - Logback 转换器，用于 `%maskedMsg` 占位符
+- `LogMaskRule` - 单条脱敏规则（正则 + 遮蔽函数），支持只遮蔽指定捕获组
+- `LogMaskRules` - 内置规则集：手机号、身份证、邮箱、银行卡、IPv4、键值对凭据
+- `LogMaskRegistry` - 静态规则注册表，充当 converter 与 Spring 容器之间的桥
+- `LogMaskProperties` - 配置属性，开关每条规则
+
+**包结构**: `ext.library.logback.mask` / `ext.library.logback.config`
+
+**配置前缀**: `ext.logback.mask`
+
+遮蔽函数直接复用 `DesensitizeStrategy`，所以日志里的手机号和接口返回里的手机号遮蔽成同一形态。
+
+**使用示例**（logback.xml）:
+```xml
+<conversionRule conversionWord="maskedMsg" converterClass="ext.library.logback.mask.LogMaskConverter"/>
+
+<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %maskedMsg%n</pattern>
+    </encoder>
+</appender>
+```
+
+> converter 由 logback XML 实例化，拿不到 Spring 容器，所以规则由 `LogMaskAutoConfiguration` 启动时写入 `LogMaskRegistry`。规则表为空时 converter 直接放行。
+
 ## 依赖关系
 
 ```
@@ -120,6 +150,10 @@ ext-tool
 oshi-core-java25
     |
     +---> ext-monitor
+
+ext-json + logback-classic
+    |
+    +---> ext-logback
 ```
 
 ## 相关文件
@@ -128,11 +162,13 @@ oshi-core-java25
 - `ext-useragent/src/main/java/ext/library/useragent/` - User-Agent 解析源码
 - `ext-qrcode/src/main/java/ext/library/qrcode/` - 二维码源码
 - `ext-monitor/src/main/java/ext/library/monitor/` - 系统监控源码
+- `ext-logback/src/main/java/ext/library/logback/` - 日志脱敏源码
 
 ## 变更记录
 
 | 日期 | 变更内容 |
 |------|----------|
+| 2026-10-10 | 新增 ext-logback 模块（日志脱敏） |
 | 2026-01-26 | 重构 ext-qrcode：修复 API 命名(form→from)、NPE 问题、MIME 类型、添加参数验证 |
 | 2026-01-26 | 重构 ext-monitor：重命名类、修复计算错误、添加静态便捷方法 |
 | 2026-01-19 | 初始化 AGENTS.md 文档 |

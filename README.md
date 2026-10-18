@@ -26,14 +26,20 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-core             | 核心实用工具和配置，作为基础依赖       |
 | ext-json             | JSON 处理，含翻译/脱敏序列化扩展      |
 | ext-redis            | Redis 集成，Spring Data Redis 增强     |
+| ext-postgres         | PostgreSQL 集成，缓存/队列/发布订阅/限流 |
+| ext-lock             | 分布式锁，注解式 Redis 加锁            |
 | ext-cache            | 缓存抽象，统一的缓存接口               |
 | ext-security         | 安全框架，认证授权支持                 |
 | ext-captcha          | 验证码生成和验证                       |
 | ext-crypto           | 加密操作，加密/解密功能                |
 | ext-api-crypto       | 接口加解密，请求解密响应加密           |
+| ext-ratelimit        | 接口限流，注解式 Redis/PG/内存限流    |
+| ext-audit            | 操作审计，注解式操作留痕               |
 | ext-http             | HTTP 客户端增强                        |
+| ext-useragent        | User-Agent 解析                        |
 | ext-idempotent       | 幂等处理，防止重复请求                 |
 | ext-mail             | 邮件发送支持                           |
+| ext-logback          | 日志脱敏，Logback 脱敏转换器           |
 | ext-monitor          | 系统监控，性能指标采集                 |
 | ext-mvc              | Web 增强，MVC 工具、验证与 OpenAPI     |
 | ext-qrcode           | 二维码生成和识别                       |

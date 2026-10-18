@@ -1,15 +1,17 @@
 package ext.library.postgres.properties;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.time.Duration;
 
 /**
  * PostgreSQL 模块配置属性
+ * <p>
+ * 本类不带 {@code @ConfigurationProperties}，而是由
+ * {@code PostgresAutoConfiguration#postgresProperties()} 这个具名 {@code @Bean} 方法完成绑定，
+ * 以保证 bean 名为 {@code postgresProperties}，供 {@code #{@postgresProperties.xxx}} 形式的
+ * {@code @Scheduled} SpEL 表达式引用。
  *
  * @since 4.0.0
  */
-@ConfigurationProperties(prefix = PostgresProperties.PREFIX)
 public class PostgresProperties {
 
     public static final String PREFIX = "ext.postgres";
