@@ -10,7 +10,7 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = RedisProperties.PREFIX)
 public class RedisProperties {
 
-    static final String PREFIX = "ext.redis";
+    public static final String PREFIX = "ext.redis";
 
     /**
      * 通用的 key 前缀

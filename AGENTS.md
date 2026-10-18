@@ -35,6 +35,8 @@ graph TD
     C --> C1b["ext-postgres<br/>PostgreSQL 支持"]
     C --> C2["ext-cache<br/>缓存支持"]
     C --> C3["ext-mail<br/>邮件支持"]
+    C --> C1d["ext-jdbc<br/>JdbcClient 增强"]
+    C --> C1e["ext-job<br/>任务调度"]
     C1 --> C1c["ext-lock<br/>分布式锁"]
     F --> F1["ext-mvc<br/>MVC 支持 (含 OpenAPI)"]
     F --> F2["ext-realtime<br/>SSE + WebSocket"]
@@ -47,6 +49,8 @@ graph TD
     H --> H2["ext-qrcode<br/>二维码"]
     H --> H3["ext-monitor<br/>系统监控"]
     H --> H4["ext-logback<br/>日志脱敏"]
+    H --> H5["ext-i18n<br/>国际化"]
+    H --> H6["ext-oss<br/>对象存储"]
     click B "./ext-common/AGENTS.md" "查看 ext-common 模块文档"
     click C "./ext-infra/AGENTS.md" "查看 ext-infra 模块文档"
     click D "./ext-security/AGENTS.md" "查看 ext-security 模块文档"
@@ -62,33 +66,33 @@ graph TD
 |------------------------------------------|----------|------------------------------------------------|
 | ext-bom                                  | 独立模块 | BOM 依赖管理，统一管理所有 ext 模块版本        |
 | [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类、核心功能、JSON 处理    |
-| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、缓存、邮件、锁     |
+| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度 |
 | [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架                             |
 | [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/DES/RSA/SM2/SM4)           |
 | [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC 与实时通信                    |
 | [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流、审计  |
-| [ext-misc](./ext-misc/AGENTS.md)         | 分层     | 杂项工具层，包含 HTTP 客户端、二维码、系统监控、日志脱敏 |
+| [ext-misc](./ext-misc/AGENTS.md)         | 分层     | 杂项工具层，包含 HTTP 客户端、二维码、系统监控、日志脱敏、国际化、对象存储 |
 
 ## 分层架构
 
 ```
-+--------------------------------------------------+
-|                    ext-bom                        |  BOM 依赖管理
-+--------------------------------------------------+
-                |                    ext-enhance                      |  业务增强层
-|      (captcha, idempotent, api-crypto, ratelimit, audit)  |
-+--------------------------------------------------+
-|                    ext-web                        |  Web 层
-|            (mvc, realtime)                        |
-+--------------------------------------------------+
-|     ext-security     |      ext-crypto            |  安全/加密层
-+--------------------------------------------------+
-|                   ext-infra                       |  基础设施层
-|      (redis, postgres, lock, cache, mail)          |
-+--------------------------------------------------+
-|                  ext-common                       |  通用基础层
-|           (tool, core, json)                     |
-+--------------------------------------------------+
++------------------------------------------------------------+
+|                       ext-bom                             |  BOM 依赖管理
++------------------------------------------------------------+
+|                       ext-enhance                         |  业务增强层
+|          (captcha, idempotent, api-crypto, ratelimit, audit)|
++------------------------------------------------------------+
+|                       ext-web                             |  Web 层
+|                    (mvc, realtime)                        |
++------------------------------------------------------------+
+|     ext-security                 ext-crypto               |  安全/加密层
++------------------------------------------------------------+
+|                       ext-infra                            |  基础设施层
+|      (redis, postgres, cache, mail, lock, jdbc, job)      |
++------------------------------------------------------------+
+|                       ext-common                           |  通用基础层
+|                    (tool, core, json)                      |
++------------------------------------------------------------+
 ```
 
 **依赖流向**: 上层模块可依赖下层模块，同层模块可相互依赖，下层模块不得依赖上层模块。
@@ -161,4 +165,5 @@ graph TD
 | 2026-10-10 | 构建方式从 Maven 切换为 Gradle (Groovy DSL)                           |
 | 2026-10-10 | 依赖版本统一收敛到 gradle.properties，第三方依赖移入 ext-bom          |
 | 2026-10-10 | AI 编程工具从 Claude Code 切换为 pi-agent，CLAUDE.md 更名为 AGENTS.md |
+| 2026-10-10 | 新增 ext-jdbc、ext-job、ext-i18n、ext-oss |
 | 2026-10-10 | 新增 ext-postgres、ext-lock、ext-ratelimit、ext-audit、ext-logback |

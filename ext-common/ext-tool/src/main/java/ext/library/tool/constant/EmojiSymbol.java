@@ -20,6 +20,8 @@ public final class EmojiSymbol {
     public static final String LOCK = "🔒";
     public static final String MAIL = "📧";
     public static final String POSTGRES = "🐘";
+    public static final String JDBC = "🔌";
+    public static final String JOB = "⚙️";
     // endregion
     public static final String CACHE = "💾";
     // region 安全/加密层
@@ -45,6 +47,8 @@ public final class EmojiSymbol {
     public static final String HTTP = "🖥️";
     public static final String MONITOR = "📊";
     public static final String LOGBACK = "🧾";
+    public static final String I18N = "🔤";
+    public static final String OSS = "📦";
     // endregion
     public static final String QRCODE = "📱";
 

@@ -17,6 +17,8 @@ ext-misc 包含相对独立的工具模块，不属于特定业务领域，可�
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
 | ext-monitor | 系统监控信息采集 | oshi-core |
 | ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
+| ext-i18n | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |
+| ext-oss | 对象存储，支持本地文件系统与 S3 协议 | ext-core, minio |
 
 ## 模块详情
 
@@ -136,6 +138,99 @@ CpuInfo cpu = monitor.getCpuInfo();
 
 > converter 由 logback XML 实例化，拿不到 Spring 容器，所以规则由 `LogMaskAutoConfiguration` 启动时写入 `LogMaskRegistry`。规则表为空时 converter 直接放行。
 
+### ext-i18n
+
+国际化模块，把翻译文案拆成多个来源，查不到就回退到下一个：
+
+- **管理器**: `I18nMessageManager` 按 `Locale` 顺序查询各翻译源，支持占位符参数、`find` 返回 `Optional`、`contains` 判定与 `clear` 清缓存
+- **来源 SPI**: `TranslationSource` 接口（`load(Locale)` / `name()` / `order()`），`order()` 越小越先查询
+- **资源文件源**: `ResourceBundleTranslationSource` 读 classpath 下的 `ResourceBundle`
+- **数据库源**: `JdbcTranslationSource` 读翻译表，查询走语言降级链 `zh-CN` → `zh` → `ROOT`，按降级顺序合并
+- **缓存**: 按语言缓存翻译表，`ext.i18n.cache-ttl` 到期重载，便于翻译变更后自动生效
+
+**包结构**: `ext.library.i18n`
+
+**配置前缀**: `ext.i18n`
+
+**核心类**:
+- `I18nMessageManager` - 翻译管理器
+- `TranslationSource` - 翻译来源 SPI
+- `ResourceBundleTranslationSource` - 资源文件翻译源
+- `JdbcTranslationSource` - 数据库翻译源
+- `I18nProperties` / `I18nAutoConfiguration` - 配置属性与自动配置
+
+**使用示例**:
+```java
+String msg = i18nMessageManager.get("user.notfound");                 // 默认语言
+String en = i18nMessageManager.get("user.notfound", Locale.US);
+String hi = i18nMessageManager.get("order.count", Locale.US, 3);       // 带参数
+```
+
+**配置示例**:
+```yaml
+ext:
+  i18n:
+    enabled: true
+    default-locale: zh-CN
+    resource-bundle-base-name: i18n/messages
+    jdbc-enabled: true            # 需要容器中存在 JdbcClient，未引入时静默关闭
+    table-name: ext_i18n_message
+    schema-init: true             # 启动时自动建表
+    cache-ttl: 5m
+```
+
+> 翻译表结构：`ext_i18n_message(id, message_key, locale, message)`，`(message_key, locale)` 唯一。
+
+### ext-oss
+
+对象存储模块，本地文件系统与 S3 协议各一份实现，业务方只依赖门面类：
+
+- **门面**: `OssTemplate` - put/putBytes/putFile/get/getString/getBytes/delete/exists/list/presign/generateKey
+- **SPI**: `ObjectStorage` 接口，本地与 S3 各实现一份
+- **本地实现**: `LocalObjectStorage` 写本地目录，可配置对外访问前缀
+- **S3 实现**: `S3ObjectStorage` 基于 MinIO SDK，支持分片上传与预签名链接
+- **返回值**: `OssObject`（bucket/key/contentType/size/content 流，实现 `Closeable`）、`ObjectItem`（列表项）
+- **实现选择**: 按 `ext.oss.type` 选 `local` 或 `s3`，MinIO 类型只出现在自动配置类方法体内部，容器里没有 MinIO 时本地模式也能正常启动
+
+**包结构**: `ext.library.oss`
+
+**配置前缀**: `ext.oss`
+
+**核心类**:
+- `OssTemplate` - 对象存储门面
+- `ObjectStorage` - 存储 SPI
+- `LocalObjectStorage` / `S3ObjectStorage` - 本地与 S3 实现
+- `OssObject` / `ObjectItem` - 返回模型
+- `OssProperties` / `OssAutoConfiguration` - 配置属性与自动配置
+
+**使用示例**:
+```java
+String key = ossTemplate.generateKey("avatar", "logo.png");
+String url = ossTemplate.put(key, Files.newInputStream(file), size, "image/png");
+
+String url2 = ossTemplate.presign(key);                  // 预签名链接
+byte[] bytes = ossTemplate.getBytes(key);
+```
+
+**配置示例**:
+```yaml
+ext:
+  oss:
+    enabled: true
+    type: LOCAL                    # LOCAL / S3
+    path: ./data/oss               # 本地存储根目录
+    url-prefix: ""                 # 本地存储对外访问前缀
+    bucket: ext-library
+    # 以下为 type=s3 时必填
+    endpoint: https://s3.example.com
+    access-key: ${OSS_ACCESS_KEY}
+    secret-key: ${OSS_SECRET_KEY}
+    region: us-east-1
+    auto-create-bucket: true
+    part-size: 10485760            # 分片大小，默认 10MB
+    presign-expiry: 1h             # 预签名链接有效期
+```
+
 ## 依赖关系
 
 ```
@@ -154,6 +249,14 @@ oshi-core-java25
 ext-json + logback-classic
     |
     +---> ext-logback
+
+ext-core + ext-json
+    |
+    +---> ext-i18n (+ spring-boot-starter-jdbc 可选)
+
+ext-core + minio
+    |
+    +---> ext-oss
 ```
 
 ## 相关文件
@@ -163,11 +266,15 @@ ext-json + logback-classic
 - `ext-qrcode/src/main/java/ext/library/qrcode/` - 二维码源码
 - `ext-monitor/src/main/java/ext/library/monitor/` - 系统监控源码
 - `ext-logback/src/main/java/ext/library/logback/` - 日志脱敏源码
+- `ext-i18n/src/main/java/ext/library/i18n/` - 国际化源码
+- `ext-oss/src/main/java/ext/library/oss/` - 对象存储源码
 
 ## 变更记录
 
 | 日期 | 变更内容 |
 |------|----------|
+| 2026-10-10 | 新增 ext-oss 模块（对象存储，本地文件系统与 S3 双实现） |
+| 2026-10-10 | 新增 ext-i18n 模块（国际化，资源文件与数据库双源翻译） |
 | 2026-10-10 | 新增 ext-logback 模块（日志脱敏） |
 | 2026-01-26 | 重构 ext-qrcode：修复 API 命名(form→from)、NPE 问题、MIME 类型、添加参数验证 |
 | 2026-01-26 | 重构 ext-monitor：重命名类、修复计算错误、添加静态便捷方法 |
