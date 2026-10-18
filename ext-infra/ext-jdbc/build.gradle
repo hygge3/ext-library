@@ -1,0 +1,6 @@
+description = '基于 JdbcClient 的通用 DAO 与链式条件构造'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    compileOnly 'org.springframework.boot:spring-boot-starter-jdbc'
+}

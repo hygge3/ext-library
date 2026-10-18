@@ -25,6 +25,7 @@ dependencies {
         api "com.google.zxing:javase:${zxingVersion}"
         api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+        api "io.minio:minio:${minioVersion}"
     }
 }
 
@@ -45,6 +46,8 @@ dependencies {
         api project(':ext-infra:ext-mail')
         api project(':ext-infra:ext-postgres')
         api project(':ext-infra:ext-lock')
+        api project(':ext-infra:ext-jdbc')
+        api project(':ext-infra:ext-job')
     }
 }
 
@@ -83,6 +86,8 @@ dependencies {
         api project(':ext-misc:ext-qrcode')
         api project(':ext-misc:ext-monitor')
         api project(':ext-misc:ext-logback')
+        api project(':ext-misc:ext-i18n')
+        api project(':ext-misc:ext-oss')
     }
 }
 

@@ -1,0 +1,5 @@
+description = '基于 PostgreSQL 队列的声明式任务投递与执行'
+
+dependencies {
+    api project(':ext-infra:ext-postgres')
+}

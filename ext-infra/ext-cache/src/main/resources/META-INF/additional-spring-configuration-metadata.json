@@ -1,0 +1,47 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "ext.cache.cache-storage",
+      "values": [
+        {
+          "value": "AUTO",
+          "description": "自动检测，有 Redis/PostgreSQL 则 L2，否则 CAFFEINE"
+        },
+        {
+          "value": "CAFFEINE",
+          "description": "Caffeine 本地内存缓存"
+        },
+        {
+          "value": "REDIS",
+          "description": "Redis 分布式缓存"
+        },
+        {
+          "value": "POSTGRES",
+          "description": "PostgreSQL 分布式缓存"
+        },
+        {
+          "value": "L2",
+          "description": "二级缓存（Caffeine + 分布式缓存）"
+        }
+      ]
+    },
+    {
+      "name": "ext.cache.l2-backend",
+      "values": [
+        {
+          "value": "AUTO",
+          "description": "自动检测，优先 Redis，其次 PostgreSQL"
+        },
+        {
+          "value": "REDIS",
+          "description": "Redis 作为分布式缓存后端"
+        },
+        {
+          "value": "POSTGRES",
+          "description": "PostgreSQL 作为分布式缓存后端"
+        }
+      ]
+    }
+  ]
+}

@@ -14,10 +14,7 @@ public class RateLimitProperties {
     public static final String PREFIX = "ext.ratelimit";
 
     /**
-     * 限流存储类型，默认为自动检测
-     * <p>
-     * {@code AUTO} 时根据类路径中存在的依赖自动选择，优先级：Redis > Memory。
-     * PostgreSQL 需显式指定，因为它还需要数据源才能工作。
+     * 限流存储类型，默认为自动检测。AUTO 时根据类路径中存在的依赖自动选择，优先级：Redis > Memory。PostgreSQL 需显式指定，因为它还需要数据源才能工作
      */
     private RateLimitStore.Type storeType = RateLimitStore.Type.AUTO;
 

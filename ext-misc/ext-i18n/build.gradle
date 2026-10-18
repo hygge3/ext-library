@@ -1,0 +1,7 @@
+description = '基于资源文件与数据库的双源国际化'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    compileOnly 'org.springframework.boot:spring-boot-starter-jdbc'
+}

@@ -1,0 +1,26 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "ext.idempotent.key-store-type",
+      "values": [
+        {
+          "value": "AUTO",
+          "description": "自动检测，优先级 Redis > PostgreSQL > Memory"
+        },
+        {
+          "value": "MEMORY",
+          "description": "内存存储（基于 Caffeine），适用于单机"
+        },
+        {
+          "value": "REDIS",
+          "description": "Redis 存储，适用于分布式"
+        },
+        {
+          "value": "POSTGRES",
+          "description": "PostgreSQL 存储，使用 UNLOGGED 表"
+        }
+      ]
+    }
+  ]
+}

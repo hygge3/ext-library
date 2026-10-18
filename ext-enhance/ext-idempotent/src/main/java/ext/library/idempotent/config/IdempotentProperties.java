@@ -13,9 +13,7 @@ public class IdempotentProperties {
     public static final String PREFIX = "ext.idempotent";
 
     /**
-     * Key 存储类型，默认为自动检测
-     * <p>
-     * {@link KeyStoreType#AUTO} 时根据类路径中存在的依赖自动选择，优先级：Redis > PostgreSQL > Memory。
+     * Key 存储类型，默认为自动检测。AUTO 时根据类路径中存在的依赖自动选择，优先级：Redis > PostgreSQL > Memory
      */
     private KeyStoreType keyStoreType = KeyStoreType.AUTO;
 

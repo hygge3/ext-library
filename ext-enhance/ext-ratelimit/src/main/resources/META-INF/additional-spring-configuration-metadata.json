@@ -1,0 +1,26 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "ext.ratelimit.store-type",
+      "values": [
+        {
+          "value": "AUTO",
+          "description": "自动检测，优先级 Redis > Memory"
+        },
+        {
+          "value": "MEMORY",
+          "description": "纯内存，仅单实例有效"
+        },
+        {
+          "value": "REDIS",
+          "description": "Redis 限流存储"
+        },
+        {
+          "value": "POSTGRES",
+          "description": "PostgreSQL 限流存储"
+        }
+      ]
+    }
+  ]
+}

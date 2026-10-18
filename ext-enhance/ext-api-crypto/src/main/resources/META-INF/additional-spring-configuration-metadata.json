@@ -1,0 +1,30 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "ext.api-crypto.algorithm",
+      "values": [
+        {
+          "value": "RSA",
+          "description": "RSA 非对称加密"
+        },
+        {
+          "value": "SM2",
+          "description": "SM2 国密非对称加密"
+        },
+        {
+          "value": "AES",
+          "description": "AES 对称加密"
+        },
+        {
+          "value": "SM4",
+          "description": "SM4 国密对称加密"
+        },
+        {
+          "value": "BASE64",
+          "description": "Base64 编解码（非加密算法）"
+        }
+      ]
+    }
+  ]
+}

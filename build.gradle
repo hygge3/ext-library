@@ -28,6 +28,12 @@ subprojects {
             options.compilerArgs << '-Xlint:deprecation,unchecked,rawtypes'
         }
 
+        // Spring Boot 官方要求：additional-spring-configuration-metadata.json 由 processResources 产出，
+        // 必须让 compileJava 显式依赖它并纳入 inputs，否则注解处理器读不到，hints 会是空数组
+        tasks.named('compileJava') {
+            inputs.files(tasks.named('processResources'))
+        }
+
         tasks.withType(Javadoc).configureEach {
             options.encoding = 'UTF-8'
             options.addStringOption('Xdoclint:none', '-quiet')
