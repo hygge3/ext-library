@@ -195,6 +195,33 @@ TreeBuilder<Menu, Long> builder = TreeBuilder.create(
 List<Menu> tree = builder.buildTree(menuList);
 ```
 
+### 图片读写
+
+```java
+// 写：格式不受支持时抛 ToolException，不再静默返回 false 丢数据
+byte[] png = ImageUtil.writeAsBytes(image, "png");
+
+// 读：无法识别的格式时抛 ToolException，不再返回 null 让调用方空指针
+BufferedImage img = ImageUtil.read(new ByteArrayInputStream(png));
+
+// 调用前先探测，避免靠异常兜底
+if (ImageUtil.isReadable("webp")) { ... }
+ImageUtil.readableFormats(); // => [bmp, gif, jpeg, jpg, png, tif, tiff, wbmp, webp]
+```
+
+#### 关于 WebP
+
+JDK 内置 ImageIO 只支持 JPEG / PNG / GIF / BMP / WBMP / TIFF，**不含 WebP**。
+需要 WebP 时引入纯 Java 插件即可，它通过 SPI 自动注册，无需任何代码改动（版本由 `ext-bom` 统一管理）：
+
+```groovy
+implementation("com.twelvemonkeys.imageio:imageio-webp")
+```
+
+该插件为 **只读**（[TwelveMonkeys #659](https://github.com/haraldk/TwelveMonkeys/issues/659) 仍 open），
+所以 `ImageUtil.isWritable("webp")` 恒为 `false`，写出 WebP 会抛异常。
+若要写 WebP，需自行接入 `org.sejda.imageio:webp-imageio`（JNI，仅 x86_64）等第三方实现。
+
 ### 版本号比较
 
 ```java
