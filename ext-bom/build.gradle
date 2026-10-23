@@ -26,6 +26,9 @@ dependencies {
         api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
         api "io.minio:minio:${minioVersion}"
+        // TwelveMonkeys ImageIO：补足 JDK ImageIO 缺失的图片格式（WebP、PSD、ICNS 等）
+        // 纯 Java、SPI 自动注册，业务方按需引入相应 artifact，版本由本 BOM 统一
+        api "com.twelvemonkeys.imageio:imageio-webp:${twelveMonkeysVersion}"
     }
 }
 
@@ -99,7 +102,7 @@ publishing {
             pom {
                 name = 'ext-bom'
                 description = project.description
-                url = 'https://hygge.eu.org'
+                url = 'https://github.com/hygge3/ext-library'
                 licenses {
                     license {
                         name = 'Apache License, Version 2.0'
