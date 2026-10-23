@@ -71,8 +71,8 @@ ext.library.desensitize    # 数据脱敏
 
 | 类名                                | 说明                    |
 |-------------------------------------|-------------------------|
-| `JsonAutoConfig`                    | JSON 自动配置类          |
-| `TranslationAutoConfiguration`      | 字段翻译自动配置类       |
+| `JsonAutoConfiguration`          | JSON 自动配置类          |
+| `TranslationAutoConfiguration`      | 字段翻译自动配置类，开关 `ext.trans.enabled`（默认 true）|
 
 ## 使用示例
 
@@ -167,13 +167,65 @@ ArrayNode arrayNode = JsonNodeUtil.createArrayNode();
 
 ## 自动配置特性
 
-模块自动配置了以下 Jackson 特性：
+`JsonUtil` 内部持有的 `JsonMapper` 与 Spring 容器管理的 `JsonMapper` 共用同一份配置（`JsonUtil.customize`），两者序列化行为一致：
 
-- 日期时间格式化 (`yyyy-MM-dd HH:mm:ss`)
-- 空值处理策略
-- 未知属性忽略
-- Long/BigInteger 超出 JS 安全整数范围时转为字符串
-- BigDecimal 无科学计数法输出
+- 日期时间格式化（`LocalDateTime` → `yyyy-MM-dd HH:mm:ss`，`LocalDate` → `yyyy-MM-dd`，`LocalTime` → `HH:mm:ss`）；未单独注册序列化器的 `Instant`/`ZonedDateTime`/`Date` 同样输出字符串而非数字时间戳（`WRITE_DATES_AS_TIMESTAMPS` 关闭）
+- 不序列化 null/空值/空集合（`NON_EMPTY`）
+- 空对象不报错（`FAIL_ON_EMPTY_BEANS` 关闭）
+- 未知属性忽略（`FAIL_ON_UNKNOWN_PROPERTIES` 关闭）
+- 浮点数反序列化为 `BigDecimal`（`USE_BIG_DECIMAL_FOR_FLOATS`）
+- Long/BigInteger 超出 JS 安全整数范围（±9007199254740991）时转为字符串；边界值本身可精确表示，仍输出数字
+- BigDecimal 以 JSON 数字输出（不是字符串），使用 `toPlainString()` 避免科学计数法，并保留原始 scale
+
+## 字段翻译
+
+```java
+@Component
+@TranslationType("dict")
+public class DictTranslator implements Translator<String> {
+    @Override
+    public String translate(Object key, String param) {
+        return dictService.getLabel(param, key.toString());
+    }
+}
+
+// 在 DTO 上标注
+public class OrderVO {
+    @Translate(type = "dict", param = "user_status")
+    private String statusLabel;
+}
+```
+
+自动配置会扫描容器中所有 `Translator` 实现类，按 `@TranslationType` 注册到 `TranslatorRegistry`。未注册的类型会记警告并原样输出字段值。
+
+## 数据脱敏
+
+```java
+public class UserVO {
+    // 只写 @Sensitive 即走默认 GENERIC 策略（保留前 1/3 + 后 1/3）
+    private String remark;
+
+    @Sensitive(strategy = DesensitizeStrategy.PHONE)
+    private String phone;
+
+    @Sensitive(strategy = DesensitizeStrategy.ID_CARD)
+    private String idCard;
+
+    // 显式跳过脱敏（仅限确认不敏感的字段）
+    @Sensitive(strategy = DesensitizeStrategy.NONE)
+    private String nickname;
+
+    // 自定义规则
+    @Sensitive(customRule = MyCustomRule.class)
+    private String customField;
+}
+```
+
+内置策略见 `DesensitizeStrategy`（通用、身份证、手机号、地址、邮箱、银行卡、中文姓名、密码、IP）。默认策略为 `GENERIC`：保留前 1/3 和后 1/3，中间按字符掩码，输出长度与输入一致（`13812345678` -> `1381***5678`）。短输入（前后各 1/3 会占满全文）退化为等长全掩码。
+
+规则实例会被缓存复用；脱敏过程抛异常或规则加载失败时输出全掩码 `******`，绝不回退到明文。
+
+`@Sensitive` 仅对 `String` 字段（或其 getter）生效，且**只作用于序列化方向**：脱敏后的值不是合法手机号/身份证，严禁用于持久化、缓存、ES 或消息队列。
 
 ## 许可证
 

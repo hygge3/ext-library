@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -264,10 +265,80 @@ public final class ClassUtil {
     public static <T> T newInstance(Class<?> clazz) {
         try {
             return (T) clazz.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
+            // record 没有无参构造器，只能走规范构造器并逐个填默认值
+            if (clazz.isRecord()) {
+                return (T) newRecord(clazz);
+            }
+            throw new ToolException(EmojiSymbol.TOOL, e);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new ToolException(EmojiSymbol.TOOL, e);
         }
+    }
+
+    /**
+     * 用 record 的规范构造器创建实例
+     *
+     * @param recordClass record 类
+     * @param args        按分量顺序排列的实参
+     * @return 新实例
+     * @throws ToolException 非 record 类，或构造器签名不匹配
+     */
+    public static Object newRecord(Class<?> recordClass, Object[] args) {
+        if (!recordClass.isRecord()) {
+            throw new ToolException(EmojiSymbol.TOOL, "不是 record 类型：" + recordClass.getName());
+        }
+        try {
+            return recordClass.getDeclaredConstructor(componentsOf(recordClass)).newInstance(args);
+        } catch (ReflectiveOperationException e) {
+            throw new ToolException(EmojiSymbol.TOOL, e);
+        }
+    }
+
+    /**
+     * 用各分量的默认值调用 record 的规范构造器
+     * <p>
+     * 引用类型填 {@code null}，基本类型填零值。仅用于转换框架的目标占位实例，
+     * 调用方随后会通过 {@code copyProperties} 填充实际值。
+     */
+    private static Object newRecord(Class<?> recordClass) {
+        RecordComponent[] components = recordClass.getRecordComponents();
+        Object[] args = new Object[components.length];
+        for (int i = 0; i < components.length; i++) {
+            args[i] = defaultValue(components[i].getType());
+        }
+        return newRecord(recordClass, args);
+    }
+
+    private static Class<?>[] componentsOf(Class<?> recordClass) {
+        RecordComponent[] components = recordClass.getRecordComponents();
+        Class<?>[] types = new Class<?>[components.length];
+        for (int i = 0; i < components.length; i++) {
+            types[i] = components[i].getType();
+        }
+        return types;
+    }
+
+    private static @Nullable Object defaultValue(Class<?> type) {
+        if (!type.isPrimitive()) {
+            return null;
+        }
+        if (type == boolean.class) {
+            return false;
+        }
+        if (type == char.class) {
+            return '\0';
+        }
+        if (type == float.class) {
+            return 0F;
+        }
+        if (type == double.class) {
+            return 0D;
+        }
+        if (type == long.class) {
+            return 0L;
+        }
+        return 0;
     }
 
     /**
