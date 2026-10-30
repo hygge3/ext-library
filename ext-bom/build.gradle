@@ -21,12 +21,20 @@ dependencies {
 dependencies {
     constraints {
         api "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
-        api "com.github.oshi:oshi-core-java25:${oshiVersion}"
         api "com.google.zxing:javase:${zxingVersion}"
         api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-        api "io.minio:minio:${minioVersion}"
+        // sshd 没有官方 BOM，只能逐个 artifact 约束
+        api "org.apache.sshd:sshd-core:${sshdVersion}"
+        api "org.apache.sshd:sshd-sftp:${sshdVersion}"
     }
+}
+
+// ===================== 自带 BOM 的第三方 =====================
+// AWS SDK for Java v2 导官方 BOM（ext-oss 的 S3 与预签名能力），
+// 不把几十个 service client 拆成 constraint，避免跟不上官方拆包节奏
+dependencies {
+    api platform("software.amazon.awssdk:bom:${awsSdkVersion}")
 }
 
 // ======================= ext-common 层 =====================
@@ -35,6 +43,7 @@ dependencies {
         api project(':ext-common:ext-tool')
         api project(':ext-common:ext-core')
         api project(':ext-common:ext-json')
+        api project(':ext-common:ext-servlet')
     }
 }
 
@@ -84,7 +93,6 @@ dependencies {
         api project(':ext-misc:ext-http')
         api project(':ext-misc:ext-useragent')
         api project(':ext-misc:ext-qrcode')
-        api project(':ext-misc:ext-monitor')
         api project(':ext-misc:ext-logback')
         api project(':ext-misc:ext-i18n')
         api project(':ext-misc:ext-oss')

@@ -1,5 +1,0 @@
-description = '系统监控信息采集'
-
-dependencies {
-    api 'com.github.oshi:oshi-core-java25'
-}
