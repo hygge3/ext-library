@@ -93,10 +93,17 @@ graph LR
 
 不选「下沉进 `ext-core`」的原因：`ext-core` 被几乎所有模块依赖，让它带上 servlet 语义会把 web 基座变成全库默认前提。
 
+## 已执行的重构：解散 `ext-misc` 层
+
+`ext-misc` 曾是「暂时不知道放哪」的收容层，与「每个模块都落在五层之一」的约定相冲。六个模块已按依赖性质归位，层目录删除：
+
+- `ext-http` / `ext-qrcode` / `ext-useragent` / `ext-logback` → `ext-common`（只依赖 `ext-tool` 或 `ext-json` 的独立工具）；
+- `ext-i18n` / `ext-oss` → `ext-infra`（带 Spring 装配与后端集成）；
+- `settings.gradle` 的 include 列表、`ext-bom` 的 constraints 分组、`ext-security` 对 `ext-useragent` 的依赖同步改到新路径；各层 AGENTS.md / README 与根索引一并更新。
+
 ## 待执行的重构
 
-1. **迁移 5 个模块目录**：`ext-http` / `ext-qrcode` / `ext-useragent` / `ext-logback` 从 `ext-misc` 迁到 `ext-common`，`ext-i18n` / `ext-oss` 迁到 `ext-infra`，`ext-misc` 层目录随之删除。本仓库的 spec 已按目标位置就位，代码目录仍是旧的 `ext-misc/`——两者不一致期间以 spec 表述的分层为准。
-2. **待定**：`X-Request-Id` 透传与 MDC 字段（`ext-servlet` ⑤）是新能力，默认开关与字段名未定，实施前需先确认；当前 `ext-servlet` 未实现该能力。
+1. **待定**：`X-Request-Id` 透传与 MDC 字段（`ext-servlet` ⑤）是新能力，默认开关与字段名未定，实施前需先确认；当前 `ext-servlet` 未实现该能力。
 
 ## 跨模块决策
 
