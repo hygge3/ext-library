@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -93,6 +94,25 @@ public class LocalObjectStorage implements ObjectStorage {
     }
 
     @Override
+    public ObjectMeta stat(String key) {
+        Path path = resolve(key);
+        if (!Files.exists(path)) {
+            throw new ExtException(EmojiSymbol.OSS, "对象不存在：{}", key);
+        }
+        try {
+            return new ObjectMeta(
+                    properties.getBucket(),
+                    key,
+                    Files.size(path),
+                    Optional.ofNullable(Files.probeContentType(path)).orElse(DEFAULT_CONTENT_TYPE),
+                    Instant.ofEpochMilli(Files.getLastModifiedTime(path).toMillis()).toString()
+            );
+        } catch (IOException e) {
+            throw new ExtException(EmojiSymbol.OSS, e, "读取对象信息失败：{}", key);
+        }
+    }
+
+    @Override
     public boolean delete(String key) {
         try {
             return Files.deleteIfExists(resolve(key));
@@ -108,10 +128,11 @@ public class LocalObjectStorage implements ObjectStorage {
 
     @Override
     public List<ObjectItem> list(String prefix) {
+        String realPrefix = prefix == null ? "" : prefix;
         try (Stream<Path> stream = Files.walk(root)) {
             return stream.filter(Files::isRegularFile)
                     .map(path -> root.relativize(path).toString().replace('\\', '/'))
-                    .filter(key -> key.startsWith(prefix))
+                    .filter(key -> key.startsWith(realPrefix))
                     .sorted()
                     .map(key -> {
                         try {
@@ -128,8 +149,83 @@ public class LocalObjectStorage implements ObjectStorage {
     }
 
     @Override
+    public void copy(String sourceKey, String targetKey) {
+        Path source = resolve(sourceKey);
+        Path target = resolve(targetKey);
+        if (!Files.exists(source)) {
+            throw new ExtException(EmojiSymbol.OSS, "对象不存在：{}", sourceKey);
+        }
+        try {
+            Path parent = target.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ExtException(EmojiSymbol.OSS, e, "复制对象失败：{} -> {}", sourceKey, targetKey);
+        }
+    }
+
+    /**
+     * 同桶移动
+     * <p>
+     * 本地文件系统有真正的 rename，不走「复制 + 删除」，也不会出现目标存在时的半成品。
+     *
+     * @param sourceKey 源对象键
+     * @param targetKey 目标对象键
+     */
+    @Override
+    public void move(String sourceKey, String targetKey) {
+        Path source = resolve(sourceKey);
+        Path target = resolve(targetKey);
+        if (!Files.exists(source)) {
+            throw new ExtException(EmojiSymbol.OSS, "对象不存在：{}", sourceKey);
+        }
+        try {
+            Path parent = target.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ExtException(EmojiSymbol.OSS, e, "移动对象失败：{} -> {}", sourceKey, targetKey);
+        }
+    }
+
+    @Override
     public String presign(String key, Duration expiry) {
-        return properties.getUrlPrefix() + "/" + key;
+        String prefix = properties.getUrlPrefix();
+        if (prefix == null || prefix.isBlank()) {
+            throw new ExtException(EmojiSymbol.OSS,
+                    "本地对象存储没有配置 ext.oss.url-prefix，无法生成直链：{}", key);
+        }
+        return stripTrailingSlash(prefix) + "/" + key;
+    }
+
+    /**
+     * 生成上传直链
+     * <p>
+     * 本地实现没有签名能力，也没有能接收 PUT 的端点——上传直链是 S3 才有的东西。
+     *
+     * @param key    对象键
+     * @param expiry 有效期
+     *
+     * @return 不会返回
+     */
+    @Override
+    public String presignPut(String key, Duration expiry) {
+        throw new UnsupportedOperationException("本地对象存储不支持预签名上传，请直接用 put/putFile 写入");
+    }
+
+    /**
+     * 去掉访问前缀末尾的斜杠
+     *
+     * @param prefix 前缀
+     *
+     * @return 规整后的前缀
+     */
+    private String stripTrailingSlash(String prefix) {
+        return prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix;
     }
 
     /**

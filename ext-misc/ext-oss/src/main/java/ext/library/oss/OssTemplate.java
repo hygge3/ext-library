@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * 对象存储门面
  * <p>
- * 业务方只用这一个类，具体落在本地文件系统还是 S3 由 {@link ObjectStorage} 实现决定。
+ * 业务方只用这一个类，具体落在本地文件系统、S3 还是 SFTP 由 {@link ObjectStorage} 实现决定。
  *
  * @since 4.1.0
  */
@@ -41,6 +41,15 @@ public class OssTemplate {
     public OssTemplate(ObjectStorage storage, OssProperties properties) {
         this.storage = storage;
         this.properties = properties;
+    }
+
+    /**
+     * 当前使用的存储实现名称
+     *
+     * @return 实现名称，如 {@code local} / {@code s3} / {@code sftp}
+     */
+    public String storageName() {
+        return storage.name();
     }
 
     /**
@@ -96,6 +105,50 @@ public class OssTemplate {
     }
 
     /**
+     * 同桶复制对象
+     *
+     * @param sourceKey 源对象键
+     * @param targetKey 目标对象键
+     */
+    public void copy(String sourceKey, String targetKey) {
+        storage.copy(sourceKey, targetKey);
+    }
+
+    /**
+     * 跨桶复制对象（只有 S3 实现支持）
+     *
+     * @param sourceBucket 源桶
+     * @param sourceKey    源对象键
+     * @param targetBucket 目标桶
+     * @param targetKey    目标对象键
+     */
+    public void copy(String sourceBucket, String sourceKey, String targetBucket, String targetKey) {
+        storage.copy(sourceBucket, sourceKey, targetBucket, targetKey);
+    }
+
+    /**
+     * 同桶移动对象（复制 + 删除）
+     *
+     * @param sourceKey 源对象键
+     * @param targetKey 目标对象键
+     */
+    public void move(String sourceKey, String targetKey) {
+        storage.move(sourceKey, targetKey);
+    }
+
+    /**
+     * 跨桶移动对象（只有 S3 实现支持）
+     *
+     * @param sourceBucket 源桶
+     * @param sourceKey    源对象键
+     * @param targetBucket 目标桶
+     * @param targetKey    目标对象键
+     */
+    public void move(String sourceBucket, String sourceKey, String targetBucket, String targetKey) {
+        storage.move(sourceBucket, sourceKey, targetBucket, targetKey);
+    }
+
+    /**
      * 读取对象
      *
      * @param key 对象键
@@ -134,6 +187,17 @@ public class OssTemplate {
         } catch (IOException | UncheckedIOException e) {
             throw new ExtException(EmojiSymbol.OSS, e, "读取对象失败：{}", key);
         }
+    }
+
+    /**
+     * 读取对象元信息（不下载内容）
+     *
+     * @param key 对象键
+     *
+     * @return 元信息
+     */
+    public ObjectMeta stat(String key) {
+        return storage.stat(key);
     }
 
     /**
@@ -193,10 +257,32 @@ public class OssTemplate {
     }
 
     /**
+     * 用默认有效期生成上传直链
+     *
+     * @param key 对象键
+     *
+     * @return 可直接 PUT 的直链
+     */
+    public String presignPut(String key) {
+        return storage.presignPut(key, properties.getPresignExpiry());
+    }
+
+    /**
+     * 生成上传直链
+     *
+     * @param key    对象键
+     * @param expiry 有效期
+     *
+     * @return 可直接 PUT 的直链
+     */
+    public String presignPut(String key, Duration expiry) {
+        return storage.presignPut(key, expiry);
+    }
+
+    /**
      * 生成对象键
      * <p>
-     * 形如 {@code directory/yyyyMMdd/uuid_文件名}，文件名去掉了路径分隔符等危险字符；
-     * 目录为空时省略目录段，文件名无扩展名时补 {@code .bin}。
+     * 形如 {@code directory/yyyyMMdd/uuid_扩展名}，目录为空时省略目录段，扩展名不合法时补 {@code .bin}。
      *
      * @param directory 目录
      * @param filename  原始文件名
@@ -204,7 +290,7 @@ public class OssTemplate {
      * @return 对象键
      */
     public String generateKey(String directory, String filename) {
-        String safeName = safeName(filename);
+        String safeExt = safeExtension(filename);
         StringBuilder key = new StringBuilder();
         if (directory != null && !directory.isBlank()) {
             key.append(stripSlashes(directory)).append('/');
@@ -212,29 +298,26 @@ public class OssTemplate {
         key.append(LocalDate.now().format(DATE_DIR))
                 .append('/')
                 .append(randomId())
-                .append('_')
-                .append(safeName);
+                .append(safeExt);
         return key.toString();
     }
 
     /**
-     * 生成安全的文件名
+     * 取安全的扩展名
      * <p>
-     * 路径分隔符等危险字符换成下划线，扩展名只保留字母数字形式，
-     * 不合法或没有时统一补 {@code .bin}，避免把可执行后缀写进对象键。
+     * 只保留字母数字形式的扩展名，其他一律换成 {@code .bin}，避免把可执行后缀或路径片段写进对象键。
      *
      * @param filename 原始文件名
      *
-     * @return 去掉路径分隔符等危险字符的文件名
+     * @return 扩展名，含前导点
      */
-    private String safeName(String filename) {
+    private String safeExtension(String filename) {
         if (filename == null || filename.isBlank()) {
-            return randomId() + ".bin";
+            return ".bin";
         }
-        String name = Path.of(filename).getFileName().toString().replaceAll("[\\\\/:*?\"<>|\\s]", "_");
+        String name = Path.of(filename).getFileName().toString();
         int dot = name.lastIndexOf('.');
-        String ext = dot > 0 && name.substring(dot).matches("\\.[A-Za-z0-9]{1,16}") ? name.substring(dot) : ".bin";
-        return randomId() + ext;
+        return dot > 0 && name.substring(dot).matches("\\.[A-Za-z0-9]{1,16}") ? name.substring(dot) : ".bin";
     }
 
     /**
