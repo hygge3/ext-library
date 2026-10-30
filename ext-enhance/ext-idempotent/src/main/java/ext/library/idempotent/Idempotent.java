@@ -67,6 +67,21 @@ public @interface Idempotent {
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 
     /**
+     * 幂等键写入的缓存名
+     * <p>
+     * 底层 key 由 [ext-cache] 拼成 {@code {ext.cache.key-prefix}:{cacheName}:{prefix}:{幂等标识}}，
+     * 因此换一个缓存名就能把不同业务的幂等键隔离开。
+     *
+     * @return 缓存名，默认 {@value #DEFAULT_CACHE_NAME}
+     */
+    String cacheName() default DEFAULT_CACHE_NAME;
+
+    /**
+     * 默认的缓存名
+     */
+    String DEFAULT_CACHE_NAME = "idempotent";
+
+    /**
      * 重复请求时的提示信息
      *
      * @return 提示信息

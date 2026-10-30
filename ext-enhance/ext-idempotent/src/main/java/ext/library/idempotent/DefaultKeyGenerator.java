@@ -1,13 +1,13 @@
 package ext.library.idempotent;
 
 import ext.library.core.util.spel.SpelUtil;
+import ext.library.servlet.util.ServletUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
 /**
@@ -34,9 +34,9 @@ public class DefaultKeyGenerator implements KeyGenerator {
         StandardEvaluationContext spelContext = SpelUtil.getSpelContext(joinPoint.getTarget(), method, args);
 
         // 如果在 Servlet 环境下，将 request 放入上下文
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes != null) {
-            spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, requestAttributes.getRequest());
+        HttpServletRequest request = ServletUtil.getRequestOrNull();
+        if (request != null) {
+            spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, request);
         }
 
         // 解析出唯一标识并拼接完整 key

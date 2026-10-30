@@ -3,13 +3,8 @@ description = '幂等性控制'
 dependencies {
     api project(':ext-common:ext-core')
     api project(':ext-common:ext-json')
-    api 'org.springframework:spring-web'
+    api project(':ext-common:ext-servlet')
+    api project(':ext-infra:ext-cache')
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
-    compileOnly project(':ext-infra:ext-redis')
-    compileOnly project(':ext-infra:ext-postgres')
-    compileOnly 'com.github.ben-manes.caffeine:caffeine'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
-    testImplementation project(':ext-infra:ext-redis')
-    testImplementation project(':ext-infra:ext-postgres')
-    testImplementation 'com.github.ben-manes.caffeine:caffeine'
 }
