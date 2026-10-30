@@ -2,7 +2,10 @@ description = '分布式锁'
 
 dependencies {
     api project(':ext-common:ext-core')
-    api project(':ext-infra:ext-redis')
-    compileOnly 'org.springframework:spring-web'
+    compileOnly project(':ext-common:ext-servlet')
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly project(':ext-infra:ext-redis')
+    compileOnly project(':ext-infra:ext-postgres')
+    testImplementation project(':ext-infra:ext-redis')
+    testImplementation project(':ext-infra:ext-postgres')
 }
