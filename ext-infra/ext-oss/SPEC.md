@@ -11,7 +11,7 @@ depends-on: [ext-core]
 
 **职责**：`OssTemplate` 作为唯一门面（`put` / `putBytes` / `putFile` / `copy` / `move` / `get` / `getString` / `getBytes` / `stat` / `delete` / `exists` / `list` / `presign` / `presignPut` / `generateKey`），背后是可替换的 `ObjectStorage` SPI，三份实现：`LocalObjectStorage`（写本地目录，可配对外访问前缀）、`S3ObjectStorage`（AWS SDK for Java v2，分片上传 + 预签名链接 + 服务端复制）与 `SftpObjectStorage`（SSH/SFTP 远端目录）。返回模型 `OssObject`（`Closeable`，含 bucket/key/contentType/size/流）、`ObjectMeta`（`stat` 结果：size/contentType/lastModified，不含内容）与 `ObjectItem`（列表项）。
 
-**装配约束**：按 `ext.oss.type` 选 `local` / `s3` / `sftp`。各实现的厂商类型（AWS SDK 的 `S3Client` / `S3Presigner`、SFTP 客户端）只出现在自动配置类的方法体内部，且各自是 `compileOnly`，因此**容器里没有对应 SDK 时其他模式仍能启动**——新增存储实现必须沿用这个约束，不能把厂商类型泄进门面或 SPI 签名。
+**装配约束**：按 `ext.oss.type` 选 `local` / `s3` / `sftp`。各实现的厂商类型（AWS SDK 的 `S3Client` / `S3Presigner`、SFTP 客户端）只出现在自动配置类的方法体内部，且各自是 `compileOnly`，因此**容器里没有对应 SDK 时其他模式仍能启动**——新增存储实现必须沿用这个约束，不能把厂商类型泄进门面或 SPI 签名。S3 模式除 `software.amazon.awssdk:s3` 外还必须引一个 HTTP 客户端实现（`apache-client` 或 `url-connection-client`）——`s3` 只带 `http-client-spi` 接口，SDK 找不到实现会在建 `S3Client` 时抛 `SdkClientException`。
 
 **S3 模式**：`ext.oss.type=s3`，配置 `ext.oss.*` 的 `endpoint` / `access-key` / `secret-key` / `region` / `bucket` / `auto-create-bucket` / `part-size`（默认 10MB）/ `presign-expiry`，外加两个 S3 兼容性开关：`path-style-access`（默认 `true`——MinIO、Ceph、R2 这类自建端点几乎都要求 path-style，AWS 官方端点要关掉）与 `chunked-encoding`（默认 `true`，个别旧网关不认 `aws-chunked` 时要关）。
 

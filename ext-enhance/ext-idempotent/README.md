@@ -43,7 +43,7 @@ implementation("ext.library:ext-idempotent")
 
 | 配置项 | 默认值 | 说明 |
 |-------|-------|------|
-| ext.cache.cache-storage | CAFFEINE | 幂等键使用的缓存后端：CAFFEINE / REDIS / POSTGRES（不能配 L2，启动会报错） |
+| ext.cache.cache-storage | AUTO | 幂等键使用的缓存后端：AUTO / CAFFEINE / REDIS / POSTGRES / L2（AUTO 在引了 ext-redis 或 ext-postgres 时解析为 L2） |
 
 ## 注解属性
 

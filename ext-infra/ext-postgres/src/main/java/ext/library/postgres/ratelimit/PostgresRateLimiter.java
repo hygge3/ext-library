@@ -157,7 +157,7 @@ public class PostgresRateLimiter {
     /**
      * 定时清理过期的限流记录
      */
-    @Scheduled(fixedDelayString = "#{@postgresProperties.rateLimitWindow.toMillis() * 2}")
+    @Scheduled(fixedDelayString = "#{@postgresProperties.ratelimit.window.toMillis() * 2}")
     public void cleanup() {
         // 清理超过两个窗口周期的旧记录
         int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE window_start < NOW() - ?::interval").param((properties.getRatelimit().getWindow().toSeconds() * 2) + " seconds").update();

@@ -20,7 +20,7 @@ ext-infra 负责与外部基础设施的集成，为上层业务模块提供数�
 | ext-jdbc | 基于 JdbcClient 的通用 DAO 与链式条件构造 | ext-core, spring-boot-starter-jdbc |
 | ext-job | 基于 PostgreSQL 队列的声明式任务投递与执行 | ext-postgres |
 | ext-i18n | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |
-| ext-oss | 对象存储，支持本地文件系统、S3 协议与 SSH/SFTP | ext-core；可选 AWS SDK v2、sshd-sftp |
+| ext-oss | 对象存储，支持本地文件系统、S3 协议与 SSH/SFTP | ext-core；可选 AWS SDK v2（s3 + apache-client）、sshd-sftp |
 
 ## 模块详情
 
@@ -44,7 +44,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 - **队列**: `FOR UPDATE SKIP LOCKED` 实现无锁任务队列
 - **发布订阅**: `LISTEN/NOTIFY` 原生消息机制
 - **限流**: 计数表 + 固定窗口算法
-- **表结构初始化**: 启动时自动建表（`ext.postgres.auto-init-schema`）
+- **表结构初始化**: 各能力独立开关，按开关建表（`ext.postgres.cache.auto-init-schema` / `ext.postgres.queue.auto-init-schema` / `ext.postgres.ratelimit.auto-init-schema`，全关则不建表）
 
 **包结构**: `ext.library.postgres`
 
@@ -265,7 +265,7 @@ ext:
 - **S3 实现**: `S3ObjectStorage` 基于 AWS SDK for Java v2（`S3Client` + `S3Presigner`），超过 `part-size` 走分片上传，复制走服务端 `CopyObject`
 - **SFTP 实现**: `SftpObjectStorage` 基于 Apache MINA SSHD，远端目录当桶用；上传写临时文件再 `rename`，连接池复用会话
 - **返回值**: `OssObject`（bucket/key/contentType/size/content 流，实现 `Closeable`）、`ObjectMeta`（stat 结果，不含内容）、`ObjectItem`（列表项）
-- **实现选择**: 按 `ext.oss.type` 选 `local` / `s3` / `sftp`；厂商类型只出现在自动配置类方法体内部，且各方 SDK 都是 `compileOnly`，容器里没有对应 SDK 时其他模式照样能启动
+- **实现选择**: 按 `ext.oss.type` 选 `local` / `s3` / `sftp`；厂商类型只出现在自动配置类方法体内部，且各方 SDK 都是 `compileOnly`，容器里没有对应 SDK 时其他模式照样能启动；S3 模式还要额外引 `software.amazon.awssdk:apache-client`（或 `url-connection-client`），`s3` 本身不带 HTTP 客户端实现
 - **不在范围**: 跨实现复制（local → s3 属于数据迁移）、CDN 回源、图片处理
 
 **包结构**: `ext.library.oss`

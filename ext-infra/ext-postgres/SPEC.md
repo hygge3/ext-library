@@ -20,6 +20,6 @@ depends-on: [ext-core, ext-json]
 
 **边界**：依赖 `ext-core`、`ext-json`、`postgresql` 驱动、`starter-jdbc`；不依赖 `ext-redis`，与 [ext-cache](../ext-cache/SPEC.md) 之间只有「cache 单向可选引用 postgres」的关系，不成环。队列能力被 [ext-job](../ext-job/SPEC.md) 直接复用，不在别处另造调度原语。
 
-**调用方自建表**：把对应 `auto-init-schema` 关掉、自己用迁移工具（Flyway / Liquibase）建表即可——关掉就是完全不建表，不会、也不应被下游模块偻着建；[ext-job](../ext-job/SPEC.md) 的队列同样只看这个开关，自己不做 DDL。
+**调用方自建表**：把对应 `auto-init-schema` 关掉、自己用迁移工具（Flyway / Liquibase）建表即可——关掉就是完全不建表，不会、也不应被下游模块逼着建；[ext-job](../ext-job/SPEC.md) 的队列同样只看这个开关，自己不做 DDL。
 
 **约定**：配置前缀 `ext.postgres`。

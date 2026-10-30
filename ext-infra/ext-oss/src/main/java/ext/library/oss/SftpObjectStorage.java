@@ -14,6 +14,7 @@ import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.apache.sshd.sftp.client.extensions.CopyFileExtension;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -103,6 +104,8 @@ public class SftpObjectStorage implements ObjectStorage {
         String path = resolve(key);
         String tempPath = path + TEMP_SUFFIX;
         execute(client -> {
+            // 远端目录不像 S3 那样隐式存在，父目录得自己建
+            ensureDirectory(client, parent(path));
             try (OutputStream out = client.write(tempPath, OpenModes.WRITE)) {
                 content.transferTo(out);
             }
@@ -115,11 +118,31 @@ public class SftpObjectStorage implements ObjectStorage {
     @Override
     public OssObject get(String key) {
         String path = resolve(key);
-        return execute(client -> {
-            SftpClient.Attributes attributes = statAttributes(client, path, key);
-            return new OssObject(properties.getBucket(), key, contentType(path),
-                    attributes.getSize(), client.read(path));
-        }, "读取对象失败：" + key);
+        Holder holder = borrow();
+        try {
+            SftpClient.Attributes attributes = statAttributes(holder.client, path, key);
+            InputStream content = holder.client.read(path);
+            // 连接要等流读完才能还池：同一个 SftpClient 不能并发使用
+            return new OssObject(properties.getBucket(), key, contentType(path), attributes.getSize(),
+                    new FilterInputStream(content) {
+                        @Override
+                        public void close() throws IOException {
+                            try {
+                                super.close();
+                            } finally {
+                                release(holder);
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            holder.broken = true;
+            release(holder);
+            throw new ExtException(EmojiSymbol.OSS, e, "读取对象失败：" + key);
+        } catch (RuntimeException e) {
+            // 对象不存在这类业务异常，连接本身是好的，照常还池
+            release(holder);
+            throw e;
+        }
     }
 
     @Override
@@ -165,6 +188,7 @@ public class SftpObjectStorage implements ObjectStorage {
         String source = resolve(sourceKey);
         String target = resolve(targetKey);
         execute(client -> {
+            ensureDirectory(client, parent(target));
             CopyFileExtension extension = client.getExtension(CopyFileExtension.class);
             if (extension != null && extension.isSupported()) {
                 // 服务端 copy-data：数据不经过应用进程
@@ -185,6 +209,7 @@ public class SftpObjectStorage implements ObjectStorage {
         String source = resolve(sourceKey);
         String target = resolve(targetKey);
         execute(client -> {
+            ensureDirectory(client, parent(target));
             client.rename(source, target, SftpClient.CopyMode.Overwrite);
             return null;
         }, "移动对象失败：" + sourceKey + " -> " + targetKey);
@@ -402,6 +427,14 @@ public class SftpObjectStorage implements ObjectStorage {
             throw new ExtException(EmojiSymbol.OSS, "非法的对象键：{}", key);
         }
         return join(basePath(), key);
+    }
+
+    /**
+     * 取路径的父目录
+     */
+    private String parent(String path) {
+        int slash = path.lastIndexOf('/');
+        return slash <= 0 ? "/" : path.substring(0, slash);
     }
 
     /**

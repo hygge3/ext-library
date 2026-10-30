@@ -107,8 +107,8 @@ public class S3ObjectStorage implements ObjectStorage {
     @Override
     public void put(String key, InputStream content, long size, String contentType) {
         long partSize = Math.max(properties.getPartSize(), MIN_PART_SIZE);
-        if (size > 0 && size <= partSize) {
-            // 一次装得下，单请求直传
+        if (size >= 0 && size <= partSize) {
+            // 一次装得下（含空对象），单请求直传
             try {
                 client.putObject(
                         PutObjectRequest.builder().bucket(bucket).key(key).contentType(contentType)
@@ -163,7 +163,9 @@ public class S3ObjectStorage implements ObjectStorage {
             }
 
             if (parts.isEmpty()) {
-                // 空流：分片上传不接受 0 片，补一个零长度的单请求
+                // 空流：分片上传不接受 0 片，先放弃它再补一个零长度的单请求
+                abortQuietly(key, uploadId);
+                uploadId = null;
                 client.putObject(
                         PutObjectRequest.builder().bucket(bucket).key(key).contentType(contentType).contentLength(0L).build(),
                         RequestBody.empty()

@@ -116,15 +116,18 @@ public class L2Strategy implements CacheStrategy {
     }
 
     /**
-     * 两级缓存不支持 putIfAbsent
+     * 两级缓存的原子写入
      * <p>
-     * 本地层与分布式层各自 putIfAbsent 会出现「本地没命中、远端已存在」的分裂判定，
-     * 让「在时间窗内只放行一次」这类语义失效，因此直接拒绝。
+     * 以分布式层为唯一裁决者：多实例共享的是它，本地层只是它的读缓存。
+     * 分布式层写���成功后再回填本地，避免「本��没命中、远端已存在」的分裂判定。
      */
     @Override
     public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
-        throw new UnsupportedOperationException(
-                "L2 缓存不支持 putIfAbsent，请把 ext.cache.cache-storage 配成 REDIS / POSTGRES / CAFFEINE 中的一个");
+        boolean created = getDistributedStrategy().putIfAbsent(cacheName, key, value, expireTime);
+        if (created) {
+            caffeineStrategy.put(cacheName, key, value, expireTime);
+        }
+        return created;
     }
 
     @Override

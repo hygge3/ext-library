@@ -1,12 +1,10 @@
 package ext.library.idempotent.config;
 
 import ext.library.cache.strategy.CacheStrategy;
-import ext.library.cache.strategy.L2Strategy;
 import ext.library.idempotent.DefaultKeyGenerator;
 import ext.library.idempotent.IdempotentAspect;
 import ext.library.idempotent.KeyGenerator;
 import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,8 +17,7 @@ import org.springframework.context.annotation.Bean;
  * （Caffeine / Redis / PostgreSQL）由 {@code ext.cache.cache-storage} 统一决定，不再自带 KeyStore
  * 与后端探测逻辑。
  * <p>
- * 没有 {@code CacheStrategy} 时启动直接失败（缺依赖是配置错误，不该静默降级成另一个后端）；
- * 配成 {@code L2} 同样启动即报错，原因见下面的 Bean 方法。
+ * 没有 {@code CacheStrategy} 时启动直接失败（缺依赖是配置错误，不该静默降级成另一个后端）。
  */
 @AutoConfiguration(afterName = "ext.library.cache.config.CacheAutoConfiguration")
 public class IdempotentAutoConfiguration {
@@ -39,8 +36,8 @@ public class IdempotentAutoConfiguration {
     /**
      * 幂等切面
      * <p>
-     * 两级缓存不能用于幂等：本地层与分布式层各自做 {@code putIfAbsent} 会出现「本地没命中、远端已存在」
-     * 的分裂判定，并发重复请求仍会被放行——这恰好是本模块唯一要保证的事，所以宁可启动失败也不含糊放行。
+     * 两级缓存同样可用：{@code L2Strategy.putIfAbsent} 以分布式层为唯一裁决者，
+     * 本地层只在写入成功后回填，不会出现「本地没命中、远端已存在」的分裂判定。
      *
      * @param cacheStrategy 缓存策略
      * @param keyGenerator  Key 生成器
@@ -49,12 +46,6 @@ public class IdempotentAutoConfiguration {
      */
     @Bean
     public IdempotentAspect idempotentAspect(CacheStrategy cacheStrategy, KeyGenerator keyGenerator) {
-        if (cacheStrategy instanceof L2Strategy) {
-            throw new ExtException(
-                    EmojiSymbol.IDEMPOTENT,
-                    "ext-idempotent 不支持两级缓存：请将 ext.cache.cache-storage 改为 CAFFEINE / REDIS / POSTGRES"
-            );
-        }
         Logs.info(EmojiSymbol.IDEMPOTENT, "载入模块：幂等（存储: {}）", cacheStrategy.getClass().getSimpleName());
         return new IdempotentAspect(cacheStrategy, keyGenerator);
     }
