@@ -3,7 +3,7 @@ description = '操作审计'
 dependencies {
     api project(':ext-common:ext-core')
     api project(':ext-common:ext-json')
-    api 'org.springframework:spring-web'
+    api project(':ext-common:ext-servlet')
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly project(':ext-security')
     testImplementation 'jakarta.servlet:jakarta.servlet-api'

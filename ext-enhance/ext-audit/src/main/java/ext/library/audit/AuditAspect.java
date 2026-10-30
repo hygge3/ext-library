@@ -2,6 +2,7 @@ package ext.library.audit;
 
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.json.util.JsonUtil;
+import ext.library.servlet.util.ServletUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,9 +11,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,8 +33,9 @@ public record AuditAspect(AuditDispatcher dispatcher, AuditOperatorResolver oper
         Method method = signature.getMethod();
         StandardEvaluationContext spelContext =
                 SpelUtil.getSpelContext(joinPoint.getTarget(), method, joinPoint.getArgs());
-        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
-            spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, attributes.getRequest());
+        HttpServletRequest request = ServletUtil.getRequestOrNull();
+        if (request != null) {
+            spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, request);
         }
 
         String module = operationLog.module().isBlank()

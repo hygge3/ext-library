@@ -126,6 +126,38 @@ public final class StringUtil {
     }
 
     /**
+     * 将 HUMP 格式转换为下划线格式（{@link #underlineToCamelCase(String)} 的逆向）
+     * <pre>
+     * StringUtils.camelToUnderline(null)        = null
+     * StringUtils.camelToUnderline("")          = ""
+     * StringUtils.camelToUnderline("aaaBbb")    = "aaa_bbb"
+     * StringUtils.camelToUnderline("userInfo")  = "user_info"
+     * </pre>
+     *
+     * @param camelText 驼峰文本
+     *
+     * @return 下划线文本
+     */
+    public static String camelToUnderline(String camelText) {
+        if (isBlank(camelText)) {
+            return camelText;
+        }
+        StringBuilder result = new StringBuilder(camelText.length() + 4);
+        for (int i = 0; i < camelText.length(); i++) {
+            char ch = camelText.charAt(i);
+            if (Character.isUpperCase(ch)) {
+                if (i > 0) {
+                    result.append('_');
+                }
+                result.append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
+            }
+        }
+        return result.toString();
+    }
+
+    /**
      * is empty
      * <pre>
      * StringUtils.isEmpty(null)      = true

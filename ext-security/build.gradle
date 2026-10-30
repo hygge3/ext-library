@@ -3,8 +3,11 @@ description = '安全认证与授权框架'
 dependencies {
     api project(':ext-common:ext-core')
     api project(':ext-common:ext-json')
+    api project(':ext-common:ext-servlet')
     api project(':ext-crypto')
-    api project(':ext-web:ext-mvc')
     api project(':ext-infra:ext-cache')
     api project(':ext-misc:ext-useragent')
+    api 'org.springframework:spring-webmvc'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
 }

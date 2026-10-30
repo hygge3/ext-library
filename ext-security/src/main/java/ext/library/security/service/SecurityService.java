@@ -15,7 +15,7 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
-import ext.library.web.util.ServletUtil;
+import ext.library.servlet.util.ServletUtil;
 
 import jakarta.annotation.Nonnull;
 import java.time.Duration;

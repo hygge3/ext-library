@@ -1,0 +1,9 @@
+description = 'Servlet 基座 (统一响应体、分页模型、servlet 工具、请求体重读)'
+
+dependencies {
+    api project(':ext-common:ext-tool')
+    api project(':ext-common:ext-json')
+    api 'org.springframework:spring-web'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+}

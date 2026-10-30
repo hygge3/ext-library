@@ -1,6 +1,8 @@
 package ext.library.jdbc;
 
 import ext.library.core.util.BeanUtil;
+import ext.library.servlet.response.PageQuery;
+import ext.library.servlet.response.PageResult;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
