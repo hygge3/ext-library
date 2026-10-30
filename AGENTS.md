@@ -27,11 +27,14 @@ graph TD
     A --> E["ext-crypto<br/>加密层"]
     A --> F["ext-web<br/>Web 层"]
     A --> G["ext-enhance<br/>业务增强层"]
-    A --> H["ext-misc<br/>杂项工具层"]
     B --> B2["ext-tool<br/>工具类"]
     B --> B3["ext-core<br/>核心功能"]
     B --> B4["ext-json<br/>JSON 处理"]
     B --> B5["ext-servlet<br/>servlet 基座"]
+    B --> B6["ext-http<br/>HTTP 客户端"]
+    B --> B7["ext-useragent<br/>User-Agent 解析"]
+    B --> B8["ext-qrcode<br/>二维码"]
+    B --> B9["ext-logback<br/>日志脱敏"]
     C --> C1["ext-redis<br/>Redis 支持"]
     C --> C1b["ext-postgres<br/>PostgreSQL 支持"]
     C --> C2["ext-cache<br/>缓存支持"]
@@ -39,6 +42,8 @@ graph TD
     C --> C1d["ext-jdbc<br/>JdbcClient 增强"]
     C --> C1e["ext-job<br/>任务调度"]
     C1 --> C1c["ext-lock<br/>分布式锁"]
+    C --> C1f["ext-i18n<br/>国际化"]
+    C --> C1g["ext-oss<br/>对象存储"]
     F --> F1["ext-mvc<br/>MVC 支持 (含 OpenAPI)"]
     F --> F2["ext-realtime<br/>SSE + WebSocket"]
     G --> G1["ext-captcha<br/>验证码"]
@@ -46,18 +51,12 @@ graph TD
     G --> G3["ext-api-crypto<br/>API 加密"]
     G --> G4["ext-ratelimit<br/>限流"]
     G --> G5["ext-audit<br/>操作审计"]
-    H --> H1["ext-http<br/>HTTP 客户端"]
-    H --> H2["ext-qrcode<br/>二维码"]
-    H --> H4["ext-logback<br/>日志脱敏"]
-    H --> H5["ext-i18n<br/>国际化"]
-    H --> H6["ext-oss<br/>对象存储"]
     click B "./ext-common/AGENTS.md" "查看 ext-common 模块文档"
     click C "./ext-infra/AGENTS.md" "查看 ext-infra 模块文档"
     click D "./ext-security/AGENTS.md" "查看 ext-security 模块文档"
     click E "./ext-crypto/AGENTS.md" "查看 ext-crypto 模块文档"
     click F "./ext-web/AGENTS.md" "查看 ext-web 模块文档"
     click G "./ext-enhance/AGENTS.md" "查看 ext-enhance 模块文档"
-    click H "./ext-misc/AGENTS.md" "查看 ext-misc 模块文档"
 ```
 
 ## 模块索引
@@ -65,13 +64,12 @@ graph TD
 | 模块                                     | 类型     | 描述                                           |
 |------------------------------------------|----------|------------------------------------------------|
 | ext-bom                                  | 独立模块 | BOM 依赖管理，统一管理所有 ext 模块版本        |
-| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类、核心功能、JSON 处理、servlet 基座 |
-| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度 |
+| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类��核心功能、JSON 处理、servlet 基座、HTTP 客户端、UA 解析、二维码、日志脱敏 |
+| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度、国际化、对象存储 |
 | [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架                             |
 | [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/RSA/SM2/SM3/SM4)           |
 | [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC 与实时通信                    |
 | [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流、审计  |
-| [ext-misc](./ext-misc/AGENTS.md)         | 分层     | 杂项工具层，包含 HTTP 客户端、二维码、日志脱敏、国际化、对象存储 |
 
 ## 分层架构
 
@@ -88,10 +86,10 @@ graph TD
 |     ext-security                 ext-crypto               |  安全/加密层
 +------------------------------------------------------------+
 |                       ext-infra                            |  基础设施层
-|      (redis, postgres, cache, mail, lock, jdbc, job)      |
+|      (redis, postgres, cache, mail, lock, jdbc, job, i18n, oss) |
 +------------------------------------------------------------+
 |                       ext-common                           |  通用基础层
-|                (tool, core, json, servlet)                 |
+|     (tool, core, json, servlet, http, useragent, qrcode, logback) |
 +------------------------------------------------------------+
 ```
 
@@ -167,3 +165,4 @@ graph TD
 | 2026-10-10 | AI 编程工具从 Claude Code 切换为 pi-agent，CLAUDE.md 更名为 AGENTS.md |
 | 2026-10-10 | 新增 ext-jdbc、ext-job、ext-i18n、ext-oss |
 | 2026-10-10 | 新增 ext-postgres、ext-lock、ext-ratelimit、ext-audit、ext-logback |
+| 2026-10-11 | 解散 ext-misc 层：ext-http / ext-qrcode / ext-useragent / ext-logback 归入 ext-common，ext-i18n / ext-oss 归入 ext-infra |
