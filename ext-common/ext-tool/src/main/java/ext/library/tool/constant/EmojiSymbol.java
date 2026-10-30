@@ -43,9 +43,8 @@ public final class EmojiSymbol {
     public static final String DESENSITIZE = "🎭";
     public static final String TRANS = "🔁";
     public static final String API_CRYPTO = "🔏";
-    // region ext-misc 层
+    // region 独立工具模块（ext-common / ext-infra）
     public static final String HTTP = "🖥️";
-    public static final String MONITOR = "📊";
     public static final String LOGBACK = "🧾";
     public static final String I18N = "🔤";
     public static final String OSS = "📦";
