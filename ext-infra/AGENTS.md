@@ -13,7 +13,7 @@ ext-infra 负责与外部基础设施的集成，为上层业务模块提供数�
 | 模块 | 描述 | 主要依赖 |
 |------|------|----------|
 | ext-redis | Redis 操作封装，提供统一的 Redis 访问接口 | ext-core, ext-json, spring-data-redis |
-| ext-lock | 分布式锁，注解式 Redis 加锁 | ext-core, ext-redis |
+| ext-lock | 分布式锁，注解式加锁（Redis / PostgreSQL 咨询锁） | ext-core；可选 ext-redis、ext-postgres |
 | ext-postgres | PostgreSQL 功能模块（缓存、队列、发布订阅、限流） | ext-core, ext-json, postgresql |
 | ext-cache | 多级缓存抽象 (Caffeine + Redis/PostgreSQL) | ext-redis(可选), ext-postgres(可选), caffeine |
 | ext-mail | 邮件发送服务封装 | spring-boot-starter-mail |
@@ -62,16 +62,17 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 
 ### ext-lock
 
-分布式锁模块，在 `DistributedLock` 之上包一层声明式入口：
+分布式锁模块，在锁存储 SPI 之上包一层声明式入口：
 
-- `@RedisLock` - 锁注解（`key` 支持 SpEL、`timeout` 持有时间、`waitTime` 等待时间）
-- `RedisLockAspect` - 锁切面，执行完毕自动释放
+- `@RedisLock` - 锁注解（`key` 支持 SpEL、`timeout` 持有时间、`waitTime` 等待时间）；注解名沿用旧契约，内部不绑定后端
+- `RedisLockAspect` - 锁切面，正常返回与抛异常都自动释放
 - `LockKeyGenerator` - 锁键生成器（SpEL），可替换为自定义实现
+- `LockStore` - 锁存储 SPI；实现 `RedisLockStore`（ext-redis 的 `DistributedLock`，自带 TTL）与 `PostgresLockStore`（`pg_try_advisory_lock` 会话级锁）
 - `LockException` - 未抢到锁时抛出，携带锁 key
 
 **包结构**: `ext.library.lock`
 
-底层锁由 ext-redis 的 `DistributedLock` 提供（线程内可重入，Lua 脚本保证释放的原子性）。
+后端由 `ext.lock.store-type` 选择（`AUTO` / `REDIS` / `POSTGRES`），两个后端模块均为 `compileOnly`，一个都没引时装配阶段直接报错。
 
 ### ext-cache
 
@@ -213,7 +214,7 @@ ext:
 ## 依赖关系
 
 ```
-ext-common (ext-core, ext-json)
+ext-common (ext-core, ext-json, ext-servlet)
     |
     +---> ext-redis (独立)
     |         |

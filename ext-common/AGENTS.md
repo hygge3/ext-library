@@ -19,6 +19,7 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 | ext-tool | 通用工具类库 (ID生成、重试、函数式接口等) | 无外部依赖 |
 | ext-core | 核心功能 (SpEL表达式、验证、AOP等) | ext-tool, spring-validation |
 | ext-json | JSON 处理工具 (Jackson封装、JsonPath、翻译、脱敏) | ext-tool, spring-boot-starter-json, json-path |
+| ext-servlet | servlet 基座 (统一响应体、分页模型、servlet 工具、错误信封、请求体重读) | ext-tool, ext-json, spring-web |
 
 ## 模块详情
 
@@ -58,6 +59,19 @@ JSON 处理模块，提供：
 - 数据脱敏 (`ext.library.desensitize`)：`@Sensitive` 注解 + `SensitiveStrategy` + `DesensitizationUtil`
 
 **包结构**: `ext.library.json`, `ext.library.trans`, `ext.library.desensitize`
+
+### ext-servlet
+
+servlet 基座，把「接口返回什么形状、分页怎么传、错误怎么回」这类与框架版本无关的契约集中定义：
+
+- **弱模型** (`ext.library.servlet.response`)：`R`、`PageQuery`、`PageResult`、`SelectData`——Web 层与 infra 层共用同一份，不再各自持有副本
+- **servlet 工具** (`ext.library.servlet.util`)：`ServletUtil`（请求/响应/参数/头/Cookie/IP/写出 JSON）、`RepeatableRequestWrapper`（请求体可重复读）
+- **错误信封** (`ext.library.servlet.exception`)：`ErrorEnvelope`（HTTP 状态 + `R` 的配对）、`ErrorLog`（统一错误日志口径）
+- **配置**：`ext.servlet.repeatable-request.enabled`（默认 `false`，开启后 body 整段驻留内存）
+
+**包结构**: `ext.library.servlet`
+
+**注意**：`R` / `ServletUtil` / 分页模型只在 `ext-servlet` 定义一份。下层模块需要就直接依赖它，不要因为「下层不能依赖 web」再拄一份同名类。
 
 ## 依赖关系
 

@@ -1,6 +1,6 @@
 # ext-misc
 
-> 杂项工具层 - 提供 HTTP 客户端、二维码生成、系统监控等独立工具
+> 杂项工具层 - 提供 HTTP 客户端、二维码生成等独立工具
 
 ## 简介
 
@@ -12,15 +12,13 @@
 |------|------|----------|
 | [ext-http](./ext-http/README.md) | HTTP 客户端封装 | ext-tool |
 | [ext-qrcode](./ext-qrcode/README.md) | 二维码生成工具 | ext-tool, ZXing |
-| [ext-monitor](./ext-monitor/README.md) | 系统监控信息采集 | OSHI |
 
 ## 模块架构
 
 ```
 ext-misc (杂项工具层)
 ├── ext-http      # HTTP 客户端
-├── ext-qrcode    # 二维码生成
-└── ext-monitor   # 系统监控
+└── ext-qrcode    # 二维码生成
 ```
 
 ## 依赖关系
@@ -31,10 +29,6 @@ ext-tool
     ├──► ext-http
     │
     └──► ext-qrcode (+ ZXing)
-
-oshi-core-java25
-    │
-    └──► ext-monitor
 ```
 
 ## 快速开始
@@ -54,11 +48,6 @@ oshi-core-java25
     <artifactId>ext-qrcode</artifactId>
 </dependency>
 
-<!-- 系统监控 -->
-<dependency>
-    <groupId>ext.library</groupId>
-    <artifactId>ext-monitor</artifactId>
-</dependency>
 ```
 
 ## 功能概览
@@ -84,16 +73,6 @@ QrCode.form("https://example.com")
     .size(512)
     .logo("/path/to/logo.png")
     .toFile("/path/to/output.png");
-```
-
-### ext-monitor
-
-基于 OSHI 的系统监控工具，提供 CPU、内存、磁盘、网络、JVM 等信息采集。
-
-```java
-CpuInfo cpuInfo = monitor.getCpuInfo();
-MemoryInfo memoryInfo = monitor.getMemoryInfo();
-List<DiskInfo> diskInfos = monitor.diskInfos();
 ```
 
 ## 许可证

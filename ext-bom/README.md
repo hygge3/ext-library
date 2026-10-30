@@ -87,7 +87,6 @@
 |------|------|
 | ext-http | HTTP 客户端封装 |
 | ext-qrcode | 二维码生成 |
-| ext-monitor | 系统监控信息 |
 
 ## 第三方依赖版本
 
@@ -96,7 +95,6 @@
 | Spring Boot | 4.1.1 | 框架全家桶（BOM 引入） |
 | Swagger | 2.2.55 | API 注解 |
 | Bouncy Castle | 1.86 | 加密库 |
-| OSHI | 7.0.0 | 系统信息采集 |
 | SpringDoc | 3.1.1 | OpenAPI 文档 |
 | ZXing | 3.5.4 | 二维码 |
 | ZXing | 3.5.3 | 二维码生成 |

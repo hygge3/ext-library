@@ -9,7 +9,7 @@
 - **SSE**（`ext.library.sse.*`）：基于 Server-Sent Events 的单向服务器推送，实现见下方 SSE 章节
 - **WebSocket**（`ext.library.websocket.*`）：全双工双向通信，实现见下方 WebSocket 章节
 
-两者共享同一套分布式连接管理机制（Redis / PostgreSQL PubSub），配置前缀分别为 `ext.sse.*` 和 `ext.websocket.*`。
+两者共享同一套分布式连接管理机制，跨实例广播都注入 ext-core 的 `PubSub`（引 ext-redis 则用它，引 ext-postgres 则用它），配置前缀分别为 `ext.sse.*` 和 `ext.websocket.*`；一个后端都没引时以单实例模式运行。
 
 ## 快速开始
 

@@ -13,10 +13,10 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 | 模块 | 描述 | 主要依赖 |
 |------|------|----------|
 | ext-captcha | 图形验证码生成与校验 | ext-cache |
-| ext-idempotent | 接口幂等性控制 | ext-redis, caffeine(可选) |
+| ext-idempotent | 接口幂等性控制 | ext-core, ext-servlet, ext-redis, caffeine(可选) |
 | ext-api-crypto | API 请求/响应加解密 | ext-json, ext-crypto |
-| ext-ratelimit | 接口限流控制 | ext-redis(可选), ext-postgres(可选) |
-| ext-audit | 操作审计留痕 | ext-json |
+| ext-ratelimit | 接口限流控制 | ext-core, ext-servlet, ext-redis(可选), ext-postgres(可选) |
+| ext-audit | 操作审计留痕 | ext-json, ext-servlet |
 
 > 字段翻译 (`ext.library.trans`) 与数据脱敏 (`ext.library.desensitize`) 已并入 ext-common/ext-json。
 
@@ -48,10 +48,8 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 
 - `@Idempotent` - 幂等性注解
 - `IdempotentAspect` - 幂等性切面
-- `IdempotentKeyGenerator` - 幂等键生成器
-- `IdempotentKeyStore` - 幂等键存储接口
-- `RedisIdempotentKeyStore` - Redis 存储实现
-- `InMemoryIdempotentKeyStore` - 内存存储实现
+- `KeyGenerator` / `DefaultKeyGenerator` - 幂等键生成器
+- 幂等键的存储由 ext-cache 的 `CacheStrategy.putIfAbsent` 承担，本模块不再自带 KeyStore
 
 **包结构**: `ext.library.idempotent`
 
@@ -61,7 +59,7 @@ API 加解密模块，提供：
 
 - `@RequestDecrypt` - 请求解密注解（支持 algorithm 属性）
 - `@ResponseEncrypt` - 响应加密注解（支持 algorithm 属性）
-- `Algorithm` - 加密算法枚举 (RSA/SM2/AES/SM4/DES/BASE64)
+- `Algorithm` - 加密算法枚举 (RSA/SM2/AES/SM4/BASE64)
 - `ApiCryptoAutoConfiguration` - 自动配置类
 - `CryptoStrategy` - 加密策略接口及实现
 

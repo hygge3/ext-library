@@ -2,7 +2,7 @@
 
 # ext-misc - 杂项工具层
 
-> 提供 HTTP 客户端、二维码生成、系统监控等独立工具
+> 提供 HTTP 客户端、二维码生成等独立工具
 
 ## 层级职责
 
@@ -15,10 +15,9 @@ ext-misc 包含相对独立的工具模块，不属于特定业务领域，可�
 | ext-http | HTTP 客户端封装 | ext-tool |
 | ext-useragent | User-Agent 解析器 | ext-tool |
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
-| ext-monitor | 系统监控信息采集 | oshi-core |
 | ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
 | ext-i18n | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |
-| ext-oss | 对象存储，支持本地文件系统与 S3 协议 | ext-core, minio |
+| ext-oss | 对象存储，支持本地文件系统、S3 协议与 SSH/SFTP | ext-core；可选 AWS SDK v2、sshd-sftp |
 
 ## 模块详情
 
@@ -76,37 +75,6 @@ String base64 = QrCode.from("内容").toBase64();
 
 // 识别二维码
 String content = QrCode.read(inputStream);
-```
-
-### ext-monitor
-
-系统监控模块，基于 OSHI，提供：
-
-- `SystemMonitor` - 监控管理器（Spring Bean）
-- `CpuInfo` - CPU 信息采集
-- `MemoryInfo` - 内存信息采集
-- `DiskInfo` - 磁盘信息采集
-- `JvmInfo` - JVM 信息采集
-- `NetIoInfo` - 网络 IO 信息
-- `HostInfo` - 主机信息
-
-**包结构**: `ext.library.monitor`
-
-**使用示例**:
-```java
-// 静态便捷方法（推荐）
-CpuInfo cpu = CpuInfo.get();
-MemoryInfo memory = MemoryInfo.get();
-JvmInfo jvm = JvmInfo.get();
-HostInfo host = HostInfo.get();
-List<DiskInfo> disks = DiskInfo.getAll();
-NetIoInfo net = NetIoInfo.get();
-
-// 或注入 SystemMonitor Bean
-@Autowired
-private SystemMonitor monitor;
-
-CpuInfo cpu = monitor.getCpuInfo();
 ```
 
 ### ext-logback
@@ -183,14 +151,16 @@ ext:
 
 ### ext-oss
 
-对象存储模块，本地文件系统与 S3 协议各一份实现，业务方只依赖门面类：
+对象存储模块，本地文件系统、S3 协议与 SSH/SFTP 各一份实现，业务方只依赖门面类：
 
-- **门面**: `OssTemplate` - put/putBytes/putFile/get/getString/getBytes/delete/exists/list/presign/generateKey
-- **SPI**: `ObjectStorage` 接口，本地与 S3 各实现一份
+- **门面**: `OssTemplate` - put/putBytes/putFile/copy/move/get/getString/getBytes/stat/delete/exists/list/presign/presignPut/generateKey
+- **SPI**: `ObjectStorage` 接口，三种后端各实现一份；`copy` / `move` 带跨桶重载，无桶概念的实现抛 `UnsupportedOperationException`
 - **本地实现**: `LocalObjectStorage` 写本地目录，可配置对外访问前缀
-- **S3 实现**: `S3ObjectStorage` 基于 MinIO SDK，支持分片上传与预签名链接
-- **返回值**: `OssObject`（bucket/key/contentType/size/content 流，实现 `Closeable`）、`ObjectItem`（列表项）
-- **实现选择**: 按 `ext.oss.type` 选 `local` 或 `s3`，MinIO 类型只出现在自动配置类方法体内部，容器里没有 MinIO 时本地模式也能正常启动
+- **S3 实现**: `S3ObjectStorage` 基于 AWS SDK for Java v2（`S3Client` + `S3Presigner`），超过 `part-size` 走分片上传，复制走服务端 `CopyObject`
+- **SFTP 实现**: `SftpObjectStorage` 基于 Apache MINA SSHD，远端目录当桶用；上传写临时文件再 `rename`，连接池复用会话
+- **返回值**: `OssObject`（bucket/key/contentType/size/content 流，实现 `Closeable`）、`ObjectMeta`（stat 结果，不含内容）、`ObjectItem`（列表项）
+- **实现选择**: 按 `ext.oss.type` 选 `local` / `s3` / `sftp`；厂商类型只出现在自动配置类方法体内部，且各方 SDK 都是 `compileOnly`，容器里没有对应 SDK 时其他模式照样能启动
+- **不在范围**: 跨实现复制（local → s3 属于数据迁移）、CDN 回源、图片处理
 
 **包结构**: `ext.library.oss`
 
@@ -199,8 +169,8 @@ ext:
 **核心类**:
 - `OssTemplate` - 对象存储门面
 - `ObjectStorage` - 存储 SPI
-- `LocalObjectStorage` / `S3ObjectStorage` - 本地与 S3 实现
-- `OssObject` / `ObjectItem` - 返回模型
+- `LocalObjectStorage` / `S3ObjectStorage` / `SftpObjectStorage` - 三种实现
+- `OssObject` / `ObjectMeta` / `ObjectItem` - 返回模型
 - `OssProperties` / `OssAutoConfiguration` - 配置属性与自动配置
 
 **使用示例**:
@@ -208,7 +178,10 @@ ext:
 String key = ossTemplate.generateKey("avatar", "logo.png");
 String url = ossTemplate.put(key, Files.newInputStream(file), size, "image/png");
 
+ossTemplate.copy(key, "backup/" + key);                  // 服务端复制，数据不过进程
+ossTemplate.move(key, "archive/" + key);                 // copy + delete
 String url2 = ossTemplate.presign(key);                  // 预签名链接
+ObjectMeta meta = ossTemplate.stat(key);
 byte[] bytes = ossTemplate.getBytes(key);
 ```
 
@@ -217,7 +190,7 @@ byte[] bytes = ossTemplate.getBytes(key);
 ext:
   oss:
     enabled: true
-    type: LOCAL                    # LOCAL / S3
+    type: LOCAL                    # LOCAL / S3 / SFTP
     path: ./data/oss               # 本地存储根目录
     url-prefix: ""                 # 本地存储对外访问前缀
     bucket: ext-library
@@ -229,6 +202,17 @@ ext:
     auto-create-bucket: true
     part-size: 10485760            # 分片大小，默认 10MB
     presign-expiry: 1h             # 预签名链接有效期
+    path-style-access: true        # 自建端点几乎都要；AWS 官方端点关掉
+    chunked-encoding: true         # 旧网关不认 aws-chunked 时关掉
+    # 以下为 type=sftp 时使用
+    sftp:
+      host: localhost
+      port: 22
+      username: root
+      password: ${SFTP_PASSWORD}   # 与 private-key 二选一
+      base-path: /data/oss
+      access-prefix: https://static.example.com   # 配了 presign 才可用
+      pool-size: 5
 ```
 
 ## 依赖关系
@@ -242,10 +226,6 @@ ext-tool
     |
     +---> ext-qrcode (+ zxing)
 
-oshi-core-java25
-    |
-    +---> ext-monitor
-
 ext-json + logback-classic
     |
     +---> ext-logback
@@ -254,7 +234,7 @@ ext-core + ext-json
     |
     +---> ext-i18n (+ spring-boot-starter-jdbc 可选)
 
-ext-core + minio
+ext-core (+ software.amazon.awssdk:s3 或 sshd-sftp，按需 compileOnly)
     |
     +---> ext-oss
 ```
@@ -264,7 +244,6 @@ ext-core + minio
 - `ext-http/src/main/java/ext/library/http/` - HTTP 客户端源码
 - `ext-useragent/src/main/java/ext/library/useragent/` - User-Agent 解析源码
 - `ext-qrcode/src/main/java/ext/library/qrcode/` - 二维码源码
-- `ext-monitor/src/main/java/ext/library/monitor/` - 系统监控源码
 - `ext-logback/src/main/java/ext/library/logback/` - 日志脱敏源码
 - `ext-i18n/src/main/java/ext/library/i18n/` - 国际化源码
 - `ext-oss/src/main/java/ext/library/oss/` - 对象存储源码
@@ -274,8 +253,8 @@ ext-core + minio
 | 日期 | 变更内容 |
 |------|----------|
 | 2026-10-10 | 新增 ext-oss 模块（对象存储，本地文件系统与 S3 双实现） |
+| 2026-10-11 | ext-oss 换 AWS SDK v2 并新增 SFTP 后端、copy/move/stat/prepresignPut |
 | 2026-10-10 | 新增 ext-i18n 模块（国际化，资源文件与数据库双源翻译） |
 | 2026-10-10 | 新增 ext-logback 模块（日志脱敏） |
 | 2026-01-26 | 重构 ext-qrcode：修复 API 命名(form→from)、NPE 问题、MIME 类型、添加参数验证 |
-| 2026-01-26 | 重构 ext-monitor：重命名类、修复计算错误、添加静态便捷方法 |
 | 2026-01-19 | 初始化 AGENTS.md 文档 |

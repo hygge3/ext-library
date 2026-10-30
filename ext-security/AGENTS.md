@@ -44,9 +44,9 @@ ext-useragent (UserAgent 解析)
 ext-core (核心工具)
 ext-json (JSON 处理)
 ext-cache (缓存支持，支持 Caffeine/Redis/PostgreSQL/L2)
-ext-mvc (MVC 支持)
+ext-servlet (servlet 基座：R、ServletUtil、ErrorEnvelope)
 ext-crypto (加密工具)
-spring-boot-starter-web (可选)
+spring-webmvc (拦截器与 @RestControllerAdvice，jakarta.servlet-api 为 compileOnly)
 ```
 
 ## 包结构

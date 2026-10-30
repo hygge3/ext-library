@@ -31,6 +31,7 @@ graph TD
     B --> B2["ext-tool<br/>工具类"]
     B --> B3["ext-core<br/>核心功能"]
     B --> B4["ext-json<br/>JSON 处理"]
+    B --> B5["ext-servlet<br/>servlet 基座"]
     C --> C1["ext-redis<br/>Redis 支持"]
     C --> C1b["ext-postgres<br/>PostgreSQL 支持"]
     C --> C2["ext-cache<br/>缓存支持"]
@@ -47,7 +48,6 @@ graph TD
     G --> G5["ext-audit<br/>操作审计"]
     H --> H1["ext-http<br/>HTTP 客户端"]
     H --> H2["ext-qrcode<br/>二维码"]
-    H --> H3["ext-monitor<br/>系统监控"]
     H --> H4["ext-logback<br/>日志脱敏"]
     H --> H5["ext-i18n<br/>国际化"]
     H --> H6["ext-oss<br/>对象存储"]
@@ -65,13 +65,13 @@ graph TD
 | 模块                                     | 类型     | 描述                                           |
 |------------------------------------------|----------|------------------------------------------------|
 | ext-bom                                  | 独立模块 | BOM 依赖管理，统一管理所有 ext 模块版本        |
-| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类、核心功能、JSON 处理    |
+| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类、核心功能、JSON 处理、servlet 基座 |
 | [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度 |
 | [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架                             |
-| [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/DES/RSA/SM2/SM4)           |
+| [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/RSA/SM2/SM3/SM4)           |
 | [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC 与实时通信                    |
 | [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流、审计  |
-| [ext-misc](./ext-misc/AGENTS.md)         | 分层     | 杂项工具层，包含 HTTP 客户端、二维码、系统监控、日志脱敏、国际化、对象存储 |
+| [ext-misc](./ext-misc/AGENTS.md)         | 分层     | 杂项工具层，包含 HTTP 客户端、二维码、日志脱敏、国际化、对象存储 |
 
 ## 分层架构
 
@@ -91,7 +91,7 @@ graph TD
 |      (redis, postgres, cache, mail, lock, jdbc, job)      |
 +------------------------------------------------------------+
 |                       ext-common                           |  通用基础层
-|                    (tool, core, json)                      |
+|                (tool, core, json, servlet)                 |
 +------------------------------------------------------------+
 ```
 
@@ -138,7 +138,7 @@ graph TD
 
 - `version` — 项目自身版本，所有 ext 模块共用
 - `springBootVersion` — Spring Boot 全家桶版本，通过 `spring-boot-dependencies` BOM 管理所有 `org.springframework.*` 等依赖
-- `bouncyCastleVersion` / `oshiVersion` / `zxingVersion` / `swaggerAnnotationsVersion` / `springdocVersion` — 不在任何
+- `bouncyCastleVersion` / `zxingVersion` / `swaggerAnnotationsVersion` / `springdocVersion` — 不在任何
   BOM 里的第三方依赖
 
 约束声明在 `ext-bom/build.gradle`，与 ext 模块版本一起发布给消费方。
