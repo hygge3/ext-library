@@ -36,11 +36,6 @@ public class SseProperties {
     private String topic = DEFAULT_TOPIC;
 
     /**
-     * 发布订阅后端类型
-     */
-    private PubSubBackend backend = PubSubBackend.REDIS;
-
-    /**
      * 心跳配置
      */
     private Heartbeat heartbeat = new Heartbeat();
@@ -69,34 +64,12 @@ public class SseProperties {
         this.topic = topic;
     }
 
-    public PubSubBackend getBackend() {
-        return backend;
-    }
-
-    public void setBackend(PubSubBackend backend) {
-        this.backend = backend;
-    }
-
     public Heartbeat getHeartbeat() {
         return heartbeat;
     }
 
     public void setHeartbeat(Heartbeat heartbeat) {
         this.heartbeat = heartbeat;
-    }
-
-    /**
-     * 发布订阅后端类型
-     */
-    public enum PubSubBackend {
-        /**
-         * 使用 Redis 发布订阅
-         */
-        REDIS,
-        /**
-         * 使用 PostgreSQL LISTEN/NOTIFY
-         */
-        POSTGRES
     }
 
     /**

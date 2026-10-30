@@ -6,13 +6,11 @@ import ext.library.sse.manager.SseConnectionManager;
 import ext.library.sse.manager.SseEmitterManager;
 import ext.library.sse.manager.SseHeartbeatManager;
 import ext.library.sse.manager.SseMessagePublisher;
+import ext.library.core.pubsub.PubSub;
 import ext.library.sse.properties.SseProperties;
-import ext.library.sse.properties.SseProperties.PubSubBackend;
-import ext.library.sse.pubsub.PostgresPubSubService;
-import ext.library.sse.pubsub.PubSubService;
-import ext.library.sse.pubsub.RedisPubSubService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,19 +38,15 @@ public class SseAutoConfiguration {
         return heartbeatManager;
     }
 
+    /**
+     * SSE 消息发布器
+     * <p>
+     * 广播用的 {@link PubSub} 取自容器：引了 ext-redis 就是 {@code RedisPubSub}，引了 ext-postgres 就是
+     * {@code PostgresPubSub}，本模块不再自带 pub/sub 实现。一个都没引时以单实例模式运行。
+     */
     @Bean
-    public PubSubService ssePubSubService(SseProperties properties) {
-        if (properties.getBackend() == PubSubBackend.POSTGRES) {
-            Logs.info(EmojiSymbol.SSE, "SSE 使用 PostgreSQL LISTEN/NOTIFY 作为发布订阅后端");
-            return new PostgresPubSubService();
-        }
-        Logs.info(EmojiSymbol.SSE, "SSE 使用 Redis 作为发布订阅后端");
-        return new RedisPubSubService();
-    }
-
-    @Bean
-    public SseMessagePublisher sseMessagePublisher(SseConnectionManager connectionManager, PubSubService pubSubService, SseProperties properties) {
-        return new SseMessagePublisher(connectionManager, pubSubService, properties.getTopic());
+    public SseMessagePublisher sseMessagePublisher(SseConnectionManager connectionManager, ObjectProvider<PubSub> pubSub, SseProperties properties) {
+        return new SseMessagePublisher(connectionManager, pubSub.getIfAvailable(), properties.getTopic());
     }
 
     @Bean
