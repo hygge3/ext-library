@@ -56,6 +56,22 @@ public interface CacheStrategy {
     void clear(String cacheName);
 
     /**
+     * 当 key 不存在时写入缓存值（后端原子操作）
+     * <p>
+     * 实现必须是后端本身的原子操作（Caffeine {@code asMap().putIfAbsent}、Redis {@code SET NX PX}、
+     * PostgreSQL {@code INSERT … ON CONFLICT DO NOTHING}），不能用 {@code get} + {@code put} 拼出来，
+     * 否则并发场景下两边会同时判定“不存在”而双双写入。
+     *
+     * @param cacheName  缓存名称
+     * @param key        缓存 key
+     * @param value      缓存值
+     * @param expireTime 过期时间
+     *
+     * @return {@code true} 写入成功（key 原本不存在）；{@code false} key 已存在
+     */
+    boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime);
+
+    /**
      * 生成 key
      *
      * @param key key

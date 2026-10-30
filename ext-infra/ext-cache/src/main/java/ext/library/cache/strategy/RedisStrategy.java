@@ -33,6 +33,11 @@ public class RedisStrategy implements CacheStrategy {
     }
 
     @Override
+    public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
+        return RedisUtil.setNxEx(genKey(cacheName, key), JsonUtil.toJson(value), expireTime);
+    }
+
+    @Override
     public void evict(String cacheName, String key) {
         RedisUtil.del(genKey(cacheName, key));
     }

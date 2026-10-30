@@ -2,6 +2,7 @@ package ext.library.cache.strategy;
 
 import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
+import ext.library.json.util.JsonUtil;
 import ext.library.postgres.util.PostgresUtil;
 
 import java.time.Duration;
@@ -30,6 +31,11 @@ public class PostgresStrategy implements CacheStrategy {
     @Override
     public <T> T put(String cacheName, String key, T value) {
         return put(cacheName, key, value, getDefaultExpireTime());
+    }
+
+    @Override
+    public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
+        return PostgresUtil.cacheSetNxEx(genKey(cacheName, key), JsonUtil.toJson(value), expireTime);
     }
 
     @Override

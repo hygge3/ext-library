@@ -91,6 +91,12 @@ public class CaffeineStrategy implements CacheStrategy {
     }
 
     @Override
+    public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
+        String cacheKey = genKey(cacheName, key);
+        return getCache().asMap().putIfAbsent(cacheKey, new CaffeineEntry(cacheKey, value, expireTime, true)) == null;
+    }
+
+    @Override
     public void evict(String cacheName, String key) {
         getCache().invalidate(genKey(cacheName, key));
     }
