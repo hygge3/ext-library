@@ -1,8 +1,10 @@
 package ext.library.redis.config;
 
+import ext.library.core.pubsub.PubSub;
 import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.RedisPrefixConverter;
 import ext.library.redis.properties.RedisProperties;
+import ext.library.redis.pubsub.RedisPubSub;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
 import ext.library.tool.constant.EmojiSymbol;
@@ -68,6 +70,16 @@ public class RedisAutoConfiguration {
         RedisMessageListenerContainer result = new RedisMessageListenerContainer();
         result.setConnectionFactory(redisConnectionFactory);
         return result;
+    }
+
+    /**
+     * 发布订阅实现，实现 {@link PubSub} SPI，供 ext-realtime 等模块注入使用
+     */
+    @Bean
+    @ConditionalOnMissingBean(PubSub.class)
+    public RedisPubSub redisPubSub(RedisMessageListenerContainer redisMessageListenerContainer) {
+        Logs.info(EmojiSymbol.REDIS, "载入模块：Redis 发布订阅");
+        return new RedisPubSub(redisMessageListenerContainer);
     }
 
 }

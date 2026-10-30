@@ -9,7 +9,11 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 /**
  * PostgreSQL 表结构初始化器
  * <p>
- * 在应用启动时自动创建所需的表结构
+ * 在应用启动时为「开着 {@code auto-init-schema}」的能力建表：缓存（{@code ext.postgres.cache.*}）、
+ * 队列（{@code ext.postgres.queue.*}）、限流（{@code ext.postgres.ratelimit.*}）。发布订阅无需建表。
+ * <p>
+ * 关掉某个能力就完全不给它建表——调用方自己用迁移工具（Flyway / Liquibase）建表即可，
+ * 下游模块（如 ext-job）也不会替它补表。三个都关时连库都不会碰。
  *
  * @since 4.0.0
  */
@@ -32,24 +36,34 @@ public class PostgresSchemaInitializer implements InitializingBean {
      * 初始化表结构
      */
     public void initSchema() {
-        // 创建缓存表
-        createCacheTable();
+        PostgresProperties.CacheConfig cache = properties.getCache();
+        PostgresProperties.QueueConfig queue = properties.getQueue();
+        PostgresProperties.RateLimitConfig ratelimit = properties.getRatelimit();
 
-        // 创建队列表
-        createQueueTable();
+        boolean cacheEnabled = cache.isAutoInitSchema();
+        boolean queueEnabled = queue.isAutoInitSchema();
+        boolean rateLimitEnabled = ratelimit.isAutoInitSchema();
+        if (!cacheEnabled && !queueEnabled && !rateLimitEnabled) {
+            Logs.info(EmojiSymbol.POSTGRES, "所有能力的 auto-init-schema 均已关闭，跳过表结构初始化（表需由调用方自行创建）");
+            return;
+        }
 
-        // 创建限流表
-        createRateLimitTable();
-
+        if (cacheEnabled) {
+            createCacheTable(cache.getTableName());
+        }
+        if (queueEnabled) {
+            createQueueTable(queue.getTableName());
+        }
+        if (rateLimitEnabled) {
+            createRateLimitTable(ratelimit.getTableName());
+        }
         Logs.info(EmojiSymbol.POSTGRES, "PostgreSQL 表结构初始化完成");
     }
 
     /**
      * 创建缓存表 (UNLOGGED)
      */
-    private void createCacheTable() {
-        String tableName = properties.getCacheTableName();
-
+    private void createCacheTable(String tableName) {
         // 创建表
         jdbcClient.sql("""
                         CREATE UNLOGGED TABLE IF NOT EXISTS %s (
@@ -98,9 +112,7 @@ public class PostgresSchemaInitializer implements InitializingBean {
     /**
      * 创建队列表
      */
-    private void createQueueTable() {
-        String tableName = properties.getQueueTableName();
-
+    private void createQueueTable(String tableName) {
         // 创建表
         jdbcClient.sql("""
                         CREATE TABLE IF NOT EXISTS %s (
@@ -137,9 +149,7 @@ public class PostgresSchemaInitializer implements InitializingBean {
     /**
      * 创建限流表
      */
-    private void createRateLimitTable() {
-        String tableName = properties.getRateLimitTableName();
-
+    private void createRateLimitTable(String tableName) {
         // 创建表
         jdbcClient.sql("""
                         CREATE TABLE IF NOT EXISTS %s (

@@ -34,7 +34,7 @@ public class PostgresQueue {
     public PostgresQueue(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
-        this.tableName = properties.getQueueTableName();
+        this.tableName = properties.getQueue().getTableName();
     }
 
     /**
@@ -72,7 +72,7 @@ public class PostgresQueue {
      * @return 任务 ID
      */
     public long enqueue(String queue, Object payload, Instant scheduledAt) {
-        return enqueue(queue, payload, scheduledAt, properties.getQueueMaxAttempts());
+        return enqueue(queue, payload, scheduledAt, properties.getQueue().getMaxAttempts());
     }
 
     /**

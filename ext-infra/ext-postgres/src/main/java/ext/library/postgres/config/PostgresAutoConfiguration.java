@@ -2,6 +2,7 @@ package ext.library.postgres.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import ext.library.core.pubsub.PubSub;
 import ext.library.postgres.cache.PostgresCacheManager;
 import ext.library.postgres.properties.DataSourceConfig;
 import ext.library.postgres.properties.PostgresProperties;
@@ -28,7 +29,7 @@ import javax.sql.DataSource;
  *
  * @since 4.0.0
  */
-@AutoConfiguration
+@AutoConfiguration(afterName = "ext.library.redis.config.RedisAutoConfiguration")
 @EnableScheduling
 @ConditionalOnClass(DataSource.class)
 public class PostgresAutoConfiguration {
@@ -48,9 +49,14 @@ public class PostgresAutoConfiguration {
         return new PostgresProperties();
     }
 
+    /**
+     * 表结构初始化器
+     * <p>
+     * 是否建表由每种能力的 {@code auto-init-schema} 决定（缓存 / 队列 / 限流各一个开关），
+     * 三者全关时初始化器直接跳过、不碰数据库。
+     */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = PostgresProperties.PREFIX, name = "auto-init-schema", havingValue = "true", matchIfMissing = true)
     public PostgresSchemaInitializer postgresSchemaInitializer(JdbcClient postgresJdbcClient, PostgresProperties properties) {
         return new PostgresSchemaInitializer(postgresJdbcClient, properties);
     }
@@ -109,7 +115,7 @@ public class PostgresAutoConfiguration {
         }
 
         @Bean
-        @ConditionalOnMissingBean
+        @ConditionalOnMissingBean(PubSub.class)
         PostgresPubSub postgresPubSub(HikariDataSource postgresDataSource) {
             Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 发布订阅 (专用数据源)");
             return new PostgresPubSub(postgresDataSource);
@@ -130,7 +136,7 @@ public class PostgresAutoConfiguration {
         }
 
         @Bean
-        @ConditionalOnMissingBean
+        @ConditionalOnMissingBean(PubSub.class)
         PostgresPubSub postgresPubSub(DataSource dataSource) {
             Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 发布订阅 (主数据源)");
             return new PostgresPubSub(dataSource);
