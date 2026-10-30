@@ -44,6 +44,10 @@ dependencies {
         api project(':ext-common:ext-core')
         api project(':ext-common:ext-json')
         api project(':ext-common:ext-servlet')
+        api project(':ext-common:ext-http')
+        api project(':ext-common:ext-useragent')
+        api project(':ext-common:ext-qrcode')
+        api project(':ext-common:ext-logback')
     }
 }
 
@@ -57,6 +61,8 @@ dependencies {
         api project(':ext-infra:ext-lock')
         api project(':ext-infra:ext-jdbc')
         api project(':ext-infra:ext-job')
+        api project(':ext-infra:ext-i18n')
+        api project(':ext-infra:ext-oss')
     }
 }
 
@@ -84,18 +90,6 @@ dependencies {
         api project(':ext-enhance:ext-api-crypto')
         api project(':ext-enhance:ext-ratelimit')
         api project(':ext-enhance:ext-audit')
-    }
-}
-
-// ======================= ext-misc 层 =====================
-dependencies {
-    constraints {
-        api project(':ext-misc:ext-http')
-        api project(':ext-misc:ext-useragent')
-        api project(':ext-misc:ext-qrcode')
-        api project(':ext-misc:ext-logback')
-        api project(':ext-misc:ext-i18n')
-        api project(':ext-misc:ext-oss')
     }
 }
 

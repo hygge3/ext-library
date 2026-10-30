@@ -6,7 +6,7 @@ dependencies {
     api project(':ext-common:ext-servlet')
     api project(':ext-crypto')
     api project(':ext-infra:ext-cache')
-    api project(':ext-misc:ext-useragent')
+    api project(':ext-common:ext-useragent')
     api 'org.springframework:spring-webmvc'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'

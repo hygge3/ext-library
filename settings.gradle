@@ -15,6 +15,10 @@ include 'ext-common:ext-tool'
 include 'ext-common:ext-core'
 include 'ext-common:ext-json'
 include 'ext-common:ext-servlet'
+include 'ext-common:ext-http'
+include 'ext-common:ext-useragent'
+include 'ext-common:ext-qrcode'
+include 'ext-common:ext-logback'
 
 // ==================== ext-infra ====================
 include 'ext-infra:ext-redis'
@@ -24,6 +28,8 @@ include 'ext-infra:ext-postgres'
 include 'ext-infra:ext-lock'
 include 'ext-infra:ext-jdbc'
 include 'ext-infra:ext-job'
+include 'ext-infra:ext-i18n'
+include 'ext-infra:ext-oss'
 
 // ==================== ext-security ====================
 include 'ext-security'
@@ -41,11 +47,3 @@ include 'ext-enhance:ext-idempotent'
 include 'ext-enhance:ext-api-crypto'
 include 'ext-enhance:ext-ratelimit'
 include 'ext-enhance:ext-audit'
-
-// ==================== ext-misc ====================
-include 'ext-misc:ext-http'
-include 'ext-misc:ext-useragent'
-include 'ext-misc:ext-qrcode'
-include 'ext-misc:ext-logback'
-include 'ext-misc:ext-i18n'
-include 'ext-misc:ext-oss'
