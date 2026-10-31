@@ -103,7 +103,7 @@ public final class StringUtil {
      *
      * @return 驼峰文本
      */
-    public static String underlineToCamelCase(String underscoreText) {
+    public static @Nullable String underlineToCamelCase(@Nullable String underscoreText) {
         if (isBlank(underscoreText)) {
             return underscoreText;
         }
@@ -282,7 +282,7 @@ public final class StringUtil {
      *
      * @return boolean
      */
-    public static boolean isNoneBlank(Collection<String> strs) {
+    public static boolean isNoneBlank(@Nullable Collection<String> strs) {
         return !isAnyBlank(strs);
     }
 
@@ -308,7 +308,7 @@ public final class StringUtil {
      *
      * @return {boolean}
      */
-    public static boolean startWith(String str, String prefix) {
+    public static boolean startWith(@Nullable String str, String prefix) {
         if (isEmpty(str)) {
             return false;
         }
@@ -335,7 +335,7 @@ public final class StringUtil {
      *
      * @return {boolean}
      */
-    public static boolean endWith(String str, String suffix) {
+    public static boolean endWith(@Nullable String str, String suffix) {
         if (isEmpty(str)) {
             return false;
         }
@@ -457,7 +457,7 @@ public final class StringUtil {
      *
      * @return {boolean}
      */
-    public static boolean isNumeric(String str) {
+    public static boolean isNumeric(@Nullable String str) {
         if (isBlank(str)) {
             return false;
         }
@@ -631,7 +631,7 @@ public final class StringUtil {
      *
      * @return {String}
      */
-    public static String escapeHtml(String html) {
+    public static String escapeHtml(@Nullable String html) {
         if (isBlank(html)) {
             return "";
         }
@@ -670,7 +670,7 @@ public final class StringUtil {
      *
      * @return the number of occurrences, 0 if either CharSequence is {@code null}
      */
-    public static int countMatches(String str, String sub) {
+    public static int countMatches(@Nullable String str, @Nullable String sub) {
         if (isEmpty(str) || isEmpty(sub)) {
             return 0;
         }

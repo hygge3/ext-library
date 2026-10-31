@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -68,19 +69,19 @@ class ServletUtilTest {
     }
 
     @Test
-    @DisplayName("writeJson：业务码不落入 HTTP 状态")
+    @DisplayName("writeJson：业务失败时 HTTP 仍为 200")
     void writeJsonWithBizCode() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
         ServletUtil.writeJson(response, R.failed(600, "业务失败"));
         assertEquals(200, response.getStatus());
-        assertEquals("{\"code\":600,\"msg\":\"业务失败\"}", response.getContentAsString());
+        assertEquals("{\"status\":200,\"code\":600,\"msg\":\"业务失败\"}", response.getContentAsString());
     }
 
     @Test
-    @DisplayName("writeJson：HTTP 状态码沿用")
+    @DisplayName("writeJson：HTTP 状态码沿用 R.status")
     void writeJsonWithHttpStatus() {
         MockHttpServletResponse response = new MockHttpServletResponse();
-        ServletUtil.writeJson(response, R.failed(401, "未授权"));
+        ServletUtil.writeJson(response, R.failed(HttpStatus.UNAUTHORIZED));
         assertEquals(401, response.getStatus());
     }
 

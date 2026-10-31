@@ -1,1 +1,7 @@
 description = '通用工具类库'
+
+dependencies {
+    // ImageUtil 的 WebP 用例需要 reader 插件在测试期生效；main 不依赖它，
+    // 保持 ext-tool 零第三方依赖，业务方要用 WebP 时自行引入（版本由 ext-bom 管理）
+    testImplementation 'com.twelvemonkeys.imageio:imageio-webp'
+}

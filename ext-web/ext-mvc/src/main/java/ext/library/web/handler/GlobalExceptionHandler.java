@@ -128,7 +128,7 @@ public class GlobalExceptionHandler {
         String message = StringUtil.format("参数异常:{}", e.getMessage());
         ErrorLog.error(EmojiSymbol.WEB, request, message, e);
         return ErrorEnvelope
-                .of(HttpStatus.INTERNAL_SERVER_ERROR, BizCode.ILLEGAL_ARGUMENT.getCode(), BizCode.ILLEGAL_ARGUMENT.getMsg())
+                .of(HttpStatus.BAD_REQUEST, BizCode.INVALID_PARAMETER.getCode(), BizCode.INVALID_PARAMETER.getMsg())
                 .toResponseEntity();
     }
 

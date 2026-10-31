@@ -40,13 +40,6 @@ public @interface Translate {
     String type();
 
     /**
-     * 映射字段名
-     * <p>
-     * 若不为空，则从该字段获取待翻译的值，而非当前字段的值
-     */
-    String mapper() default "";
-
-    /**
      * 翻译参数
      * <p>
      * 传递给 {@link Translator#translate(Object, String)} 的附加参数，

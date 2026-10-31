@@ -1,17 +1,20 @@
 package ext.library.json.serializer;
 
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.annotation.JacksonStdImpl;
 import tools.jackson.databind.ser.jdk.NumberSerializer;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 /**
- * 超出 JS 最大最小值 处理
+ * 超出 JS 安全整数范围的处理
+ * <p>
+ * 超出 {@code Number.MAX_SAFE_INTEGER} / {@code Number.MIN_SAFE_INTEGER} 的整数序列化为字符串，
+ * 防止前端解析时精度丢失。边界值本身 JS 可精确表示，序列化为数字。
  */
 @JacksonStdImpl
 public class BigNumberSerializer extends NumberSerializer {
@@ -20,6 +23,7 @@ public class BigNumberSerializer extends NumberSerializer {
      * 提供实例
      */
     public static final BigNumberSerializer INSTANCE = new BigNumberSerializer(Number.class);
+
     /**
      * 根据 JS Number.MAX_SAFE_INTEGER 与 Number.MIN_SAFE_INTEGER 得来
      */
@@ -32,6 +36,11 @@ public class BigNumberSerializer extends NumberSerializer {
 
     @Override
     public void serialize(Number value, JsonGenerator g, SerializationContext provider) throws JacksonException {
+        // Jackson 对 null 走 serializeNull()，这里只做防御：inSafeRange 会直接解引用 value
+        if (value == null) {
+            g.writeNull();
+            return;
+        }
         // 在 JS 安全整数范围内，直接序列化为数字；超出范围则序列化为字符串
         if (inSafeRange(value)) {
             super.serialize(value, g, provider);
@@ -40,6 +49,7 @@ public class BigNumberSerializer extends NumberSerializer {
         }
     }
 
+    /**
     /**
      * 判断是否在 JS 安全整数范围内
      * <p>

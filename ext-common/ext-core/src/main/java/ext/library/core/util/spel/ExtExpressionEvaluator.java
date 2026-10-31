@@ -20,6 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
 
+    /** 缓存上限：类加载器泄漏的护栏，超过后不再缓存 */
+    private static final int CACHE_LIMIT = 1024;
+
     /** 表达式缓存 */
     private final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
 
@@ -104,12 +107,22 @@ public class ExtExpressionEvaluator extends CachedExpressionEvaluator {
         if (beanFactory != null) {
             context.setBeanResolver(new BeanFactoryResolver(beanFactory));
         }
-        return context;
+        // 加固：禁用类型引用与构造器解析，避免来自配置的表达式变成 RCE 入口
+        return SpelLock.lock(context);
     }
 
     private Method getTargetMethod(Class<?> targetClass, Method method) {
         AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
-        return methodCache.computeIfAbsent(methodKey, key -> AopUtils.getMostSpecificMethod(method, targetClass));
+        Method cached = methodCache.get(methodKey);
+        if (cached != null) {
+            return cached;
+        }
+        Method resolved = AopUtils.getMostSpecificMethod(method, targetClass);
+        // 缓存的键强引用 Class/Method，热部署或反复建 context 时旧 ClassLoader 永远无法回收，故设上限
+        if (methodCache.size() < CACHE_LIMIT) {
+            methodCache.putIfAbsent(methodKey, resolved);
+        }
+        return resolved;
     }
 
 }

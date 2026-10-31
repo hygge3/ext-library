@@ -2,7 +2,7 @@
 
 [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/hygge3/ext-library)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6eafae2ee8d24d80a0d8c7994d91d7ac)](https://app.codacy.com/gh/hygge3/ext-library/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-![Version](https://img.shields.io/badge/version-4.1.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-green.svg)
 ![JAVA 25](https://img.shields.io/badge/JDK-25-brightgreen.svg)
 ![Spring Boot](https://img.shields.io/github/v/release/spring-projects/spring-boot?label=version)
 ![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/ext-library)
@@ -51,13 +51,58 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 
 ## 快速开始
 
+所有 ext 模块的 groupId 均为 `ext.library`。
+
+### Maven 引入
+
+先导入 BOM 统一管理版本：
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-bom</artifactId>
+            <version>2.1.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+然后按需引入模块，BOM 已托管版本，无需再写 `<version>`：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>ext.library</groupId>
+        <artifactId>ext-core</artifactId>
+    </dependency>
+</dependencies>
+```
+
+也可以直接指定版本，不导入 BOM：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>ext.library</groupId>
+        <artifactId>ext-core</artifactId>
+        <version>2.1.0</version>
+    </dependency>
+</dependencies>
+```
+
+> 注意：`<scope>import</scope>` 只能用在 `<dependencyManagement>` 中，且该节点必须直接位于 `<project>` 下。
+
 ### Gradle 引入
 
 先导入 BOM 统一管理版本：
 
 ```groovy
 dependencies {
-    implementation platform('ext.library:ext-bom:4.1.0')
+    implementation platform('ext.library:ext-bom:2.1.0')
 }
 ```
 
@@ -73,7 +118,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'ext.library:ext-core:4.1.0'
+    implementation 'ext.library:ext-core:2.1.0'
 }
 ```
 

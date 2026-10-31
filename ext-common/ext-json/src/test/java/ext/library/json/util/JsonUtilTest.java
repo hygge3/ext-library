@@ -50,11 +50,10 @@ class JsonUtilTest {
     @Test
     @DisplayName("测试字符串转 JSON")
     void testToJsonString() {
-        String str = "test";
-        String json = JsonUtil.toJson(str);
+        String json = JsonUtil.toJson("test");
 
         assertEquals("\"test\"", json, "字符串应转义为 JSON 字符串");
-        assertEquals(str, JsonUtil.readObj(json, String.class), "应能与 readObj 对称往返");
+        assertEquals("test", JsonUtil.readObj(json, String.class), "应能与 readObj 对称往返");
     }
 
     @Test
@@ -237,8 +236,10 @@ class JsonUtilTest {
         assertFalse(JsonUtil.isValidJson(""), "空字符串应无效");
         assertFalse(JsonUtil.isValidJson(null), "null 应无效");
         assertFalse(JsonUtil.isValidJson("test"), "纯文本应无效");
-        // Jackson 解析器对 JSON 格式比较宽容，只要能开始解析就认为有效
-        // 所以不完整的对象/数组可能被认为是有效的
+        // 截断的 JSON 必须判定为无效
+        assertFalse(JsonUtil.isValidJson("{\"a\":1"), "截断对象应无效");
+        assertFalse(JsonUtil.isValidJson("[1,2"), "截断数组应无效");
+        assertFalse(JsonUtil.isValidJson("{\"a\":1} trailing"), "尾随垃圾应无效");
     }
 
     // ========== isValidJson 测试 ==========

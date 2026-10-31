@@ -18,7 +18,7 @@
         <dependency>
             <groupId>ext.library</groupId>
             <artifactId>ext-bom</artifactId>
-            <version>4.1.0</version>
+            <version>2.1.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

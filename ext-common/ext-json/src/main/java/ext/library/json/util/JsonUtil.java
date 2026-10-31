@@ -10,6 +10,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.ser.FilterProvider;
 import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
@@ -18,8 +19,8 @@ import tools.jackson.databind.type.CollectionLikeType;
 import tools.jackson.databind.type.MapType;
 import tools.jackson.databind.type.TypeBase;
 import java.lang.reflect.Type;
-
 import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,20 +29,34 @@ import java.util.Map;
  */
 public final class JsonUtil {
 
-    private static final JsonMapper MAPPER = JsonMapper.builder()
-            // 注册扩展模块
-            .addModule(new ExtJacksonModule())
-            // 序列化配置：不序列化空值/空集合
-            .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
-            // 序列化配置：空对象不报错
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            // 反序列化配置：忽略未知属性
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            // 反序列化配置：浮点数使用 BigDecimal（避免精度丢失）
-            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-            .build();
+    private static final JsonMapper MAPPER = customize(JsonMapper.builder()).build();
 
     private JsonUtil() {
+    }
+
+    /**
+     * 统一配置 JsonMapper 构建器
+     * <p>
+     * {@link JsonUtil} 与 Spring 的 JsonMapper 共用这套配置，保证两者行为一致。
+     *
+     * @param builder 构建器
+     * @return 已配置的构建器
+     */
+    public static JsonMapper.Builder customize(JsonMapper.Builder builder) {
+        return builder
+                // 注册扩展模块
+                .addModule(new ExtJacksonModule())
+                // 序列化配置：不序列化空值/空集合
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+                // 序列化配置：空对象不报错
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                // 序列化配置：日期时间统一输出字符串（覆盖 Instant/ZonedDateTime/Date 等
+                // 未单独注册序列化器的类型，避免前端拿到数字时间戳）
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                // 反序列化配置：忽略未知属性
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                // 反序列化配置：浮点数使用 BigDecimal（避免精度丢失）
+                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
     }
 
     /**
@@ -75,7 +90,7 @@ public final class JsonUtil {
      *
      * @param obj 对象
      *
-     * @return JSON 字符串，null 返回空字符串
+     * @return JSON 字符串，null 返回空字符串；String 按 JSON 字符串转义后带引号输出
      */
     public static String toJson(@Nullable Object obj) {
         return serialize(obj, false);
@@ -249,7 +264,11 @@ public final class JsonUtil {
      * @return 转换后的对象
      */
     public static <T> T convert(Object fromValue, Class<T> toValueType) {
-        return MAPPER.convertValue(fromValue, toValueType);
+        try {
+            return MAPPER.convertValue(fromValue, toValueType);
+        } catch (JacksonException | IllegalArgumentException e) {
+            throw new ToolException(EmojiSymbol.JSON, e);
+        }
     }
 
     // endregion
@@ -268,7 +287,13 @@ public final class JsonUtil {
             return false;
         }
         try (var parser = MAPPER.createParser(json)) {
-            parser.nextToken();
+            if (parser.nextToken() == null) {
+                return false;
+            }
+            // 完整消费到流末尾：能走到 null 说明 JSON 没被截断（单 token 文档只会走一轮）
+            while (parser.nextToken() != null) {
+                // 只需读完，不取内容
+            }
             return true;
         } catch (Exception e) {
             return false;

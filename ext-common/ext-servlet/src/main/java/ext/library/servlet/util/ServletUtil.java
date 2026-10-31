@@ -442,16 +442,13 @@ public final class ServletUtil {
     /**
      * 写出统一响应体
      * <p>
-     * 响应的 HTTP 状态码取 {@code R.code}：落在 100-599 内视为 HTTP 状态码，
-     * 否则（如业务码 6xx）视为业务码，HTTP 状态仍为 200。
+     * 响应体的 HTTP 状态码取自 {@code R.status}，与 {@code R.code}（业务码）互不干扰。
      *
      * @param response 响应对象
      * @param body     统一响应体
      */
     public static void writeJson(HttpServletResponse response, R<?> body) {
-        int code = body.getCode();
-        boolean httpStatus = code >= 100 && code <= 599;
-        writeJson(response, httpStatus ? code : HttpServletResponse.SC_OK, body);
+        writeJson(response, body.getStatus(), body);
     }
 
     // endregion

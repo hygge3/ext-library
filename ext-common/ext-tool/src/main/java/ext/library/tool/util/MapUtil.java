@@ -197,11 +197,9 @@ public final class MapUtil {
      */
     public static <K> void trimStringValues(Map<K, String> paramMap) {
         paramMap.forEach((key, value) -> {
-            if (value != null) {
-                String trimmed = value.trim();
-                if (!trimmed.equals(value)) {
-                    paramMap.put(key, trimmed);
-                }
+            String trimmed = value.trim();
+            if (!trimmed.equals(value)) {
+                paramMap.put(key, trimmed);
             }
         });
     }

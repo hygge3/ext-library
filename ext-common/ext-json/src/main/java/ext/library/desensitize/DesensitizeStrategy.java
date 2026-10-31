@@ -17,6 +17,14 @@ public enum DesensitizeStrategy implements DesensitizeRule {
     NONE(Function.identity()),
 
     /**
+     * 通用脱敏（默认策略），保留前 1/3 和后 1/3，中间掩码
+     * <p>示例：1381***5678、北京市海淀***村大街1号
+     *
+     * @see DesensitizeUtil#maskGeneric(String)
+     */
+    GENERIC(DesensitizeUtil::maskGeneric),
+
+    /**
      * 身份证号脱敏
      * <p>示例：430123********432X
      */

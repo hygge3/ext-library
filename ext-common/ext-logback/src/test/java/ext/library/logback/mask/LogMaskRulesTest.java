@@ -34,7 +34,7 @@ class LogMaskRulesTest {
     @DisplayName("手机号、身份证、邮箱、IP 按各自策略脱敏")
     void masksBuiltInTypes() {
         assertThat(LogMaskRules.PHONE.mask("call 13812345678 now")).isEqualTo("call 138****5678 now");
-        assertThat(LogMaskRules.EMAIL.mask("mail bob@example.com")).isEqualTo("mail b****@example.com");
+        assertThat(LogMaskRules.EMAIL.mask("mail bob@example.com")).isEqualTo("mail b**@example.com");
         assertThat(LogMaskRules.IP.mask("from 192.168.2.1")).isEqualTo("from 192.*.*.*");
     }
 

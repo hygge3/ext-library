@@ -24,7 +24,8 @@ class ErrorEnvelopeTest {
         ErrorEnvelope envelope = ErrorEnvelope.of(HttpStatus.BAD_REQUEST);
         assertEquals(HttpStatus.BAD_REQUEST, envelope.status());
         assertTrue(envelope.hasStatus());
-        assertEquals(400, envelope.body().getCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), envelope.body().getStatus());
+        assertEquals(BizCode.INVALID_PARAMETER.getCode(), envelope.body().getCode());
     }
 
     @Test
@@ -32,19 +33,21 @@ class ErrorEnvelopeTest {
     void ofStatusWithMessage() {
         ErrorEnvelope envelope = ErrorEnvelope.of(HttpStatus.FORBIDDEN, "没有权限");
         assertEquals("没有权限", envelope.body().getMsg());
-        assertEquals(403, envelope.body().getCode());
+        assertEquals(HttpStatus.FORBIDDEN.value(), envelope.body().getStatus());
+        assertEquals(BizCode.FORBIDDEN.getCode(), envelope.body().getCode());
     }
 
     @Test
     @DisplayName("ofCode：业务码保持 HTTP 200")
     void ofCode() {
-        ErrorEnvelope envelope = ErrorEnvelope.ofCode(601, "业务失败");
+        ErrorEnvelope envelope = ErrorEnvelope.ofCode(BizCode.JSON_PARSE_ERROR.getCode(), "业务失败");
         assertNull(envelope.status());
         assertFalse(envelope.hasStatus());
 
         ResponseEntity<R<Void>> entity = envelope.toResponseEntity();
         assertEquals(HttpStatus.OK, entity.getStatusCode());
-        assertEquals(601, entity.getBody().getCode());
+        assertEquals(BizCode.JSON_PARSE_ERROR.getCode(), entity.getBody().getCode());
+        assertEquals(HttpStatus.OK.value(), entity.getBody().getStatus());
     }
 
     @Test
@@ -59,8 +62,9 @@ class ErrorEnvelopeTest {
     @DisplayName("toResponseEntity：HTTP 状态落到响应实体")
     void toResponseEntityWithStatus() {
         ResponseEntity<R<Void>> entity = ErrorEnvelope.of(HttpStatus.UNAUTHORIZED).toResponseEntity();
-        assertEquals(401, entity.getStatusCode().value());
-        assertEquals(401, entity.getBody().getCode());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), entity.getStatusCode().value());
+        assertEquals(BizCode.UNAUTHORIZED.getCode(), entity.getBody().getCode());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), entity.getBody().getStatus());
     }
 
 }

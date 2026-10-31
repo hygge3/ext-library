@@ -5,11 +5,14 @@ import java.io.Serial;
 /**
  * 业务异常
  * <p>
- * 用于在业务逻辑中抛出可预期的异常，携带业务错误码和消息。
+ * 用于在业务逻辑中抛出可预期的异常，携带业务错误码与消息。
+ * <p>
+ * 实现了 {@link ResponseCode}，因此可直接作为响应码使用，例如 {@code R.failed(bizException)}。
+ * 未显式指定错误码时，默认使用 {@link BizCode#UNKNOWN}。
  *
  * @since 2025.01.01
  */
-public class BizException extends RuntimeException {
+public class BizException extends RuntimeException implements ResponseCode {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -61,7 +64,7 @@ public class BizException extends RuntimeException {
     /**
      * 使用响应码和原因构造异常
      *
-     * @param responseCode 响应码（提供错误码）
+     * @param responseCode 响应码（提供错误码和消息）
      * @param cause        原因异常
      */
     public BizException(ResponseCode responseCode, Throwable cause) {
@@ -84,7 +87,7 @@ public class BizException extends RuntimeException {
      * 使用响应码、自定义消息和原因构造异常
      *
      * @param responseCode 响应码（提供错误码）
-     * @param message      自定义消息
+     * @param message      自定义消息（覆盖响应码的默认消息）
      * @param cause        原因异常
      */
     public BizException(ResponseCode responseCode, String message, Throwable cause) {
@@ -120,7 +123,18 @@ public class BizException extends RuntimeException {
      *
      * @return 业务错误码
      */
+    @Override
     public int getCode() {
         return code;
+    }
+
+    /**
+     * 获取异常消息（作为响应消息）
+     *
+     * @return 异常消息
+     */
+    @Override
+    public String getMsg() {
+        return getMessage();
     }
 }

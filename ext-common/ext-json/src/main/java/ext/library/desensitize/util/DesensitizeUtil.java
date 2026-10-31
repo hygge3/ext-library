@@ -56,7 +56,10 @@ public final class DesensitizeUtil {
      *
      * <pre>{@code
      * DesensitizeUtil.maskIdCard("43012319990101432X") = "4301**********432X"
+     * DesensitizeUtil.maskIdCard("430123199901432") = "4301*******9432"
      * }</pre>
+     * <p>
+     * 长度不是 15/18 时保守打码（只保留前两位），不会返回明文
      *
      * @param input 身份证号
      * @return 脱敏后的文本
@@ -65,19 +68,21 @@ public final class DesensitizeUtil {
         if (isEmpty(input)) {
             return input;
         }
-        // 18 位：4 + 10 + 4；15 位：4 + 7 + 4
-        return switch (input.length()) {
-            case 18 -> input.replaceAll("(\\d{4})\\d{10}(\\w{4})", "$1**********$2");
-            case 15 -> input.replaceAll("(\\d{4})\\d{7}(\\d{4})", "$1*******$2");
-            default -> input;
-        };
+        int length = input.length();
+        // 18 位（新证）与 15 位（旧证）均保留前四位后四位
+        if (length == 18 || length == 15) {
+            return maskBySlide(input, 4, 4);
+        }
+        // 长度不匹配时保守打码（保留前 2 位），不返回明文
+        return maskBySlide(input, Math.min(2, length), 0);
     }
 
     /**
-     * 手机号脱敏，显示前三位后四位
+     * 手机号脱敏，显示前三位后四位（+86 前缀保留）
      *
      * <pre>{@code
      * DesensitizeUtil.maskPhone("13812345678") = "138****5678"
+     * DesensitizeUtil.maskPhone("+8613812345678") = "+861****5678"
      * }</pre>
      *
      * @param input 手机号
@@ -87,7 +92,26 @@ public final class DesensitizeUtil {
         if (isEmpty(input)) {
             return input;
         }
-        return input.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+        int digits = countDigits(input);
+        // 带 +86 前缀共 13 位数字，保留前缀与前三位
+        int head = digits == 13 ? 5 : 3;
+        return maskBySlide(input, head, 4);
+    }
+
+    /**
+     * 统计字符串中的数字个数
+     *
+     * @param text 输入字符串
+     * @return 数字个数
+     */
+    private static int countDigits(String text) {
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isDigit(text.charAt(i))) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -108,10 +132,10 @@ public final class DesensitizeUtil {
     }
 
     /**
-     * 邮箱脱敏，显示前缀第一个字符和 @ 后的域名
+     * 邮箱脱敏，@ 前的用户名只保留首字符，域名完整保留
      *
      * <pre>{@code
-     * DesensitizeUtil.maskEmail("test.demo@qq.com") = "t****@qq.com"
+     * DesensitizeUtil.maskEmail("test.demo@qq.com") = "t********@qq.com"
      * }</pre>
      *
      * @param input 邮箱地址
@@ -121,7 +145,12 @@ public final class DesensitizeUtil {
         if (isEmpty(input)) {
             return input;
         }
-        return input.replaceAll("(^\\w)[^@]*(@.*$)", "$1****$2");
+        int atIndex = input.indexOf('@');
+        if (atIndex <= 0) {
+            // 非邮箱格式，保守打码
+            return maskBySlide(input, 1, 0);
+        }
+        return maskBySlide(input.substring(0, atIndex), 1, 0) + input.substring(atIndex);
     }
 
     /**
@@ -163,7 +192,8 @@ public final class DesensitizeUtil {
         if (colonIndex > 0) {
             return input.substring(0, colonIndex) + ":*:*:*:*:*:*:*";
         }
-        return input;
+        // 无法识别为 IP（主机名、空串等），全掩码，绝不返回明文
+        return "*".repeat(input.length());
     }
 
     /**
@@ -189,6 +219,9 @@ public final class DesensitizeUtil {
      * DesensitizeUtil.maskBySlide("Hello World", 2, 3, "#") = "He######rld"
      * }</pre>
      *
+     * <p>
+     * 输入短到无法同时保留头尾时（{@code head + tail >= length}），退化为等长全掩码，<b>绝不返回明文</b>
+     *
      * @param input      输入字符串
      * @param head       头部保留长度
      * @param tail       尾部保留长度
@@ -201,7 +234,7 @@ public final class DesensitizeUtil {
         }
         int length = input.length();
         if (head + tail >= length) {
-            return input;
+            return maskString.repeat(length);
         }
 
         StringBuilder sb = new StringBuilder(length);
@@ -258,6 +291,30 @@ public final class DesensitizeUtil {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * 通用脱敏（{@link #maskBySlide(String, int, int)} 的三分之一版本），保留前 1/3 和后 1/3，中间掩码
+     * <p>
+     * 用于没有专用规则的敏感字段，按字符计数（一个汉字算 1 位），输出长度与输入一致。
+     * <pre>{@code
+     * DesensitizeUtil.maskGeneric("13812345678") = "1381***5678"
+     * DesensitizeUtil.maskGeneric("北京市海淀区中关村大街1号") = "北京市海淀***村大街1号"
+     * }</pre>
+     * <p>
+     * 输入短到无法同时保留头尾时（2 位、4 位等，此时前后各占一半），退化为等长全掩码，绝不返回明文。
+     *
+     * @param input 输入字符串
+     * @return 脱敏后的文本
+     */
+    public static String maskGeneric(String input) {
+        if (isEmpty(input)) {
+            return input;
+        }
+        int length = input.length();
+        // ceil(length / 3)，避开 length=1 时 head+tail >= length 导致的边界问题
+        int keep = length <= 1 ? 0 : (length + 2) / 3;
+        return maskBySlide(input, keep, keep);
     }
 
     private static boolean isEmpty(String text) {

@@ -3,6 +3,8 @@ package ext.library.core.util;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.jspecify.annotations.Nullable;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -36,7 +38,19 @@ public final class AspectUtil {
     public static <T extends Annotation> @Nullable T getAnnotation(ProceedingJoinPoint point, Class<T> cls) {
         Method method = getMethod(point);
         T annotation = method != null ? method.getAnnotation(cls) : null;
-        return annotation != null ? annotation : point.getTarget().getClass().getAnnotation(cls);
+        if (annotation != null) {
+            return annotation;
+        }
+        Object target = point.getTarget();
+        if (target == null) {
+            return null;
+        }
+        // 必须剥掉代理：否则拿到的是 CGLIB/JDK 子类，类级注解（含 @Inherited）会被跳过。
+        // JDK 动态代理不实现 TargetClassAware，AopUtils.getTargetClass 对它只会返回代理类本身，
+        // 所以 Advised 必须走 advised.getTargetClass()
+        Class<?> targetClass = target instanceof Advised advised
+                ? advised.getTargetClass() : AopUtils.getTargetClass(target);
+        return targetClass.getAnnotation(cls);
     }
 
 }
