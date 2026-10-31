@@ -128,13 +128,13 @@ ext.library.tool
 
 ### 异常体系 (exception)
 
-| 类名 | 说明 |
-|------|------|
-| `ResponseCode` | 响应码接口 |
-| `BizCode` | 业务错误码枚举（按模块分段 600-699） |
-| `BizException` | 业务异常（携带错误码） |
-| `ExtException` | 框架内部异常（自动添加模块标识） |
-| `ToolException` | 工具异常 |
+| 类名            | 说明                                                                                                                                    |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `ResponseCode`  | 响应码接口（`getCode()` / `getMsg()`）                                                                                                  |
+| `BizCode`       | 业务错误码枚举（「大类+序号」4 位编码：1xxx 参数 / 2xxx 认证 / 3xxx 资源 / 4xxx 业务 / 5xxx 系统 / 6xxx 外部，支持 `of` / `find` 反查） |
+| `BizException`  | 业务异常（携带错误码，自身也实现 `ResponseCode`）                                                                                       |
+| `ExtException`  | 框架内部异常（自动添加 `[module]` 前缀，可 `getModule()`）                                                                              |
+| `ToolException` | 工具异常（`ExtException` 的薄封装）                                                                                                     |
 
 ## 使用示例
 

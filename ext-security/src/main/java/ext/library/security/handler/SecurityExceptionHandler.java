@@ -3,6 +3,7 @@ package ext.library.security.handler;
 import ext.library.security.exception.ForbiddenException;
 import ext.library.security.exception.UnauthorizedException;
 import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.BizCode;
 import ext.library.tool.runtime.Logs;
 import ext.library.web.response.R;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -40,7 +41,7 @@ public class SecurityExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public R<Void> forbiddenException(ForbiddenException e, HttpServletRequest request) {
         printLog(request, e.getMessage());
-        return R.failed(HttpStatus.FORBIDDEN);
+        return R.failed(HttpStatus.FORBIDDEN, BizCode.FORBIDDEN);
     }
 
     /**
@@ -50,7 +51,7 @@ public class SecurityExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public R<Void> unauthorizedException(UnauthorizedException e, HttpServletRequest request) {
         printLog(request, e.getMessage());
-        return R.failed(HttpStatus.UNAUTHORIZED);
+        return R.failed(HttpStatus.UNAUTHORIZED, BizCode.UNAUTHORIZED);
     }
 
 }

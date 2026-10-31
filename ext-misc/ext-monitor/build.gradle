@@ -1,5 +1,6 @@
 description = '系统监控信息采集'
 
 dependencies {
+    api project(':ext-common:ext-tool')
     api 'com.github.oshi:oshi-core-java25'
 }

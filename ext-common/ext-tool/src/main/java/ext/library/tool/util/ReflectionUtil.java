@@ -145,7 +145,7 @@ public final class ReflectionUtil {
      *
      * @return 方法调用结果
      */
-    public static Object invokeMethod(Method method, Object target, Object @Nullable ... args) {
+    public static @Nullable Object invokeMethod(Method method, Object target, Object @Nullable ... args) {
         try {
             return args != null ? method.invoke(target, args) : method.invoke(target);
         } catch (Exception ex) {
@@ -227,7 +227,7 @@ public final class ReflectionUtil {
      * @param target 目标对象
      * @param value  要设置的值
      */
-    public static void setField(Field field, Object target, Object value) {
+    public static void setField(Field field, Object target, @Nullable Object value) {
         try {
             field.set(target, value);
         } catch (IllegalAccessException ex) {
@@ -243,7 +243,7 @@ public final class ReflectionUtil {
      *
      * @return 字段值
      */
-    public static Object getField(Field field, Object target) {
+    public static @Nullable Object getField(Field field, Object target) {
         try {
             return field.get(target);
         } catch (IllegalAccessException ex) {

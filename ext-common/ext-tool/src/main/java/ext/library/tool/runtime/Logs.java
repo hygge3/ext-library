@@ -1,5 +1,6 @@
 package ext.library.tool.runtime;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public final class Logs {
      *
      * @return 调用者类名
      */
-    private static String getCallerClassName() {
+    private static @Nullable String getCallerClassName() {
         return stackWalker.walk(frames -> frames
                 .map(StackWalker.StackFrame::getClassName)
                 .filter(className -> !className.equals(Logs.class.getName()))
@@ -55,7 +56,7 @@ public final class Logs {
      */
     public static void debug(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().debug("[{}] " + message, allArgs);
+        getLogger().debug("[{}] {}", allArgs, message);
     }
 
     /**
@@ -68,7 +69,7 @@ public final class Logs {
      */
     public static void debug(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().debug("[{}] " + message, allArgs);
+        getLogger().debug("[{}] {}", allArgs, message);
     }
 
     /**
@@ -115,7 +116,7 @@ public final class Logs {
      */
     public static void info(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().info("[{}] " + message, allArgs);
+        getLogger().info("[{}] {}", allArgs, message);
     }
 
     /**
@@ -128,7 +129,7 @@ public final class Logs {
      */
     public static void info(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().info("[{}] " + message, allArgs);
+        getLogger().info("[{}] {}", allArgs, message);
     }
 
     /**
@@ -175,7 +176,7 @@ public final class Logs {
      */
     public static void warn(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().warn("[{}] " + message, allArgs);
+        getLogger().warn("[{}] {}", allArgs, message);
     }
 
     /**
@@ -188,7 +189,7 @@ public final class Logs {
      */
     public static void warn(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().warn("[{}] " + message, allArgs);
+        getLogger().warn("[{}] {}", allArgs, message);
     }
 
     /**
@@ -235,7 +236,7 @@ public final class Logs {
      */
     public static void error(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().error("[{}] " + message, allArgs);
+        getLogger().error("[{}] {}", allArgs, message);
     }
 
     /**
@@ -248,7 +249,7 @@ public final class Logs {
      */
     public static void error(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().error("[{}] " + message, allArgs);
+        getLogger().error("[{}] {}", allArgs, message);
     }
 
     /**

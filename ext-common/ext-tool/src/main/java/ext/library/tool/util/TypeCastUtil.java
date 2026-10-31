@@ -27,7 +27,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的字符串值，输入为 null 时返回 {@code null}
      */
-    public static String getAsString(@Nullable Object obj) {
+    public static @Nullable String getAsString(@Nullable Object obj) {
         return obj == null ? null : obj.toString();
     }
 
@@ -59,7 +59,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Number 值，输入为 null 时返回 {@code null}
      */
-    public static Number getAsNumber(@Nullable Object obj) {
+    public static @Nullable Number getAsNumber(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -105,7 +105,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Boolean 值，输入为 null 时返回 {@code null}
      */
-    public static Boolean getAsBoolean(@Nullable Object obj) {
+    public static @Nullable Boolean getAsBoolean(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -163,7 +163,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Byte 值，输入为 null 时返回 {@code null}
      */
-    public static Byte getAsByte(@Nullable Object obj) {
+    public static @Nullable Byte getAsByte(@Nullable Object obj) {
         return fromNumber(obj, Byte.class, Number::byteValue);
     }
 
@@ -213,7 +213,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Short 值，输入为 null 时返回 {@code null}
      */
-    public static Short getAsShort(@Nullable Object obj) {
+    public static @Nullable Short getAsShort(@Nullable Object obj) {
         return fromNumber(obj, Short.class, Number::shortValue);
     }
 
@@ -263,7 +263,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Integer 值，输入为 null 时返回 {@code null}
      */
-    public static Integer getAsInteger(@Nullable Object obj) {
+    public static @Nullable Integer getAsInteger(@Nullable Object obj) {
         return fromNumber(obj, Integer.class, Number::intValue);
     }
 
@@ -313,7 +313,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Long 值，输入为 null 时返回 {@code null}
      */
-    public static Long getAsLong(@Nullable Object obj) {
+    public static @Nullable Long getAsLong(@Nullable Object obj) {
         return fromNumber(obj, Long.class, Number::longValue);
     }
 
@@ -363,7 +363,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Float 值，输入为 null 时返回 {@code null}
      */
-    public static Float getAsFloat(@Nullable Object obj) {
+    public static @Nullable Float getAsFloat(@Nullable Object obj) {
         return fromNumber(obj, Float.class, Number::floatValue);
     }
 
@@ -413,7 +413,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Double 值，输入为 null 时返回 {@code null}
      */
-    public static Double getAsDouble(@Nullable Object obj) {
+    public static @Nullable Double getAsDouble(@Nullable Object obj) {
         return fromNumber(obj, Double.class, Number::doubleValue);
     }
 
@@ -463,7 +463,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 BigInteger 值，输入为 null 时返回 {@code null}
      */
-    public static BigInteger getAsBigInteger(@Nullable Object obj) {
+    public static @Nullable BigInteger getAsBigInteger(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -500,7 +500,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 BigDecimal 值，输入为 null 时返回 {@code null}
      */
-    public static BigDecimal getAsBigDecimal(@Nullable Object obj) {
+    public static @Nullable BigDecimal getAsBigDecimal(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -539,7 +539,7 @@ public final class TypeCastUtil {
      * @return 转换后的值，如果 obj 为 null 则返回 null
      */
     @SuppressWarnings("unchecked")
-    public static <R> R cast(@Nullable Object obj, Class<R> clz) {
+    public static <R> @Nullable R cast(@Nullable Object obj, Class<R> clz) {
         if (obj == null) {
             return null;
         }
@@ -612,7 +612,7 @@ public final class TypeCastUtil {
     /**
      * 通用的数值类型转换：从 {@link #getAsNumber(Object)} 结果中提取目标类型
      */
-    private static <T extends Number> T fromNumber(@Nullable Object obj, Class<T> type, Function<Number, T> converter) {
+    private static <T extends Number> @Nullable T fromNumber(@Nullable Object obj, Class<T> type, Function<Number, T> converter) {
         Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;

@@ -3,7 +3,9 @@ package ext.library.tool.exception;
 /**
  * 响应码接口
  * <p>
- * 定义业务响应码的标准接口，所有业务错误码枚举应实现此接口。
+ * 定义业务响应码的统一契约，所有业务错误码枚举（如 {@link BizCode}）以及业务异常
+ * （如 {@link BizException}）都应实现此接口，从而可以统一地被序列化为响应体，
+ * 例如 {@code R.failed(responseCode)}。
  *
  * @since 2025.01.01
  */

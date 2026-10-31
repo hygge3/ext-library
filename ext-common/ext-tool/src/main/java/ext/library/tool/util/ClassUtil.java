@@ -369,7 +369,7 @@ public final class ClassUtil {
      *
      * @return 属性值
      */
-    public static Object getProperty(Object bean, String propertyName) {
+    public static @Nullable Object getProperty(Object bean, String propertyName) {
         try {
             PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
             Method readMethod = pd.getReadMethod();
@@ -386,7 +386,7 @@ public final class ClassUtil {
      * @param propertyName 属性名
      * @param value        属性值
      */
-    public static void setProperty(Object bean, String propertyName, Object value) {
+    public static void setProperty(Object bean, String propertyName, @Nullable Object value) {
         try {
             Field field = bean.getClass().getDeclaredField(propertyName);
             field.setAccessible(true);

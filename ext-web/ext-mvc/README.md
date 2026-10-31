@@ -92,6 +92,17 @@ implementation("ext.library:ext-mvc")
 
 ### 统一响应
 
+响应体字段划分：`status`（HTTP 状态码）、`code`（业务码，`0` 表示成功）、`msg`（提示消息）、`data`（业务数据）。
+
+```json
+{
+  "status": 200,
+  "code": 0,
+  "msg": "OK",
+  "data": {}
+}
+```
+
 ```java
 @RestController
 @RequestMapping("/api")
@@ -104,7 +115,8 @@ public class DemoController {
 
     @GetMapping("/fail")
     public R<Void> fail() {
-        return R.fail("操作失败");
+        // 业务失败：HTTP 200 + 业务码
+        return R.failed(BizCode.OPERATION_NOT_ALLOWED, "操作失败");
     }
 
     @GetMapping("/data")

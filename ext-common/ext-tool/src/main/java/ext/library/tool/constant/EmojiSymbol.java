@@ -9,7 +9,6 @@ public final class EmojiSymbol {
 
     // region 通用符号
     public static final String WARN = "⚠️";
-    public static final String EXT = "🍃";
     // region ext-common 层
     public static final String TOOL = "🛠️";
     // endregion

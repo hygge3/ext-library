@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     public R<Void> bizException(BizException e, HttpServletRequest request) {
         Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
-        return R.failed(e.getCode(), e.getMessage());
+        return R.failed(e);
     }
 
     /**
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> otherException(RuntimeException e, HttpServletRequest request) {
         printLog(request, "未知错误", e);
-        return R.failed(BizCode.UNKNOWN, BizCode.UNKNOWN.getMsg());
+        return R.failed(HttpStatus.INTERNAL_SERVER_ERROR, BizCode.UNKNOWN);
     }
 
     /**
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         String message = StringUtil.format("参数异常:{}", e.getMessage());
         printLog(request, message, e);
-        return R.failed(BizCode.ILLEGAL_ARGUMENT, BizCode.ILLEGAL_ARGUMENT.getMsg());
+        return R.failed(HttpStatus.INTERNAL_SERVER_ERROR, BizCode.INVALID_PARAMETER);
     }
 
     /**

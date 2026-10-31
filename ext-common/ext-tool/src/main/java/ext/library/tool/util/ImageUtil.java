@@ -2,6 +2,7 @@ package ext.library.tool.util;
 
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
+import org.jspecify.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -49,9 +50,7 @@ public final class ImageUtil {
      * 从文件读取图片
      *
      * @param input 图片文件
-     *
      * @return BufferedImage 对象
-     *
      * @throws ToolException 如果读取失败或格式不受支持
      */
     public static BufferedImage read(File input) {
@@ -68,9 +67,7 @@ public final class ImageUtil {
      * 调用方负责关闭输入流，本方法不会关闭它。
      *
      * @param input 图片输入流
-     *
      * @return BufferedImage 对象
-     *
      * @throws ToolException 如果读取失败或格式不受支持
      */
     public static BufferedImage read(InputStream input) {
@@ -87,9 +84,7 @@ public final class ImageUtil {
      * 支持 http/https 网络地址和本地文件路径
      *
      * @param url 图片地址（http/https URL 或本地文件路径）
-     *
      * @return BufferedImage 对象
-     *
      * @throws IllegalArgumentException 如果 url 为空
      * @throws ToolException            如果读取失败或格式不受支持
      */
@@ -104,9 +99,7 @@ public final class ImageUtil {
      * 从 URL 对象读取图片
      *
      * @param url 图片 URL
-     *
      * @return BufferedImage 对象
-     *
      * @throws ToolException 如果读取失败或格式不受支持
      */
     public static BufferedImage read(URL url) {
@@ -129,7 +122,7 @@ public final class ImageUtil {
      * ImageIO 遇到无法识别的格式时返回 null 而不是抛异常，直接透传会让调用方在后续操作上空指针，
      * 因此在这里转成带线索的异常
      */
-    private static BufferedImage requireImage(BufferedImage image, String source) {
+    private static BufferedImage requireImage(@Nullable BufferedImage image, @Nullable String source) {
         if (image != null) {
             return image;
         }
@@ -146,10 +139,9 @@ public final class ImageUtil {
      * 当前运行时是否可读取指定格式
      *
      * @param formatName 格式名称（如 "png"、"webp"），不区分大小写
-     *
      * @return 存在对应 reader 时返回 true
      */
-    public static boolean isReadable(String formatName) {
+    public static boolean isReadable(@Nullable String formatName) {
         return formatName != null && ImageIO.getImageReadersByFormatName(normalize(formatName)).hasNext();
     }
 
@@ -157,10 +149,9 @@ public final class ImageUtil {
      * 当前运行时是否可写出指定格式
      *
      * @param formatName 格式名称（如 "png"、"webp"），不区分大小写
-     *
      * @return 存在对应 writer 时返回 true
      */
-    public static boolean isWritable(String formatName) {
+    public static boolean isWritable(@Nullable String formatName) {
         return formatName != null && ImageIO.getImageWritersByFormatName(normalize(formatName)).hasNext();
     }
 
@@ -206,7 +197,6 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标输出流
-     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static void write(RenderedImage image, String formatName, ImageOutputStream output) {
@@ -223,7 +213,6 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标文件
-     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static void write(RenderedImage image, String formatName, File output) {
@@ -242,7 +231,6 @@ public final class ImageUtil {
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
      * @param output     目标输出流
-     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static void write(RenderedImage image, String formatName, OutputStream output) {
@@ -269,9 +257,7 @@ public final class ImageUtil {
      *
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
-     *
      * @return 图片字节数组
-     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static byte[] writeAsBytes(RenderedImage image, String formatName) {
@@ -288,9 +274,7 @@ public final class ImageUtil {
      *
      * @param image      待写出的图片
      * @param formatName 图片格式名称（如 "png", "jpg"）
-     *
      * @return 包含图片数据的 ByteArrayInputStream
-     *
      * @throws ToolException 如果写出失败或找不到合适的 writer
      */
     public static ByteArrayInputStream writeAsStream(RenderedImage image, String formatName) {

@@ -1,5 +1,7 @@
 package ext.library.monitor;
 
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.runtime.Logs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -22,7 +24,7 @@ public class MonitorAutoConfig {
     @Bean
     @ConditionalOnMissingBean
     public SystemMonitor systemMonitor() {
-        log.info("[📊] 加载模块：系统监控");
+        Logs.info(EmojiSymbol.MONITOR, "载入模块：系统监控");
         return new SystemMonitor();
     }
 }

@@ -1,6 +1,7 @@
 package ext.library.tool.domain;
 
 import ext.library.tool.constant.Singletons;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
@@ -19,13 +20,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 2025.10.24
  */
 public final class MongoObjectId {
-    /** 下一个计数器值，用于生成唯一标识符 */
+    /**
+     * 下一个计数器值，用于生成唯一标识符
+     */
     private static final AtomicInteger NEXT_COUNTER = new AtomicInteger(Singletons.SECURE_RANDOM.nextInt() & 0x00FF_FFFF);
 
-    /** 用于生成随机值的字节数组，长度为 5 */
+    /**
+     * 用于生成随机值的字节数组，长度为 5
+     */
     private static final byte[] RANDOM_VALUE = new byte[5];
 
-    /** 用于将字节转换为十六进制字符串的字符数组，包含小写字母 */
+    /**
+     * 用于将字节转换为十六进制字符串的字符数组，包含小写字母
+     */
     private static final char[] HEX = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     static {
@@ -83,7 +90,7 @@ public final class MongoObjectId {
      * @param hex24 要验证的十六进制字符串
      * @return 如果字符串是有效的 24 位十六进制字符串，返回 true; 否则返回 false
      */
-    public static boolean isValid(String hex24) {
+    public static boolean isValid(@Nullable String hex24) {
         if (hex24 == null || hex24.length() != 24) {
             return false;
         }
@@ -130,7 +137,7 @@ public final class MongoObjectId {
      * @return 转换后的字节数组，长度为 12
      * @throws IllegalArgumentException 当输入的十六进制字符串无效时抛出
      */
-    public static byte[] fromHex(String hex24) {
+    public static byte[] fromHex(@Nullable String hex24) {
         Assert.isTrue(isValid(hex24), "无效的 ObjectId 十六进制");
         byte[] out = new byte[12];
         for (int i = 0; i < 12; i++) {
