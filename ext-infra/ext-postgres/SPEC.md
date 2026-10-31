@@ -16,7 +16,7 @@ depends-on: [ext-core, ext-json]
 - **发布订阅**：`LISTEN/NOTIFY`——`PostgresPubSub`（实现 [ext-core](../../ext-common/ext-core/SPEC.md) 的 `PubSub` SPI）。
 - **限流**：计数表 + 固定窗口——`PostgresRateLimiter`。
 
-**建表与配置**：每种能力有自己的开关与表名，互不影响——`ext.postgres.cache.*`（`auto-init-schema`、`table-name`）、`ext.postgres.queue.*`（`auto-init-schema`、`table-name`）、`ext.postgres.ratelimit.*`（`auto-init-schema`、`table-name`），`auto-init-schema` 默认均为 `true`。`PostgresSchemaInitializer` 只为开着的那些能力建表（`CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS`，幂等），全关时不连库、不建表；`pubsub` 不需要表。表名可改（用于与已有表/前缀共存），DDL 语句统一引用配置的表名，不写死 `pg_*`。其余参数同样归到各自能力下：`cache.default-expire-time` / `cache.cleanup-interval`、`queue.max-attempts` / `queue.poll-interval`、`ratelimit.window` / `ratelimit.default-limit`。
+**建表与配置**：每种能力有自己的开关与表名，互不影响——`ext.postgres.cache.*`（`auto-init-schema`、`table-name`）、`ext.postgres.queue.*`（`auto-init-schema`、`table-name`）、`ext.postgres.ratelimit.*`（`auto-init-schema`、`table-name`），`auto-init-schema` 默认均为 `true`。`PostgresSchemaInitializer` 只为开着的那些能力建表（`CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS`，幂等），全关时不连库、不建表；`pubsub` 不需要表。表名可改（用于与已有表/前缀共存），DDL 语句统一引用配置的表名，不写死 `pg_*`。其余参数同样归到各自能力下：`cache.default-expire-time` / `cache.cleanup-interval`、`queue.max-attempts`、`ratelimit.window` / `ratelimit.default-limit`。
 
 **边界**：依赖 `ext-core`、`ext-json`、`postgresql` 驱动、`starter-jdbc`；不依赖 `ext-redis`，与 [ext-cache](../ext-cache/SPEC.md) 之间只有「cache 单向可选引用 postgres」的关系，不成环。队列能力被 [ext-job](../ext-job/SPEC.md) 直接复用，不在别处另造调度原语。
 

@@ -79,6 +79,7 @@ public class ResourceBundleTranslationSource implements TranslationSource {
     /**
      * 清除缓存，改动资源文件后用于热更新
      */
+    @Override
     public void clear() {
         cache.clear();
     }

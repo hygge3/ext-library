@@ -64,8 +64,7 @@ public final class QueueUtil {
      * @param time      延迟时间
      */
     public static void delayedProducer(String queueName, String data, Duration time) {
-        long score = time.getSeconds();
-        RedisUtil.zSetOps().add(queueName, data, score);
+        delayedProducer(queueName, data, time.getSeconds());
     }
 
     /**

@@ -7,10 +7,10 @@ import jakarta.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -61,20 +61,29 @@ public class LocalObjectStorage implements ObjectStorage {
     @Override
     public void put(String key, InputStream content, long size, String contentType) {
         Path path = resolve(key);
+        Path parent = path.getParent();
+        Path temp = null;
         try {
-            Path parent = path.getParent();
             if (parent != null) {
                 Files.createDirectories(parent);
             }
-            if (size > 0) {
-                Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                // 长度未知时无法预估拷贝尺寸，退化为边读边写
-                content.transferTo(Files.newOutputStream(path, StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE));
+            // 先写同目录临时文件再原子 rename：直接往最终路径写，覆盖瞬间的并发读者会拿到截断内容
+            temp = Files.createTempFile(parent, ".upload-", ".tmp");
+            try (OutputStream out = Files.newOutputStream(temp)) {
+                content.transferTo(out);
             }
+            Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE);
+            temp = null;
         } catch (IOException e) {
             throw new ExtException(EmojiSymbol.OSS, e, "写入对象失败：{}", key);
+        } finally {
+            if (temp != null) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (IOException _) {
+                    // 清理失败不影响主流程，残留临时文件由运维清理
+                }
+            }
         }
     }
 

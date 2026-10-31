@@ -112,6 +112,7 @@ public class JdbcTranslationSource implements TranslationSource {
     /**
      * 清除缓存，供翻译变更后热更新
      */
+    @Override
     public void clear() {
         cache.clear();
     }

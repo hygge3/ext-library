@@ -1,10 +1,10 @@
 package ext.library.i18n;
 
-import ext.library.i18n.store.ResourceBundleTranslationSource;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
  * 串联多个 {@link TranslationSource}，按 {@link TranslationSource#order()} 从小到大依次查询，
  * 先命中的翻译优先；全部未命中时返回消息键本身，便于暴露缺失而不返回 null。
  * <p>
- * 翻译内容按语言缓存，需要变更时调用 {@link #clear()}。
+ * 翻译内容按语言缓存，{@code ext.i18n.cache-ttl} 到期后整体重新加载；需要立即生效时调用 {@link #clear()}。
  *
  * @since 4.1.0
  */
@@ -33,13 +33,27 @@ public class I18nMessageManager {
     private final Locale defaultLocale;
 
     /**
+     * 缓存有效期
+     */
+    private final Duration cacheTtl;
+
+    /**
      * 语言 → 合并后的翻译表
      */
     private final ConcurrentMap<Locale, Map<String, String>> cache = new ConcurrentHashMap<>();
 
-    public I18nMessageManager(List<TranslationSource> sources, Locale defaultLocale) {
+    /**
+     * 下次过期时间点，{@link #NEVER_EXPIRE} 表示永不过期
+     */
+    private volatile long expireAtNanos = NEVER_EXPIRE;
+
+    private static final long NEVER_EXPIRE = 0L;
+
+    public I18nMessageManager(List<TranslationSource> sources, Locale defaultLocale, Duration cacheTtl) {
         this.sources = sources.stream().sorted((a, b) -> Integer.compare(a.order(), b.order())).toList();
         this.defaultLocale = defaultLocale;
+        this.cacheTtl = cacheTtl == null ? Duration.ZERO : cacheTtl;
+        resetExpiry();
         this.sources.forEach(source -> Logs.info(EmojiSymbol.I18N, "载入翻译来源：name={}, order={}",
                 source.name(), source.order()));
     }
@@ -128,6 +142,7 @@ public class I18nMessageManager {
      * 取合并后的翻译表
      */
     private Map<String, String> messages(Locale locale) {
+        expireIfDue();
         return cache.computeIfAbsent(locale, key -> {
             Map<String, String> merged = new LinkedHashMap<>();
             for (TranslationSource source : sources) {
@@ -145,11 +160,26 @@ public class I18nMessageManager {
      */
     public void clear() {
         cache.clear();
-        for (TranslationSource source : sources) {
-            if (source instanceof ResourceBundleTranslationSource bundle) {
-                bundle.clear();
+        sources.forEach(TranslationSource::clear);
+        resetExpiry();
+    }
+
+    /**
+     * 整体过期而非逐条计时：语言键由调用方传入，逐条 TTL 无法阻止随机语言撑大缓存
+     */
+    private void expireIfDue() {
+        if (expireAtNanos != NEVER_EXPIRE && System.nanoTime() - expireAtNanos > 0) {
+            synchronized (this) {
+                if (expireAtNanos != NEVER_EXPIRE && System.nanoTime() - expireAtNanos > 0) {
+                    clear();
+                }
             }
         }
+    }
+
+    private void resetExpiry() {
+        expireAtNanos = cacheTtl.isZero() || cacheTtl.isNegative() ? NEVER_EXPIRE
+                : System.nanoTime() + cacheTtl.toNanos();
     }
 
 }

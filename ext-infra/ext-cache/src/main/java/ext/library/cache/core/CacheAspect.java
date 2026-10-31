@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * 缓存切面
@@ -47,7 +48,7 @@ public class CacheAspect {
         return switch (annotation.type()) {
             case PUT -> {
                 Object result = point.proceed();
-                cacheStrategy.put(cacheName, key, result);
+                cacheStrategy.put(cacheName, key, result, DateUtil.convert(annotation.timeout(), annotation.timeUnit()));
                 yield result;
             }
             case DELETE -> {
@@ -63,7 +64,7 @@ public class CacheAspect {
      */
     private Object getOrLoad(ProceedingJoinPoint point, MethodSignature signature,
                              String cacheName, String key, Cache annotation) throws Throwable {
-        Object cache = getCachedValue(cacheName, key, signature.getReturnType());
+        Object cache = getCachedValue(cacheName, key, signature.getMethod().getGenericReturnType());
         if (cache != null) {
             return cache;
         }
@@ -77,10 +78,10 @@ public class CacheAspect {
     }
 
     /**
-     * 按方法返回类型读取缓存，缓存值只做类型转换不做序列化，转换失败由策略实现返回 null
+     * 按方法返回的泛型类型读取缓存，缓存值只做类型转换不做序列化，转换失败由策略实现返回 null
      */
     @SuppressWarnings("unchecked")
-    private Object getCachedValue(String cacheName, String key, Class<?> returnType) {
-        return cacheStrategy.get(cacheName, key, (Class<Object>) returnType);
+    private Object getCachedValue(String cacheName, String key, Type returnType) {
+        return cacheStrategy.get(cacheName, key, returnType);
     }
 }

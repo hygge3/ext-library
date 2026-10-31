@@ -44,8 +44,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
     private final String hostThreadId;
     /** 锁定值 */
     private final String lockValue;
-    /** 是否重入 */
-    private boolean reentrant = false;
     /** 是否持有锁 */
     private boolean locked = false;
 
@@ -79,44 +77,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
             serialNum.set(serial);
         }
         return serial;
-    }
-
-    private static DefaultRedisScript<Boolean> getBooleanDefaultRedisScript() {
-        // 使用文本块提高可读性
-        // language=redis
-        String script = """
-                -- 获取传入的参数
-                local val = ARGV[1]
-                local ttl = tonumber(ARGV[2]) -- 确保是数字
-                -- 检查键是否存在
-                if redis.call('EXISTS', KEYS[1]) == 1 then
-                    -- 获取当前值
-                    local curValue = redis.call('GET', KEYS[1])
-                    -- 修改点 1: 使用精确匹配，而不是前缀查找
-                    if curValue == val then
-                        -- 获取当前 TTL
-                        local curTtl = redis.call('TTL', KEYS[1])
-                        -- 修改点 2: 严谨处理 TTL 返回值
-                        if curTtl == -1 then
-                            -- 如果键是永久有效的，直接设置新的 TTL
-                            redis.call('EXPIRE', KEYS[1], ttl)
-                        else
-                            -- 如果键已经有 TTL，则延长
-                            redis.call('EXPIRE', KEYS[1], curTtl + ttl)
-                        end
-                        return true
-                    else
-                        return false
-                    end
-                else
-                    -- 键不存在
-                    return false
-                end
-                """;
-        DefaultRedisScript<Boolean> redisScript = new DefaultRedisScript<>();
-        redisScript.setResultType(Boolean.class);
-        redisScript.setScriptText(script);
-        return redisScript;
     }
 
     /**
@@ -158,17 +118,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
                 locked = true;
                 Logs.debug(EmojiSymbol.LOCK, "加锁成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return true;
-            } else {
-                // 如果持有锁的是当前线程，则重入
-                // language=Redis
-                DefaultRedisScript<Boolean> redisScript = getBooleanDefaultRedisScript();
-                success = RedisUtil.execute(redisScript, List.of(lockKey), hostThreadId, String.valueOf(Math.max(timeout.toSeconds(), 1)));
-                if (success != null && success) {
-                    this.reentrant = true;
-                    locked = true;
-                    Logs.debug(EmojiSymbol.LOCK, "锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
-                    return true;
-                }
             }
         } catch (Exception e) {
             Logs.error(EmojiSymbol.LOCK, e, "尝试加锁错误，请先解锁，lockKey: {}, lockValue: {}", lockKey, lockValue);
@@ -199,10 +148,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
     public void unlock() {
         try {
             if (!locked) {
-                return;
-            }
-            if (this.reentrant) {
-                Logs.debug(EmojiSymbol.REDIS, "解锁重入成功，lockKey: {}, lockValue: {}", lockKey, lockValue);
                 return;
             }
             // 使用 lua 脚本处理锁判断和释放
@@ -295,7 +240,7 @@ public final class DistributedLock implements Lock, AutoCloseable {
      *
      */
     private boolean tryLock(long time, TimeUnit unit, boolean interruptibly) {
-        long millis = unit.convert(time, TimeUnit.MILLISECONDS);
+        long millis = unit.toMillis(time);
         long current = System.currentTimeMillis();
         do {
             if (interruptibly && Thread.interrupted()) {
@@ -328,10 +273,6 @@ public final class DistributedLock implements Lock, AutoCloseable {
 
     public String getLockValue() {
         return lockValue;
-    }
-
-    public boolean isReentrant() {
-        return reentrant;
     }
 
     public boolean isLocked() {

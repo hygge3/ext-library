@@ -91,7 +91,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 **配置前缀**: `ext.cache`
 
 **核心类**:
-- `CacheAutoConfig` - 自动配置类
+- `CacheAutoConfiguration` - 自动配置类
 - `CacheProperties` - 缓存配置属性
 - `Cache` - 缓存注解
 - `CacheStorage` - 缓存存储方式枚举

@@ -7,6 +7,7 @@ import ext.library.tool.runtime.Logs;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 
 /**
@@ -36,8 +37,8 @@ public class PostgresCacheManager {
      *
      * @return 缓存值，不存在或已过期返回 null
      */
-    public <T> T get(String key, Class<T> clazz) {
-        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.readObj(json, clazz)).orElse(null);
+    public <T> T get(String key, Type clazz) {
+        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.<T>readObj(json, clazz)).orElse(null);
     }
 
     /**

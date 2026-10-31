@@ -109,6 +109,20 @@ class LocalObjectStorageTest {
                 storage.presign("a.txt", java.time.Duration.ofMinutes(5)));
     }
 
+    @Test
+    @DisplayName("覆盖写不留临时文件，内容完整")
+    void testOverwriteIsAtomic() throws Exception {
+        storage.put("a.txt", stream("first"), 5, "text/plain");
+        storage.put("a.txt", stream("second"), 6, "text/plain");
+
+        try (var object = storage.get("a.txt")) {
+            assertEquals("second", new String(object.content().readAllBytes(), StandardCharsets.UTF_8));
+        }
+        try (var files = java.nio.file.Files.list(root)) {
+            assertTrue(files.noneMatch(path -> path.getFileName().toString().startsWith(".upload-")));
+        }
+    }
+
     private ByteArrayInputStream stream(String content) {
         return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     }

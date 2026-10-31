@@ -60,7 +60,7 @@ public class I18nAutoConfiguration {
     public I18nMessageManager i18nMessageManager(I18nProperties properties, List<TranslationSource> sources) {
         Logs.info(EmojiSymbol.I18N, "载入模块：国际化，default={}, sources={}", properties.getDefaultLocale(),
                 sources.size());
-        return new I18nMessageManager(sources, properties.getDefaultLocale());
+        return new I18nMessageManager(sources, properties.getDefaultLocale(), properties.getCacheTtl());
     }
 
     /**

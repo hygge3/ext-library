@@ -39,6 +39,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -415,7 +416,7 @@ public final class RedisUtil {
      *
      * @see <a href="http://redis.io/commands/get">Get Command</a>
      */
-    public static <T> T get(String key, Class<T> clazz) {
+    public static <T> T get(String key, Type clazz) {
         String value = get(key);
         if (Objects.isNull(value)) {
             return null;
@@ -540,8 +541,15 @@ public final class RedisUtil {
      */
     public static long incrByAndExpire(String key, long delta, long timeout) {
         // 自增并设置过期时间的 lua 脚本
+        // 只在计数器新建（或被人抢走了 TTL）时设过期时间：每次都 EXPIRE 等于把窗口无限往后推，
+        // 持续有流量时计数永不归零，累计超过阈值后就永久限流
         // language=Redis
-        DefaultRedisScript<Long> incrByExpireLua = new DefaultRedisScript<>("local r = redis.call('INCRBY', KEYS[1], ARGV[1]) redis.call('EXPIRE', KEYS[1], ARGV[2]) return r", Long.class);
+        DefaultRedisScript<Long> incrByExpireLua = new DefaultRedisScript<>(
+                "local r = redis.call('INCRBY', KEYS[1], ARGV[1]) " +
+                        "if r == tonumber(ARGV[1]) or redis.call('TTL', KEYS[1]) < 0 then " +
+                        "redis.call('EXPIRE', KEYS[1], ARGV[2]) end " +
+                        "return r",
+                Long.class);
         return getRedisTemplate().execute(incrByExpireLua, Collections.singletonList(key), String.valueOf(delta), String.valueOf(timeout));
     }
 
@@ -695,17 +703,6 @@ public final class RedisUtil {
      */
     public static void setEx(String key, String value, long timeout, TimeUnit timeUnit) {
         valueOps().set(key, value, Expiration.from(timeout, timeUnit));
-    }
-
-    /**
-     * 将值 value 关联到 key，保留当前对象 TTL 有效期
-     *
-     * @param key   key
-     * @param value value
-     */
-    public static void setExAndKeep(String key, String value) {
-        Long expire = ttl(key);
-        setEx(key, value, expire);
     }
 
     /**

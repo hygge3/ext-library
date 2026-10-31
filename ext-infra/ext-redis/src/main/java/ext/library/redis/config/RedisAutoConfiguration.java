@@ -10,7 +10,6 @@ import ext.library.redis.serialize.PrefixStringRedisSerializer;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
@@ -30,7 +29,6 @@ import tools.jackson.databind.json.JsonMapper;
 public class RedisAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean
     public StringRedisTemplate stringRedisTemplate(RedisPrefixConverter prefixConverter, RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate template = new StringRedisTemplate();
@@ -41,14 +39,12 @@ public class RedisAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RedisProperties.class)
-    @ConditionalOnMissingBean(RedisPrefixConverter.class)
+    @ConditionalOnMissingBean
     public RedisPrefixConverter redisPrefixConverter(RedisProperties redisProperties) {
         return new DefaultRedisPrefixConverter(redisProperties);
     }
 
     @Bean
-    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(RedisPrefixConverter prefixConverter, JsonMapper jsonMapper, RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();

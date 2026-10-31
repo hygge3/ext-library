@@ -123,11 +123,6 @@ public class PostgresProperties {
          */
         private int maxAttempts = 3;
 
-        /**
-         * 队列轮询间隔
-         */
-        private Duration pollInterval = Duration.ofMillis(100);
-
         public boolean isAutoInitSchema() {
             return autoInitSchema;
         }
@@ -150,14 +145,6 @@ public class PostgresProperties {
 
         public void setMaxAttempts(int maxAttempts) {
             this.maxAttempts = maxAttempts;
-        }
-
-        public Duration getPollInterval() {
-            return pollInterval;
-        }
-
-        public void setPollInterval(Duration pollInterval) {
-            this.pollInterval = pollInterval;
         }
 
     }

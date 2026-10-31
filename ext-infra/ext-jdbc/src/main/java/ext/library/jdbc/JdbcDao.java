@@ -142,12 +142,18 @@ public class JdbcDao<T> {
      * @return 影响行数
      */
     public int insert(T entity) {
-        List<String> columns = Arrays.stream(metaData.properties()).map(EntityMetaData::toColumnName).toList();
+        Map<String, Object> values = BeanUtil.beanToMap(entity);
+        // 主键为空时把 id 列整个从 INSERT 里去掉，交给数据库自增；
+        // 带上它只会绑一个 null 进去，PG 直接报 not-null 违反
+        String[] properties = Arrays.stream(metaData.properties())
+                .filter(property -> values.get(property) != null || !property.equals(metaData.idField()))
+                .toArray(String[]::new);
+        List<String> columns = Arrays.stream(properties).map(EntityMetaData::toColumnName).toList();
         String placeholders = placeholders(columns.size());
         String sql = "INSERT INTO " + metaData.tableName()
                 + " (" + String.join(", ", columns) + ") VALUES (" + placeholders + ")";
         Logs.debug(EmojiSymbol.JDBC, "插入实体：table={}", metaData.tableName());
-        return jdbcClient.sql(sql).params(readValues(BeanUtil.beanToMap(entity), metaData.properties())).update();
+        return jdbcClient.sql(sql).params(readValues(values, properties)).update();
     }
 
     /**

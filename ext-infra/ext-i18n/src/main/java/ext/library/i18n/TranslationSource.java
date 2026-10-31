@@ -38,4 +38,10 @@ public interface TranslationSource {
         return 0;
     }
 
+    /**
+     * 清除已缓存的翻译，供热更新调用；无缓存实现的来源无需覆写
+     */
+    default void clear() {
+    }
+
 }

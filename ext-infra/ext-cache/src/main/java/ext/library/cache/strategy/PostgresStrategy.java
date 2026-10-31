@@ -5,6 +5,7 @@ import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.postgres.util.PostgresUtil;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 
 /**
@@ -18,8 +19,8 @@ import java.time.Duration;
 public class PostgresStrategy implements CacheStrategy {
 
     @Override
-    public <T> T get(String cacheName, String key, Class<T> clazz) {
-        return PostgresUtil.cacheGet(genKey(cacheName, key), clazz);
+    public <T> T get(String cacheName, String key, Type type) {
+        return PostgresUtil.cacheGet(genKey(cacheName, key), type);
     }
 
     @Override
@@ -41,6 +42,11 @@ public class PostgresStrategy implements CacheStrategy {
     @Override
     public void evict(String cacheName, String key) {
         PostgresUtil.cacheDelete(genKey(cacheName, key));
+    }
+
+    @Override
+    public Duration remainingTtl(String cacheName, String key) {
+        return PostgresUtil.cacheTtl(genKey(cacheName, key));
     }
 
     @Override
