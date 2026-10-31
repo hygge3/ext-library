@@ -65,7 +65,12 @@ public final class DesensitizeUtil {
         if (isEmpty(input)) {
             return input;
         }
-        return input.replaceAll("(\\d{4})\\d{10}(\\w{4})", "$1**********$2");
+        // 18 位：4 + 10 + 4；15 位：4 + 7 + 4
+        return switch (input.length()) {
+            case 18 -> input.replaceAll("(\\d{4})\\d{10}(\\w{4})", "$1**********$2");
+            case 15 -> input.replaceAll("(\\d{4})\\d{7}(\\d{4})", "$1*******$2");
+            default -> input;
+        };
     }
 
     /**

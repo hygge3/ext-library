@@ -10,6 +10,13 @@ package ext.library.servlet.response;
 public class PageQuery {
 
     /**
+     * 每页条数上限
+     * <p>
+     * 没有上限时 {@code ?size=100000000} 会被直接拼进 {@code LIMIT}，一个请求就能把实例打挂。
+     */
+    private static final long MAX_SIZE = 500;
+
+    /**
      * 当前页码，从 1 开始
      */
     private long page = 1;
@@ -29,7 +36,7 @@ public class PageQuery {
     }
 
     public void setPage(long page) {
-        this.page = page;
+        this.page = Math.max(page, 1);
     }
 
     public long getSize() {
@@ -37,7 +44,7 @@ public class PageQuery {
     }
 
     public void setSize(long size) {
-        this.size = size;
+        this.size = Math.min(Math.max(size, 1), MAX_SIZE);
     }
 
     public long getTotal() {
@@ -54,7 +61,12 @@ public class PageQuery {
      * @return 偏移量，从 0 开始
      */
     public long offset() {
-        return (Math.max(page, 1) - 1) * Math.max(size, 1);
+        // 页码离谱时避免真实溢出：溢出说明这条查询没有意义，放到一个肯定越过后全部数据的位置
+        try {
+            return Math.multiplyExact(page - 1, size);
+        } catch (ArithmeticException e) {
+            return Long.MAX_VALUE;
+        }
     }
 
 }

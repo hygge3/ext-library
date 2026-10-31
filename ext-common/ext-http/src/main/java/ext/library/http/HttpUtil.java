@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -652,12 +653,7 @@ public final class HttpUtil {
          */
         public CompletableFuture<Response> executeAsync() {
             HttpRequest httpRequest = buildRequest();
-            return sendAsyncRequest(httpRequest).thenApply(Response::new).exceptionally(ex -> {
-                if (errorHandler != null && ex instanceof Exception) {
-                    errorHandler.accept((Exception) ex);
-                }
-                return null;
-            });
+            return sendAsyncRequest(httpRequest).thenApply(Response::new).whenComplete((result, ex) -> handleAsyncFailure(ex));
         }
 
         /**
@@ -671,12 +667,8 @@ public final class HttpUtil {
         public <T> CompletableFuture<T> executeAsyncAs(Class<T> type) {
             this.responseType = type;
             HttpRequest httpRequest = buildRequest();
-            return sendAsyncRequest(httpRequest).thenApply(response -> convertResponse(response, type)).exceptionally(ex -> {
-                if (errorHandler != null && ex instanceof Exception) {
-                    errorHandler.accept((Exception) ex);
-                }
-                return null;
-            });
+            return sendAsyncRequest(httpRequest).thenApply(response -> convertResponse(response, type))
+                    .whenComplete((result, ex) -> handleAsyncFailure(ex));
         }
 
         /**
@@ -866,6 +858,27 @@ public final class HttpUtil {
                     errorHandler.accept(e);
                 }
                 throw new ExtException(EmojiSymbol.HTTP, e);
+            }
+        }
+
+        /**
+         * 异步失败统一处理
+         * <p>
+         * 不能用 {@code exceptionally} 返回 null：那等于把失败变成「成功完成且值为 null」，
+         * 调用方后续的 thenApply/thenAccept 会全部静默跳过，失败彻底消失。
+         * 这里只负责回调与日志，异常继续往下传，与同步路径抛 {@link ExtException} 的行为对齐。
+         *
+         * @param ex 异常
+         */
+        private void handleAsyncFailure(@Nullable Throwable ex) {
+            if (ex == null) {
+                return;
+            }
+            Throwable cause = (ex instanceof CompletionException completionException && completionException.getCause() != null)
+                    ? completionException.getCause() : ex;
+            Logs.warn(EmojiSymbol.HTTP, "异步请求失败: url={}, error={}", url, cause.getMessage());
+            if (errorHandler != null && cause instanceof Exception exception) {
+                errorHandler.accept(exception);
             }
         }
 

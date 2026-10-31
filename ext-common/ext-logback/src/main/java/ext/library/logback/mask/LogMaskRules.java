@@ -35,7 +35,8 @@ public final class LogMaskRules {
     /** 键值对形式的凭据：{@code password=xxx} / {@code "token": "xxx"}，只遮蔽值、保留键名 */
     public static final LogMaskRule CREDENTIAL = LogMaskRule.ofGroup(
             "CREDENTIAL",
-            "(?i)((?:password|passwd|pwd|secret|token|accessToken|refreshToken)\\s*[:=]\\s*)(\"?'?[^\s,;\\]\\}&\"']+[\"']?)",
+            // 键名两侧可选引号，以兼容 JSON；字符类里用 \\s 才是正则空白
+            "(?i)([\"']?(?:password|passwd|pwd|secret|token|accessToken|refreshToken)[\"']?\\s*[:=]\\s*)([\"']?[^\\s,;\\]}\"']+[\"']?)",
             2,
             DesensitizeStrategy.PASSWORD
     );

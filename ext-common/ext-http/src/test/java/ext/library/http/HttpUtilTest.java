@@ -4,8 +4,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.net.ConnectException;
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("HttpUtil 工具类测试")
 class HttpUtilTest {
@@ -366,4 +371,20 @@ class HttpUtilTest {
             assertNotNull(HttpUtil.Response.class);
         }
     }
+    @Nested
+    @DisplayName("异步请求测试")
+    class AsyncTests {
+
+        @Test
+        @DisplayName("连接失败不会变成成功返回 null")
+        void asyncFailureCompletesExceptionally() {
+            // 端口 1 必然拒绝连接
+            CompletableFuture<String> future = HttpUtil.get("http://127.0.0.1:1/ping").executeAsyncAsString();
+
+            ExecutionException exception = assertThrows(ExecutionException.class, () -> future.get(10, TimeUnit.SECONDS));
+            assertInstanceOf(ConnectException.class, exception.getCause());
+        }
+
+    }
+
 }

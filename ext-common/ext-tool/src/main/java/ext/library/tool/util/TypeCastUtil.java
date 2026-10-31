@@ -4,8 +4,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.function.Function;
 
 /**
@@ -66,10 +68,12 @@ public final class TypeCastUtil {
         return switch (obj) {
             case Number number -> number;
             case Boolean bool -> bool ? 1 : 0;
+            // 不能用 NumberFormat：它跟 JVM 默认 locale 走（-Duser.language=de 下 "1.5" 解析成 15），
+            // 而且 "123abc" 会被静默截断成 123
             case String s -> {
                 try {
-                    yield NumberFormat.getInstance().parse(s);
-                } catch (ParseException e) {
+                    yield new BigDecimal(s);
+                } catch (NumberFormatException _) {
                     throw new NumberFormatException(obj + " 不是有效的数字格式");
                 }
             }
@@ -528,6 +532,89 @@ public final class TypeCastUtil {
 
     // endregion
 
+    // region 时间与枚举
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalDateTime
+     * <p>
+     * 支持 JDBC 驱动返回的 {@link java.sql.Timestamp}（PgJDBC 的 timestamp 列就是它）
+     *
+     * @param obj 源对象
+     *
+     * @return LocalDateTime，输入为 null 时返回 {@code null}
+     */
+    public static LocalDateTime getAsLocalDateTime(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalDateTime dateTime -> dateTime;
+            case LocalDate date -> date.atStartOfDay();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime();
+            case java.util.Date date -> LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+            case String s -> LocalDateTime.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalDate
+     *
+     * @param obj 源对象
+     *
+     * @return LocalDate，输入为 null 时返回 {@code null}
+     */
+    public static LocalDate getAsLocalDate(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalDate date -> date;
+            case LocalDateTime dateTime -> dateTime.toLocalDate();
+            case java.sql.Date date -> date.toLocalDate();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime().toLocalDate();
+            case String s -> LocalDate.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalTime
+     *
+     * @param obj 源对象
+     *
+     * @return LocalTime，输入为 null 时返回 {@code null}
+     */
+    public static LocalTime getAsLocalTime(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalTime time -> time;
+            case LocalDateTime dateTime -> dateTime.toLocalTime();
+            case java.sql.Time time -> time.toLocalTime();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime().toLocalTime();
+            case String s -> LocalTime.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取枚举
+     *
+     * @param obj 源对象
+     * @param clz 枚举类型
+     * @param <E> 枚举类型
+     *
+     * @return 枚举值，输入为 null 时返回 {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <E extends Enum<E>> E getAsEnum(@Nullable Object obj, Class<E> clz) {
+        if (obj == null) {
+            return null;
+        }
+        if (clz.isInstance(obj)) {
+            return clz.cast(obj);
+        }
+        return (E) Enum.valueOf((Class) clz, obj.toString());
+    }
+
+    // endregion
+
     // region cast
 
     /**
@@ -568,6 +655,14 @@ public final class TypeCastUtil {
             return (R) getAsBigDecimal(obj);
         } else if (Number.class.isAssignableFrom(clz)) {
             return (R) getAsNumber(obj);
+        } else if (clz.isEnum()) {
+            return (R) getAsEnum(obj, clz.asSubclass(Enum.class));
+        } else if (LocalDateTime.class.equals(clz)) {
+            return (R) getAsLocalDateTime(obj);
+        } else if (LocalDate.class.equals(clz)) {
+            return (R) getAsLocalDate(obj);
+        } else if (LocalTime.class.equals(clz)) {
+            return (R) getAsLocalTime(obj);
         }
         throw new UnsupportedOperationException("不支持的目标类型: " + clz);
     }

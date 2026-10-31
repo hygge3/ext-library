@@ -17,6 +17,7 @@ import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import tools.jackson.databind.type.CollectionLikeType;
 import tools.jackson.databind.type.MapType;
 import tools.jackson.databind.type.TypeBase;
+import java.lang.reflect.Type;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -68,6 +69,9 @@ public final class JsonUtil {
 
     /**
      * 将对象序列化成 JSON 字符串
+     * <p>
+     * 结果一定是合法 JSON，能被 {@link #readObj} 读回：{@code String} 也会加引号转义，
+     * 否则 {@code toJson("abc")} 产出裸文本，写进 jsonb 列或再 {@code readObj} 都会失败。
      *
      * @param obj 对象
      *
@@ -114,9 +118,6 @@ public final class JsonUtil {
             case null -> {
                 return "";
             }
-            case String str -> {
-                return str;
-            }
             case BigDecimal bd -> {
                 return bd.toPlainString();
             }
@@ -145,9 +146,9 @@ public final class JsonUtil {
      *
      * @return 反序列化对象
      */
-    public static <T> T readObj(String json, Class<T> valueType) {
+    public static <T> T readObj(String json, Type valueType) {
         try {
-            return MAPPER.readValue(json, valueType);
+            return MAPPER.readValue(json, MAPPER.getTypeFactory().constructType(valueType));
         } catch (JacksonException e) {
             throw new ToolException(EmojiSymbol.JSON, e);
         }

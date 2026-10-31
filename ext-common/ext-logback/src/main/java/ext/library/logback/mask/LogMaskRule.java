@@ -75,7 +75,13 @@ public record LogMaskRule(String name, Pattern pattern, int group, Function<Stri
             sb.append(text, last, matcher.start());
             // group 下标越界时 group() 返回 null，退回整个匹配项
             String target = matcher.group(group);
-            sb.append(target == null ? matcher.group() : replacer.apply(target));
+            if (target == null) {
+                sb.append(replacer.apply(matcher.group()));
+            } else {
+                // 保留捕获组之前的键名与分隔符，只遮蔽值
+                sb.append(text, matcher.start(), matcher.start(group));
+                sb.append(replacer.apply(target));
+            }
             last = matcher.end();
         }
         return sb.append(text, last, text.length()).toString();

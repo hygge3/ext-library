@@ -2,13 +2,16 @@ package ext.library.json.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.type.TypeReference;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,7 +53,15 @@ class JsonUtilTest {
         String str = "test";
         String json = JsonUtil.toJson(str);
 
-        assertEquals("test", json, "字符串应原样返回");
+        assertEquals("\"test\"", json, "字符串应转义为 JSON 字符串");
+        assertEquals(str, JsonUtil.readObj(json, String.class), "应能与 readObj 对称往返");
+    }
+
+    @Test
+    @DisplayName("测试基本类型转 JSON 后能读回")
+    void testToJsonPrimitiveRoundTrip() {
+        assertEquals(5, JsonUtil.<Integer>readObj(JsonUtil.toJson(5), int.class), "int 应能往返");
+        assertEquals(true, JsonUtil.readObj(JsonUtil.toJson(true), boolean.class), "boolean 应能往返");
     }
 
     @Test
@@ -136,8 +147,19 @@ class JsonUtilTest {
         assertTrue(users.isEmpty(), "列表应为空");
     }
 
-    // ========== readList 测试 ==========
+    @Test
+    @DisplayName("readObj 接受泛型 Type，保留元素类型")
+    void testReadObjWithGenericType() {
+        String json = "[{\"name\":\"张三\",\"age\":25}]";
+        Type type = new TypeReference<List<User>>() {
+        }.getType();
 
+        List<User> users = JsonUtil.readObj(json, type);
+
+        assertInstanceOf(User.class, users.getFirst(), "元素应是 User 而不是 LinkedHashMap");
+    }
+
+    // ========== readList 测试 ==========
     @Test
     @DisplayName("测试 JSON 转 Map")
     void testReadMap() {

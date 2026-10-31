@@ -9,6 +9,7 @@ import ext.library.tool.util.StringUtil;
 import ext.library.tool.util.TypeCastUtil;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.ObjectUtils;
@@ -305,6 +306,19 @@ public final class ServletUtil {
         cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
+    }
+
+    /**
+     * 写入一个完整的 cookie，path / domain / secure / httpOnly 由调用方决定
+     *
+     * @param cookie 已组装好的 cookie
+     */
+    public static void addCookie(ResponseCookie cookie) {
+        HttpServletResponse response = getResponse();
+        if (response == null) {
+            return;
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     /**
