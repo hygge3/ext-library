@@ -42,7 +42,8 @@ public @interface OperationLog {
     /**
      * 操作描述
      * <p>
-     * 支持 SpEL，可从方法参数中引用，如 {@code "下单商品 #orderId"}。
+     * 支持 SpEL，可从方法参数中引用，如 {@code "'下单商品 ' + #orderId"}；
+     * 表达式解析失败时退回原串，不会影响业务方法执行。
      *
      * @return 描述
      */

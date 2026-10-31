@@ -30,15 +30,15 @@ ext-enhance 提供常见业务场景的增强功能，通过注解和 AOP 实现
 - `CaptchaDraw` - 验证码绘制接口
 - `RandomCaptchaDraw` - 随机字符验证码
 - `MathCaptchaDraw` - 数学表达式验证码
-- `BackgroundDraw` - 背景绘制
+- `BackgroundDraw` / `SmallCharBackgroundDraw` - 背景绘制
 - `InterferenceDraw` - 干扰线绘制
-- `CurveInterferenceDraw` - 曲线干扰
+- `CubicCurveInterferenceDraw` - 曲线干扰
 
 **核心组件**:
-- `ICaptcha` - 验证码核心接口
-- `ICaptchaService` - 验证码服务接口
+- `Captcha` - 验证码核心接口
+- `CaptchaService` - 验证码服务接口（`DefaultCaptchaService` 默认实现）
 - `CaptchaCache` - 验证码缓存
-- `CaptchaVO` - 验证码响应对象
+- `CaptchaResponse` - 验证码响应对象
 
 **包结构**: `ext.library.captcha`
 

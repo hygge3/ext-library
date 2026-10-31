@@ -59,17 +59,13 @@ public class DefaultCaptcha implements Captcha {
         this(new RandomCaptchaDraw());
     }
 
-    public DefaultCaptcha(CaptchaType type) {
-        this(type.getCaptchaDraw());
-    }
-
     public DefaultCaptcha(CaptchaDraw captchaDraw) {
         this(SmallCharBackgroundDraw.INSTANCE, captchaDraw, CubicCurveInterferenceDraw.INSTANCE, Singletons.SECURE_RANDOM,
                 defaultWidth, defaultHeight, defaultImageFormat);
     }
 
     public DefaultCaptcha(CaptchaProperties properties) {
-        this(SmallCharBackgroundDraw.INSTANCE, properties.getCaptchaType().getCaptchaDraw(),
+        this(SmallCharBackgroundDraw.INSTANCE, properties.getCaptchaType().newDraw(properties.getCodeLength()),
                 CubicCurveInterferenceDraw.INSTANCE, Singletons.SECURE_RANDOM,
                 properties.getWidth(), properties.getHeight(), properties.getImageFormat());
     }

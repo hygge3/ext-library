@@ -19,16 +19,20 @@ public class DefaultKeyGenerator implements KeyGenerator {
 
     @Override
     public String generate(JoinPoint joinPoint, Idempotent idempotent) {
-        String uniqueExpression = idempotent.uniqueExpression();
-
-        // 如果没有填写表达式，直接返回 prefix
-        if (uniqueExpression.isBlank()) {
-            return idempotent.prefix();
-        }
-
         // 获取当前方法以及方法参数
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
+
+        // 没有填表达式时按「类名 + 方法名」退代：只拼 prefix 会让所有业务共用同一个常量 key，
+        // 第一个请求就把所有业务锁死一个 duration
+        String uniqueExpression = idempotent.uniqueExpression();
+        if (uniqueExpression.isBlank()) {
+            String target = joinPoint.getTarget() == null
+                    ? method.getDeclaringClass().getName()
+                    : joinPoint.getTarget().getClass().getName();
+            return idempotent.prefix() + ":" + target + "#" + method.getName();
+        }
+
         Object[] args = joinPoint.getArgs();
         // 根据当前切点，获取 SpEL 上下文
         StandardEvaluationContext spelContext = SpelUtil.getSpelContext(joinPoint.getTarget(), method, args);
