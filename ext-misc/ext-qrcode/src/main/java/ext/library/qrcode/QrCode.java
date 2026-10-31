@@ -583,12 +583,10 @@ public class QrCode {
      * 输出到流
      *
      * @param output 输出流
-     *
-     * @return 是否成功
      */
-    public boolean write(OutputStream output) {
+    public void write(OutputStream output) {
         BufferedImage image = this.toImage();
-        return ImageUtil.write(image, this.imageFormat, output);
+        ImageUtil.write(image, this.imageFormat, output);
     }
 
     /**
