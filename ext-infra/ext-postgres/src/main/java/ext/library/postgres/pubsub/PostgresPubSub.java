@@ -246,6 +246,12 @@ public class PostgresPubSub implements PubSub, DisposableBean {
      *
      * @return 带引号的通道标识符
      */
+    /**
+     * 转义通道名作为标识符。
+     *
+     * <p>PostgreSQL 的 LISTEN / UNLISTEN 不接受绑定参数，只能拼接标识符，
+     * 所以这里是唯一的防护点：长度受限，双引号成对转义。
+     */
     private String quoteChannel(String channel) {
         if (channel.isBlank()) {
             throw new IllegalArgumentException("无效的通道名称：不能为空。");

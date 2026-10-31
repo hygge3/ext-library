@@ -45,14 +45,12 @@ class JdbcDaoInsertTest {
 
     private JdbcClient jdbcClient;
 
-    private JdbcClient.StatementSpec statementSpec;
-
     private JdbcDao<Demo> jdbcDao;
 
     @BeforeEach
     void setUp() {
         jdbcClient = mock(JdbcClient.class);
-        statementSpec = mock(JdbcClient.StatementSpec.class, RETURNS_SELF);
+        JdbcClient.StatementSpec statementSpec = mock(JdbcClient.StatementSpec.class, RETURNS_SELF);
         when(jdbcClient.sql(anyString())).thenReturn(statementSpec);
         when(statementSpec.params(anyList())).thenReturn(statementSpec);
         when(statementSpec.update()).thenReturn(1);

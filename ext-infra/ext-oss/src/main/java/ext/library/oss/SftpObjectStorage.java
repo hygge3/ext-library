@@ -265,11 +265,12 @@ public class SftpObjectStorage implements ObjectStorage {
         }
         try {
             return openConnection();
+        } catch (ExtException e) {
+            permits.release();
+            throw e;
         } catch (IOException | GeneralSecurityException | RuntimeException e) {
             permits.release();
-            throw e instanceof ExtException ext
-                    ? ext
-                    : new ExtException(EmojiSymbol.OSS, e, "连接 SFTP 失败：{}:{}", sftp.getHost(), sftp.getPort());
+            throw new ExtException(EmojiSymbol.OSS, e, "连接 SFTP 失败：{}:{}", sftp.getHost(), sftp.getPort());
         }
     }
 
