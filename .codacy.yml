@@ -1,0 +1,12 @@
+---
+# Codacy / Semgrep 的误报屏蔽清单。
+#
+# 只屏蔽「人工复核过、且规则本身无法区分」的位置，判定依据见
+# https://github.com/hygge3/ext-library/pull/3 。改动这些文件时要重新人工复核。
+exclude_patterns:
+  # PostgreSQL 的 LISTEN / UNLISTEN 不支持绑定参数，通道名只能作为标识符拼接；
+  # 防护在 PostgresPubSub#quoteChannel（拒绝空串、限长 64、双引号成对转义后整体加引号）。
+  - "ext-infra/ext-postgres/src/main/java/ext/library/postgres/pubsub/PostgresPubSub.java"
+  # 表达式全部来自 @Cache / @RateLimit 等注解与配置，不经过请求数据；
+  # SpelLock 已在上下文上禁用 T(...) 类型引用与 new 构造器。
+  - "ext-common/ext-core/src/main/java/ext/library/core/util/spel/SpelUtil.java"
