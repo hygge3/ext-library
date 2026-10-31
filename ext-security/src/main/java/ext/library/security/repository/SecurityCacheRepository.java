@@ -47,7 +47,9 @@ public class SecurityCacheRepository implements SecurityRepository {
     private final CacheStrategy cacheStrategy;
 
     public SecurityCacheRepository(CacheStrategy cacheStrategy) {
-        this.cacheStrategy = cacheStrategy;
+        // 安全数据必须直读分布式层：L2 的本地层只是读缓存，踢下线/封禁/登出只清本机，
+        // 其他实例的本地副本会继续放行旧状态（且 refresh-on-access 会把本地 TTL 一直续下去）
+        this.cacheStrategy = cacheStrategy.distributed();
     }
 
     // -----------------------security session----------------------------------
@@ -65,7 +67,8 @@ public class SecurityCacheRepository implements SecurityRepository {
             return null;
         }
 
-        return session;
+        // 返回副本：调用方会就地改写（设置当前 token、查列表时置空 tokenInfoList）
+        return session.copy();
     }
 
     @Override
@@ -107,7 +110,8 @@ public class SecurityCacheRepository implements SecurityRepository {
 
     @Override
     public SecurityToken getSecurityTokenByTokenValue(String tokenValue) {
-        return cacheStrategy.get(tokenCacheName, tokenValue, SecurityToken.class);
+        SecurityToken token = cacheStrategy.get(tokenCacheName, tokenValue, SecurityToken.class);
+        return token == null ? null : token.copy();
     }
 
     @Override
@@ -228,7 +232,8 @@ public class SecurityCacheRepository implements SecurityRepository {
     @SuppressWarnings("unchecked")
     private Set<String> getTokenIndex() {
         Set<String> index = cacheStrategy.get(tokenIndexCacheName, tokenIndexKey, Set.class);
-        return index != null ? index : new HashSet<>();
+        // 复制后修改：缓存的集合实例不能被多个请求同时改
+        return index != null ? new HashSet<>(index) : new HashSet<>();
     }
 
     /**

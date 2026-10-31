@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Security Session 信息
@@ -65,6 +67,32 @@ public class SecuritySession implements Serializable {
     private Long version;
 
     public SecuritySession() {
+    }
+
+    /**
+     * 深拷贝
+     * <p>
+     * Caffeine 与 L2 的本地层返回的是缓存里的同一个引用，调用方就地改写（比如查在线用户时
+     * 把 {@code tokenInfoList} 置 null）会直接污染缓存对象，所以对外一律给副本。
+     *
+     * @return 副本
+     */
+    public SecuritySession copy() {
+        List<SecurityToken> tokens = tokenInfoList == null
+                ? new ArrayList<>()
+                : tokenInfoList.stream().map(SecurityToken::copy).collect(Collectors.toCollection(ArrayList::new));
+
+        SecuritySession copy = new SecuritySession(securitySessionId, loginId, timeout, null, createTime, updateTime,
+                tokens, version);
+        copy.mountData.putAll(mountData);
+
+        if (currentSecurityToken != null) {
+            copy.currentSecurityToken = tokens.stream()
+                    .filter(token -> Objects.equals(token.getToken(), currentSecurityToken.getToken()))
+                    .findFirst()
+                    .orElseGet(currentSecurityToken::copy);
+        }
+        return copy;
     }
 
     public SecuritySession(String securitySessionId, String loginId, Long timeout,

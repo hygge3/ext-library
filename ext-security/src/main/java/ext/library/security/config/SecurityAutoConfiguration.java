@@ -2,6 +2,7 @@ package ext.library.security.config;
 
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.security.authority.SecurityAuthority;
+import ext.library.security.interceptor.SecurityInterceptor;
 import ext.library.security.properties.SecurityProperties;
 import ext.library.security.repository.SecurityCacheRepository;
 import ext.library.security.repository.SecurityRepository;
@@ -10,8 +11,13 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
 /**
  * 安全模块自动配置
@@ -50,6 +56,25 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean(SecurityRepository.class)
     public SecurityRepository securityRepository(CacheStrategy cacheStrategy) {
         return new SecurityCacheRepository(cacheStrategy);
+    }
+
+    /**
+     * 注册权限拦截器
+     * <p>
+     * 之前没有任何地方注册它，按 README 写 {@code @RequiresPermissions} / {@code @RequiresRoles}
+     * 的接口实际不校验。
+     *
+     * @return 拦截器配置
+     */
+    @Bean
+    @ConditionalOnWebApplication(type = SERVLET)
+    public WebMvcConfigurer securityInterceptorConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/**");
+            }
+        };
     }
 
     /**
