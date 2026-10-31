@@ -103,11 +103,12 @@ public class SseHeartbeatManager {
     private void heartbeatTask() {
         for (Map.Entry<String, SseEmitter> entry : emitterRegistry.entrySet()) {
             SseEmitter emitter = entry.getValue();
+            // 单个连接抛未捕获异常会让 scheduleAtFixedRate 永久停止后续心跳，必须在循环内兜住
             try {
                 // 发送 SSE 注释作为心跳（注释不会触发客户端事件，仅保持连接）
                 emitter.send(SseEmitter.event().comment("heartbeat"));
                 Logs.debug(EmojiSymbol.SSE, "[心跳] 发送心跳到 {}", entry.getKey());
-            } catch (IOException e) {
+            } catch (IOException | RuntimeException e) {
                 Logs.warn(EmojiSymbol.SSE, "[心跳] {} 发送失败，移除连接: {}", entry.getKey(), e.getMessage());
                 emitterRegistry.remove(entry.getKey());
                 // 尝试完成 emitter

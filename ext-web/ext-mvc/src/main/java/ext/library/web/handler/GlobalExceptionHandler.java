@@ -30,6 +30,7 @@ import org.springframework.web.method.annotation.MethodArgumentConversionNotSupp
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -90,6 +91,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<R<Void>> bizException(BizException e, HttpServletRequest request) {
         ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage());
         return ErrorEnvelope.ofCode(e.getCode(), e.getMessage()).toResponseEntity();
+    }
+
+    /**
+     * 带 HTTP 状态码的异常（Spring 标准的 {@code ResponseStatusException}）
+     * <p>
+     * 不单独接住会被下面的 {@code RuntimeException} 兜底成 500，前端分不出 404/403/409。
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<R<Void>> responseStatusException(ResponseStatusException e, HttpServletRequest request) {
+        String message = StringUtil.format("{}", e.getReason());
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+        if (status == null) {
+            return ErrorEnvelope.ofCode(e.getStatusCode().value(), message).toResponseEntity();
+        }
+        return ErrorEnvelope.of(status, message).toResponseEntity();
     }
 
     /**

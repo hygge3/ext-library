@@ -12,6 +12,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -25,16 +26,9 @@ public class WebInvokeTimeInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
 
-        // 打印请求参数
+        // 请求参数：JSON 请求体要等 handler 读完才有内容（由 ContentCachingFilter 提供包装器），放到 afterCompletion 打印
         if (isJsonRequest(request)) {
-            String jsonParam = "";
-            ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request, 0);
-            // 处理请求数据
-            byte[] body = requestWrapper.getContentAsByteArray();
-            if (ObjectUtil.isNotEmpty(body)) {
-                jsonParam = new String(body);
-            }
-            Logs.info(EmojiSymbol.WEB, "{}:{},body:[{}]", request.getMethod(), request.getRequestURI(), jsonParam);
+            Logs.info(EmojiSymbol.WEB, "{}:{}", request.getMethod(), request.getRequestURI());
         } else {
             Map<String, String[]> parameterMap = request.getParameterMap();
             if (ObjectUtil.isNotEmpty(parameterMap)) {
@@ -54,6 +48,12 @@ public class WebInvokeTimeInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, @Nullable Exception ex) throws Exception {
+        if (request instanceof ContentCachingRequestWrapper requestWrapper) {
+            byte[] body = requestWrapper.getContentAsByteArray();
+            Logs.info(EmojiSymbol.WEB, "{}:{},body:[{}]", request.getMethod(), request.getRequestURI(),
+                    body.length == 0 ? "" : new String(body, StandardCharsets.UTF_8));
+        }
+
         if (request.getAttribute(stopWatchAttr) instanceof StopWatch stopWatch) {
             stopWatch.stop();
             Logs.info(EmojiSymbol.WEB, "{}:{},take:[{}]ms", request.getMethod(), request.getRequestURI(), stopWatch.getTotalTimeMillis());

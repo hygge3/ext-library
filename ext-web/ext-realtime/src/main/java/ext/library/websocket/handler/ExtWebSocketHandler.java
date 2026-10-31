@@ -49,7 +49,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
         }
         String sessionKey = loginUser.getLoginId();
         connectionManager.addSession(sessionKey, session);
-        heartbeatManager.recordActivity(sessionKey);
+        heartbeatManager.recordActivity(session.getId());
         Logs.info(EmojiSymbol.WEBSOCKET, "[连接] sessionId: {}, userId: {}", session.getId(), sessionKey);
     }
 
@@ -61,7 +61,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         String sessionKey = loginUser.getLoginId();
         // 记录活动时间
-        heartbeatManager.recordActivity(sessionKey);
+        heartbeatManager.recordActivity(session.getId());
         Logs.debug(EmojiSymbol.WEBSOCKET, "[消息] userId: {}, message: {}", sessionKey, message.getPayload());
     }
 
@@ -72,7 +72,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (loginUser != null) {
-            heartbeatManager.recordActivity(loginUser.getLoginId());
+            heartbeatManager.recordActivity(session.getId());
         }
         super.handleBinaryMessage(session, message);
     }
@@ -85,7 +85,7 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
         SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
         if (loginUser != null) {
             // 收到 Pong 表示客户端活跃
-            heartbeatManager.recordActivity(loginUser.getLoginId());
+            heartbeatManager.recordActivity(session.getId());
             Logs.debug(EmojiSymbol.WEBSOCKET, "[心跳] 收到 Pong, userId: {}", loginUser.getLoginId());
         }
     }
@@ -109,8 +109,8 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
             return;
         }
         String sessionKey = loginUser.getLoginId();
-        connectionManager.removeSession(sessionKey);
-        heartbeatManager.removeActivity(sessionKey);
+        connectionManager.removeSession(sessionKey, session.getId());
+        heartbeatManager.removeActivity(session.getId());
         Logs.info(EmojiSymbol.WEBSOCKET, "[断开] sessionId: {}, userId: {}", session.getId(), sessionKey);
     }
 
