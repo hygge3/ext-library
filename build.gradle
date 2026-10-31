@@ -19,6 +19,8 @@ subprojects {
             toolchain {
                 languageVersion = JavaLanguageVersion.of(25)
             }
+            // 发布源码包，消费方反查实现时不必另找仓库
+            withSourcesJar()
         }
 
         tasks.withType(JavaCompile).configureEach {

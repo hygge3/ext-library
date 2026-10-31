@@ -34,10 +34,10 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 - **ID 生成**: `SnowflakeId` (雪花算法), `MongoObjectId` (MongoDB风格ID)
 - **树形构建**: `TreeBuilder` 用于构建树形数据结构
 - **版本处理**: `Version` 版本号比较工具
-- **重试机制**: `IRetry`, `RetryCallback` 重试回调接口
+- **重试机制**: `RetryUtils` 重试工具
 - **函数式接口**: `CheckedFunction`, `CheckedConsumer`, `CheckedSupplier` 等支持异常的函数式接口
 - **延迟加载**: `Lazy`, `Once` 延迟初始化工具
-- **字典接口**: `IDict` 枚举字典接口
+- **字典接口**: `Dict` 枚举字典接口，`DictUtil` 转换工具
 
 **包结构**: `ext.library.tool`
 
@@ -60,7 +60,7 @@ JSON 处理模块，提供：
 - JsonPath 查询支持
 - JSON 序列化/反序列化工具类
 - 字段翻译 (`ext.library.trans`)：`@Translate` 注解 + `TranslatorRegistry` + Jackson `TranslationHandler`
-- 数据脱敏 (`ext.library.desensitize`)：`@Sensitive` 注解 + `SensitiveStrategy` + `DesensitizationUtil`
+- 数据脱敏 (`ext.library.desensitize`)：`@Sensitive` 注解 + `DesensitizeStrategy` + `DesensitizeUtil`
 
 **包结构**: `ext.library.json`, `ext.library.trans`, `ext.library.desensitize`
 

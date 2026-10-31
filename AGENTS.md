@@ -12,7 +12,7 @@ ext-library 是一个基于 Spring Boot 的扩展库，采用 Gradle 多模块�
 |-------------------|--------------------|
 | Java              | 25                 |
 | Spring Boot       | 4.1.1              |
-| Gradle            | 9.8.0 (Groovy DSL) |
+| Gradle            | 9.8.1 (Groovy DSL) |
 | Bouncy Castle     | 1.86               |
 | SpringDoc OpenAPI | 3.1.1              |
 
@@ -136,8 +136,8 @@ graph TD
 
 - `version` — 项目自身版本，所有 ext 模块共用
 - `springBootVersion` — Spring Boot 全家桶版本，通过 `spring-boot-dependencies` BOM 管理所有 `org.springframework.*` 等依赖
-- `bouncyCastleVersion` / `zxingVersion` / `swaggerAnnotationsVersion` / `springdocVersion` — 不在任何
-  BOM 里的第三方依赖
+- `bouncyCastleVersion` / `zxingVersion` / `swaggerAnnotationsVersion` / `springdocVersion` / `awsSdkVersion` /
+  `sshdVersion` / `s3mockVersion`（仅测试）— 不在其他 BOM 里单独约束的第三方依赖
 
 约束声明在 `ext-bom/build.gradle`，与 ext 模块版本一起发布给消费方。
 
