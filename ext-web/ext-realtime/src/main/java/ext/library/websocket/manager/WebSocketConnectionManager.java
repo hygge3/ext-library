@@ -9,6 +9,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.SessionLimitExceededException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WebSocketConnectionManager {
 
-    private static final Map<String, WebSocketSession> userSessionMap = new ConcurrentHashMap<>();
+    /**
+     * sessionKey（用户 ID）→ (sessionId → session)
+     * <p>
+     * 同一用户允许多个标签页同时在线，按 sessionId 存，关掉其中一个标签页不会把其他连接一起删掉。
+     */
+    private static final Map<String, Map<String, WebSocketSession>> userSessionMap = new ConcurrentHashMap<>();
 
     /**
      * 添加 WebSocket 会话
@@ -27,26 +33,31 @@ public class WebSocketConnectionManager {
      * @param session    WebSocket 会话
      */
     public void addSession(String sessionKey, WebSocketSession session) {
-        userSessionMap.put(sessionKey, session);
+        userSessionMap.computeIfAbsent(sessionKey, _ -> new ConcurrentHashMap<>()).put(session.getId(), session);
     }
 
     /**
-     * 移除 WebSocket 会话
+     * 移除单个 WebSocket 会话
      *
      * @param sessionKey 会话键
+     * @param sessionId  会话 ID
      */
-    public void removeSession(String sessionKey) {
-        userSessionMap.remove(sessionKey);
+    public void removeSession(String sessionKey, String sessionId) {
+        userSessionMap.computeIfPresent(sessionKey, (_, sessions) -> {
+            sessions.remove(sessionId);
+            return sessions.isEmpty() ? null : sessions;
+        });
     }
 
     /**
-     * 获取指定会话键的 WebSocket 会话
+     * 获取指定会话键的所有 WebSocket 会话
      *
      * @param sessionKey 会话键
-     * @return WebSocket 会话，不存在则返回 null
+     * @return WebSocket 会话列表，不存在时返回空列表
      */
-    public WebSocketSession getSession(String sessionKey) {
-        return userSessionMap.get(sessionKey);
+    public List<WebSocketSession> getSessions(String sessionKey) {
+        Map<String, WebSocketSession> sessions = userSessionMap.get(sessionKey);
+        return sessions == null ? List.of() : List.copyOf(sessions.values());
     }
 
     /**
@@ -75,8 +86,7 @@ public class WebSocketConnectionManager {
      * @param message    消息内容
      */
     public void sendMessage(String sessionKey, String message) {
-        WebSocketSession session = userSessionMap.get(sessionKey);
-        sendMessage(session, new TextMessage(message));
+        getSessions(sessionKey).forEach(session -> sendMessage(session, new TextMessage(message)));
     }
 
     /**

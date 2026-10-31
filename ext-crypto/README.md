@@ -38,7 +38,6 @@ implementation("ext.library:ext-crypto")
 | 工具类 | 算法 | 说明 |
 |--------|------|------|
 | `AESUtil` | AES | 高级加密标准，推荐使用 |
-| `DESUtil` | DES | 数据加密标准 |
 | `SM4Util` | SM4 | 国密对称加密算法 |
 
 ### 非对称加密
@@ -53,6 +52,7 @@ implementation("ext.library:ext-crypto")
 | 工具类 | 功能 | 说明 |
 |--------|------|------|
 | `DigestUtil` | 摘要算法 | MD5, SHA 等摘要计算 |
+| `SM3Util` | 国密摘要 | SM3 摘要与 HMAC |
 | `PasswordEncoder` | 密码编码 | 基于 Spring Security 的密码加密 |
 
 ## 包结构
@@ -60,11 +60,11 @@ implementation("ext.library:ext-crypto")
 ```
 ext.library.crypto
 ├── AESUtil.java         # AES 加密工具
-├── DESUtil.java         # DES 加密工具
 ├── SM4Util.java         # SM4 国密加密
 ├── RSAUtil.java         # RSA 非对称加密
 ├── SM2Util.java         # SM2 国密非对称加密
 ├── DigestUtil.java      # 摘要算法工具
+├── SM3Util.java         # SM3 国密摘要
 └── PasswordEncoder.java # 密码编码器
 ```
 

@@ -3,7 +3,7 @@ description = 'API 请求解密响应加密'
 dependencies {
     api project(':ext-common:ext-tool')
     api project(':ext-common:ext-json')
+    api project(':ext-common:ext-servlet')
     api project(':ext-crypto')
     api 'org.springframework:spring-webmvc'
-    compileOnly 'jakarta.servlet:jakarta.servlet-api'
 }

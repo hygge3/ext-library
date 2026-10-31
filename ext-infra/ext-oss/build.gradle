@@ -1,0 +1,22 @@
+description = '对象存储，支持本地文件系统、S3 协议与 SSH/SFTP'
+
+dependencies {
+    api project(':ext-common:ext-core')
+
+    // 厂商 SDK 一律 compileOnly：消费方只引自己用得上的后端，没有 SDK 时其他模式仍能启动
+    // AWS SDK for Java v2（S3 客户端 + 预签名），版本由 ext-bom 导入的 awssdk bom 收敛
+    compileOnly 'software.amazon.awssdk:s3'
+    compileOnly 'software.amazon.awssdk:auth'
+
+    // Apache MINA SSHD（SFTP 模式），版本由 ext-bom 约束
+    compileOnly 'org.apache.sshd:sshd-core'
+    compileOnly 'org.apache.sshd:sshd-sftp'
+
+    // compileOnly 不进测试类路径，两个后端的测试各自把 SDK 引回来
+    testImplementation 'software.amazon.awssdk:s3'
+    testImplementation 'software.amazon.awssdk:auth'
+    testImplementation 'org.apache.sshd:sshd-core'
+    testImplementation 'org.apache.sshd:sshd-sftp'
+    // 进程内 S3 服务端，S3 后端不需要 Docker 也能跑真实往返
+    testImplementation "com.adobe.testing:s3mock-junit5:${s3mockVersion}"
+}

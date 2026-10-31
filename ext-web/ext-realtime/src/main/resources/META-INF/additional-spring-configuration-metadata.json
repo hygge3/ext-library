@@ -1,31 +1,4 @@
 {
   "properties": [],
-  "hints": [
-    {
-      "name": "ext.sse.backend",
-      "values": [
-        {
-          "value": "REDIS",
-          "description": "使用 Redis 发布订阅"
-        },
-        {
-          "value": "POSTGRES",
-          "description": "使用 PostgreSQL LISTEN/NOTIFY"
-        }
-      ]
-    },
-    {
-      "name": "ext.websocket.backend",
-      "values": [
-        {
-          "value": "REDIS",
-          "description": "使用 Redis 发布订阅"
-        },
-        {
-          "value": "POSTGRES",
-          "description": "使用 PostgreSQL LISTEN/NOTIFY"
-        }
-      ]
-    }
-  ]
+  "hints": []
 }

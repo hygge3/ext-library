@@ -1,14 +1,16 @@
 package ext.library.web.handler;
 
+import ext.library.servlet.exception.ErrorEnvelope;
+import ext.library.servlet.exception.ErrorLog;
+import ext.library.servlet.response.R;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.BizCode;
 import ext.library.tool.exception.BizException;
-import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
-import ext.library.web.response.R;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -22,13 +24,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -37,28 +39,20 @@ import java.util.Set;
 
 /**
  * 全局异常处理器
+ * <p>
+ * 只负责两件事：某类异常归谁管、它对外要说什么。HTTP 状态与响应体的配对交给
+ * {@link ErrorEnvelope}，日志口径交给 {@link ErrorLog}。
  */
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * 打印日志
-     *
-     * @param request 请求
-     * @param message 消息
-     * @param e       e
-     */
-    private static void printLog(HttpServletRequest request, String message, Exception e) {
-        Logs.error(EmojiSymbol.WARN, e, "URI:{},{}", request.getRequestURI(), message);
-    }
-
-    /**
      * 处理 BindingResult
      *
      * @param result BindingResult
      *
-     * @return R
+     * @return 校验失败的响应体
      */
     private static R<Void> handleBindingResult(BindingResult result) {
         FieldError error = result.getFieldError();
@@ -79,7 +73,7 @@ public class GlobalExceptionHandler {
      *
      * @param violations 校验结果
      *
-     * @return R
+     * @return 校验失败的响应体
      */
     private static R<Void> handleConstraintViolation(Set<ConstraintViolation<?>> violations) {
         ConstraintViolation<?> violation = violations.iterator().next();
@@ -94,69 +88,87 @@ public class GlobalExceptionHandler {
      * 主动业务异常
      */
     @ExceptionHandler(BizException.class)
-    public R<Void> bizException(BizException e, HttpServletRequest request) {
-        Logs.error(EmojiSymbol.WEB, "URI:{},{}", request.getRequestURI(), e.getMessage());
-        return R.failed(e.getCode(), e.getMessage());
+    public ResponseEntity<R<Void>> bizException(BizException e, HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage());
+        return ErrorEnvelope.ofCode(e.getCode(), e.getMessage()).toResponseEntity();
+    }
+
+    /**
+     * 带 HTTP 状态码的异常（Spring 标准的 {@code ResponseStatusException}）
+     * <p>
+     * 不单独接住会被下面的 {@code RuntimeException} 兜底成 500，前端分不出 404/403/409。
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<R<Void>> responseStatusException(ResponseStatusException e, HttpServletRequest request) {
+        String message = StringUtil.format("{}", e.getReason());
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+        if (status == null) {
+            return ErrorEnvelope.ofCode(e.getStatusCode().value(), message).toResponseEntity();
+        }
+        return ErrorEnvelope.of(status, message).toResponseEntity();
     }
 
     /**
      * 未知的应用内部异常
      */
     @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public R<Void> otherException(RuntimeException e, HttpServletRequest request) {
-        printLog(request, "未知错误", e);
-        return R.failed(BizCode.UNKNOWN, BizCode.UNKNOWN.getMsg());
+    public ResponseEntity<R<Void>> otherException(RuntimeException e, HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, "未知错误", e);
+        return ErrorEnvelope
+                .of(HttpStatus.INTERNAL_SERVER_ERROR, BizCode.UNKNOWN.getCode(), BizCode.UNKNOWN.getMsg())
+                .toResponseEntity();
     }
 
     /**
      * 内部参数校验异常
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public R<Void> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
+    public ResponseEntity<R<Void>> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         String message = StringUtil.format("参数异常:{}", e.getMessage());
-        printLog(request, message, e);
-        return R.failed(BizCode.ILLEGAL_ARGUMENT, BizCode.ILLEGAL_ARGUMENT.getMsg());
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope
+                .of(HttpStatus.BAD_REQUEST, BizCode.INVALID_PARAMETER.getCode(), BizCode.INVALID_PARAMETER.getMsg())
+                .toResponseEntity();
     }
 
     /**
      * 请求使用的方法不被允许
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public R<Void> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+    public ResponseEntity<R<Void>> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e,
+                                                                          HttpServletRequest request) {
         String message = StringUtil.format("({}) 未支持", e.getMethod());
-        printLog(request, message, e);
-        return R.failed(HttpStatus.METHOD_NOT_ALLOWED, message);
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.METHOD_NOT_ALLOWED, message).toResponseEntity();
     }
 
     /**
      * 请求路径中缺少必需的路径变量
      */
     @ExceptionHandler(MissingPathVariableException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_REQUIRED)
-    public R<Void> missingPathVariableException(MissingPathVariableException e, HttpServletRequest request) {
+    public ResponseEntity<R<Void>> missingPathVariableException(MissingPathVariableException e,
+                                                                HttpServletRequest request) {
         String message = StringUtil.format("缺少 Path 变量：{}", e.getVariableName());
-        printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST, message);
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, message).toResponseEntity();
     }
 
     /**
      * 请求参数类型不匹配
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    public R<Void> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
-                                                       HttpServletRequest request) {
+    public ResponseEntity<R<Void>> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e,
+                                                                      HttpServletRequest request) {
         String message = StringUtil.format("参数 [{}] 类型不匹配，要求：'{}'，实际：'{}'",
-                e.getName(), e.getRequiredType().getName(), e.getValue());
-        printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST, StringUtil.format("参数 [{}] 类型不匹配", e.getName()));
+                e.getName(), e.getRequiredType(), e.getValue());
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, StringUtil.format("参数 [{}] 类型不匹配", e.getName()))
+                .toResponseEntity();
     }
 
     /**
-     * 参数效验未通过统一处理
+     * 缺少必需的请求参数
      *
      * @param e       参数校验未通过异常
      * @param request 请求
@@ -164,16 +176,15 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_REQUIRED)
-    public R<Void> missingServletRequestParameterException(MissingServletRequestParameterException e,
-                                                           HttpServletRequest request) {
+    public ResponseEntity<R<Void>> missingServletRequestParameterException(MissingServletRequestParameterException e,
+                                                                           HttpServletRequest request) {
         String message = StringUtil.format("缺少请求参数：{}", e.getParameterName());
-        printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST, message);
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, message).toResponseEntity();
     }
 
     /**
-     * 参数效验未通过统一处理
+     * 方法参数校验未通过统一处理
      *
      * @param e       参数校验未通过异常
      * @param request 请求
@@ -181,9 +192,8 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_REQUIRED)
-    public R<Void> handlerMethodValidationException(HandlerMethodValidationException e,
-                                                    HttpServletRequest request) {
+    public ResponseEntity<R<Void>> handlerMethodValidationException(HandlerMethodValidationException e,
+                                                                    HttpServletRequest request) {
         String param = StreamUtil.join(e.getParameterValidationResults(), (allValidationResult) -> {
             String parameterName = allValidationResult.getMethodParameter().getParameterName();
             String defaultMessage = allValidationResult.getResolvableErrors().getFirst().getDefaultMessage();
@@ -191,8 +201,8 @@ public class GlobalExceptionHandler {
         }, ";");
 
         String message = StringUtil.format("参数校验未通过：{}", param);
-        printLog(request, message, e);
-        return R.failed(HttpStatus.BAD_REQUEST, message);
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, message).toResponseEntity();
     }
 
     /**
@@ -201,13 +211,12 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Void> }
+     * @return 结果
      */
     @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public R<Void> noHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.NOT_FOUND, "请求的资源不存在");
+    public ResponseEntity<R<Void>> noHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
+        return ErrorEnvelope.of(HttpStatus.NOT_FOUND, "请求的资源不存在").toResponseEntity();
     }
 
     /**
@@ -216,14 +225,13 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Object> }
+     * @return 结果
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Object> httpMessageNotReadableException(HttpMessageNotReadableException e,
-                                                     HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, "请求体格式错误或无法解析");
+    public ResponseEntity<R<Void>> httpMessageNotReadableException(HttpMessageNotReadableException e,
+                                                                   HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, "请求体格式错误或无法解析").toResponseEntity();
     }
 
     /**
@@ -232,14 +240,13 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Object> }
+     * @return 结果
      */
     @ExceptionHandler(HttpMessageConversionException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Object> httpMessageConversionException(HttpMessageConversionException e,
-                                                    HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, "请求数据转换失败");
+    public ResponseEntity<R<Void>> httpMessageConversionException(HttpMessageConversionException e,
+                                                                  HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, "请求数据转换失败").toResponseEntity();
     }
 
     /**
@@ -248,14 +255,13 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Object> }
+     * @return 结果
      */
     @ExceptionHandler(MethodArgumentConversionNotSupportedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Object> methodArgumentConversionNotSupportedException(MethodArgumentConversionNotSupportedException e,
-                                                                   HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.BAD_REQUEST, "参数类型转换不支持");
+    public ResponseEntity<R<Void>> methodArgumentConversionNotSupportedException(
+            MethodArgumentConversionNotSupportedException e, HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, "参数类型转换不支持").toResponseEntity();
     }
 
     /**
@@ -264,14 +270,13 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Object> }
+     * @return 结果
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    public R<Object> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e,
-                                                        HttpServletRequest request) {
-        printLog(request, e.getMessage(), e);
-        return R.failed(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "不支持的媒体类型");
+    public ResponseEntity<R<Void>> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e,
+                                                                      HttpServletRequest request) {
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
+        return ErrorEnvelope.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "不支持的媒体类型").toResponseEntity();
     }
 
     /**
@@ -280,15 +285,14 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Object> }
+     * @return 结果
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public R<Object> httpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e,
-                                                         HttpServletRequest request) {
+    public ResponseEntity<R<Void>> httpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e,
+                                                                       HttpServletRequest request) {
         String message = e.getMessage() + "，支持的媒体类型：" + StringUtil.join(e.getSupportedMediaTypes());
-        printLog(request, message, e);
-        return R.failed(HttpStatus.NOT_ACCEPTABLE, "请求的媒体类型不可接受");
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.NOT_ACCEPTABLE, "请求的媒体类型不可接受").toResponseEntity();
     }
 
     /**
@@ -297,14 +301,13 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Void> }
+     * @return 结果
      */
     @ExceptionHandler(BindException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_REQUIRED)
-    public R<Void> bindException(BindException e, HttpServletRequest request) {
+    public ResponseEntity<R<Void>> bindException(BindException e, HttpServletRequest request) {
         R<Void> result = handleBindingResult(e.getBindingResult());
-        printLog(request, result.getMsg(), e);
-        return result;
+        ErrorLog.error(EmojiSymbol.WEB, request, result.getMsg(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, result.getMsg()).toResponseEntity();
     }
 
     /**
@@ -313,15 +316,14 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Void> }
+     * @return 结果
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_REQUIRED)
-    public R<Void> constraintViolationException(ConstraintViolationException e,
-                                                HttpServletRequest request) {
+    public ResponseEntity<R<Void>> constraintViolationException(ConstraintViolationException e,
+                                                                HttpServletRequest request) {
         R<Void> result = handleConstraintViolation(e.getConstraintViolations());
-        printLog(request, result.getMsg(), e);
-        return result;
+        ErrorLog.error(EmojiSymbol.WEB, request, result.getMsg(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, result.getMsg()).toResponseEntity();
     }
 
     /**
@@ -330,15 +332,14 @@ public class GlobalExceptionHandler {
      * @param e       e
      * @param request 请求
      *
-     * @return {@code R<Void> }
+     * @return 结果
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Void> methodArgumentNotValidException(MethodArgumentNotValidException e,
-                                                   HttpServletRequest request) {
+    public ResponseEntity<R<Void>> methodArgumentNotValidException(MethodArgumentNotValidException e,
+                                                                   HttpServletRequest request) {
         R<Void> result = handleBindingResult(e.getBindingResult());
-        printLog(request, result.getMsg(), e);
-        return result;
+        ErrorLog.error(EmojiSymbol.WEB, request, result.getMsg(), e);
+        return ErrorEnvelope.of(HttpStatus.BAD_REQUEST, result.getMsg()).toResponseEntity();
     }
 
     /**
@@ -350,12 +351,10 @@ public class GlobalExceptionHandler {
      * @return 结果
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    @ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
-    public R<Void> maxUploadSizeExceededException(MaxUploadSizeExceededException e,
-                                                  HttpServletRequest request) {
-        long maxUploadSize = e.getMaxUploadSize();
-        String message = StringUtil.format("超出最大上传大小，最大：{}", maxUploadSize);
-        printLog(request, message, e);
-        return R.failed(HttpStatus.CONTENT_TOO_LARGE, message);
+    public ResponseEntity<R<Void>> maxUploadSizeExceededException(MaxUploadSizeExceededException e,
+                                                                  HttpServletRequest request) {
+        String message = StringUtil.format("超出最大上传大小，最大：{}", e.getMaxUploadSize());
+        ErrorLog.error(EmojiSymbol.WEB, request, message, e);
+        return ErrorEnvelope.of(HttpStatus.CONTENT_TOO_LARGE, message).toResponseEntity();
     }
 }

@@ -11,8 +11,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 /**
  * API 加解密自动配置类
  * <p>
@@ -22,7 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ConditionalOnClass(HttpServletRequest.class)
+// 按类名探测 servlet API：jakarta.servlet-api 由消费方容器提供（ext-servlet 为 compileOnly），
+// 本模块不直接引用 servlet 类型，因此编译期不需要该依赖
+@ConditionalOnClass(name = "jakarta.servlet.http.HttpServletRequest")
 @EnableConfigurationProperties(ApiCryptoProperties.class)
 public class ApiCryptoAutoConfiguration {
 

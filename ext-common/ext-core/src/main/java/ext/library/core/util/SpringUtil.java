@@ -6,6 +6,7 @@ import ext.library.tool.util.ObjectUtil;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -22,18 +23,22 @@ import java.util.Map;
 /**
  * Spring 工具类
  */
-public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextAware {
+public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextAware, DisposableBean {
 
     /**
      * "@PostConstruct"注解标记的类中，由于 ApplicationContext 还未加载，导致空指针<br>
      * 因此实现 BeanFactoryPostProcessor 注入 ConfigurableListableBeanFactory 实现 bean 的操作
+     * <p>
+     * <b>约束：</b>两个静态字段使本类持有全局单例上下文，同一 JVM 内运行多个 Spring 应用
+     * （嵌入式 + 主应用、测试反复 refresh）时后启动的上下文会覆盖前一个。
+     * 每个 JVM 只能绑定一个 Spring 上下文。
      */
-    private static ConfigurableListableBeanFactory beanFactory;
+    private static volatile ConfigurableListableBeanFactory beanFactory;
 
     /**
      * Spring 应用上下文环境
      */
-    private static ApplicationContext context;
+    private static volatile ApplicationContext context;
 
     /**
      * 设置 Spring 应用上下文
@@ -42,6 +47,25 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      */
     public static void setContext(ApplicationContext context) {
         SpringUtil.context = context;
+    }
+
+    /**
+     * 清理静态上下文
+     * <p>
+     * Spring 上下文关闭时必须调用，否则 {@code getBean()} 拿到的是已关闭的旧上下文，
+     * 抛出的是语义模糊的 {@code IllegalStateException} 而非“上下文已销毁”。
+     */
+    public static void clearContext() {
+        beanFactory = null;
+        context = null;
+    }
+
+    /**
+     * 容器关闭时自动清理，避免跨测试/多应用场景拿到已销毁的上下文
+     */
+    @Override
+    public void destroy() {
+        clearContext();
     }
 
     /**
@@ -240,13 +264,23 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
      * <p>
      * 由 {@link org.springframework.beans.factory.BeanFactory} 实现，通过工具开放 API。
      * 注册的 bean 会自动进行依赖注入。
+     * <p>
+     * <b>注意：</b>{@code registerSingleton} 不会触发 {@code init} 方法，
+     * {@code @PostConstruct} 不会执行，需要手动调用 {@code InitializingBean} 契约。
      *
      * @param <T>      Bean 类型
      * @param beanName Bean 名称
      * @param bean     Bean 实例
+     * @throws ToolException 如果 beanName 已被占用
      */
     public static <T> void registerBean(String beanName, T bean) {
         ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
+        if (factory.containsSingleton(beanName)) {
+            throw new ToolException(EmojiSymbol.CORE, "Bean 名称已存在：" + beanName);
+        }
+        if (factory.containsBeanDefinition(beanName)) {
+            throw new ToolException(EmojiSymbol.CORE, "Bean 定义已存在，请先 unregisterBean：" + beanName);
+        }
         factory.autowireBean(bean);
         factory.registerSingleton(beanName, bean);
     }

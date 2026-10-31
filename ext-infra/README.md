@@ -12,7 +12,13 @@
 |------|------|----------|
 | [ext-redis](ext-redis/README.md) | Redis 操作封装 | ext-core, ext-json, spring-data-redis |
 | [ext-cache](ext-cache/README.md) | 多级缓存支持 | ext-redis, caffeine |
+| [ext-postgres](ext-postgres/SPEC.md) | PostgreSQL 集成，缓存/队列/发布订阅/限流 | ext-core, ext-json, postgresql |
+| [ext-lock](ext-lock/SPEC.md) | 分布式锁，注解式加锁（Redis / PostgreSQL 咨询锁） | ext-core；可选 ext-redis、ext-postgres |
+| [ext-jdbc](ext-jdbc/SPEC.md) | JdbcClient 增强，注解驱动的轻量 DAO | ext-core, spring-boot-starter-jdbc |
+| [ext-job](ext-job/SPEC.md) | 任务调度，基于 PostgreSQL 队列 | ext-postgres |
 | [ext-mail](ext-mail/README.md) | 邮件发送服务 | spring-boot-starter-mail |
+| ext-i18n | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |
+| ext-oss | 对象存储，本地 / S3 / SFTP 三种后端 | ext-core；可选 AWS SDK v2、sshd-sftp |
 
 ## 依赖关系
 

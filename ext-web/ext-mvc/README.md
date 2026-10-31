@@ -29,13 +29,13 @@ implementation("ext.library:ext-mvc")
 |------|------|
 | ext-core | 核心工具类 |
 | ext-json | JSON 处理 |
+| ext-servlet | servlet 基座（`R`、分页模型、`ServletUtil`、错误信封） |
 | spring-boot-starter-web | Spring MVC |
 
 ## 功能特性
 
-- 统一响应封装（R 类）
-- 分页查询支持（PageParam、PageResult）
-- 全局异常处理
+- 统一出参：异常处理与 REST 响应包装（信封与模型来自 ext-servlet）
+- 分页参数解析（`PageQuery`，模型来自 ext-servlet）
 - 参数校验增强
 - 请求/响应拦截器
 - Trace 追踪
@@ -55,12 +55,8 @@ implementation("ext.library:ext-mvc")
 
 ### 响应类
 
-| 类名 | 说明 |
-|------|------|
-| `R<T>` | 统一响应封装类 |
-| `PageResult<T>` | 分页结果封装 |
-| `PageParam` | 分页参数 |
-| `SelectData` | 下拉选择数据 |
+`R` / `PageQuery` / `PageResult` / `SelectData` 定义在 [ext-servlet](../../ext-common/ext-servlet/README.md)，
+本模块不重复定义；异常处理器只用基座的 `ErrorEnvelope` / `ErrorLog` 组装信封与日志。
 
 ### 处理器
 
@@ -92,6 +88,17 @@ implementation("ext.library:ext-mvc")
 
 ### 统一响应
 
+响应体字段划分：`status`（HTTP 状态码）、`code`（业务码，`0` 表示成功）、`msg`（提示消息）、`data`（业务数据）。
+
+```json
+{
+  "status": 200,
+  "code": 0,
+  "msg": "OK",
+  "data": {}
+}
+```
+
 ```java
 @RestController
 @RequestMapping("/api")
@@ -104,7 +111,8 @@ public class DemoController {
 
     @GetMapping("/fail")
     public R<Void> fail() {
-        return R.fail("操作失败");
+        // 业务失败：HTTP 200 + 业务码
+        return R.failed(BizCode.OPERATION_NOT_ALLOWED, "操作失败");
     }
 
     @GetMapping("/data")
@@ -118,7 +126,7 @@ public class DemoController {
 
 ```java
 @PostMapping("/list")
-public R<PageResult<UserDTO>> list(@RequestBody PageParam param) {
+public R<PageResult<UserDTO>> list(@RequestBody PageQuery param) {
     PageResult<UserDTO> result = userService.pageQuery(param);
     return R.ok(result);
 }

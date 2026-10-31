@@ -35,7 +35,7 @@ public final class ValidatorUtil {
      *
      * @return 是否为手机号码（中国）
      */
-    public static boolean isMobile(CharSequence value) {
+    public static boolean isMobile(@Nullable CharSequence value) {
         return isMatchRegex(PatternPool.MOBILE, value);
     }
 
@@ -46,7 +46,7 @@ public final class ValidatorUtil {
      *
      * @return 是否为汉字
      */
-    public static boolean isChinese(CharSequence value) {
+    public static boolean isChinese(@Nullable CharSequence value) {
         return isMatchRegex(PatternPool.CHINESE, value);
     }
 
@@ -57,7 +57,7 @@ public final class ValidatorUtil {
      *
      * @return 是否是字母（包括大写和小写字母）
      */
-    public static boolean isWord(CharSequence value) {
+    public static boolean isWord(@Nullable CharSequence value) {
         return isMatchRegex(PatternPool.WORD, value);
     }
 
@@ -82,7 +82,7 @@ public final class ValidatorUtil {
      *
      * @return 是否为邮政编码（中国）
      */
-    public static boolean isZipCode(CharSequence value) {
+    public static boolean isZipCode(@Nullable CharSequence value) {
         return isMatchRegex(PatternPool.ZIP_CODE, value);
     }
 

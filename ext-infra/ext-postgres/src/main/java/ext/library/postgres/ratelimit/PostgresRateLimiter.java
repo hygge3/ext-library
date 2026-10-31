@@ -25,7 +25,7 @@ public class PostgresRateLimiter {
     public PostgresRateLimiter(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
-        this.tableName = properties.getRateLimitTableName();
+        this.tableName = properties.getRatelimit().getTableName();
     }
 
     /**
@@ -36,7 +36,7 @@ public class PostgresRateLimiter {
      * @return 限流结果
      */
     public RateLimitResult checkAndIncrement(String key) {
-        return checkAndIncrement(key, properties.getDefaultRateLimit(), properties.getRateLimitWindow());
+        return checkAndIncrement(key, properties.getRatelimit().getDefaultLimit(), properties.getRatelimit().getWindow());
     }
 
     /**
@@ -91,7 +91,7 @@ public class PostgresRateLimiter {
      * @return 是否允许
      */
     public boolean isAllowed(String key) {
-        return isAllowed(key, properties.getDefaultRateLimit(), properties.getRateLimitWindow());
+        return isAllowed(key, properties.getRatelimit().getDefaultLimit(), properties.getRatelimit().getWindow());
     }
 
     /**
@@ -121,7 +121,7 @@ public class PostgresRateLimiter {
         return jdbcClient.sql("""
                 SELECT request_count FROM %s
                 WHERE key = ? AND window_start > NOW() - ?::interval
-                """.formatted(tableName)).param(key).param(properties.getRateLimitWindow().toSeconds() + " seconds").query(Integer.class).optional().orElse(0);
+                """.formatted(tableName)).param(key).param(properties.getRatelimit().getWindow().toSeconds() + " seconds").query(Integer.class).optional().orElse(0);
     }
 
     /**
@@ -157,10 +157,10 @@ public class PostgresRateLimiter {
     /**
      * 定时清理过期的限流记录
      */
-    @Scheduled(fixedDelayString = "#{@postgresProperties.rateLimitWindow.toMillis() * 2}")
+    @Scheduled(fixedDelayString = "#{@postgresProperties.ratelimit.window.toMillis() * 2}")
     public void cleanup() {
         // 清理超过两个窗口周期的旧记录
-        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE window_start < NOW() - ?::interval").param((properties.getRateLimitWindow().toSeconds() * 2) + " seconds").update();
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE window_start < NOW() - ?::interval").param((properties.getRatelimit().getWindow().toSeconds() * 2) + " seconds").update();
         if (deleted > 0) {
             Logs.debug(EmojiSymbol.POSTGRES, "清理过期限流记录：{} 条", deleted);
         }
@@ -172,6 +172,6 @@ public class PostgresRateLimiter {
      * @return 当前有效的限流记录数
      */
     public long count() {
-        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE window_start > NOW() - ?::interval").param(properties.getRateLimitWindow().toSeconds() + " seconds").query(Long.class).single();
+        return jdbcClient.sql("SELECT COUNT(*) FROM " + tableName + " WHERE window_start > NOW() - ?::interval").param(properties.getRatelimit().getWindow().toSeconds() + " seconds").query(Long.class).single();
     }
 }

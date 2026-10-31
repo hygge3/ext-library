@@ -4,6 +4,7 @@ import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.DateUtil;
 import ext.library.web.handler.GlobalExceptionHandler;
 import ext.library.web.handler.GlobalResponseHandler;
+import ext.library.web.filter.ContentCachingFilter;
 import ext.library.web.interceptor.WebInvokeTimeInterceptor;
 import ext.library.web.properties.WebMvcProperties;
 import ext.library.web.resolver.body.BodyParamArgumentResolver;
@@ -105,6 +106,19 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         argumentResolvers.add(new BodyParamArgumentResolver());
         argumentResolvers.add(new PageQueryArgumentResolver());
         WebMvcConfigurer.super.addArgumentResolvers(argumentResolvers);
+    }
+
+    /**
+     * 注册请求体缓存过滤器（仅开启调用时间统计时需要）
+     *
+     * @return FilterRegistrationBean
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = WebMvcProperties.PREFIX, name = "invoke-time-enabled", havingValue = "true")
+    public FilterRegistrationBean<@NonNull ContentCachingFilter> contentCachingFilterRegistrationBean() {
+        FilterRegistrationBean<@NonNull ContentCachingFilter> bean = new FilterRegistrationBean<>(new ContentCachingFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 900);
+        return bean;
     }
 
     /**

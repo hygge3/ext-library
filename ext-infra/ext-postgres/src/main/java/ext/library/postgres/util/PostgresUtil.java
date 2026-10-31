@@ -8,6 +8,7 @@ import ext.library.postgres.queue.PostgresQueue;
 import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.ratelimit.RateLimitResult;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -47,7 +48,7 @@ public final class PostgresUtil {
      *
      * @return 缓存值，不存在返回 null
      */
-    public static <T> T cacheGet(String key, Class<T> clazz) {
+    public static <T> T cacheGet(String key, Type clazz) {
         return getCacheManager().get(key, clazz);
     }
 
@@ -103,6 +104,18 @@ public final class PostgresUtil {
      */
     public static boolean cacheExists(String key) {
         return getCacheManager().exists(key);
+    }
+
+    /**
+     * 获取缓存的剩余有效期
+     *
+     * @param key 缓存键
+     *
+     * @return 剩余有效期；{@code null} 表示 key 不存在或永不过期
+     */
+    public static Duration cacheTtl(String key) {
+        long ttl = getCacheManager().ttl(key);
+        return ttl > 0 ? Duration.ofSeconds(ttl) : null;
     }
 
     /**

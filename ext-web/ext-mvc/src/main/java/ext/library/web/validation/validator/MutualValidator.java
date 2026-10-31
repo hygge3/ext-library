@@ -24,15 +24,15 @@ public class MutualValidator implements ConstraintValidator<Mutual, Object> {
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         // 相互关系逻辑，多个字段必须有一个有值
-        boolean isMutualValueExist = false;
+        Map<String, Object> objectMap = BeanUtil.beanToMap(value);
         for (String mutual : mutuals) {
-            Map<String, Object> objectMap = BeanUtil.beanToMap(value);
-            if (objectMap.containsKey(mutual)) {
-                isMutualValueExist = true;
+            // 判的是「有值」不是「字段存在」：beanToMap 对每个属性无条件 put，containsKey 恒为真
+            if (objectMap.get(mutual) != null) {
+                return true;
             }
         }
         // 不满足相互关系
-        return isMutualValueExist;
+        return false;
     }
 
 }

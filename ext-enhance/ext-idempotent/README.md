@@ -27,14 +27,15 @@ implementation("ext.library:ext-idempotent")
 
 | 依赖 | 说明 |
 |------|------|
-| ext-redis | Redis 存储模式 |
-| caffeine | 可选，内存存储模式 |
+| ext-cache | 幂等键的实际存储（本模块必备） |
+| ext-redis | 可选，让 ext-cache 走 Redis 后端 |
+| ext-postgres | 可选，让 ext-cache 走 PostgreSQL 后端 |
 
 ## 功能特性
 
 - 基于注解的幂等性控制
 - 支持 SpEL 表达式
-- 内存和 Redis 两种存储模式
+- 存储后端跟随 ext-cache（Caffeine / Redis / PostgreSQL），不再自带 KeyStore
 - 可自定义幂等 Key 生成器
 - 灵活的过期策略
 
@@ -42,7 +43,7 @@ implementation("ext.library:ext-idempotent")
 
 | 配置项 | 默认值 | 说明 |
 |-------|-------|------|
-| ext.idempotent.key-store-type | MEMORY | MEMORY (内存) / REDIS |
+| ext.cache.cache-storage | AUTO | 幂等键使用的缓存后端：AUTO / CAFFEINE / REDIS / POSTGRES / L2（AUTO 在引了 ext-redis 或 ext-postgres 时解析为 L2） |
 
 ## 注解属性
 
@@ -55,6 +56,7 @@ implementation("ext.library:ext-idempotent")
 | message | 重复请求，请稍后重试 | 重复请求提示信息 |
 | removeKeyWhenFinished | false | 业务完成后是否清除 Key |
 | removeKeyWhenError | false | 异常时是否清除 Key |
+| cacheName | idempotent | 幂等键写入的缓存名，可用于隔离不同业务 |
 
 ## 使用示例
 
@@ -94,7 +96,7 @@ public R<Void> pay(@RequestParam Long userId, @RequestBody PaymentDTO dto) {
 public class IPKeyGenerator extends DefaultIdempotentKeyGenerator {
     @Override
     public String generate(JoinPoint joinPoint, Idempotent annotation) {
-        String clientIP = ServletUtil.getClientIp();
+        String clientIP = ServletUtil.getIpAddr();
         return clientIP + ":" + super.generate(joinPoint, annotation);
     }
 }

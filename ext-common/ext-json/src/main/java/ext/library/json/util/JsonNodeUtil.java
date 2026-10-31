@@ -9,7 +9,6 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * JsonNode 工具类
@@ -97,8 +96,11 @@ public final class JsonNodeUtil {
      * @return JsonNode 节点
      */
     public static JsonNode parseNode(String json) {
+        if (json == null) {
+            throw new ToolException(EmojiSymbol.JSON, "json is null");
+        }
         try {
-            return JsonUtil.getMapper().readTree(Objects.requireNonNull(json, "json is null"));
+            return JsonUtil.getMapper().readTree(json);
         } catch (JacksonException e) {
             throw new ToolException(EmojiSymbol.JSON, e);
         }

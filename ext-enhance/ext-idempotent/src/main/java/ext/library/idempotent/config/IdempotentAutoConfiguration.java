@@ -1,28 +1,25 @@
 package ext.library.idempotent.config;
 
+import ext.library.cache.strategy.CacheStrategy;
 import ext.library.idempotent.DefaultKeyGenerator;
 import ext.library.idempotent.IdempotentAspect;
 import ext.library.idempotent.KeyGenerator;
-import ext.library.idempotent.store.KeyStore;
-import ext.library.idempotent.store.MemoryKeyStore;
-import ext.library.idempotent.store.PostgresKeyStore;
-import ext.library.idempotent.store.RedisKeyStore;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ClassUtils;
 
 /**
  * 幂等模块自动配置
+ * <p>
+ * 幂等键的存储完全交给 [ext-cache]：本模块只依赖一个 {@link CacheStrategy} Bean，因此存储后端
+ * （Caffeine / Redis / PostgreSQL）由 {@code ext.cache.cache-storage} 统一决定，不再自带 KeyStore
+ * 与后端探测逻辑。
+ * <p>
+ * 没有 {@code CacheStrategy} 时启动直接失败（缺依赖是配置错误，不该静默降级成另一个后端）。
  */
-@AutoConfiguration
-@EnableConfigurationProperties(IdempotentProperties.class)
+@AutoConfiguration(afterName = "ext.library.cache.config.CacheAutoConfiguration")
 public class IdempotentAutoConfiguration {
 
     /**
@@ -38,103 +35,19 @@ public class IdempotentAutoConfiguration {
 
     /**
      * 幂等切面
+     * <p>
+     * 两级缓存同样可用：{@code L2Strategy.putIfAbsent} 以分布式层为唯一裁决者，
+     * 本地层只在写入成功后回填，不会出现「本地没命中、远端已存在」的分裂判定。
      *
-     * @param keyStore     Key 存储器
-     * @param keyGenerator Key 生成器
+     * @param cacheStrategy 缓存策略
+     * @param keyGenerator  Key 生成器
      *
      * @return 幂等切面实例
      */
     @Bean
-    public IdempotentAspect idempotentAspect(KeyStore keyStore, KeyGenerator keyGenerator) {
-        Logs.info(EmojiSymbol.IDEMPOTENT, "载入模块：幂等（KeyStore: {}）", keyStore.getClass().getSimpleName());
-        return new IdempotentAspect(keyStore, keyGenerator);
-    }
-
-    // ──────────── 显式配置 ────────────
-
-    /**
-     * 显式配置：Redis 存储
-     * <p>
-     * 当 {@code ext.idempotent.key-store-type=REDIS} 且类路径中存在 {@code ext-redis} 依赖时生效。
-     */
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(name = "ext.library.redis.util.RedisUtil")
-    @ConditionalOnProperty(prefix = IdempotentProperties.PREFIX, name = "key-store-type", havingValue = "REDIS")
-    static class RedisKeyStoreConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(KeyStore.class)
-        public KeyStore idempotentKeyStore() {
-            return new RedisKeyStore();
-        }
-
-    }
-
-    /**
-     * 显式配置：PostgreSQL 存储
-     * <p>
-     * 当 {@code ext.idempotent.key-store-type=POSTGRES} 且类路径中存在 {@code ext-postgres} 依赖时生效。
-     */
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(name = "ext.library.postgres.util.PostgresUtil")
-    @ConditionalOnProperty(prefix = IdempotentProperties.PREFIX, name = "key-store-type", havingValue = "POSTGRES")
-    static class PostgresKeyStoreConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(KeyStore.class)
-        public KeyStore idempotentKeyStore() {
-            return new PostgresKeyStore();
-        }
-
-    }
-
-    /**
-     * 显式配置：内存存储
-     * <p>
-     * 当 {@code ext.idempotent.key-store-type=MEMORY} 时生效。
-     */
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = IdempotentProperties.PREFIX, name = "key-store-type", havingValue = "MEMORY")
-    static class MemoryKeyStoreConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(KeyStore.class)
-        public KeyStore idempotentKeyStore() {
-            return new MemoryKeyStore();
-        }
-
-    }
-
-    // ──────────── 自动检测 ────────────
-
-    /**
-     * 自动检测 KeyStore 实现
-     * <p>
-     * 当 {@code ext.idempotent.key-store-type} 未配置或显式设置为 {@code AUTO} 时生效，
-     * 根据类路径中可用的依赖自动选择存储实现，优先级：Redis > PostgreSQL > Memory。
-     */
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(
-            prefix = IdempotentProperties.PREFIX,
-            name = "key-store-type",
-            havingValue = "AUTO",
-            matchIfMissing = true
-    )
-    static class AutoDetectKeyStoreConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(KeyStore.class)
-        public KeyStore idempotentKeyStore() {
-            ClassLoader cl = AutoDetectKeyStoreConfiguration.class.getClassLoader();
-            if (ClassUtils.isPresent("ext.library.redis.util.RedisUtil", cl)) {
-                return new RedisKeyStore();
-            }
-            if (ClassUtils.isPresent("ext.library.postgres.util.PostgresUtil", cl)) {
-                return new PostgresKeyStore();
-            }
-            return new MemoryKeyStore();
-        }
-
+    public IdempotentAspect idempotentAspect(CacheStrategy cacheStrategy, KeyGenerator keyGenerator) {
+        Logs.info(EmojiSymbol.IDEMPOTENT, "载入模块：幂等（存储: {}）", cacheStrategy.getClass().getSimpleName());
+        return new IdempotentAspect(cacheStrategy, keyGenerator);
     }
 
 }

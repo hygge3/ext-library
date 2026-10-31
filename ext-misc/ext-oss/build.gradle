@@ -1,6 +1,0 @@
-description = '对象存储，支持本地文件系统与 S3 协议'
-
-dependencies {
-    api project(':ext-common:ext-core')
-    api 'io.minio:minio'
-}

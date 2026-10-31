@@ -128,13 +128,13 @@ ext.library.tool
 
 ### 异常体系 (exception)
 
-| 类名 | 说明 |
-|------|------|
-| `ResponseCode` | 响应码接口 |
-| `BizCode` | 业务错误码枚举（按模块分段 600-699） |
-| `BizException` | 业务异常（携带错误码） |
-| `ExtException` | 框架内部异常（自动添加模块标识） |
-| `ToolException` | 工具异常 |
+| 类名            | 说明                                                                                                                                    |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `ResponseCode`  | 响应码接口（`getCode()` / `getMsg()`）                                                                                                  |
+| `BizCode`       | 业务错误码枚举（「大类+序号」4 位编码：1xxx 参数 / 2xxx 认证 / 3xxx 资源 / 4xxx 业务 / 5xxx 系统 / 6xxx 外部，支持 `of` / `find` 反查） |
+| `BizException`  | 业务异常（携带错误码，自身也实现 `ResponseCode`）                                                                                       |
+| `ExtException`  | 框架内部异常（自动添加 `[module]` 前缀，可 `getModule()`）                                                                              |
+| `ToolException` | 工具异常（`ExtException` 的薄封装）                                                                                                     |
 
 ## 使用示例
 
@@ -194,6 +194,33 @@ TreeBuilder<Menu, Long> builder = TreeBuilder.create(
 );
 List<Menu> tree = builder.buildTree(menuList);
 ```
+
+### 图片读写
+
+```java
+// 写：格式不受支持时抛 ToolException，不再静默返回 false 丢数据
+byte[] png = ImageUtil.writeAsBytes(image, "png");
+
+// 读：无法识别的格式时抛 ToolException，不再返回 null 让调用方空指针
+BufferedImage img = ImageUtil.read(new ByteArrayInputStream(png));
+
+// 调用前先探测，避免靠异常兜底
+if (ImageUtil.isReadable("webp")) { ... }
+ImageUtil.readableFormats(); // => [bmp, gif, jpeg, jpg, png, tif, tiff, wbmp, webp]
+```
+
+#### 关于 WebP
+
+JDK 内置 ImageIO 只支持 JPEG / PNG / GIF / BMP / WBMP / TIFF，**不含 WebP**。
+需要 WebP 时引入纯 Java 插件即可，它通过 SPI 自动注册，无需任何代码改动（版本由 `ext-bom` 统一管理）：
+
+```groovy
+implementation("com.twelvemonkeys.imageio:imageio-webp")
+```
+
+该插件为 **只读**（[TwelveMonkeys #659](https://github.com/haraldk/TwelveMonkeys/issues/659) 仍 open），
+所以 `ImageUtil.isWritable("webp")` 恒为 `false`，写出 WebP 会抛异常。
+若要写 WebP，需自行接入 `org.sejda.imageio:webp-imageio`（JNI，仅 x86_64）等第三方实现。
 
 ### 版本号比较
 

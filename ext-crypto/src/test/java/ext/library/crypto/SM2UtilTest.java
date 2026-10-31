@@ -20,6 +20,17 @@ class SM2UtilTest {
     }
 
     @Test
+    void encryptAndDecryptChinese() {
+        // processBlock 的第三个参数是字节数，按字符数传会只加密前一段，解出来是乱码
+        SM2KeyPair keyPair = SM2Util.generateKeyPair();
+        String plainText = "你好世界，这是一段中文明文";
+
+        String encrypted = SM2Util.encrypt(keyPair.publicKey(), plainText);
+
+        assertEquals(plainText, SM2Util.decrypt(keyPair.privateKey(), encrypted));
+    }
+
+    @Test
     void signAndVerify() {
         SM2KeyPair keyPair = SM2Util.generateKeyPair();
         String plainText = "Data to sign";

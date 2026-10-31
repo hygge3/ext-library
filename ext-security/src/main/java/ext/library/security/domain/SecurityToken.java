@@ -70,6 +70,21 @@ public class SecurityToken implements Serializable {
     public SecurityToken() {
     }
 
+    /**
+     * 深拷贝
+     * <p>
+     * Caffeine 与 L2 的本地层返回的是缓存里的同一个引用，调用方就地改写会直接污染缓存对象，
+     * 所以对外一律给副本。
+     *
+     * @return 副本
+     */
+    public SecurityToken copy() {
+        SecurityToken copy = new SecurityToken(token, loginId, deviceType, timeout, activityTime, activityTimeout,
+                state, createTime, updateTime);
+        copy.tokenMountData.putAll(tokenMountData);
+        return copy;
+    }
+
     public SecurityToken(String token, String loginId, String deviceType, Long timeout,
                          LocalDateTime activityTime, Long activityTimeout, TokenState state,
                          LocalDateTime createTime, LocalDateTime updateTime) {

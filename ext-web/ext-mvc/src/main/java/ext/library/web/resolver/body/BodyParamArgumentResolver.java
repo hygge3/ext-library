@@ -1,6 +1,7 @@
 package ext.library.web.resolver.body;
 
 import ext.library.json.util.JsonNodeUtil;
+import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.util.ObjectUtil;
@@ -54,9 +55,10 @@ public class BodyParamArgumentResolver implements HandlerMethodArgumentResolver 
 
         Class<?> parameterType = parameter.getParameterType();
 
-        JsonNode jsonNode = JsonNodeUtil.toNode(request.getReader());
+        // 直接解析请求体：{@code JsonNodeUtil.toNode(Object)} 是值序列化，把 Reader 当对象序列化只会得到 {}
+        JsonNode jsonNode = JsonUtil.getMapper().readTree(request.getReader());
 
-        if (jsonNode.isNull() || jsonNode.isEmpty()) {
+        if (jsonNode == null || jsonNode.isMissingNode() || jsonNode.isNull() || jsonNode.isEmpty()) {
             if (param.required()) {
                 throw new MissingServletRequestParameterException(paramName, parameter.getNestedParameterType().getSimpleName());
             } else if (Objects.equals(ValueConstants.DEFAULT_NONE, param.defaultValue())) {

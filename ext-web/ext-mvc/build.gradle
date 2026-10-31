@@ -3,6 +3,7 @@ description = 'MVC 支持 (含 OpenAPI 文档)'
 dependencies {
     api project(':ext-common:ext-core')
     api project(':ext-common:ext-json')
+    api project(':ext-common:ext-servlet')
     api 'io.swagger.core.v3:swagger-annotations'
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
     api 'org.springframework.boot:spring-boot-starter-webmvc'

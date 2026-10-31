@@ -1,14 +1,15 @@
 package ext.library.redis.config;
 
+import ext.library.core.pubsub.PubSub;
 import ext.library.redis.prefix.DefaultRedisPrefixConverter;
 import ext.library.redis.prefix.RedisPrefixConverter;
 import ext.library.redis.properties.RedisProperties;
+import ext.library.redis.pubsub.RedisPubSub;
 import ext.library.redis.serialize.PrefixJdkRedisSerializer;
 import ext.library.redis.serialize.PrefixStringRedisSerializer;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
@@ -28,7 +29,6 @@ import tools.jackson.databind.json.JsonMapper;
 public class RedisAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean
     public StringRedisTemplate stringRedisTemplate(RedisPrefixConverter prefixConverter, RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate template = new StringRedisTemplate();
@@ -39,14 +39,12 @@ public class RedisAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RedisProperties.class)
-    @ConditionalOnMissingBean(RedisPrefixConverter.class)
+    @ConditionalOnMissingBean
     public RedisPrefixConverter redisPrefixConverter(RedisProperties redisProperties) {
         return new DefaultRedisPrefixConverter(redisProperties);
     }
 
     @Bean
-    @ConditionalOnBean(RedisPrefixConverter.class)
     @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(RedisPrefixConverter prefixConverter, JsonMapper jsonMapper, RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
@@ -68,6 +66,16 @@ public class RedisAutoConfiguration {
         RedisMessageListenerContainer result = new RedisMessageListenerContainer();
         result.setConnectionFactory(redisConnectionFactory);
         return result;
+    }
+
+    /**
+     * 发布订阅实现，实现 {@link PubSub} SPI，供 ext-realtime 等模块注入使用
+     */
+    @Bean
+    @ConditionalOnMissingBean(PubSub.class)
+    public RedisPubSub redisPubSub(RedisMessageListenerContainer redisMessageListenerContainer) {
+        Logs.info(EmojiSymbol.REDIS, "载入模块：Redis 发布订阅");
+        return new RedisPubSub(redisMessageListenerContainer);
     }
 
 }

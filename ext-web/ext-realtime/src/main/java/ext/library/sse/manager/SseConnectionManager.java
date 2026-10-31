@@ -41,11 +41,11 @@ public class SseConnectionManager {
         emitters.put(token, emitter);
 
         // 当 emitter 完成、超时或发生错误时，从映射表中移除对应的 token
-        emitter.onCompletion(() -> emitters.remove(token));
-        emitter.onTimeout(() -> emitters.remove(token));
+        emitter.onCompletion(() -> removeEmitter(userId, token));
+        emitter.onTimeout(() -> removeEmitter(userId, token));
         emitter.onError(e -> {
             Logs.warn(EmojiSymbol.SSE, "SSE 连接异常，userId:{}, token:{}, error:{}", userId, token, e.getMessage());
-            emitters.remove(token);
+            removeEmitter(userId, token);
         });
 
         // 注册到心跳管理器
@@ -57,7 +57,7 @@ public class SseConnectionManager {
             emitter.send(SseEmitter.event().comment("connected").data("connected"));
         } catch (IOException e) {
             Logs.warn(EmojiSymbol.SSE, "SSE 连接初始化失败，userId:{}, token:{}, error:{}", userId, token, e.getMessage());
-            emitters.remove(token);
+            removeEmitter(userId, token);
         }
         return emitter;
     }
@@ -80,13 +80,26 @@ public class SseConnectionManager {
             } catch (Exception e) {
                 Logs.warn(EmojiSymbol.SSE, "SSE 断开连接异常，userId:{}, token:{}, error:{}", userId, token, e.getMessage());
             } finally {
-                emitters.remove(token);
+                removeEmitter(userId, token);
                 // 从心跳管理器移除
                 if (heartbeatManager != null) {
                     heartbeatManager.unregister(userId, token);
                 }
             }
         }
+    }
+
+    /**
+     * 移除某个连接，内层空了把外层也删掉
+     * <p>
+     * 只删内层时外层 entry 永远不会消失，{@code hasConnection} 就永远为 true，
+     * 跨实例消息会被当成「本机有连接」而不再转发，等于消息丢失。
+     */
+    private static void removeEmitter(String userId, String token) {
+        userTokenEmitters.computeIfPresent(userId, (_, emitters) -> {
+            emitters.remove(token);
+            return emitters.isEmpty() ? null : emitters;
+        });
     }
 
     /**

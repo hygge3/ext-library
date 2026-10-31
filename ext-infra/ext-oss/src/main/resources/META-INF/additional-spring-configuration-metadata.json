@@ -1,0 +1,22 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "ext.oss.type",
+      "values": [
+        {
+          "value": "LOCAL",
+          "description": "本地文件系统"
+        },
+        {
+          "value": "S3",
+          "description": "S3 协议，对接 MinIO、Ceph、AWS S3、Cloudflare R2、阿里云 OSS 等"
+        },
+        {
+          "value": "SFTP",
+          "description": "SSH/SFTP 远端目录，远端目录当桶用"
+        }
+      ]
+    }
+  ]
+}

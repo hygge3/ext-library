@@ -24,16 +24,16 @@ public class ExclusionValidator implements ConstraintValidator<Exclusion, Object
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         // 互斥关系逻辑，多个字段只能其中一个有值
-        boolean isExclusionValueExist = false;
         Map<String, Object> objectMap = BeanUtil.beanToMap(value);
+        boolean isExclusionValueExist = false;
         for (String exclusion : exclusions) {
-            if (objectMap.containsKey(exclusion)) {
-                if (!isExclusionValueExist) {
-                    isExclusionValueExist = true;
-                } else {
+            // 判的是「有值」不是「字段存在」：beanToMap 对每个属性无条件 put，containsKey 恒为真
+            if (objectMap.get(exclusion) != null) {
+                if (isExclusionValueExist) {
                     // 不满足互斥关系
                     return false;
                 }
+                isExclusionValueExist = true;
             }
         }
 

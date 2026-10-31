@@ -26,6 +26,13 @@ public record RandomCaptchaDraw(int codeSize) implements CaptchaDraw {
         this(defaultCodeSize);
     }
 
+    public RandomCaptchaDraw {
+        // 配置写错时不至于生成空验证码或抛 NegativeArraySizeException
+        if (codeSize < 1) {
+            codeSize = defaultCodeSize;
+        }
+    }
+
     /**
      * 生成验证码字符串
      *

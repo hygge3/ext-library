@@ -9,7 +9,7 @@ import java.io.Serial;
  * <p>
  * 用于框架各模块抛出的内部异常，自动添加模块标识前缀，便于定位问题来源。
  * <p>
- * 消息格式：{@code [module] message}
+ * 消息格式：{@code [module] message}，可通过 {@link #getModule()} 获取原始模块标识。
  *
  * @since 2025.01.01
  */
@@ -17,6 +17,9 @@ public class ExtException extends BizException {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    /** 模块标识 */
+    private final String module;
 
     /**
      * 使用模块标识和格式化消息构造异常
@@ -27,6 +30,7 @@ public class ExtException extends BizException {
      */
     public ExtException(String module, String message, Object... args) {
         super(formatMessage(module, StringUtil.format(message, args)));
+        this.module = module;
     }
 
     /**
@@ -37,6 +41,7 @@ public class ExtException extends BizException {
      */
     public ExtException(String module, Throwable cause) {
         super(formatMessage(module, cause.getMessage()), cause);
+        this.module = module;
     }
 
     /**
@@ -49,6 +54,16 @@ public class ExtException extends BizException {
      */
     public ExtException(String module, Throwable cause, String message, Object... args) {
         super(formatMessage(module, StringUtil.format(message, args)), cause);
+        this.module = module;
+    }
+
+    /**
+     * 获取模块标识
+     *
+     * @return 模块标识
+     */
+    public String getModule() {
+        return module;
     }
 
     /**
@@ -56,6 +71,7 @@ public class ExtException extends BizException {
      *
      * @param module  模块标识
      * @param message 原始消息
+     *
      * @return 格式化后的消息
      */
     private static String formatMessage(String module, String message) {

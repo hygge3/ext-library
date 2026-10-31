@@ -1,5 +1,6 @@
 package ext.library.core.util;
 
+import ext.library.tool.exception.ToolException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -67,6 +68,60 @@ class BeanUtilTest {
         assertEquals("王五", user.getName(), "name 属性应正确设置");
         assertEquals(30, user.getAge(), "age 属性应正确设置");
         assertEquals("wangwu@example.com", user.getEmail(), "email 属性应正确设置");
+    }
+
+    @Test
+    @DisplayName("mapToBean 不清空 map 中不存在的属性（保留字段默认值）")
+    void testMapToBeanKeepsMissingProperties() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "赵六");
+
+        WithDefault result = BeanUtil.mapToBean(map, WithDefault.class);
+
+        assertEquals("赵六", result.getName(), "存在的 key 应被设置");
+        assertEquals(5, result.getCount(), "map 中不存在的属性应保留默认值，不能被 null 覆盖");
+        assertEquals("keep", result.getTag(), "map 中不存在的属性应保留默认值，不能被 null 覆盖");
+    }
+
+    @Test
+    @DisplayName("mapToBean 类型不匹配时抛出 ToolException 而非原始 IllegalArgumentException")
+    void testMapToBeanTypeMismatch() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "赵六");
+        map.put("count", "not-a-number");
+
+        assertThrows(ToolException.class, () -> BeanUtil.mapToBean(map, WithDefault.class),
+                "类型不匹配应被包装为 ToolException");
+    }
+
+    public static class WithDefault {
+        private String name;
+        private int count = 5;
+        private String tag = "keep";
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
     }
 
     // ========== beanToMap 测试 ==========
@@ -239,6 +294,31 @@ class BeanUtilTest {
         assertEquals(3, dtos.size(), "列表大小应相同");
         assertEquals("用户1", dtos.getFirst().getName(), "第一个元素 name 应正确");
         assertEquals(20, dtos.getFirst().getAge(), "第一个元素 age 应正确");
+        assertEquals("用户3", dtos.get(2).getName(), "第三个元素 name 应正确");
+    }
+
+    @Test
+    @DisplayName("列表转换返回可变列表")
+    void testConvertListIsMutable() {
+        List<UserDTO> dtos = BeanUtil.convert(List.of(new User("用户1", 20)), UserDTO.class);
+
+        dtos.add(new UserDTO());
+
+        assertEquals(2, dtos.size(), "转换结果必须可增删，不能是不可变列表");
+    }
+
+    @Test
+    @DisplayName("convert 支持 record 等无无参构造的目标类型")
+    void testConvertToRecord() {
+        User user = new User("记录", 20);
+
+        UserRecord record = BeanUtil.convert(user, UserRecord.class);
+
+        assertEquals("记录", record.name(), "应能转换到 record");
+        assertEquals(20, record.age(), "应能转换到 record");
+    }
+
+    public record UserRecord(String name, Integer age) {
     }
 
     @Test

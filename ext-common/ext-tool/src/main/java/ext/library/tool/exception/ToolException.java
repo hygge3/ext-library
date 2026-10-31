@@ -5,9 +5,10 @@ import java.io.Serial;
 /**
  * 工具异常
  * <p>
- * 用于工具类方法抛出的异常，自动添加模块标识前缀，便于定位问题来源。
+ * 工具类方法在无法继续执行时抛出的统一异常，继承自 {@link ExtException}，
+ * 同样会自动添加模块标识前缀，便于定位问题来源。
  * <p>
- * 消息格式：{@code [module] message}
+ * 消息格式：{@code [module] message}。
  *
  * @since 2025.01.01
  */

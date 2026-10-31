@@ -4,8 +4,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.function.Function;
 
 /**
@@ -27,7 +29,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的字符串值，输入为 null 时返回 {@code null}
      */
-    public static String getAsString(@Nullable Object obj) {
+    public static @Nullable String getAsString(@Nullable Object obj) {
         return obj == null ? null : obj.toString();
     }
 
@@ -59,17 +61,19 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Number 值，输入为 null 时返回 {@code null}
      */
-    public static Number getAsNumber(@Nullable Object obj) {
+    public static @Nullable Number getAsNumber(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
         return switch (obj) {
             case Number number -> number;
             case Boolean bool -> bool ? 1 : 0;
+            // 不能用 NumberFormat：它跟 JVM 默认 locale 走（-Duser.language=de 下 "1.5" 解析成 15），
+            // 而且 "123abc" 会被静默截断成 123
             case String s -> {
                 try {
-                    yield NumberFormat.getInstance().parse(s);
-                } catch (ParseException e) {
+                    yield new BigDecimal(s);
+                } catch (NumberFormatException _) {
                     throw new NumberFormatException(obj + " 不是有效的数字格式");
                 }
             }
@@ -105,7 +109,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Boolean 值，输入为 null 时返回 {@code null}
      */
-    public static Boolean getAsBoolean(@Nullable Object obj) {
+    public static @Nullable Boolean getAsBoolean(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -163,7 +167,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Byte 值，输入为 null 时返回 {@code null}
      */
-    public static Byte getAsByte(@Nullable Object obj) {
+    public static @Nullable Byte getAsByte(@Nullable Object obj) {
         return fromNumber(obj, Byte.class, Number::byteValue);
     }
 
@@ -213,7 +217,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Short 值，输入为 null 时返回 {@code null}
      */
-    public static Short getAsShort(@Nullable Object obj) {
+    public static @Nullable Short getAsShort(@Nullable Object obj) {
         return fromNumber(obj, Short.class, Number::shortValue);
     }
 
@@ -263,7 +267,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Integer 值，输入为 null 时返回 {@code null}
      */
-    public static Integer getAsInteger(@Nullable Object obj) {
+    public static @Nullable Integer getAsInteger(@Nullable Object obj) {
         return fromNumber(obj, Integer.class, Number::intValue);
     }
 
@@ -313,7 +317,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Long 值，输入为 null 时返回 {@code null}
      */
-    public static Long getAsLong(@Nullable Object obj) {
+    public static @Nullable Long getAsLong(@Nullable Object obj) {
         return fromNumber(obj, Long.class, Number::longValue);
     }
 
@@ -363,7 +367,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Float 值，输入为 null 时返回 {@code null}
      */
-    public static Float getAsFloat(@Nullable Object obj) {
+    public static @Nullable Float getAsFloat(@Nullable Object obj) {
         return fromNumber(obj, Float.class, Number::floatValue);
     }
 
@@ -413,7 +417,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 Double 值，输入为 null 时返回 {@code null}
      */
-    public static Double getAsDouble(@Nullable Object obj) {
+    public static @Nullable Double getAsDouble(@Nullable Object obj) {
         return fromNumber(obj, Double.class, Number::doubleValue);
     }
 
@@ -463,7 +467,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 BigInteger 值，输入为 null 时返回 {@code null}
      */
-    public static BigInteger getAsBigInteger(@Nullable Object obj) {
+    public static @Nullable BigInteger getAsBigInteger(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -500,7 +504,7 @@ public final class TypeCastUtil {
      *
      * @return 对象的 BigDecimal 值，输入为 null 时返回 {@code null}
      */
-    public static BigDecimal getAsBigDecimal(@Nullable Object obj) {
+    public static @Nullable BigDecimal getAsBigDecimal(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -528,6 +532,89 @@ public final class TypeCastUtil {
 
     // endregion
 
+    // region 时间与枚举
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalDateTime
+     * <p>
+     * 支持 JDBC 驱动返回的 {@link java.sql.Timestamp}（PgJDBC 的 timestamp 列就是它）
+     *
+     * @param obj 源对象
+     *
+     * @return LocalDateTime，输入为 null 时返回 {@code null}
+     */
+    public static LocalDateTime getAsLocalDateTime(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalDateTime dateTime -> dateTime;
+            case LocalDate date -> date.atStartOfDay();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime();
+            case java.util.Date date -> LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+            case String s -> LocalDateTime.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalDate
+     *
+     * @param obj 源对象
+     *
+     * @return LocalDate，输入为 null 时返回 {@code null}
+     */
+    public static LocalDate getAsLocalDate(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalDate date -> date;
+            case LocalDateTime dateTime -> dateTime.toLocalDate();
+            case java.sql.Date date -> date.toLocalDate();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime().toLocalDate();
+            case String s -> LocalDate.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取 LocalTime
+     *
+     * @param obj 源对象
+     *
+     * @return LocalTime，输入为 null 时返回 {@code null}
+     */
+    public static LocalTime getAsLocalTime(@Nullable Object obj) {
+        return switch (obj) {
+            case null -> null;
+            case LocalTime time -> time;
+            case LocalDateTime dateTime -> dateTime.toLocalTime();
+            case java.sql.Time time -> time.toLocalTime();
+            case java.sql.Timestamp timestamp -> timestamp.toLocalDateTime().toLocalTime();
+            case String s -> LocalTime.parse(s);
+            default -> throw new UnsupportedOperationException("不支持的类型: " + obj.getClass());
+        };
+    }
+
+    /**
+     * 以 null 安全的方式从 Object 获取枚举
+     *
+     * @param obj 源对象
+     * @param clz 枚举类型
+     * @param <E> 枚举类型
+     *
+     * @return 枚举值，输入为 null 时返回 {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <E extends Enum<E>> E getAsEnum(@Nullable Object obj, Class<E> clz) {
+        if (obj == null) {
+            return null;
+        }
+        if (clz.isInstance(obj)) {
+            return clz.cast(obj);
+        }
+        return (E) Enum.valueOf((Class) clz, obj.toString());
+    }
+
+    // endregion
+
     // region cast
 
     /**
@@ -539,7 +626,7 @@ public final class TypeCastUtil {
      * @return 转换后的值，如果 obj 为 null 则返回 null
      */
     @SuppressWarnings("unchecked")
-    public static <R> R cast(@Nullable Object obj, Class<R> clz) {
+    public static <R> @Nullable R cast(@Nullable Object obj, Class<R> clz) {
         if (obj == null) {
             return null;
         }
@@ -568,6 +655,14 @@ public final class TypeCastUtil {
             return (R) getAsBigDecimal(obj);
         } else if (Number.class.isAssignableFrom(clz)) {
             return (R) getAsNumber(obj);
+        } else if (clz.isEnum()) {
+            return (R) getAsEnum(obj, clz.asSubclass(Enum.class));
+        } else if (LocalDateTime.class.equals(clz)) {
+            return (R) getAsLocalDateTime(obj);
+        } else if (LocalDate.class.equals(clz)) {
+            return (R) getAsLocalDate(obj);
+        } else if (LocalTime.class.equals(clz)) {
+            return (R) getAsLocalTime(obj);
         }
         throw new UnsupportedOperationException("不支持的目标类型: " + clz);
     }
@@ -612,7 +707,7 @@ public final class TypeCastUtil {
     /**
      * 通用的数值类型转换：从 {@link #getAsNumber(Object)} 结果中提取目标类型
      */
-    private static <T extends Number> T fromNumber(@Nullable Object obj, Class<T> type, Function<Number, T> converter) {
+    private static <T extends Number> @Nullable T fromNumber(@Nullable Object obj, Class<T> type, Function<Number, T> converter) {
         Number answer = getAsNumber(obj);
         if (answer == null) {
             return null;

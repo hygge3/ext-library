@@ -18,7 +18,7 @@
         <dependency>
             <groupId>ext.library</groupId>
             <artifactId>ext-bom</artifactId>
-            <version>4.1.0</version>
+            <version>2.1.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -48,8 +48,13 @@
 | 模块 | 说明 |
 |------|------|
 | ext-tool | 通用工具类库 |
-| ext-core | 核心功能模块 |
+| ext-core | 核心功能模��� |
 | ext-json | JSON 处理工具 |
+| ext-servlet | servlet 基座（统一响应体 / 分页 / 错误信封） |
+| ext-http | HTTP 客户端��装 |
+| ext-useragent | User-Agent 解析 |
+| ext-qrcode | 二维码生成与识别 |
+| ext-logback | 日志脱敏 |
 
 ### ext-infra 层
 
@@ -58,6 +63,12 @@
 | ext-redis | Redis 操作封装 |
 | ext-cache | 多级缓存支持 |
 | ext-mail | 邮件发送服务 |
+| ext-postgres | PostgreSQL 集成（缓存 / 队列 / 发布订阅 / 限流） |
+| ext-lock | 分布式锁 |
+| ext-jdbc | JdbcClient 增强 |
+| ext-job | 任务调度 |
+| ext-i18n | 国际化 |
+| ext-oss | 对象存储（本地 / S3 / SFTP） |
 
 ### 安全/加密层
 
@@ -80,14 +91,8 @@
 | ext-captcha | 图形验证码 |
 | ext-idempotent | 接口幂等性控制 |
 | ext-api-crypto | API 加解密 |
-
-### ext-misc 层
-
-| 模块 | 说明 |
-|------|------|
-| ext-http | HTTP 客户端封装 |
-| ext-qrcode | 二维码生成 |
-| ext-monitor | 系统监控信息 |
+| ext-ratelimit | 接口限流 |
+| ext-audit | 操作审计 |
 
 ## 第三方依赖版本
 
@@ -96,7 +101,6 @@
 | Spring Boot | 4.1.1 | 框架全家桶（BOM 引入） |
 | Swagger | 2.2.55 | API 注解 |
 | Bouncy Castle | 1.86 | 加密库 |
-| OSHI | 7.0.0 | 系统信息采集 |
 | SpringDoc | 3.1.1 | OpenAPI 文档 |
 | ZXing | 3.5.4 | 二维码 |
 | ZXing | 3.5.3 | 二维码生成 |

@@ -12,8 +12,8 @@ ext-web 负责 Web 层的功能增强，提供统一的请求处理、API 文档
 
 | 模块 | 描述 | 主要依赖 |
 |------|------|----------|
-| ext-mvc | Spring MVC 增强与 OpenAPI 文档，自定义验证器、异常处理 | ext-core, ext-json, springdoc-openapi, spring-webmvc |
-| ext-realtime | 实时通信，SSE 服务端推送与 WebSocket 双向通信 | ext-security, ext-mvc, ext-redis, spring-websocket |
+| ext-mvc | Spring MVC 增强与 OpenAPI 文档，自定义验证器、异常处理 | ext-core, ext-json, ext-servlet, springdoc-openapi, spring-webmvc |
+| ext-realtime | 实时通信，SSE 服务端推送与 WebSocket 双向通信 | ext-security, spring-webmvc, spring-websocket, ext-redis |
 
 ## 模块详情
 
@@ -42,7 +42,7 @@ Spring MVC 增强模块，提供：
 
 ### ext-realtime
 
-实时通信模块，包含两套实时通道实现，均支持分布式环境（Redis / PostgreSQL PubSub）：
+实时通信模块，包含两套实时通道实现，均支持分布式环境——跨实例广播注入 ext-core 的 `PubSub`（ext-redis 的 `RedisPubSub` 或 ext-postgres 的 `PostgresPubSub`），本模块不再自带 pub/sub 实现，没有该 Bean 时退化为单实例模式：
 
 **SSE** (`ext.library.sse`)：
 - `SseController` - SSE 控制器
@@ -60,11 +60,10 @@ Spring MVC 增强模块，提供：
 ## 依赖关系
 
 ```
-ext-common (ext-core, ext-json)
+ext-common (ext-core, ext-json, ext-servlet)
     |
     +---> ext-mvc
-              |
-              +---> ext-realtime (依赖 ext-mvc, ext-security, ext-redis)
+    +---> ext-security ---> ext-realtime (依赖 ext-security, spring-webmvc；广播后端 ext-redis / ext-postgres 由消费方引入)
 ```
 
 ## 相关文件

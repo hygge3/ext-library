@@ -15,7 +15,9 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
-import ext.library.web.util.ServletUtil;
+import ext.library.tool.util.StringUtil;
+import ext.library.servlet.util.ServletUtil;
+import org.springframework.http.ResponseCookie;
 
 import jakarta.annotation.Nonnull;
 import java.time.Duration;
@@ -64,7 +66,12 @@ public class SecurityService {
         if (ObjectUtil.isEmpty(token)) {
             return null;
         }
-        return token.replaceAll(properties.getTokenPrefix(), "");
+        // 前缀是字面量而非正则：replaceAll 会把前缀当正则解释，还会删掉 token 内部的同名字符串
+        String prefix = properties.getTokenPrefix();
+        if (ObjectUtil.isEmpty(prefix) || !token.startsWith(prefix)) {
+            return token;
+        }
+        return token.substring(prefix.length());
     }
 
     /**
@@ -406,8 +413,8 @@ public class SecurityService {
         // 清理 cookie
         if (Boolean.TRUE.equals(properties.getEnableCookie())) {
             CookieProperties cookieProperties = properties.getCookieConfig();
-            ServletUtil.addCookie(cookieProperties.getCookieName(), null, 0);
-            ServletUtil.addCookie(securitySessionId, null, 0);
+            writeCookie(cookieProperties.getCookieName(), null, 0);
+            writeCookie(securitySessionId, null, 0);
         }
 
         if (repository.removeTokenByTokenValue(securityToken.getToken())) {
@@ -668,9 +675,25 @@ public class SecurityService {
 
         if (Boolean.TRUE.equals(properties.getEnableCookie())) {
             CookieProperties cookieProperties = properties.getCookieConfig();
-            ServletUtil.addCookie(cookieProperties.getCookieName(), securitySession.getCurrentSecurityToken().getToken(), securitySession.getCurrentSecurityToken().getTimeout().intValue());
-            ServletUtil.addCookie(securitySessionId, securitySession.getSecuritySessionId(), securitySession.getCurrentSecurityToken().getTimeout().intValue());
+            writeCookie(cookieProperties.getCookieName(), securitySession.getCurrentSecurityToken().getToken(), securitySession.getCurrentSecurityToken().getTimeout().intValue());
+            writeCookie(securitySessionId, securitySession.getSecuritySessionId(), securitySession.getCurrentSecurityToken().getTimeout().intValue());
         }
+    }
+
+    /**
+     * 写入认证 cookie，path / domain / secure / httpOnly 取自 {@code ext.security.cookie-config}
+     */
+    private void writeCookie(String name, String value, int maxAge) {
+        CookieProperties cookie = properties.getCookieConfig();
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, value == null ? "" : value)
+                .httpOnly(!Boolean.FALSE.equals(cookie.getHttpOnly()))
+                .secure(Boolean.TRUE.equals(cookie.getSecure()))
+                .path(StringUtil.isEmpty(cookie.getPath()) ? "/" : cookie.getPath())
+                .maxAge(maxAge);
+        if (StringUtil.isNotEmpty(cookie.getDomain())) {
+            builder.domain(cookie.getDomain());
+        }
+        ServletUtil.addCookie(builder.build());
     }
 
     /**

@@ -1,7 +1,7 @@
 package ext.library.web.resolver.page;
 
 import ext.library.tool.util.TypeCastUtil;
-import ext.library.web.response.PageQuery;
+import ext.library.servlet.response.PageQuery;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;

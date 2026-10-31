@@ -21,12 +21,23 @@ dependencies {
 dependencies {
     constraints {
         api "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
-        api "com.github.oshi:oshi-core-java25:${oshiVersion}"
         api "com.google.zxing:javase:${zxingVersion}"
         api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-        api "io.minio:minio:${minioVersion}"
+        // sshd 没有官方 BOM，只能逐个 artifact 约束
+        api "org.apache.sshd:sshd-core:${sshdVersion}"
+        api "org.apache.sshd:sshd-sftp:${sshdVersion}"
+        // TwelveMonkeys ImageIO：补足 JDK ImageIO 缺失的图片格式（WebP、PSD、ICNS 等）
+        // 纯 Java、SPI 自动注册，业务方按需引入相应 artifact，版本由本 BOM 统一
+        api "com.twelvemonkeys.imageio:imageio-webp:${twelveMonkeysVersion}"
     }
+}
+
+// ===================== 自带 BOM 的第三方 =====================
+// AWS SDK for Java v2 导官方 BOM（ext-oss 的 S3 与预签名能力），
+// 不把几十个 service client 拆成 constraint，避免跟不上官方拆包节奏
+dependencies {
+    api platform("software.amazon.awssdk:bom:${awsSdkVersion}")
 }
 
 // ======================= ext-common 层 =====================
@@ -35,6 +46,11 @@ dependencies {
         api project(':ext-common:ext-tool')
         api project(':ext-common:ext-core')
         api project(':ext-common:ext-json')
+        api project(':ext-common:ext-servlet')
+        api project(':ext-common:ext-http')
+        api project(':ext-common:ext-useragent')
+        api project(':ext-common:ext-qrcode')
+        api project(':ext-common:ext-logback')
     }
 }
 
@@ -48,6 +64,8 @@ dependencies {
         api project(':ext-infra:ext-lock')
         api project(':ext-infra:ext-jdbc')
         api project(':ext-infra:ext-job')
+        api project(':ext-infra:ext-i18n')
+        api project(':ext-infra:ext-oss')
     }
 }
 
@@ -78,19 +96,6 @@ dependencies {
     }
 }
 
-// ======================= ext-misc 层 =====================
-dependencies {
-    constraints {
-        api project(':ext-misc:ext-http')
-        api project(':ext-misc:ext-useragent')
-        api project(':ext-misc:ext-qrcode')
-        api project(':ext-misc:ext-monitor')
-        api project(':ext-misc:ext-logback')
-        api project(':ext-misc:ext-i18n')
-        api project(':ext-misc:ext-oss')
-    }
-}
-
 publishing {
     publications {
         bom(MavenPublication) {
@@ -99,7 +104,7 @@ publishing {
             pom {
                 name = 'ext-bom'
                 description = project.description
-                url = 'https://hygge.eu.org'
+                url = 'https://github.com/hygge3/ext-library'
                 licenses {
                     license {
                         name = 'Apache License, Version 2.0'

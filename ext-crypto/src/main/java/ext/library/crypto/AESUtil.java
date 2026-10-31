@@ -7,6 +7,8 @@ import org.springframework.security.crypto.keygen.KeyGenerators;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AES 加密工具类，提供 AES-GCM 256 位加密功能
@@ -56,6 +58,12 @@ import java.util.HexFormat;
  */
 public final class AESUtil {
 
+    /** 缓存的加密器上限，防止按 (密码,盐) 组合无界增长 */
+    private static final int MAX_CACHED_ENCRYPTORS = 1024;
+
+    /** 已派生的加密器：{@code password\0salt} → encryptor */
+    private static final Map<String, BytesEncryptor> encryptors = new ConcurrentHashMap<>();
+
     private AESUtil() {
         // 私有构造函数，防止实例化
     }
@@ -93,7 +101,7 @@ public final class AESUtil {
      * @return Base64 URL 安全编码的密文
      */
     public static String encrypt(String password, String salt, String plainText) {
-        BytesEncryptor encryptor = AesGcmBytesEncryptor.withPassword(password, salt).build();
+        BytesEncryptor encryptor = getEncryptor(password, salt);
         byte[] encrypted = encryptor.encrypt(plainText.getBytes(StandardCharsets.UTF_8));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
     }
@@ -107,9 +115,29 @@ public final class AESUtil {
      * @return 解密后的明文字符串
      */
     public static String decrypt(String password, String salt, String cipherText) {
-        BytesEncryptor encryptor = AesGcmBytesEncryptor.withPassword(password, salt).build();
+        BytesEncryptor encryptor = getEncryptor(password, salt);
         byte[] decrypted = encryptor.decrypt(Base64.getUrlDecoder().decode(cipherText));
         return new String(decrypted, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 取得（并缓存）已派生的加密器
+     * <p>
+     * {@code AesGcmBytesEncryptor.withPassword(password, salt).build()} 每次都会跑一遍 60 万次 PBKDF2（实测约 200ms），
+     * 每个加密请求重建一次就等于白烧 CPU，并发一上来线程池直接打满。
+     *
+     * @param password 加密密码
+     * @param salt     盐值
+     *
+     * @return 加密器
+     */
+    private static BytesEncryptor getEncryptor(String password, String salt) {
+        // shortcut: 上限之外整体丢弃；盐按用户随机生成时条目会持续增长，需要精确淘汰时换 Caffeine
+        if (encryptors.size() >= MAX_CACHED_ENCRYPTORS) {
+            encryptors.clear();
+        }
+        return encryptors.computeIfAbsent(password + '\u0000' + salt,
+                key -> AesGcmBytesEncryptor.withPassword(password, salt).build());
     }
 
     /**

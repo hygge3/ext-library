@@ -2,7 +2,7 @@
 
 [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/hygge3/ext-library)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6eafae2ee8d24d80a0d8c7994d91d7ac)](https://app.codacy.com/gh/hygge3/ext-library/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-![Version](https://img.shields.io/badge/version-4.1.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-green.svg)
 ![JAVA 25](https://img.shields.io/badge/JDK-25-brightgreen.svg)
 ![Spring Boot](https://img.shields.io/github/v/release/spring-projects/spring-boot?label=version)
 ![GitHub last commit](https://img.shields.io/github/last-commit/hygge3/ext-library)
@@ -25,9 +25,10 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-tool             | 通用工具类，提供常见编程任务和实用工具 |
 | ext-core             | 核心实用工具和配置，作为基础依赖       |
 | ext-json             | JSON 处理，含翻译/脱敏序列化扩展      |
+| ext-servlet          | servlet 基座，统一响应体/分页/错误信封 |
 | ext-redis            | Redis 集成，Spring Data Redis 增强     |
 | ext-postgres         | PostgreSQL 集成，缓存/队列/发布订阅/限流 |
-| ext-lock             | 分布式锁，注解式 Redis 加锁            |
+| ext-lock             | 分布式锁，注解式加锁（Redis/PostgreSQL） |
 | ext-cache            | 缓存抽象，统一的缓存接口               |
 | ext-security         | 安全框架，认证授权支持                 |
 | ext-captcha          | 验证码生成和验证                       |
@@ -42,14 +43,58 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-jdbc             | JdbcClient 增强，注解驱动的轻量 DAO    |
 | ext-job              | 任务调度，基于 PostgreSQL 队列         |
 | ext-logback          | 日志脱敏，Logback 脱敏转换器           |
-| ext-monitor          | 系统监控，性能指标采集                 |
 | ext-mvc              | Web 增强，MVC 工具、验证与 OpenAPI     |
 | ext-qrcode           | 二维码生成和识别                       |
 | ext-realtime         | 实时通信，SSE 推送与 WebSocket         |
 | ext-i18n             | 国际化，资源文件与数据库双源翻译        |
-| ext-oss              | 对象存储，本地文件系统与 S3 双实现      |
+| ext-oss              | 对象存储，本地 / S3 / SFTP 三种后端     |
 
 ## 快速开始
+
+所有 ext 模块的 groupId 均为 `ext.library`。
+
+### Maven 引入
+
+先导入 BOM 统一管理版本：
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>ext.library</groupId>
+            <artifactId>ext-bom</artifactId>
+            <version>2.1.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+然后按需引入模块，BOM 已托管版本，无需再写 `<version>`：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>ext.library</groupId>
+        <artifactId>ext-core</artifactId>
+    </dependency>
+</dependencies>
+```
+
+也可以直接指定版本，不导入 BOM：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>ext.library</groupId>
+        <artifactId>ext-core</artifactId>
+        <version>2.1.0</version>
+    </dependency>
+</dependencies>
+```
+
+> 注意：`<scope>import</scope>` 只能用在 `<dependencyManagement>` 中，且该节点必须直接位于 `<project>` 下。
 
 ### Gradle 引入
 
@@ -57,7 +102,7 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 
 ```groovy
 dependencies {
-    implementation platform('ext.library:ext-bom:4.1.0')
+    implementation platform('ext.library:ext-bom:2.1.0')
 }
 ```
 
@@ -73,7 +118,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'ext.library:ext-core:4.1.0'
+    implementation 'ext.library:ext-core:2.1.0'
 }
 ```
 

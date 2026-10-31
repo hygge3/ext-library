@@ -58,7 +58,6 @@ ext.library.core
 |---------------|-------------------------------|
 | `SpringUtil`  | Spring 上下文工具                  |
 | `BeanUtil`    | Bean 操作工具 (属性拷贝/转换)         |
-| `ServletUtil` | Servlet 请求响应工具                |
 | `MethodUtil`  | 方法操作工具                        |
 | `AspectUtil`  | AOP 切面工具                      |
 

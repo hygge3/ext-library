@@ -130,7 +130,9 @@ public final class SM2Util {
 
         // 执行加密
         try {
-            byte[] encryptedData = sm2Engine.processBlock(plainText.getBytes(StandardCharsets.UTF_8), 0, plainText.length());
+            byte[] data = plainText.getBytes(StandardCharsets.UTF_8);
+            // 第三个参数是字节数，不是字符数：中文等多字节明文按 length() 传会只加密前一段，解出来是乱码
+            byte[] encryptedData = sm2Engine.processBlock(data, 0, data.length);
             // 返回 Base64 编码结果
             return Base64Util.encodeUrlSafeToStr(encryptedData);
         } catch (InvalidCipherTextException e) {

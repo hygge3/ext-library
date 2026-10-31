@@ -7,6 +7,7 @@ import ext.library.tool.runtime.Logs;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 
 /**
@@ -25,7 +26,7 @@ public class PostgresCacheManager {
     public PostgresCacheManager(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
-        this.tableName = properties.getCacheTableName();
+        this.tableName = properties.getCache().getTableName();
     }
 
     /**
@@ -36,8 +37,8 @@ public class PostgresCacheManager {
      *
      * @return 缓存值，不存在或已过期返回 null
      */
-    public <T> T get(String key, Class<T> clazz) {
-        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.readObj(json, clazz)).orElse(null);
+    public <T> T get(String key, Type clazz) {
+        return jdbcClient.sql("SELECT value FROM " + tableName + " WHERE key = ? AND expires_at > NOW()").param(key).query(String.class).optional().map(json -> JsonUtil.<T>readObj(json, clazz)).orElse(null);
     }
 
     /**
@@ -74,7 +75,7 @@ public class PostgresCacheManager {
      * @param value 缓存值
      */
     public <T> void set(String key, T value) {
-        set(key, value, properties.getDefaultCacheExpireTime());
+        set(key, value, properties.getCache().getDefaultExpireTime());
     }
 
     /**
@@ -124,7 +125,7 @@ public class PostgresCacheManager {
      * @return true: 设置成功（key 不存在） false: 设置失败（key 已存在且未过期）
      */
     public boolean setNx(String key, String value) {
-        return setNxEx(key, value, properties.getDefaultCacheExpireTime());
+        return setNxEx(key, value, properties.getCache().getDefaultExpireTime());
     }
 
     /**
@@ -223,7 +224,7 @@ public class PostgresCacheManager {
     /**
      * 定时清理过期缓存
      */
-    @Scheduled(fixedDelayString = "#{@postgresProperties.cacheCleanupInterval.toMillis()}")
+    @Scheduled(fixedDelayString = "#{@postgresProperties.cache.cleanupInterval.toMillis()}")
     public void cleanup() {
         int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE expires_at < NOW()").update();
         if (deleted > 0) {

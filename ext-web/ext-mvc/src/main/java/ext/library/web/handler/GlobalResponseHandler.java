@@ -4,7 +4,7 @@ package ext.library.web.handler;
 import ext.library.json.util.JsonUtil;
 import ext.library.web.annotation.IgnoreRestWrapper;
 import ext.library.web.properties.WebMvcProperties;
-import ext.library.web.response.R;
+import ext.library.servlet.response.R;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

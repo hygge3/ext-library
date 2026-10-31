@@ -107,8 +107,9 @@ public record TreeBuilder<T, K>(
 
         // 1. 构建数据索引
         Map<K, T> nodeMap = createNodeMap(items);
-        // 保持插入顺序
+        // Keep insertion order; groupingBy 对 null key 抛 NPE，根节点的 parentId 就是 null，先滤掉
         Map<K, List<T>> parentChildrenMap = items.stream()
+                .filter(item -> parentIdGetter.apply(item) != null)
                 .collect(Collectors.groupingBy(
                         parentIdGetter,
                         LinkedHashMap::new,
@@ -195,8 +196,7 @@ public record TreeBuilder<T, K>(
      */
     private void detectCyclicDependencies(List<T> items, Map<K, T> nodeMap) {
         Set<K> verifiedNodes = new HashSet<>();
-        Map<K, K> idToParentMap = items.stream()
-                .collect(Collectors.toMap(idGetter, parentIdGetter));
+        Map<K, K> idToParentMap = createIdToParentMap(items);
 
         for (T item : items) {
             K currentId = idGetter.apply(item);
@@ -259,12 +259,31 @@ public record TreeBuilder<T, K>(
      * @return 相关节点 ID 集合
      */
     private Set<K> findRelatedIds(List<T> allItems, Set<K> matchIds) {
-        Map<K, K> idToParentMap = allItems.stream()
-                .collect(Collectors.toMap(idGetter, parentIdGetter));
+        Map<K, K> idToParentMap = createIdToParentMap(allItems);
 
         return matchIds.stream()
                 .flatMap(id -> traceAncestors(id, idToParentMap).stream())
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * 创建「节点 ID → 父节点 ID」映射表
+     * <p>
+     * 根节点的父 ID 为 null，`Collectors.toMap` 对 null 值抛 NPE，故手动跳过；
+     * 查询时「取不到」与「为 null」语义一致，都是到根了。
+     *
+     * @param items 节点列表
+     * @return 映射表
+     */
+    private Map<K, K> createIdToParentMap(List<T> items) {
+        Map<K, K> map = new LinkedHashMap<>(items.size());
+        for (T item : items) {
+            K parentId = parentIdGetter.apply(item);
+            if (parentId != null) {
+                map.put(idGetter.apply(item), parentId);
+            }
+        }
+        return map;
     }
 
     /**

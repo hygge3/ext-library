@@ -8,15 +8,17 @@ import tools.jackson.databind.ValueSerializer;
 
 import java.math.BigDecimal;
 
+/**
+ * BigDecimal 无科学计数法序列化
+ * <p>
+ * 输出为 JSON 数字（而非字符串），使用 {@link BigDecimal#toPlainString()} 避免科学计数法。
+ * 不做 {@code stripTrailingZeros()}，保留原始 scale（金额场景 scale 有意义）。
+ */
 public class BigDecimalPlainSerializer extends ValueSerializer<BigDecimal> {
 
     @Override
     public void serialize(BigDecimal value, JsonGenerator gen, SerializationContext ctxt) throws JacksonException {
-        if (value == null) {
-            gen.writeNull();
-        } else {
-            // 使用 toPlainString() 避免科学计数法
-            gen.writeString(value.stripTrailingZeros().toPlainString());
-        }
+        // toPlainString() 避免科学计数法；不做 stripTrailingZeros()，保留原始 scale（金额场景 scale 有意义）
+        gen.writeNumber(value.toPlainString());
     }
 }

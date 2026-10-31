@@ -7,6 +7,7 @@ import ext.library.cache.properties.CacheProperties;
 import ext.library.core.util.SpringUtil;
 import org.jspecify.annotations.NonNull;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 
 /**
@@ -70,12 +71,9 @@ public class CaffeineStrategy implements CacheStrategy {
     }
 
     @Override
-    public <T> T get(String cacheName, String key, Class<T> clazz) {
+    public <T> T get(String cacheName, String key, Type type) {
         CaffeineEntry entry = getCache().getIfPresent(genKey(cacheName, key));
-        if (entry == null) {
-            return null;
-        }
-        return clazz.cast(entry.value());
+        return entry == null ? null : narrow(entry.value(), type);
     }
 
     @Override
@@ -88,6 +86,12 @@ public class CaffeineStrategy implements CacheStrategy {
     @Override
     public <T> T put(String cacheName, String key, T value) {
         return put(cacheName, key, value, getDefaultExpireTime());
+    }
+
+    @Override
+    public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
+        String cacheKey = genKey(cacheName, key);
+        return getCache().asMap().putIfAbsent(cacheKey, new CaffeineEntry(cacheKey, value, expireTime, true)) == null;
     }
 
     @Override

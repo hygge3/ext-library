@@ -1,13 +1,13 @@
 package ext.library.ratelimit;
 
 import ext.library.core.util.spel.SpelUtil;
+import ext.library.servlet.util.ServletUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
 /**
@@ -42,8 +42,9 @@ public interface RateLimitKeyGenerator {
             StandardEvaluationContext spelContext = SpelUtil.getSpelContext(joinPoint.getTarget(), method, args);
 
             // Servlet 环境下，将 request 放入上下文
-            if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
-                spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, attributes.getRequest());
+            HttpServletRequest request = ServletUtil.getRequestOrNull();
+            if (request != null) {
+                spelContext.setVariable(RequestAttributes.REFERENCE_REQUEST, request);
             }
 
             // 未配置表达式时，按「类名 + 方法名」整体限流

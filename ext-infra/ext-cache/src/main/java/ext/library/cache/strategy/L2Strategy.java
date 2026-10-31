@@ -7,6 +7,7 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 
 /**
@@ -34,7 +35,7 @@ public class L2Strategy implements CacheStrategy {
     /**
      * 获取分布式缓存策略（延迟初始化）
      */
-    private CacheStrategy getDistributedStrategy() {
+    public CacheStrategy getDistributedStrategy() {
         if (distributedStrategy == null) {
             synchronized (this) {
                 if (distributedStrategy == null) {
@@ -45,6 +46,11 @@ public class L2Strategy implements CacheStrategy {
             }
         }
         return distributedStrategy;
+    }
+
+    @Override
+    public CacheStrategy distributed() {
+        return getDistributedStrategy();
     }
 
     /**
@@ -80,9 +86,9 @@ public class L2Strategy implements CacheStrategy {
     }
 
     @Override
-    public <T> T get(String cacheName, String key, Class<T> clazz) {
+    public <T> T get(String cacheName, String key, Type type) {
         // 先查询 Caffeine 本地缓存
-        T caffeineCache = caffeineStrategy.get(cacheName, key, clazz);
+        T caffeineCache = caffeineStrategy.get(cacheName, key, type);
         if (caffeineCache != null) {
             Logs.debug(EmojiSymbol.CACHE, "从 Caffeine 中获取数据");
             return caffeineCache;
@@ -90,11 +96,13 @@ public class L2Strategy implements CacheStrategy {
 
         // 本地未命中，查询分布式缓存
         CacheStrategy distributed = getDistributedStrategy();
-        T distributedCache = distributed.get(cacheName, key, clazz);
+        T distributedCache = distributed.get(cacheName, key, type);
         if (distributedCache != null) {
             Logs.debug(EmojiSymbol.CACHE, "从 {} 获取数据", backendType);
-            // 回填到 Caffeine 本地缓存
-            caffeineStrategy.put(cacheName, key, distributedCache);
+            // 回填本地缓存时沿用分布式层的剩余有效期，不能用默认值：那会让本地副本比分布式层活得久，
+            // 分布式层过期后本实例还在供应旧值
+            Duration remaining = distributed.remainingTtl(cacheName, key);
+            caffeineStrategy.put(cacheName, key, distributedCache, remaining != null ? remaining : getDefaultExpireTime());
             return distributedCache;
         }
 
@@ -113,6 +121,21 @@ public class L2Strategy implements CacheStrategy {
         getDistributedStrategy().put(cacheName, key, value);
         caffeineStrategy.put(cacheName, key, value);
         return value;
+    }
+
+    /**
+     * 两级缓存的原子写入
+     * <p>
+     * 以分布式层为唯一裁决者：多实例共享的是它，本地层只是它的读缓存。
+     * 分布式层写入成功后再回填本地，避免「本地未命中、远端已存在」的分裂判定。
+     */
+    @Override
+    public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
+        boolean created = getDistributedStrategy().putIfAbsent(cacheName, key, value, expireTime);
+        if (created) {
+            caffeineStrategy.put(cacheName, key, value, expireTime);
+        }
+        return created;
     }
 
     @Override

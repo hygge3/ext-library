@@ -1,8 +1,8 @@
 package ext.library.audit;
 
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import ext.library.servlet.util.ServletUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 操作人解析器
@@ -34,7 +34,8 @@ public interface AuditOperatorResolver {
 
         @Override
         public String resolve() {
-            if (!(RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes)) {
+            HttpServletRequest request = ServletUtil.getRequestOrNull();
+            if (request == null) {
                 return ANONYMOUS;
             }
             // 优先取当前登录标识
@@ -42,8 +43,8 @@ public interface AuditOperatorResolver {
             if (loginId != null && !loginId.isBlank()) {
                 return loginId;
             }
-            // 退化到客户端 IP
-            String remoteIp = attributes.getRequest().getRemoteAddr();
+            // 退化到客户端 IP（走代理头，取真实地址）
+            String remoteIp = ServletUtil.getIpAddr(request);
             return remoteIp == null || remoteIp.isBlank() ? ANONYMOUS : remoteIp;
         }
 

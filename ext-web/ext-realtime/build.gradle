@@ -2,8 +2,7 @@ description = '实时通信支持 (Server-Sent Events + WebSocket)'
 
 dependencies {
     api project(':ext-security')
-    api project(':ext-web:ext-mvc')
+    api 'org.springframework:spring-webmvc'
     api 'org.springframework.boot:spring-boot-starter-websocket'
-    compileOnly project(':ext-infra:ext-redis')
-    compileOnly project(':ext-infra:ext-postgres')
+    // 跨实例广播后端（ext-redis / ext-postgres）由消费方按需引入，本模块只依赖 ext-core 的 PubSub SPI
 }
