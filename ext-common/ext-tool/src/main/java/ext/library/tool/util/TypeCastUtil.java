@@ -633,38 +633,105 @@ public final class TypeCastUtil {
         if (clz.isAssignableFrom(obj.getClass())) {
             return (R) obj;
         }
-        if (Boolean.class.equals(clz) || boolean.class.equals(clz)) {
+        // 两个分支返回 null 表示「不归我管」：入参非 null 时转换器只会给值或抛异常，不会返回 null
+        R converted = castScalar(obj, clz);
+        if (converted == null) {
+            converted = castOther(obj, clz);
+        }
+        if (converted == null) {
+            throw new UnsupportedOperationException("不支持的目标类型: " + clz);
+        }
+        return converted;
+    }
+
+    /**
+     * 标量转换：包装类型、基本类型与 String
+     *
+     * @param obj 源对象，非 null
+     * @param clz 目标类型
+     * @param <R> 目标类型
+     *
+     * @return 转换后的值，目标类型不在本方法职责内时返回 {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    private static <R> @Nullable R castScalar(Object obj, Class<R> clz) {
+        if (isAny(clz, Boolean.class, boolean.class)) {
             return (R) getAsBoolean(obj);
-        } else if (Byte.class.equals(clz) || byte.class.equals(clz)) {
+        }
+        if (isAny(clz, Byte.class, byte.class)) {
             return (R) getAsByte(obj);
-        } else if (Short.class.equals(clz) || short.class.equals(clz)) {
+        }
+        if (isAny(clz, Short.class, short.class)) {
             return (R) getAsShort(obj);
-        } else if (Integer.class.equals(clz) || int.class.equals(clz)) {
+        }
+        if (isAny(clz, Integer.class, int.class)) {
             return (R) getAsInteger(obj);
-        } else if (Long.class.equals(clz) || long.class.equals(clz)) {
+        }
+        if (isAny(clz, Long.class, long.class)) {
             return (R) getAsLong(obj);
-        } else if (Float.class.equals(clz) || float.class.equals(clz)) {
+        }
+        if (isAny(clz, Float.class, float.class)) {
             return (R) getAsFloat(obj);
-        } else if (Double.class.equals(clz) || double.class.equals(clz)) {
+        }
+        if (isAny(clz, Double.class, double.class)) {
             return (R) getAsDouble(obj);
-        } else if (String.class.equals(clz)) {
+        }
+        if (isAny(clz, String.class)) {
             return (R) getAsString(obj);
-        } else if (BigInteger.class.isAssignableFrom(clz)) {
+        }
+        return null;
+    }
+
+    /**
+     * 非标量转换：大数、数字、枚举与时间类型
+     *
+     * @param obj 源对象，非 null
+     * @param clz 目标类型
+     * @param <R> 目标类型
+     *
+     * @return 转换后的值，目标类型不在本方法职责内时返回 {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    private static <R> @Nullable R castOther(Object obj, Class<R> clz) {
+        if (BigInteger.class.isAssignableFrom(clz)) {
             return (R) getAsBigInteger(obj);
-        } else if (BigDecimal.class.isAssignableFrom(clz)) {
+        }
+        if (BigDecimal.class.isAssignableFrom(clz)) {
             return (R) getAsBigDecimal(obj);
-        } else if (Number.class.isAssignableFrom(clz)) {
+        }
+        if (Number.class.isAssignableFrom(clz)) {
             return (R) getAsNumber(obj);
-        } else if (clz.isEnum()) {
+        }
+        if (clz.isEnum()) {
             return (R) getAsEnum(obj, clz.asSubclass(Enum.class));
-        } else if (LocalDateTime.class.equals(clz)) {
+        }
+        if (LocalDateTime.class.equals(clz)) {
             return (R) getAsLocalDateTime(obj);
-        } else if (LocalDate.class.equals(clz)) {
+        }
+        if (LocalDate.class.equals(clz)) {
             return (R) getAsLocalDate(obj);
-        } else if (LocalTime.class.equals(clz)) {
+        }
+        if (LocalTime.class.equals(clz)) {
             return (R) getAsLocalTime(obj);
         }
-        throw new UnsupportedOperationException("不支持的目标类型: " + clz);
+        return null;
+    }
+
+    /**
+     * 目标类型是否命中候选列表
+     *
+     * @param clz        目标类型
+     * @param candidates 候选类型
+     *
+     * @return 命中返回 {@code true}
+     */
+    private static boolean isAny(Class<?> clz, Class<?>... candidates) {
+        for (Class<?> candidate : candidates) {
+            if (candidate.equals(clz)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

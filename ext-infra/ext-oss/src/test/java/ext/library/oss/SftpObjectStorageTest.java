@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +38,8 @@ class SftpObjectStorageTest {
 
     private static final String USER = "ext";
 
-    private static final String PASSWORD = "ext-secret";
+    /** 进程内临时服务端的登录密码，随实例生成，不留固定口令 */
+    private static final String PASSWORD = UUID.randomUUID().toString();
 
     /**
      * 服务端虚拟文件系统的根
