@@ -4,7 +4,6 @@ import ext.library.oss.LocalObjectStorage;
 import ext.library.oss.ObjectStorage;
 import ext.library.oss.OssTemplate;
 import ext.library.oss.S3ObjectStorage;
-import ext.library.oss.SftpObjectStorage;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
@@ -25,7 +24,7 @@ import java.net.URI;
 /**
  * 对象存储自动配置
  * <p>
- * 按 {@code ext.oss.type} 选择本地文件系统、S3 或 SFTP 实现。厂商类型只出现在本类的私有方法体内，
+ * 按 {@code ext.oss.type} 选择本地文件系统或 S3 实现。厂商类型只出现在本类的私有方法体内，
  * 因此没引对应 SDK 时选其他模式照样能启动。
  *
  * @since 4.1.0
@@ -64,7 +63,6 @@ public class OssAutoConfiguration {
         return switch (properties.getType()) {
             case LOCAL -> new LocalObjectStorage(properties);
             case S3 -> new S3ObjectStorage(s3Client(properties), s3Presigner(properties), properties);
-            case SFTP -> new SftpObjectStorage(sshClient(), properties);
         };
     }
 
@@ -111,15 +109,6 @@ public class OssAutoConfiguration {
                         .chunkedEncodingEnabled(properties.isChunkedEncoding())
                         .build())
                 .build();
-    }
-
-    /**
-     * 创建 SSH 客户端
-     *
-     * @return SSH 客户端，连接由 {@link SftpObjectStorage} 自己按需建立
-     */
-    private Object sshClient() {
-        return org.apache.sshd.client.SshClient.setUpDefaultClient();
     }
 
     /**

@@ -27,9 +27,6 @@ dependencies {
         api "com.webauthn4j:webauthn4j-core:${webauthn4jVersion}"
         api "org.jetbrains:annotations:${jetbrainsAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-        // sshd 没有官方 BOM，只能逐个 artifact 约束
-        api "org.apache.sshd:sshd-core:${sshdVersion}"
-        api "org.apache.sshd:sshd-sftp:${sshdVersion}"
         // TwelveMonkeys ImageIO：补足 JDK ImageIO 缺失的图片格式（WebP、PSD、ICNS 等）
         // 纯 Java、SPI 自动注册，业务方按需引入相应 artifact，版本由本 BOM 统一
         api "com.twelvemonkeys.imageio:imageio-webp:${twelveMonkeysVersion}"

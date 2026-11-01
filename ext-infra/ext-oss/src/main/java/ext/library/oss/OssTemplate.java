@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * 对象存储门面
  * <p>
- * 业务方只用这一个类，具体落在本地文件系统、S3 还是 SFTP 由 {@link ObjectStorage} 实现决定。
+ * 业务方只用这一个类，具体落在本地文件系统还是 S3 由 {@link ObjectStorage} 实现决定。
  *
  * @since 4.1.0
  */
@@ -46,7 +46,7 @@ public class OssTemplate {
     /**
      * 当前使用的存储实现名称
      *
-     * @return 实现名称，如 {@code local} / {@code s3} / {@code sftp}
+     * @return 实现名称，如 {@code local} / {@code s3}
      */
     public String storageName() {
         return storage.name();

@@ -15,11 +15,6 @@ public enum StorageType {
     /**
      * S3 协议（AWS SDK for Java v2），对接 AWS S3、MinIO、Ceph、R2、阿里云 OSS 等
      */
-    S3,
-
-    /**
-     * SSH / SFTP 远端目录
-     */
-    SFTP
+    S3
 
 }

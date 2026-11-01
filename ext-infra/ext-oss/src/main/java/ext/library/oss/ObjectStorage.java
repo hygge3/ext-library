@@ -8,10 +8,10 @@ import java.util.Objects;
 /**
  * 对象存储 SPI
  * <p>
- * 本地文件系统、S3 协议与 SFTP 各实现一份，业务方只依赖 {@link OssTemplate}，
+ * 本地文件系统与 S3 协议各实现一份，业务方只依赖 {@link OssTemplate}，
  * 切换实现不需要改动调用代码。
  * <p>
- * 实现里的厂商类型（AWS SDK 的 {@code S3Client} / {@code S3Presigner}、SFTP 客户端）不得出现在
+ * 实现里的厂商类型（AWS SDK 的 {@code S3Client} / {@code S3Presigner}）不得出现在
  * SPI 签名上——否则没有该 SDK 的环境连接口都加载不了，其他模式也跟着起不来。
  *
  * @since 4.1.0
@@ -140,7 +140,7 @@ public interface ObjectStorage {
     /**
      * 生成下载直链
      * <p>
-     * 本地与 SFTP 实现返回 {@code 对外访问前缀 + "/" + key}（没配前缀时 SFTP 会拒绝）。
+     * 本地实现返回 {@code 对外访问前缀 + "/" + key}（没配前缀时拒绝）。
      *
      * @param key    对象键
      * @param expiry 有效期
