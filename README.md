@@ -47,7 +47,7 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-qrcode           | 二维码生成和识别                       |
 | ext-realtime         | 实时通信，SSE 推送与 WebSocket         |
 | ext-i18n             | 国际化，资源文件与数据库双源翻译        |
-| ext-oss              | 对象存储，本地 / S3 / SFTP 三种后端     |
+| ext-oss              | 对象存储，本地 / S3 两种后端           |
 
 ## 快速开始
 

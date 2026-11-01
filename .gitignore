@@ -32,5 +32,4 @@ build/
 
 ### AI ###
 /.pi/
-/.spec-workflow/
-/.serena/
+/.unipi/

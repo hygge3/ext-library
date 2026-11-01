@@ -68,7 +68,7 @@
 | ext-jdbc | JdbcClient 增强 |
 | ext-job | 任务调度 |
 | ext-i18n | 国际化 |
-| ext-oss | 对象存储（本地 / S3 / SFTP） |
+| ext-oss | 对象存储（本地 / S3） |
 
 ### 安全/加密层
 

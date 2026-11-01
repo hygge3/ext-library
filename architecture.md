@@ -107,7 +107,7 @@ graph LR
 
 ## 跨模块决策
 
-- **版本收敛**：Spring 全家桶经 `spring-boot-dependencies` 导入；自己带 BOM 的第三方（如 `software.amazon.awssdk:bom`）导它的 BOM；不在任何 BOM 的第三方（bouncycastle / zxing / swagger-annotations / springdoc / sshd）逐个在 `ext-bom` 约束。这样消费方只导一个 BOM，模块之间不会出现版本漂移。
+- **版本收敛**：Spring 全家桶经 `spring-boot-dependencies` 导入；自己带 BOM 的第三方（如 `software.amazon.awssdk:bom`）导它的 BOM；不在任何 BOM 的第三方（bouncycastle / zxing / swagger-annotations / springdoc / webauthn4j）逐个在 `ext-bom` 约束。这样消费方只导一个 BOM，模块之间不会出现版本漂移。
 - **重后端 `compileOnly` + 类路径探测**：目的是让消费方只引自己用得上的后端、不被意外拖入 Redis / PostgreSQL；切换后端靠"引入哪个依赖"，配置只选行为不选类（`AUTO` 优先 Redis）。该原则在 `ext-cache`、`ext-idempotent`、`ext-ratelimit`、`ext-realtime`、`ext-i18n`、`ext-oss` 上一体适用。
 - **接入方式**：横切能力用注解 + 切面（`@Cache`、`@RedisLock`、`@Idempotent`、`@RateLimit`、`@OperationLog`、`@RequestDecrypt`）；可选实现用 SPI + 自动探测（`CacheStrategy`、`RateLimitStore`、`LockStore`、`ObjectStorage`、`PubSub`、`AuditHandler`、`TranslationSource`）。
 - **配置类型**：时长用 `Duration`（`30d`、`1h`、`3m`），语言用 `Locale`，不暴露裸毫秒数与字符串枚举常量。
