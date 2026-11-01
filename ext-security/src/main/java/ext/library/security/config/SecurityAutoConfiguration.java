@@ -3,14 +3,23 @@ package ext.library.security.config;
 import ext.library.cache.strategy.CacheStrategy;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.interceptor.SecurityInterceptor;
+import ext.library.security.properties.MfaProperties;
+import ext.library.security.properties.PasskeyProperties;
 import ext.library.security.properties.SecurityProperties;
+import ext.library.security.repository.CacheMfaCredentialRepository;
+import ext.library.security.repository.CachePasskeyCredentialRepository;
+import ext.library.security.repository.MfaCredentialRepository;
+import ext.library.security.repository.PasskeyCredentialRepository;
 import ext.library.security.repository.SecurityCacheRepository;
 import ext.library.security.repository.SecurityRepository;
+import ext.library.security.service.MfaService;
+import ext.library.security.service.PasskeyService;
 import ext.library.security.service.SecurityService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +37,7 @@ import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebA
  * @since 4.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties({SecurityProperties.class, MfaProperties.class, PasskeyProperties.class})
 public class SecurityAutoConfiguration {
 
     /**
@@ -88,6 +97,62 @@ public class SecurityAutoConfiguration {
         Logs.warn(EmojiSymbol.SECURITY, "将使用默认权限认证接口，所有权限皆无，建议实现 SecurityAuthority 接口中的业务逻辑");
         return new SecurityAuthority() {
         };
+    }
+
+    // -----------------------两步验证----------------------------------
+
+    /**
+     * 两步验证存储仓库注入
+     *
+     * @param cacheStrategy 缓存策略
+     *
+     * @return {@code MfaCredentialRepository }
+     */
+    @Bean
+    @ConditionalOnMissingBean(MfaCredentialRepository.class)
+    public MfaCredentialRepository mfaCredentialRepository(CacheStrategy cacheStrategy) {
+        return new CacheMfaCredentialRepository(cacheStrategy);
+    }
+
+    /**
+     * 两步验证服务注入
+     *
+     * @return {@code MfaService }
+     */
+    @Bean
+    @ConditionalOnMissingBean(MfaService.class)
+    public MfaService mfaService(MfaCredentialRepository repository, MfaProperties properties) {
+        return new MfaService(repository, properties);
+    }
+
+    // -----------------------通行密钥----------------------------------
+
+    /**
+     * 通行密钥存储仓库注入
+     *
+     * @param cacheStrategy 缓存策略
+     *
+     * @return {@code PasskeyCredentialRepository }
+     */
+    @Bean
+    @ConditionalOnMissingBean(PasskeyCredentialRepository.class)
+    public PasskeyCredentialRepository passkeyCredentialRepository(CacheStrategy cacheStrategy) {
+        return new CachePasskeyCredentialRepository(cacheStrategy);
+    }
+
+    /**
+     * 通行密钥服务注入
+     * <p>
+     * 没配 {@code ext.security.passkey.rp-id} 时无法校验来源，不装配。
+     *
+     * @return {@code PasskeyService }
+     */
+    @Bean
+    @ConditionalOnMissingBean(PasskeyService.class)
+    @ConditionalOnProperty(prefix = PasskeyProperties.PREFIX, name = "rp-id")
+    public PasskeyService passkeyService(PasskeyCredentialRepository repository, PasskeyProperties properties,
+                                         CacheStrategy cacheStrategy) {
+        return new PasskeyService(repository, properties, cacheStrategy);
     }
 
 }

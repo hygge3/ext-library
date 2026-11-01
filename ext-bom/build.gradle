@@ -23,6 +23,9 @@ dependencies {
         api "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
         api "com.google.zxing:javase:${zxingVersion}"
         api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
+        // webauthn4j 的 API 签名带 @NotNull，但它自己只声明 compileOnly，消费方得自带
+        api "com.webauthn4j:webauthn4j-core:${webauthn4jVersion}"
+        api "org.jetbrains:annotations:${jetbrainsAnnotationsVersion}"
         api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
         // sshd 没有官方 BOM，只能逐个 artifact 约束
         api "org.apache.sshd:sshd-core:${sshdVersion}"

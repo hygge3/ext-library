@@ -8,6 +8,10 @@ dependencies {
     api project(':ext-infra:ext-cache')
     api project(':ext-common:ext-useragent')
     api 'org.springframework:spring-webmvc'
+    // WebAuthn（通行密钥）注册/断言校验，纯库无 servlet 依赖
+    api 'com.webauthn4j:webauthn4j-core'
+    // webauthn4j 的 API 签名带 @NotNull，但它自己只声明 compileOnly，消费方得自带
+    api 'org.jetbrains:annotations'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
 }
