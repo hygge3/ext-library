@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # ================================================ 说明 start ================================================
 # 自动根据所在目录获取最新的可执行 jar、war
@@ -11,12 +11,14 @@
 # ================================================ 说明 end   ================================================
 #
 # ================================================ 使用说明 start ================================================
+# 注意：本脚本用了 bash 语法（[[ ]]、(( ))），必须用 bash 执行，不能用 sh/dash
+#
 # 1. 赋予执行权限: chmod +x boot.sh
-# 2. 启动应用程序: sh boot.sh start
-# 3. 停止应用程序: sh boot.sh stop
-# 4. 查看应用程序: sh boot.sh status
-# 5. 重启应用程序: sh boot.sh restart c # 加 c 删除历史日志文件
-# 6. 查看应用日志: sh boot.sh logs
+# 2. 启动应用程序: bash boot.sh start
+# 3. 停止应用程序: bash boot.sh stop
+# 4. 查看应用程序: bash boot.sh status
+# 5. 重启应用程序: bash boot.sh restart c # 加 c 删除历史日志文件
+# 6. 查看应用日志: bash boot.sh logs
 # ================================================ 使用说明 end   ================================================
 #
 # ================================================ 参数 start ================================================
@@ -24,21 +26,24 @@
 #JAVA="/usr/java/latest/bin/java"
 #JAVA="/usr/java/latest/"
 JAVA="${JAVA_HOME}"
-# ------ 文件路径
+# ------ 文件路径（脚本所在目录，与执行时的工作目录无关）
 DIR_PATH=$(
   cd "$(dirname "$0")" || exit
   pwd
 )
 # ------ 服务文件名（默认使用目录下最新的.jar或者.war文件）
-SERVER_FILE_NAME=$(find "${DIR_PATH}" -maxdepth 1 -type f \( -name "*.jar" -o -name "*.war" \) -printf "%T@ %p\n" | sort -n | tail -1 | cut -d' ' -f2- | xargs -n1 basename)
+# 制表符分隔时间戳与文件名，%f 直接取 basename，避免文件名含空格时被 xargs/cut 拆坏
+SERVER_FILE_NAME=$(find "${DIR_PATH}" -maxdepth 1 -type f \( -name "*.jar" -o -name "*.war" \) -printf "%T@\t%f\n" | sort -n | tail -1 | cut -f2-)
+# ------ 堆大小（可用环境变量覆盖，如 XMS=1g XMX=1g bash boot.sh start）
+XMS="${XMS:-4g}"
+XMX="${XMX:-4g}"
 # ------ Java 参数
-JAVA_OPT="${JAVA_OPT} -server -Djava.security.egd=file:/dev/./urandom"
+# 日志、dump 一律用绝对路径：脚本不 cd 到 DIR_PATH，相对路径会在调用者的工作目录下找不到
+JAVA_OPT="${JAVA_OPT} -server"
 # 调整堆大小：通过 -Xms 和 -Xmx 参数来调整堆大小。合理的堆大小设置可以减少垃圾回收的频率，从而提高性能。
-JAVA_OPT="${JAVA_OPT} -Xms4g -Xmx4g"
-# 异步日志配置，使用JDK 25的统一日志框架
-JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=./logs/gc.log:time,uptime,level,tags -Xlog:async"
-# 启用启动优化：启用应用程序类数据共享，以加速应用程序的启动时间。
-JAVA_OPT="${JAVA_OPT} -XX:+UseAppCDS"
+JAVA_OPT="${JAVA_OPT} -Xms${XMS} -Xmx${XMX}"
+# 异步日志 + GC 日志按 5 × 20M 轮转，避免无限增长
+JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${DIR_PATH}/logs/gc.log:time,uptime,level,tags:filecount=5,filesize=20M -Xlog:async"
 # 启用编译优化：启用分层编译，这将在运行时进行更多的 JIT 编译，提高应用程序的性能
 JAVA_OPT="${JAVA_OPT} -XX:+TieredCompilation"
 # 启用多线程处理器：来启用非一致性内存访问 (NUMA) 支持，以提高多核系统上的性能。
@@ -49,23 +54,23 @@ JAVA_OPT="${JAVA_OPT} -XX:+UseDynamicNumberOfGCThreads"
 JAVA_OPT="${JAVA_OPT} -XX:+UseStringDeduplication"
 # 当 JVM 发生 OOM 时，自动生成 DUMP 文件
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError"
-# 生成DUMP文件的路径
-JAVA_OPT="${JAVA_OPT} -XX:HeapDumpPath=./logs/dump/"
+# 生成DUMP文件的路径（目录必须在启动前存在，否则 dump 写不出来）
+JAVA_OPT="${JAVA_OPT} -XX:HeapDumpPath=${DIR_PATH}/logs/dump/"
 # 开启分代ZGC
 JAVA_OPT="${JAVA_OPT} -XX:+UseZGC"
-#关闭主动GC周期，在主动回收模式下，ZGC 会在系统空闲时自动执行垃圾回收，以减少垃圾回收在应用程序忙碌时所造成的影响。如果未指定此参数（默认情况），ZGC 会在需要时（即堆内存不足以满足分配请求时）执行垃圾回收。
+# 关闭主动GC周期，在主动回收模式下，ZGC 会在系统空闲时自动执行垃圾回收，以减少垃圾回收在应用程序忙碌时所造成的影响。如果未指定此参数（默认情况），ZGC 会在需要时（即堆内存不足以满足分配请求时）执行垃圾回收。
 JAVA_OPT="${JAVA_OPT} -XX:-ZProactive"
-# 设置ZGC的线程数为CPU核心数的一半，平衡性能和资源消耗
-JAVA_OPT="${JAVA_OPT} -XX:ParallelGCThreads=$(($(nproc)/2))"
-# 设置ZGC的最大暂停时间目标为10ms
-JAVA_OPT="${JAVA_OPT} -XX:MaxGCPauseMillis=10"
+# 设置 GC 线程数为 CPU 核心数的一半，平衡性能和资源消耗（单核机器兜底为 1，0 会被 JVM 拒绝）
+JAVA_OPT="${JAVA_OPT} -XX:ParallelGCThreads=$(($(nproc) / 2 > 1 ? $(nproc) / 2 : 1))"
 # ------ Spring 参数
 SPRING_OPT="${SPRING_OPT}"
 # ------ 控制台文件
 #CONSOLE_FILE="/dev/null"
 CONSOLE_FILE="${DIR_PATH}/logs/console.log"
-# ------ 停止时等待超时的秒数
-STOP_TIMEOUT=60
+# ------ 停止时等待超时的秒数（可配置）
+STOP_TIMEOUT="${STOP_TIMEOUT:-60}"
+# ------ 启动时等待端口绑定的最长秒数（可配置）
+PORT_TIMEOUT="${PORT_TIMEOUT:-300}"
 #
 # ================================================ 参数 end   ================================================
 #
@@ -81,56 +86,81 @@ _LOG_PATH="${DIR_PATH}/logs"
 _P2=$2
 #
 # =======================================
+# 判断给定 pid 是否为本脚本启动的应用
+# 只看 pid 是否存在不够：机器重启后 pidfile 里的号可能已被别的进程复用，
+# 按号码直接 kill 会误杀无关进程
+# =======================================
+is_our_pid() {
+  local pid=$1
+  # 目录里没 jar 时名字为空，grep -qF "" 会匹配任何进程，必须提前返回
+  [ -n "${pid}" ] && [ -n "${SERVER_FILE_NAME}" ] || return 1
+  if [ -r "/proc/${pid}/cmdline" ]; then
+    # cat 包一层：进程可能在检查与读取之间退出，直接重定向会报错刷屏
+    cat "/proc/${pid}/cmdline" 2>/dev/null | tr '\0' ' ' | grep -qF "${SERVER_FILE_NAME}"
+  else
+    # 非 Linux 没有 /proc，退化为 ps
+    ps -p "${pid}" -o args= 2>/dev/null | grep -qF "${SERVER_FILE_NAME}"
+  fi
+}
+#
+# =======================================
 # 解析服务的 pid
 # =======================================
 resolve_server_pid() {
   _SERVER_PID=0
   if [ -f "${_LOG_PATH}/server.pid" ]; then
     # pid 文件存在则读取文件
-    _SERVER_PID=$(cat "${_LOG_PATH}/server.pid")
-    # 判断是否真的存在这个 pid
-    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
-      # 没有找到文件记录的 pid, 删除这个文件
-      rm -rf "${_LOG_PATH}/server.pid"
+    local pid
+    pid=$(tr -dc '0-9' <"${_LOG_PATH}/server.pid")
+    if [ -n "${pid}" ] && is_our_pid "${pid}"; then
+      _SERVER_PID=${pid}
+    else
+      # 内容非法或进程已不存在（或号已被别的进程复用），删除这个文件
+      rm -f "${_LOG_PATH}/server.pid"
       sleep 0.2
-      _SERVER_PID=0
-      # 重新解析服务的 pid
-      #resolve_server_pid
     fi
-  #else
-  #    # pid文件不存在则尝试根据应用程序的名称获取pid
-  #    if test $(pgrep -f ${SERVER_FILE_NAME} | wc -l) -gt 0; then
-  #        # 说明应用程序正在跑, 使用第一个pid
-  #        _SERVER_PID=$(pgrep -f ${SERVER_FILE_NAME} | head -1)
-  #    else
-  #        _SERVER_PID=0
-  #    fi
+  fi
+}
+#
+# =======================================
+# 列出本进程正在监听的端口
+# ss/netstat 的 PID 列只有 root 可见，非 root 下返回空，调用方需按「未知」处理
+# =======================================
+list_server_ports() {
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltnp 2>/dev/null | grep "pid=${_SERVER_PID}," | awk '{print $4}'
+  elif command -v netstat >/dev/null 2>&1; then
+    netstat -tulnp 2>/dev/null | grep "${_SERVER_PID}/" | awk '{print $4}'
   fi
 }
 #
 # =======================================
 # 解析服务的端口
+# 返回 0 已绑定端口 / 1 进程已退出或启动失败 / 2 超时仍未拿到端口信息
 # =======================================
 retry_resolve_server_port() {
   _SERVER_PORT=0
-  # 解析服务的 pid
-  resolve_server_pid
-  # 检测5分钟(300秒)
-  for ((i = 0; i <= 300; i++)); do
-    # 判断 pid 是否存在
-    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
-      rm -rf "${_LOG_PATH}/server.pid"
-      _SERVER_PID=0
-      break
+  local i
+  for ((i = 0; i <= PORT_TIMEOUT; i++)); do
+    # 进程没了，没必要再等
+    if ! is_our_pid "${_SERVER_PID}"; then
+      return 1
     fi
-    # 判断 pid 的 port 是否绑定
-    if test "$(netstat -tulnp | grep "${_SERVER_PID}/" | wc -l)" -gt 0; then
-      _SERVER_PORT=$(netstat -tulnp | grep "${_SERVER_PID}/" | head -1 | awk '{print $4}' | awk -F ":" '{print $NF}')
-      break
+    # 启动失败时 JVM 不会退出，只会在控制台打印栈，命中关键字就直接放弃
+    if [ -f "${CONSOLE_FILE}" ] &&
+      grep -qE "APPLICATION FAILED TO START|Error starting ApplicationContext|Web server failed to start|Exception encountered during context initialization" "${CONSOLE_FILE}"; then
+      return 1
     fi
-    [[ $((i%5)) -eq 0 ]] && echo "观察服务器端口使用情况 ${i}s"
+    local ports
+    ports=$(list_server_ports)
+    if [ -n "${ports}" ]; then
+      _SERVER_PORT_TEXT=$(echo "${ports}" | awk 'BEGIN{ORS=" "}NF{print}')
+      return 0
+    fi
+    [[ $((i % 5)) -eq 0 ]] && echo "观察服务器端口使用情况 ${i}s"
     sleep 1
   done
+  return 2
 }
 #
 # =======================================
@@ -146,6 +176,11 @@ start() {
     echo "---------- 启动 [end] ----------"
     return
   fi
+  # 目录里没有可执行包时早报错，否则用户只会看到一句模糊的「启动失败」
+  if [ -z "${SERVER_FILE_NAME}" ]; then
+    echo -e "\033[31m${DIR_PATH} 下没有找到 .jar 或 .war 文件\033[0m"
+    exit 1
+  fi
   #
   echo "启动 ${SERVER_FILE_NAME} 中 ..."
   # 如果 JAVA 是一个目录,则加上/bin/java
@@ -155,7 +190,7 @@ start() {
   # 最终 Java 不是一个存在的文件, 则清空
   [ ! -e "$JAVA" ] && unset JAVA
   if [ -z "${JAVA}" ]; then
-    echo -e "\033[31m请在您的环境中设置JAVA_HOME变量，我们需要java（x64）！jdk21版本更好！\033[0m"
+    echo -e "\033[31m请在您的环境中设置JAVA_HOME变量，我们需要java（x64）！\033[0m"
     exit 1
   fi
   # 判断是否需要删除日志文件
@@ -164,19 +199,21 @@ start() {
     echo -e "\033[33m删除 ${SERVER_FILE_NAME} 的日志文件(${DIR_PATH}/logs/*)\033[0m"
     rm -rf "${DIR_PATH}"/logs/*
   fi
-  # 检查日志目录
-  test -d "${DIR_PATH}/logs/" || mkdir -p "${DIR_PATH}/logs/"
+  # 检查日志目录（含 dump 目录，OOM 时目录不存在则 dump 静默失败）
+  mkdir -p "${_LOG_PATH}/dump"
+  # 上一次的控制台日志留一份，重启后还能查上一次的异常
+  [ -f "${CONSOLE_FILE}" ] && mv -f "${CONSOLE_FILE}" "${CONSOLE_FILE}.1"
   # 执行脚本
   # nohup java -Xmx128m -jar /home/app/server.jar --spring.profiles.active=prod >> /home/app/logs/console.log 2>&1 & echo $! > /home/app/logs/server.pid
   #
   # 运行的参数
-  RUN_OPT="${JAVA_OPT} -jar"
-  RUN_OPT="${RUN_OPT} ${DIR_PATH}/${SERVER_FILE_NAME}"
-  [ -n "${SPRING_OPT}" ] && RUN_OPT="${RUN_OPT} ${SPRING_OPT}"
+  # 用数组传参，jar 路径含空格时不会被拆成多个参数
+  read -r -a RUN_OPT <<<"${JAVA_OPT} ${SPRING_OPT}"
+  RUN_OPT_TEXT="${JAVA} ${JAVA_OPT} ${SPRING_OPT} -jar ${DIR_PATH}/${SERVER_FILE_NAME}"
   #
-  echo "$JAVA ${RUN_OPT}"
-  echo "$JAVA ${RUN_OPT}" >"${CONSOLE_FILE}"
-  nohup "$JAVA" ${RUN_OPT} >>"${CONSOLE_FILE}" 2>&1 &
+  echo "${RUN_OPT_TEXT}"
+  echo "${RUN_OPT_TEXT}" >"${CONSOLE_FILE}"
+  nohup "$JAVA" "${RUN_OPT[@]}" -jar "${DIR_PATH}/${SERVER_FILE_NAME}" >>"${CONSOLE_FILE}" 2>&1 &
   echo $! >"${_LOG_PATH}/server.pid"
   #
   echo "${SERVER_FILE_NAME} 正在运行"
@@ -188,21 +225,21 @@ start() {
   resolve_server_pid
   # 判断应用程序是否成功跑起来
   if [ "${_SERVER_PID}" -eq 0 ]; then
-    echo -e "\033[31m${SERVER_FILE_NAME} 启动失败\033[0m"
+    echo -e "\033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
   else
-    if [ -n "${SPRING_OPT}" ]; then
-      # 如果是 Spring 项目, 需要观察端口是否成功绑定
-      retry_resolve_server_port
-      #
-      if [ "${_SERVER_PORT}" -eq 0 ]; then
-        echo -e "\033[31m${SERVER_FILE_NAME} 启动失败\033[0m"
-      else
-        _SERVER_PORT_TEXT=$(netstat -tulnp | grep "${_SERVER_PID}/" | awk 'BEGIN{ORS=" "}{print $4}')
-        echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
-      fi
-    else
-      echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, \033[0m\033[33mSERVER_PORT = unknown \033[0m\033[32m]\033[0m"
-    fi
+    retry_resolve_server_port
+    case $? in
+    0)
+      echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
+      ;;
+    1)
+      echo -e "\033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
+      ;;
+    *)
+      # 非 root 看不到 ss 的 PID 列，进程活着就算成功，端口只是显示不出来
+      echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, \033[0m\033[33mSERVER_PORT = unknown（非 root 无法读取端口，或非 Spring 项目）\033[0m\033[32m]\033[0m"
+      ;;
+    esac
   fi
   echo "---------- 启动 [end] ----------"
 }
@@ -227,26 +264,22 @@ stop() {
   _wait_seconds=0
   #
   while true; do
-    if test "$(ps -ef | awk '{print $2}' | grep -cw "${_SERVER_PID}")" -eq 0; then
+    if ! is_our_pid "${_SERVER_PID}"; then
       echo "${SERVER_FILE_NAME} 已停止"
+      rm -f "${_LOG_PATH}/server.pid"
       break
     fi
     if [ "${_wait_seconds}" -ge "${STOP_TIMEOUT}" ]; then
       # 强制终止进程
-      echo -e "\033[31m等待超时(${_wait_seconds}s), 强制关机 [kill -9 ${SERVER_FILE_NAME}].\033[0m"
-      sudo kill -9 "${_SERVER_PID}"
+      echo -e "\033[31m等待超时(${_wait_seconds}s), 强制关机 [kill -9 ${_SERVER_PID}].\033[0m"
+      kill -9 "${_SERVER_PID}" 2>/dev/null || echo -e "\033[31m强制关机失败，请手动处理 [kill -9 ${_SERVER_PID}]\033[0m"
+      rm -f "${_LOG_PATH}/server.pid"
       break
     fi
     sleep 1
     ((_wait_seconds++))
     echo "请稍等 ${_wait_seconds}s"
   done
-  if [ $? -eq 0 ]; then
-    echo "${SERVER_FILE_NAME} 停止成功"
-    rm -rf "${_LOG_PATH}/server.pid"
-  else
-    echo "${SERVER_FILE_NAME} 停止失败"
-  fi
   echo "---------- 停止  [end] ----------"
   sleep 1
 }
@@ -261,8 +294,8 @@ status() {
   if [ "${_SERVER_PID}" -eq 0 ]; then
     echo -e "\033[33m${SERVER_FILE_NAME} 已停止\033[0m"
   else
-    _SERVER_PORT_TEXT=$(netstat -tulnp | grep "${_SERVER_PID}/" | awk 'BEGIN{ORS=" "}{print $4}')
-    [ -z "$_SERVER_PORT_TEXT" ] && _SERVER_PORT_TEXT="unknown "
+    _SERVER_PORT_TEXT=$(list_server_ports | awk 'BEGIN{ORS=" "}NF{print}')
+    [ -z "$_SERVER_PORT_TEXT" ] && _SERVER_PORT_TEXT="unknown（非 root 无法读取端口）"
     echo -e "\033[32m${SERVER_FILE_NAME} 运行中 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
     echo -e "你可以查看日志文件 \033[36m${CONSOLE_FILE}\033[0m 或者执行下面的命令"
     echo -e "\033[40;37mtail -f -n 300 ${CONSOLE_FILE}\033[0m"
@@ -274,6 +307,10 @@ status() {
 # 日志
 # =======================================
 logs() {
+  if [ ! -f "${CONSOLE_FILE}" ]; then
+    echo -e "\033[33m还没有日志文件 ${CONSOLE_FILE}，服务是否启动过？\033[0m"
+    exit 1
+  fi
   tail -f -n 200 "${CONSOLE_FILE}"
 }
 #
