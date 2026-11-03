@@ -10,7 +10,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
 
 import java.time.LocalDateTime;
-import java.util.stream.Stream;
 
 /**
  * 项目启动监听打印项目信息
@@ -19,7 +18,7 @@ import java.util.stream.Stream;
 public class StartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private static boolean hasOpenApi() {
-        return Stream.of("springfox.documentation.spring.web.plugins.Docket", "io.swagger.v3.oas.models.OpenAPI").anyMatch(clazz -> ClassUtils.isPresent(clazz, null));
+        return ClassUtils.isPresent("io.swagger.v3.oas.models.OpenAPI", null);
     }
 
     @Override
@@ -56,11 +55,11 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
                 """.formatted(appName, DateUtil.format(event.getTimeTaken()), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch);
         boolean hasOpenApi = hasOpenApi();
         if (hasOpenApi) {
-            // 如果有 swagger，打印开发阶段的 swagger ui 地址
-            String swaggerPath = environment.getProperty("springdoc.swagger-ui.path", "/swagger-ui.html");
+            // 本模块只产 OpenAPI 描述（JSON）
+            String apiDocsPath = environment.getProperty("springdoc.api-docs.path", "/v3/api-docs");
             content = content.concat("""
-                    📘 OpenAPI 文档\t:\t%s%s
-                    """.formatted(url, swaggerPath));
+                    📘 OpenAPI 描述（JSON）\t:\t%s%s
+                    """.formatted(url, apiDocsPath));
         }
         System.out.println(content);
     }

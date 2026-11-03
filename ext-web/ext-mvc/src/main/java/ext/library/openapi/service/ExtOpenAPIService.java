@@ -21,7 +21,7 @@ import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -74,8 +74,8 @@ public class ExtOpenAPIService extends OpenAPIService {
     @Override
     public Operation buildTags(@Nonnull HandlerMethod handlerMethod, Operation operation,
                                OpenAPI openAPI, Locale locale) {
-        Set<Tag> tags = new HashSet<>();
-        Set<String> tagsStr = new HashSet<>();
+        Set<Tag> tags = new LinkedHashSet<>();
+        Set<String> tagsStr = new LinkedHashSet<>();
 
         buildTagsFromMethod(handlerMethod.getMethod(), tags, tagsStr, locale);
         buildTagsFromClass(handlerMethod.getBeanType(), tags, tagsStr, locale);
@@ -83,7 +83,7 @@ public class ExtOpenAPIService extends OpenAPIService {
         if (ObjectUtil.isNotEmpty(tagsStr)) {
             Set<String> resolvedTags = tagsStr.stream()
                     .map(str -> propertyResolverUtils.resolve(str, locale))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             mergeOperationTags(operation, resolvedTags);
         }
 
@@ -92,9 +92,10 @@ public class ExtOpenAPIService extends OpenAPIService {
         }
 
         if (ObjectUtil.isNotEmpty(tags)) {
-            List<Tag> openApiTags = openAPI.getTags();
-            if (ObjectUtil.isNotEmpty(openApiTags)) {
-                tags.addAll(openApiTags);
+            // 配置或前序 Controller 已声明的同名 Tag 优先，避免同名两条
+            Set<String> tagNames = tags.stream().map(Tag::getName).collect(Collectors.toSet());
+            if (ObjectUtil.isNotEmpty(openAPI.getTags())) {
+                openAPI.getTags().stream().filter(t -> tagNames.add(t.getName())).forEach(tags::add);
             }
             openAPI.setTags(new ArrayList<>(tags));
         }
@@ -110,10 +111,9 @@ public class ExtOpenAPIService extends OpenAPIService {
         if (ObjectUtil.isEmpty(operation.getTags())) {
             operation.setTags(new ArrayList<>(tagsToMerge));
         } else {
-            Set<String> mergedTags = new HashSet<>(operation.getTags());
+            Set<String> mergedTags = new LinkedHashSet<>(operation.getTags());
             mergedTags.addAll(tagsToMerge);
-            operation.getTags().clear();
-            operation.getTags().addAll(mergedTags);
+            operation.setTags(new ArrayList<>(mergedTags));
         }
     }
 
@@ -134,33 +134,36 @@ public class ExtOpenAPIService extends OpenAPIService {
     }
 
     /**
-     * 自动构建 Tag（使用 JavaDoc 注释作为 Tag 名称）
+     * 自动构建 Tag：JavaDoc 第一行作 Tag 名，整段作描述；没有 JavaDoc 时退化为类名拆分。
      */
     private void buildAutoTag(HandlerMethod handlerMethod, Operation operation, OpenAPI openAPI) {
-        if (javadocProvider.isEmpty()) {
-            String tagAutoName = splitCamelCase(handlerMethod.getBeanType().getSimpleName());
-            operation.addTagsItem(tagAutoName);
-            return;
-        }
-        String description = javadocProvider.get().getClassJavadoc(handlerMethod.getBeanType());
-        if (StringUtils.isBlank(description)) {
-            return;
-        }
-        // 使用 JavaDoc 第一行作为 Tag 名称
-        String tagName = description.lines().findFirst().orElse(description);
-        Tag tag = new Tag().name(tagName).description(description);
+        Class<?> beanType = handlerMethod.getBeanType();
+        String autoName = splitCamelCase(beanType.getSimpleName());
+        String javadoc = javadocProvider.map(provider -> provider.getClassJavadoc(beanType)).orElse(null);
+        String tagName = StringUtils.isBlank(javadoc)
+                ? autoName
+                : javadoc.lines().map(String::trim).filter(StringUtils::isNotBlank).findFirst().orElse(autoName);
+
         operation.addTagsItem(tagName);
 
-        if (openAPI.getTags() == null || !openAPI.getTags().contains(tag)) {
-            openAPI.addTagsItem(tag);
+        // Tag.equals 连 description 一起比，必须按 name 查重，否则同名 Tag 会出现两条
+        boolean exists = openAPI.getTags() != null
+                && openAPI.getTags().stream().anyMatch(tag -> tagName.equals(tag.getName()));
+        if (exists) {
+            return;
         }
+        Tag tag = new Tag().name(tagName);
+        if (StringUtils.isNotBlank(javadoc) && !tagName.equals(javadoc)) {
+            tag.description(javadoc);
+        }
+        openAPI.addTagsItem(tag);
     }
 
     private void buildTagsFromMethod(Method method, Set<Tag> tags, Set<String> tagsStr, Locale locale) {
         Set<io.swagger.v3.oas.annotations.tags.Tag> methodTags =
                 AnnotatedElementUtils.findAllMergedAnnotations(method, Tags.class).stream()
                         .flatMap(x -> Stream.of(x.value()))
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
         methodTags.addAll(AnnotatedElementUtils.findAllMergedAnnotations(method,
                 io.swagger.v3.oas.annotations.tags.Tag.class));
 
@@ -169,7 +172,7 @@ public class ExtOpenAPIService extends OpenAPIService {
         }
         tagsStr.addAll(methodTags.stream()
                 .map(tag -> propertyResolverUtils.resolve(tag.name(), locale))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
         addTags(new ArrayList<>(methodTags), tags, locale);
     }
 

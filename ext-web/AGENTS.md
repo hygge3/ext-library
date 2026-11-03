@@ -46,10 +46,10 @@ Spring MVC 增强模块，提供：
 
 - **校验**：自定义约束 `@Chinese` / `@English` / `@Cellphone` / `@ZipCode` / `@Username` / `@Xss` / `@RangeIn` / `@Exclusion` / `@Mutual`，预定义分组 `ValidationGroups`，消息插值 `EmptyCurlyToDefaultMessageInterpolator`。
 - **统一出参**：异常处理与 REST 响应包装，**包装范围由包名列表控制**（不要退回布尔开关）。
-- **OpenAPI**：接口文档自动配置。
+- **OpenAPI**：接口文档自动配置，只生成 `/v3/api-docs`，不带 swagger-ui；需要页面时消费方自行加 `springdoc-openapi-starter-webmvc-ui`（版本不写）。**Tag 命名只在 `ExtOpenAPIService` 一处决定**（JavaDoc 第一行作名、整段作描述，无 JavaDoc 退化为 `splitCamelCase`），`OpenApiCustomizer` 只负责补 contextPath，不要再在 customizer 里改名——两套改名逻辑口径不一致，且 `Tag.equals` 连 description 一起比，同名会生成两条。
 - **启动**：`StartupListener`。
 
-**边界**：依赖 `ext-core`、`ext-json`、`ext-servlet`、`swagger-annotations`、`springdoc`、`starter-webmvc`；它不实现认证，认证在 [ext-security](../ext-security/AGENTS.md)。统一响应体 `R`、分页与选项模型（`PageQuery` / `PageResult` / `SelectData`）、`ServletUtil`、错误信封都属 [ext-servlet](../ext-common/AGENTS.md#ext-servlet)，本模块不重复定义，**也不要再放回同名类**。本模块只负责包装范围、异常归类、校验与文档：`GlobalExceptionHandler` 只声明「哪种异常归我管、对外说什么」，信封组装与日志口径用基座的 `ErrorEnvelope` / `ErrorLog`。
+**边界**：依赖 `ext-core`、`ext-json`、`ext-servlet`、`swagger-core-jakarta`、`springdoc-openapi-starter-webmvc-api`、`starter-webmvc`；它不实现认证，认证在 [ext-security](../ext-security/AGENTS.md)。统一响应体 `R`、分页与选项模型（`PageQuery` / `PageResult` / `SelectData`）、`ServletUtil`、错误信封都属 [ext-servlet](../ext-common/AGENTS.md#ext-servlet)，本模块不重复定义，**也不要再放回同名类**。本模块只负责包装范围、异常归类、校验与文档：`GlobalExceptionHandler` 只声明「哪种异常归我管、对外说什么」，信封组装与日志口径用基座的 `ErrorEnvelope` / `ErrorLog`。
 
 **转义归属**：不另开 HTML 模块——纯字符串转义（`escapeHtml`）用 `ext-tool` 的 `StringUtil`，`@Xss` 校验器留在本模块（它是校验语义，`ext-servlet` 明确不收校验器）。
 

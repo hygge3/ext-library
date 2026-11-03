@@ -94,7 +94,7 @@ graph TD
 
 ## ext-bom
 
-**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、swagger-annotations、springdoc、webauthn4j、twelvemonkeys），并把 26 个 ext 模块的版本一并约束。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
+**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、springdoc、webauthn4j、twelvemonkeys），并把 26 个 ext 模块的版本一并约束。swagger 三件套（`swagger-core-jakarta` / `swagger-annotations-jakarta` / `swagger-models-jakarta`）**不由本 BOM 约束**，版本必须与 springdoc 传递的完全一致，否则同名注解类会出现两份。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
 
 **优先复用官方 BOM**：第三方自己带 BOM（如 `software.amazon.awssdk:bom`）就 `platform(...)` 导入，不要把它的几十个 artifact 拆成 constraint——逐个约束跟不上官方拆包节奏，还会诱使模块混引不同版本的 service client。
 
@@ -173,8 +173,8 @@ graph TD
 
 - `version` — 项目自身版本，所有 ext 模块共用
 - `springBootVersion` — Spring Boot 全家桶版本，通过 `spring-boot-dependencies` BOM 管理所有 `org.springframework.*` 等依赖
-- `bouncyCastleVersion` / `zxingVersion` / `swaggerAnnotationsVersion` / `springdocVersion` / `awsSdkVersion` /
-  `webauthn4jVersion` / `jetbrainsAnnotationsVersion` / `s3mockVersion`（仅测试）— 不在其他 BOM 里单独约束的第三方依赖
+- `bouncyCastleVersion` / `zxingVersion` / `springdocVersion` / `awsSdkVersion` /
+  `webauthn4jVersion` / `s3mockVersion`（仅测试）— 不在其他 BOM 里单独约束的第三方依赖
 
 约束声明在 `ext-bom/build.gradle`，与 ext 模块版本一起发布给消费方。
 
@@ -207,3 +207,5 @@ graph TD
 | 2026-10-31 | `goal-and-requirements.md` 的目标 / 非目标 / 设计原则并入根 AGENTS.md，原文档删除 |
 | 2026-11-01 | ext-oss 移除 SFTP 后端（presign 无法实现，属接口违约），只留 local + S3；sshd 依赖与 BOM 约束删除 |
 | 2026-11-01 | ext-security 新增两步验证（TOTP）与通行密钥（WebAuthn，webauthn4j-core）；ext-bom 新增 webauthn4j 与 org.jetbrains:annotations 约束 |
+| 2026-11-03 | 依赖收敛：ext-mvc 改声明 `swagger-core-jakarta`（原 `swagger-annotations:3.0.0` 与 springdoc 传递的 `-jakarta:2.2.55` 同名类冲突，且 3.x 需 Jackson 3/EE11，springdoc 3.2.0 尚未跟进）；BOM 不再约束 swagger；删除用不到的 `org.jetbrains:annotations`；webauthn4j 升 0.32.0；ext-qrcode 排除 jcommander |
+| 2026-11-03 | ext-mvc 改用 `springdoc-openapi-starter-webmvc-api`：只生成 `/v3/api-docs`，不再拖 swagger-ui webjars；`-ui` 留给消费方自加（BOM 仍有约束） |

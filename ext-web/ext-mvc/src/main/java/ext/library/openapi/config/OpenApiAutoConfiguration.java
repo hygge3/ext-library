@@ -5,12 +5,9 @@ import ext.library.openapi.service.ExtOpenAPIService;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.ObjectUtil;
-import ext.library.tool.util.StringUtil;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -29,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * OpenAPI 自动配置类
@@ -38,8 +34,6 @@ import java.util.regex.Pattern;
 @AutoConfigureBefore(SpringDocConfiguration.class)
 @ConditionalOnProperty(prefix = OpenApiProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiAutoConfiguration {
-
-    private static final Pattern alphaNumericPattern = Pattern.compile("^[a-zA-Z0-9-]+$");
 
     private final OpenApiProperties openApiProperties;
     private final ServerProperties serverProperties;
@@ -101,48 +95,15 @@ public class OpenApiAutoConfiguration {
         String finalContextPath = ObjectUtil.isEmpty(contextPath) || "/".equals(contextPath) ? "" : contextPath;
 
         return openApi -> {
-            // 对所有路径增加前置上下文路径
+            // 对所有路径增加前置上下文路径；Tag 命名由 ExtOpenAPIService 负责，此处不再改名
             Paths oldPaths = openApi.getPaths();
-            if (oldPaths instanceof PrefixedPaths) {
+            if (ObjectUtil.isEmpty(oldPaths) || oldPaths instanceof PrefixedPaths) {
                 return;
             }
             PrefixedPaths newPaths = new PrefixedPaths();
             oldPaths.forEach((k, v) -> newPaths.addPathItem(finalContextPath + k, v));
             openApi.setPaths(newPaths);
-
-            // 将 Controller 的 JavaDoc 注释转换为 Tag 名称
-            if (openApi.getTags() == null) {
-                return;
-            }
-            convertJavadocToTagName(openApi);
         };
-    }
-
-    /**
-     * 将 JavaDoc 描述转换为 Tag 名称
-     */
-    private void convertJavadocToTagName(OpenAPI openApi) {
-        for (Tag tag : openApi.getTags()) {
-            if (!alphaNumericPattern.matcher(tag.getName()).matches() || StringUtil.isEmpty(tag.getDescription())) {
-                continue;
-            }
-            String oldName = tag.getName();
-            String newName = tag.getDescription();
-
-            // 同步修改所有 Operation 中的 Tag 引用
-            openApi.getPaths().forEach((path, pathItem) -> pathItem.readOperations().forEach(operation -> replaceTagName(operation, oldName, newName)));
-            tag.name(newName);
-        }
-    }
-
-    /**
-     * 替换 Operation 中的 Tag 名称
-     */
-    private void replaceTagName(Operation operation, String oldName, String newName) {
-        if (operation.getTags() == null) {
-            return;
-        }
-        operation.getTags().replaceAll(tagName -> tagName.equals(oldName) ? newName : tagName);
     }
 
     /**
