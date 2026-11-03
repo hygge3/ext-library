@@ -2,5 +2,8 @@ description = '二维码生成与识别'
 
 dependencies {
     api project(':ext-common:ext-tool')
-    api 'com.google.zxing:javase'
+    // javase 只为 BufferedImageLuminanceSource，其自带的命令行入口 jcommander 用不到
+    api('com.google.zxing:javase') {
+        exclude group: 'org.jcommander'
+    }
 }

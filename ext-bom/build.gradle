@@ -22,11 +22,8 @@ dependencies {
     constraints {
         api "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
         api "com.google.zxing:javase:${zxingVersion}"
-        api "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
-        // webauthn4j 的 API 签名带 @NotNull，但它自己只声明 compileOnly，消费方得自带
         api "com.webauthn4j:webauthn4j-core:${webauthn4jVersion}"
-        api "org.jetbrains:annotations:${jetbrainsAnnotationsVersion}"
-        api "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+        api "org.springdoc:springdoc-openapi-starter-webmvc-api:${springdocVersion}"
         // TwelveMonkeys ImageIO：补足 JDK ImageIO 缺失的图片格式（WebP、PSD、ICNS 等）
         // 纯 Java、SPI 自动注册，业务方按需引入相应 artifact，版本由本 BOM 统一
         api "com.twelvemonkeys.imageio:imageio-webp:${twelveMonkeysVersion}"
