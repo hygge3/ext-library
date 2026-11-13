@@ -77,8 +77,10 @@ dependencies {
 // ======================= ext-web 层 =====================
 dependencies {
     constraints {
+        api project(':ext-web:ext-accesslog')
         api project(':ext-web:ext-mvc')
         api project(':ext-web:ext-realtime')
+        api project(':ext-web:ext-trace')
     }
 }
 

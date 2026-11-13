@@ -1,0 +1,11 @@
+description = '结构化访问日志'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    api project(':ext-common:ext-servlet')
+    api 'org.springframework:spring-web'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

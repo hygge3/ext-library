@@ -2,20 +2,38 @@
 
 # ext-web - Web 层
 
-> 提供 Web 开发相关功能，包括 MVC 增强与实时通信
+> 提供 Web 开发相关功能，包括 MVC 增强、访问日志、链路追踪与实时通信
 
 ## 层级职责
 
-ext-web 负责 Web 层的功能增强，提供统一的请求处理、API 文档、实时通信等能力。
+ext-web 负责 Web 层的功能增强，提供统一的请求处理、API 文档、访问观测、实时通信等能力。
 
 ## 子模块列表
 
 | 模块 | 描述 | 主要依赖 |
 |------|------|----------|
+| ext-accesslog | 结构化 HTTP 访问日志（耗时、状态码、IP、UA、traceId、慢请求） | ext-core, ext-json, ext-servlet, spring-web, servlet-api |
 | ext-mvc | Spring MVC 增强与 OpenAPI 文档，自定义验证器、异常处理 | ext-core, ext-json, ext-servlet, springdoc-openapi, spring-webmvc |
 | ext-realtime | 实时通信，SSE 服务端推送与 WebSocket 双向通信 | ext-security, spring-webmvc, spring-websocket, ext-redis |
+| ext-trace | 链路追踪（traceId/requestId 透传、MDC、响应头）与异步上下文传播 | ext-core, ext-servlet, spring-web, servlet-api |
 
 ## 模块详情
+
+### ext-accesslog
+
+结构化访问日志模块，提供：
+
+- `AccessLogFilter` - `OncePerRequestFilter`，记录方法、URI、查询串、状态码、耗时、traceId（MDC）、客户端 IP（`ServletUtil.getIpAddr`）、UA、可选请求头（敏感头自动掩码）
+- `AccessLogProperties` - 配置属性（前缀 `ext.accesslog`）
+- 慢请求阈值（默认 `3000ms`）以 `WARN` 输出；`4xx`/`5xx` 分级日志
+
+**包结构**: `ext.library.accesslog`
+
+#### 设计约束
+
+**职责**：统一 HTTP 访问观测，不替代业务审计（`ext-audit`）。默认只记元信息，不读请求/响应 body；排除路径（actuator/swagger 等）可配。
+
+**边界**：依赖 `ext-servlet` 的 `ServletUtil` 获取 IP；traceId 从 MDC 读取（与 `ext-trace` 配合，trace 过滤器 order 更靠前）。`jakarta.servlet-api` 为 `compileOnly`。
 
 ### ext-mvc
 
@@ -86,16 +104,40 @@ Spring MVC 增强模块，提供：
 ```
 ext-common (ext-core, ext-json, ext-servlet)
     |
+    +---> ext-accesslog
     +---> ext-mvc
+    +---> ext-trace
     +---> ext-security ---> ext-realtime (依赖 ext-security, spring-webmvc；广播后端 ext-redis / ext-postgres 由消费方引入)
 ```
 
+### ext-trace
+
+链路追踪与上下文透传模块，提供：
+
+- `TraceFilter` - 从请求头（`X-Request-Id` / `X-Trace-Id` / `traceparent`）提取或生成 traceId，写入 MDC 与响应头
+- `MdcTaskDecorator` - 提交异步任务时捕获/恢复 MDC，避免线程复用串线
+- `TraceIdGenerator` - 追踪 ID 生成（短 hex / UUID）
+- `TraceProperties` - 配置属性（前缀 `ext.trace`）
+- `BeanPostProcessor` 为 `ThreadPoolTaskExecutor` 自动挂载 MDC 装饰器（可关 `ext.trace.propagate-mdc`）
+
+**包结构**: `ext.library.trace`
+
+#### 设计约束
+
+**职责**：补齐跨请求/跨线程的追踪上下文，供日志（`ext-logback`/访问日志）关联；不自造分布式 tracer，对接 Micrometer Tracing 时由消费方引入桥接（本模块 `compileOnly` 声明 `micrometer-tracing`/`context-propagation` 以便后续扩展）。
+
+**边界**：Web 过滤器依赖 `ext-servlet`；MDC 传播是通用能力。与 `ext-accesslog` 配合时 trace 过滤器 order（`+5`）早于 accesslog（`+20`）。
+
+**注意**：`ThreadPoolTaskExecutor` 装饰器通过 `BeanPostProcessor` 在初始化前设置；若用户需自定义 `TaskDecorator`，应关闭 `ext.trace.propagate-mdc` 并自行组合装饰器。
+
 ## 相关文件
 
+- `ext-accesslog/src/main/java/ext/library/accesslog/` - 访问日志源码
 - `ext-mvc/src/main/java/ext/library/web/` - MVC 增强源码
 - `ext-mvc/src/main/java/ext/library/openapi/` - OpenAPI 源码
 - `ext-realtime/src/main/java/ext/library/sse/` - SSE 源码
 - `ext-realtime/src/main/java/ext/library/websocket/` - WebSocket 源码
+- `ext-trace/src/main/java/ext/library/trace/` - 链路追踪源码
 
 ## 变更记录
 
@@ -103,3 +145,4 @@ ext-common (ext-core, ext-json, ext-servlet)
 |------|----------|
 | 2026-01-19 | 初始化 AGENTS.md 文档 |
 | 2026-10-10 | ext-openapi 并入 ext-mvc，ext-sse 与 ext-websocket 合并为 ext-realtime |
+| 2026-11-04 | 新增 ext-accesslog（结构化访问日志）与 ext-trace（链路追踪/MDC 透传） |

@@ -38,8 +38,10 @@ include 'ext-security'
 include 'ext-crypto'
 
 // ==================== ext-web ====================
+include 'ext-web:ext-accesslog'
 include 'ext-web:ext-mvc'
 include 'ext-web:ext-realtime'
+include 'ext-web:ext-trace'
 
 // ==================== ext-enhance ====================
 include 'ext-enhance:ext-captcha'

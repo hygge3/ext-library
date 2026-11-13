@@ -65,8 +65,10 @@ graph TD
     C1 --> C1c["ext-lock<br/>分布式锁"]
     C --> C1f["ext-i18n<br/>国际化"]
     C --> C1g["ext-oss<br/>对象存储"]
-    F --> F1["ext-mvc<br/>MVC 支持 (含 OpenAPI)"]
-    F --> F2["ext-realtime<br/>SSE + WebSocket"]
+    F --> F1["ext-accesslog<br/>结构化访问日志"]
+    F --> F2["ext-mvc<br/>MVC 支持 (含 OpenAPI)"]
+    F --> F3["ext-realtime<br/>SSE + WebSocket"]
+    F --> F4["ext-trace<br/>链路追踪/上下文透传"]
     G --> G1["ext-captcha<br/>验证码"]
     G --> G2["ext-idempotent<br/>幂等性"]
     G --> G3["ext-api-crypto<br/>API 加密"]
@@ -89,12 +91,12 @@ graph TD
 | [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度、国际化、对象存储 |
 | [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架（会话、权限、两步验证、通行密钥） |
 | [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/RSA/SM2/SM3/SM4)           |
-| [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC 与实时通信                    |
+| [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC、访问日志、链路追踪、实时通信    |
 | [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流、审计  |
 
 ## ext-bom
 
-**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、springdoc、webauthn4j、twelvemonkeys），并把 26 个 ext 模块的版本一并约束。swagger 三件套（`swagger-core-jakarta` / `swagger-annotations-jakarta` / `swagger-models-jakarta`）**不由本 BOM 约束**，版本必须与 springdoc 传递的完全一致，否则同名注解类会出现两份。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
+**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、springdoc、webauthn4j、twelvemonkeys），并把 28 个 ext 模块的版本一并约束。swagger 三件套（`swagger-core-jakarta` / `swagger-annotations-jakarta` / `swagger-models-jakarta`）**不由本 BOM 约束**，版本必须与 springdoc 传递的完全一致，否则同名注解类会出现两份。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
 
 **优先复用官方 BOM**：第三方自己带 BOM（如 `software.amazon.awssdk:bom`）就 `platform(...)` 导入，不要把它的几十个 artifact 拆成 constraint——逐个约束跟不上官方拆包节奏，还会诱使模块混引不同版本的 service client。
 
@@ -118,7 +120,7 @@ graph TD
 |          (captcha, idempotent, api-crypto, ratelimit, audit)|
 +------------------------------------------------------------+
 |                       ext-web                             |  Web 层
-|                    (mvc, realtime)                        |
+|              (accesslog, mvc, realtime, trace)            |
 +------------------------------------------------------------+
 |     ext-security                 ext-crypto               |  安全/加密层
 +------------------------------------------------------------+
