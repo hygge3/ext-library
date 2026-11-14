@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>运行时指标</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --line: #21262d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --accent: #4b9bff;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  h1 { font-size: 20px; margin: 0; font-weight: 600; }
+
+  .meta { color: var(--muted); font-size: 13px; }
+
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .dot.down { background: var(--bad); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .card .label { color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+
+  .card .value { font-size: 26px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+  .card .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+  .value.ok { color: var(--ok); }
+  .value.warn { color: var(--warn); }
+  .value.bad { color: var(--bad); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    min-width: 0;
+  }
+
+  section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 10px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+
+  th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 4px 8px 6px 0;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  td { padding: 6px 8px 6px 0; border-bottom: 1px solid rgba(33, 38, 45, .6); vertical-align: top; }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.num, th.num { text-align: right; }
+
+  .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
+
+  .endpoint { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; word-break: break-all; }
+
+  .empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+  .bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+
+  .bar > i { display: block; height: 100%; background: var(--accent); }
+
+  .bar > i.warn { background: var(--warn); }
+  .bar > i.bad { background: var(--bad); }
+
+  .sql { color: var(--muted); font-size: 12px; word-break: break-all; max-width: 520px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 14px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>运行时指标</h1>
+  <span class="meta" id="status"><span class="dot"></span>连接中…</span>
+  <span class="meta" id="window"></span>
+  <span class="meta" id="updated"></span>
+</header>
+
+<div class="cards">
+  <div class="card">
+    <div class="label">QPS</div>
+    <div class="value" id="qps">-</div>
+    <div class="sub" id="requests">窗口内 0 请求</div>
+  </div>
+  <div class="card">
+    <div class="label">P99 延迟</div>
+    <div class="value" id="p99">-</div>
+    <div class="sub" id="p99Hint">阈值 500ms</div>
+  </div>
+  <div class="card">
+    <div class="label">错误率</div>
+    <div class="value" id="errorRate">-</div>
+    <div class="sub" id="errors">5xx 0 次</div>
+  </div>
+  <div class="card">
+    <div class="label">限流拒绝 / 幂等命中</div>
+    <div class="value" id="counters">-</div>
+    <div class="sub">累计，重启归零</div>
+  </div>
+</div>
+
+<div class="grid">
+  <section>
+    <h2>端点</h2>
+    <div id="endpoints"></div>
+  </section>
+  <section>
+    <h2>错误码分布</h2>
+    <div id="errorCodes"></div>
+  </section>
+  <section>
+    <h2>慢 SQL</h2>
+    <div id="slowSql"></div>
+  </section>
+  <section>
+    <h2>池水位</h2>
+    <div id="pools"></div>
+  </section>
+  <section>
+    <h2>限流拒绝</h2>
+    <div id="rateLimitRejected"></div>
+  </section>
+  <section>
+    <h2>幂等命中</h2>
+    <div id="idempotentHits"></div>
+  </section>
+</div>
+
+<script>
+  var REFRESH_SECONDS = {{refreshSeconds}};
+  var SNAPSHOT_URL = '{{snapshotUrl}}';
+  var ERROR_RATE_THRESHOLD = {{errorRateThreshold}};
+  var P99_THRESHOLD = {{p99ThresholdMillis}};
+
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function num(value, digits) {
+    if (value == null || !isFinite(value)) return '-';
+    return Number(value).toFixed(digits == null ? 0 : digits);
+  }
+
+  function pct(value) {
+    if (value == null || !isFinite(value)) return '-';
+    return (value * 100).toFixed(2) + '%';
+  }
+
+  function ms(value) {
+    if (value == null) return '-';
+    if (value >= 9007199254740991) return '>10s';
+    return value + 'ms';
+  }
+
+  function level(test, threshold) {
+    if (threshold <= 0) return 'ok';
+    var ratio = test / threshold;
+    if (ratio > 2) return 'bad';
+    if (ratio > 1) return 'warn';
+    return 'ok';
+  }
+
+  function setValue(id, text, cls) {
+    var el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'value' + (cls ? ' ' + cls : '');
+  }
+
+  function table(headers, rows, empty) {
+    if (!rows.length) return '<div class="empty">' + empty + '</div>';
+    var html = '<table><thead><tr>';
+    for (var i = 0; i < headers.length; i++) {
+      html += '<th' + (i > 0 ? ' class="num"' : '') + '>' + esc(headers[i]) + '</th>';
+    }
+    html += '</tr></thead><tbody>';
+    for (var r = 0; r < rows.length; r++) {
+      html += '<tr>';
+      for (var c = 0; c < rows[r].length; c++) {
+        html += '<td' + (c > 0 ? ' class="num"' : '') + '>' + rows[r][c] + '</td>';
+      }
+      html += '</tr>';
+    }
+    return html + '</tbody></table>';
+  }
+
+  function sum(list) {
+    var total = 0;
+    for (var i = 0; i < (list || []).length; i++) total += list[i].count || 0;
+    return total;
+  }
+
+  function render(snapshot) {
+    var rates = snapshot.rates || {};
+
+    document.getElementById('window').textContent = '窗口 ' + (snapshot.windowSeconds || 0) + 's';
+    document.getElementById('updated').textContent = '更新于 ' + new Date().toLocaleTimeString();
+    document.getElementById('status').innerHTML = '<span class="dot"></span>正常';
+
+    setValue('qps', num(rates.qps, 2));
+    document.getElementById('requests').textContent = '窗口内 ' + (rates.requests || 0) + ' 请求';
+
+    setValue('p99', ms(rates.p99Millis), level(rates.p99Millis, P99_THRESHOLD));
+    document.getElementById('p99Hint').textContent = '阈值 ' + ms(P99_THRESHOLD);
+
+    setValue('errorRate', pct(rates.errorRate), level(rates.errorRate, ERROR_RATE_THRESHOLD));
+    document.getElementById('errors').textContent = '5xx ' + (rates.errors || 0) + ' 次';
+
+    var rejected = sum(snapshot.rateLimitRejected);
+    var hits = sum(snapshot.idempotentHits);
+    setValue('counters', rejected + ' / ' + hits, rejected > 0 ? 'warn' : 'ok');
+    document.getElementById('rateLimitRejected').innerHTML = table(
+      ['名称', '次数'],
+      (snapshot.rateLimitRejected || []).map(function (item) {
+        return ['<span class="endpoint">' + esc(item.name) + '</span>', item.count];
+      }),
+      '窗口内没有限流拒绝');
+
+    document.getElementById('idempotentHits').innerHTML = table(
+      ['接口', '次数'],
+      (snapshot.idempotentHits || []).map(function (item) {
+        return ['<span class="endpoint">' + esc(item.name) + '</span>', item.count];
+      }),
+      '暂无幂等命中');
+
+    document.getElementById('endpoints').innerHTML = table(
+      ['端点', 'QPS', 'P99', '错误率', '请求'],
+      (snapshot.endpoints || []).map(function (item) {
+        var cls = level(item.errorRate, ERROR_RATE_THRESHOLD);
+        var bar = '<div class="bar"><i class="' + (cls === 'ok' ? '' : cls) + '" style="width:' +
+          Math.min(100, Math.round((item.errorRate / (ERROR_RATE_THRESHOLD * 2)) * 100)) + '%"></i></div>';
+        return [
+          '<span class="endpoint">' + esc(item.name) + '</span>',
+          num(item.qps, 2),
+          ms(item.p99Millis),
+          '<span class="' + (cls === 'ok' ? '' : cls) + '">' + pct(item.errorRate) + '</span>' + bar,
+          item.requests
+        ];
+      }),
+      '暂无请求');
+
+    document.getElementById('errorCodes').innerHTML = table(
+      ['错误码', '次数'],
+      (snapshot.errorCodes || []).map(function (item) {
+        return ['<span class="tag">' + esc(item.name) + '</span>', item.count];
+      }),
+      '窗口内没有业务错误');
+
+    document.getElementById('slowSql').innerHTML = table(
+      ['SQL', '耗时', 'traceId'],
+      (snapshot.slowSql || []).map(function (item) {
+        return [
+          '<span class="sql mono">' + esc(item.sql) + '</span>',
+          ms(item.millis),
+          '<span class="mono">' + esc(item.traceId || '-') + '</span>'
+        ];
+      }),
+      '没有超阈值的 SQL');
+
+    document.getElementById('pools').innerHTML = table(
+      ['池', '活跃', '大小', '上限', '队列'],
+      (snapshot.pools || []).map(function (item) {
+        var busy = item.maxSize > 0 ? item.active / item.maxSize : 0;
+        var cls = busy > 0.9 ? 'bad' : (busy > 0.75 ? 'warn' : '');
+        return [
+          '<span class="endpoint">' + esc(item.name) + '</span><div class="tag">' + esc(item.type) + '</div>' +
+            '<div class="bar"><i class="' + cls + '" style="width:' + Math.round(Math.min(1, busy) * 100) + '%"></i></div>',
+          item.active,
+          item.size,
+          item.maxSize,
+          item.queueSize + (item.queueCapacity > 0 ? ' / ' + item.queueCapacity : '')
+        ];
+      }),
+      '没有可观测的线程池或连接池');
+  }
+
+  function fail() {
+    document.getElementById('status').innerHTML = '<span class="dot down"></span>连接中断';
+  }
+
+  function tick() {
+    fetch(SNAPSHOT_URL, { headers: { 'Accept': 'application/json' } })
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function (snapshot) { render(snapshot); })
+      .catch(fail)
+      .finally(function () { setTimeout(tick, REFRESH_SECONDS * 1000); });
+  }
+
+  tick();
+</script>
+</body>
+</html>

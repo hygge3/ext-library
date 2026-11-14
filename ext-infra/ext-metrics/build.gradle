@@ -1,0 +1,12 @@
+description = '运行时指标采集与即时告警（QPS、P99、错误率、错误码分布、限流/幂等计数、慢 SQL、池水位）'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-json')
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'com.zaxxer:HikariCP'
+    compileOnly 'org.springframework:spring-jdbc'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework:spring-web'
+}
