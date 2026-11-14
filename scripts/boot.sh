@@ -76,6 +76,17 @@ PORT_TIMEOUT="${PORT_TIMEOUT:-300}"
 #
 # ================================================ 方法 start ================================================
 #
+# 步骤计数：每条步骤都打一行 [n/total]，失败的行里也带当前步骤号，定位到底卡在哪步
+STEP=0
+TOTAL=0
+step() {
+  STEP=$((STEP + 1))
+  echo -e "\033[36m[${STEP}/${TOTAL}]\033[0m $*"
+}
+finish() {
+  echo -e "\033[32m  ✔ $*\033[0m"
+}
+#
 # 服务PID
 _SERVER_PID=0
 # 服务端口
@@ -168,7 +179,10 @@ retry_resolve_server_port() {
 # =======================================
 start() {
   echo "---------- 启动 [start] ----------"
+  TOTAL=7
+  STEP=0
   # 解析服务的 pid
+  step "检查是否已在运行"
   resolve_server_pid
   if [ "${_SERVER_PID}" -ne 0 ]; then
     # 如果 _SERVER_PID != 0, 那就说明应用程序在运行,不进行启动
@@ -177,67 +191,74 @@ start() {
     return
   fi
   # 目录里没有可执行包时早报错，否则用户只会看到一句模糊的「启动失败」
+  step "校验可执行包"
   if [ -z "${SERVER_FILE_NAME}" ]; then
-    echo -e "\033[31m${DIR_PATH} 下没有找到 .jar 或 .war 文件\033[0m"
+    echo -e "\033[31m[步骤 ${STEP}/${TOTAL}] ${DIR_PATH} 下没有找到 .jar 或 .war 文件\033[0m"
     exit 1
   fi
+  echo "  → ${SERVER_FILE_NAME}"
   #
-  echo "启动 ${SERVER_FILE_NAME} 中 ..."
   # 如果 JAVA 是一个目录,则加上/bin/java
+  step "定位 java"
   [ -d "${JAVA}" ] && JAVA="${JAVA}/bin/java"
   # 如果 JAVA 不是一个存在的文件, 则尝试使用默认的java
   [ ! -e "$JAVA" ] && JAVA=$(which java)
   # 最终 Java 不是一个存在的文件, 则清空
   [ ! -e "$JAVA" ] && unset JAVA
   if [ -z "${JAVA}" ]; then
-    echo -e "\033[31m请在您的环境中设置JAVA_HOME变量，我们需要java（x64）！\033[0m"
+    echo -e "\033[31m[步骤 ${STEP}/${TOTAL}] 请在您的环境中设置JAVA_HOME变量，我们需要java（x64）！\033[0m"
     exit 1
   fi
+  echo "  → ${JAVA}"
+  step "准备日志目录"
   # 判断是否需要删除日志文件
   if [[ "$_P2" == "c" ]]; then
     # 如果第二个参数是c, 删除日志文件
-    echo -e "\033[33m删除 ${SERVER_FILE_NAME} 的日志文件(${DIR_PATH}/logs/*)\033[0m"
+    echo -e "  → \033[33m删除 ${SERVER_FILE_NAME} 的日志文件(${DIR_PATH}/logs/*)\033[0m"
     rm -rf "${DIR_PATH}"/logs/*
   fi
   # 检查日志目录（含 dump 目录，OOM 时目录不存在则 dump 静默失败）
   mkdir -p "${_LOG_PATH}/dump"
   # 上一次的控制台日志留一份，重启后还能查上一次的异常
   [ -f "${CONSOLE_FILE}" ] && mv -f "${CONSOLE_FILE}" "${CONSOLE_FILE}.1"
+  echo "  → ${CONSOLE_FILE}"
   # 执行脚本
   # nohup java -Xmx128m -jar /home/app/server.jar --spring.profiles.active=prod >> /home/app/logs/console.log 2>&1 & echo $! > /home/app/logs/server.pid
   #
   # 运行的参数
   # 用数组传参，jar 路径含空格时不会被拆成多个参数
+  step "组装启动命令"
   read -r -a RUN_OPT <<<"${JAVA_OPT} ${SPRING_OPT}"
   RUN_OPT_TEXT="${JAVA} ${JAVA_OPT} ${SPRING_OPT} -jar ${DIR_PATH}/${SERVER_FILE_NAME}"
   #
   echo "${RUN_OPT_TEXT}"
   echo "${RUN_OPT_TEXT}" >"${CONSOLE_FILE}"
+  step "拉起进程并写 pid 文件"
   nohup "$JAVA" "${RUN_OPT[@]}" -jar "${DIR_PATH}/${SERVER_FILE_NAME}" >>"${CONSOLE_FILE}" 2>&1 &
   echo $! >"${_LOG_PATH}/server.pid"
   #
-  echo "${SERVER_FILE_NAME} 正在运行"
-  echo -e "你可以查看日志文件 \033[36m${CONSOLE_FILE}\033[0m 或者执行下面的命令"
-  echo -e "\033[40;37mtail -f -n 300 ${CONSOLE_FILE}\033[0m"
+  echo "  → 日志 ${CONSOLE_FILE}"
+  echo -e "  → 跟踪 \033[40;37mtail -f -n 300 ${CONSOLE_FILE}\033[0m"
   # 睡眠1秒
   sleep 1
   # 解析服务的 pid
+  step "等待端口绑定（最长 ${PORT_TIMEOUT}s）"
   resolve_server_pid
   # 判断应用程序是否成功跑起来
   if [ "${_SERVER_PID}" -eq 0 ]; then
-    echo -e "\033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
+    echo -e "  → \033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
   else
     retry_resolve_server_port
     case $? in
     0)
-      echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
+      finish "${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]"
       ;;
     1)
-      echo -e "\033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
+      echo -e "  → \033[31m${SERVER_FILE_NAME} 启动失败，请查看 ${CONSOLE_FILE}\033[0m"
       ;;
     *)
       # 非 root 看不到 ss 的 PID 列，进程活着就算成功，端口只是显示不出来
-      echo -e "\033[32m${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, \033[0m\033[33mSERVER_PORT = unknown（非 root 无法读取端口，或非 Spring 项目）\033[0m\033[32m]\033[0m"
+      finish "${SERVER_FILE_NAME} 启动成功 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = unknown（非 root 无法读取端口，或非 Spring 项目）]"
       ;;
     esac
   fi
@@ -249,36 +270,40 @@ start() {
 # =======================================
 stop() {
   echo "---------- 停止 [start] ----------"
+  TOTAL=3
+  STEP=0
   # 解析服务的 pid
+  step "检查是否在运行"
   resolve_server_pid
   if [ "${_SERVER_PID}" -eq 0 ]; then
     # _SERVER_PID = 0, 那就说明应用程序没有在运行
-    echo "${SERVER_FILE_NAME} 已停止"
+    echo "  → ${SERVER_FILE_NAME} 已停止"
     echo "---------- 停止 [end] ----------"
     return
   fi
-  echo "停止 ${SERVER_FILE_NAME} 中..."
+  step "优雅停机（kill -15 ${_SERVER_PID}）"
   # 进行优雅停机
   kill -15 "${_SERVER_PID}"
+  step "等待退出（超时 ${STOP_TIMEOUT}s 后 kill -9）"
   # 当前等待秒数
   _wait_seconds=0
   #
   while true; do
     if ! is_our_pid "${_SERVER_PID}"; then
-      echo "${SERVER_FILE_NAME} 已停止"
+      finish "${SERVER_FILE_NAME} 已停止"
       rm -f "${_LOG_PATH}/server.pid"
       break
     fi
     if [ "${_wait_seconds}" -ge "${STOP_TIMEOUT}" ]; then
       # 强制终止进程
-      echo -e "\033[31m等待超时(${_wait_seconds}s), 强制关机 [kill -9 ${_SERVER_PID}].\033[0m"
-      kill -9 "${_SERVER_PID}" 2>/dev/null || echo -e "\033[31m强制关机失败，请手动处理 [kill -9 ${_SERVER_PID}]\033[0m"
+      echo -e "  → \033[31m等待超时(${_wait_seconds}s), 强制关机 [kill -9 ${_SERVER_PID}].\033[0m"
+      kill -9 "${_SERVER_PID}" 2>/dev/null || echo -e "  → \033[31m强制关机失败，请手动处理 [kill -9 ${_SERVER_PID}]\033[0m"
       rm -f "${_LOG_PATH}/server.pid"
       break
     fi
     sleep 1
     ((_wait_seconds++))
-    echo "请稍等 ${_wait_seconds}s"
+    echo "  请稍等 ${_wait_seconds}s"
   done
   echo "---------- 停止  [end] ----------"
   sleep 1
@@ -289,16 +314,20 @@ stop() {
 # =======================================
 status() {
   echo "---------- 状态 [start] ----------"
+  TOTAL=2
+  STEP=0
   # 解析服务的 pid
+  step "查找服务进程"
   resolve_server_pid
   if [ "${_SERVER_PID}" -eq 0 ]; then
-    echo -e "\033[33m${SERVER_FILE_NAME} 已停止\033[0m"
+    echo -e "  → \033[33m${SERVER_FILE_NAME} 已停止\033[0m"
   else
+    step "列出监听端口"
     _SERVER_PORT_TEXT=$(list_server_ports | awk 'BEGIN{ORS=" "}NF{print}')
     [ -z "$_SERVER_PORT_TEXT" ] && _SERVER_PORT_TEXT="unknown（非 root 无法读取端口）"
-    echo -e "\033[32m${SERVER_FILE_NAME} 运行中 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
-    echo -e "你可以查看日志文件 \033[36m${CONSOLE_FILE}\033[0m 或者执行下面的命令"
-    echo -e "\033[40;37mtail -f -n 300 ${CONSOLE_FILE}\033[0m"
+    echo -e "  → \033[32m${SERVER_FILE_NAME} 运行中 [ SERVER_PID = ${_SERVER_PID}, SERVER_PORT = ${_SERVER_PORT_TEXT}]\033[0m"
+    echo -e "  → 日志 ${CONSOLE_FILE}"
+    echo -e "  → 跟踪 \033[40;37mtail -f -n 300 ${CONSOLE_FILE}\033[0m"
   fi
   echo "---------- 状态 [end] ----------"
 }
@@ -307,10 +336,14 @@ status() {
 # 日志
 # =======================================
 logs() {
+  TOTAL=1
+  STEP=0
+  step "打开控制台日志"
   if [ ! -f "${CONSOLE_FILE}" ]; then
-    echo -e "\033[33m还没有日志文件 ${CONSOLE_FILE}，服务是否启动过？\033[0m"
+    echo -e "  → \033[33m还没有日志文件 ${CONSOLE_FILE}，服务是否启动过？\033[0m"
     exit 1
   fi
+  echo "  → ${CONSOLE_FILE}"
   tail -f -n 200 "${CONSOLE_FILE}"
 }
 #

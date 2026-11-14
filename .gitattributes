@@ -1,2 +1,4 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
+# *.sh 要在 Linux 容器里执行，CRLF 会让 bash 报错
+*.sh text eol=lf
