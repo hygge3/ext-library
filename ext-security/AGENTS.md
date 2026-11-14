@@ -21,6 +21,16 @@ ext-security 是一个独立的安全模块，提供完整的认证授权框架�
 - `@RequiresPermissions` - 权限校验注解
 - `@RequiresRoles` - 角色校验注解
 - `@SecurityIgnore` - 忽略安全校验
+- `@DataScope` - 数据权限注解（注入当前用户可见的数据范围）
+
+### 数据权限
+
+功能权限解决"能不能调"，数据权限解决"能看到哪些行"，两者不改同一处：`@DataScope` 不拦截请求，只把当前用户的范围算好放进 `ext-core` 的 `DataScopeContext`，查询层自己去拼条件。
+
+- `DataScopeType` - 范围类型（`ALL` / `DEPT` / `DEPT_AND_CHILD` / `SELF` / `CUSTOM`）
+- `DataScopeProvider` - 范围值提供 SPI（需业务实现：`List<Object> resolve(DataScopeType)`，返回当前用户可见的部门 ID / 用户 ID 集合）
+- `DataScopeContext` / `DataScopeMeta` - `ext-core` 里的 ThreadLocal 上下文与范围元数据（`field` + `values`）
+- `ext-jdbc` 的 `JdbcDao` 在 `selectList` / `selectCount` 上自动追加 `field IN (...)`，业务 DAO 不手写这段；未标注则上下文为空，SQL 不变
 
 ### 逻辑运算
 
@@ -58,10 +68,12 @@ spring-webmvc (拦截器与 @RestControllerAdvice，jakarta.servlet-api 为 comp
 ```
 ext.library.security
 ├── annotation/        # 安全注解
+│   ├── DataScope.java
 │   ├── RequiresPermissions.java
 │   ├── RequiresRoles.java
 │   └── SecurityIgnore.java
 ├── authority/         # 权限校验
+│   ├── DataScopeProvider.java
 │   └── SecurityAuthority.java
 ├── config/            # 自动配置
 │   └── SecurityAutoConfiguration.java
@@ -75,6 +87,7 @@ ext.library.security
 │   ├── SecuritySession.java
 │   └── SecurityToken.java
 ├── enums/             # 枚举
+│   ├── DataScopeType.java
 │   ├── Logical.java
 │   └── TokenState.java
 ├── exception/         # 异常
@@ -292,8 +305,8 @@ securityService.doLogin(authenticatedLoginId, params);
 
 | 日期 | 变更内容 |
 |------|----------|
-| 2026-11-01 | 新增两步验证（`MfaService` / `TotpUtil`）与通行密钥（`PasskeyService`，基于 webauthn4j）；凭证存储各一套接口 + ext-cache 默认实现；登录编排仍由接入方负责，不引入半登录态 |
-| 2026-02-18 | SRP 重构：领域对象移除 Spring 容器依赖，持久化逻辑统一收归 SecurityService；修复多处 bug（tokenIndex 分布式、createLoginByLoginId token 持久化、issueTokenMaxLimit 逻辑反向、PermissionUtil AND 分支）；修复 CookieProperties final 字段、SecurityExceptionHandler 注解、SecurityListenerManager 线程安全 |
-| 2026-01-26 | 时间配置改用 Duration 类型，支持 30d、1h、3m 等格式 |
-| 2026-01-26 | 重构存储层，改用 ext-cache 替代独立的 RAM/Redis 实现 |
 | 2026-01-19 | 初始化 AGENTS.md 文档 |
+| 2026-01-26 | 时间配置改用 Duration 类型，支持 30d、1h、3m 等格式；重构存储层，改用 ext-cache 替代独立的 RAM/Redis 实现 |
+| 2026-02-18 | SRP 重构：领域对象移除 Spring 容器依赖，持久化逻辑统一收归 SecurityService；修复多处 bug（tokenIndex 分布式、createLoginByLoginId token 持久化、issueTokenMaxLimit 逻辑反向、PermissionUtil AND 分支）；修复 CookieProperties final 字段、SecurityExceptionHandler 注解、SecurityListenerManager 线程安全 |
+| 2026-11-01 | 新增两步验证（`MfaService` / `TotpUtil`）与通行密钥（`PasskeyService`，基于 webauthn4j）；凭证存储各一套接口 + ext-cache 默认实现；登录编排仍由接入方负责，不引入半登录态 |
+| 2026-11-11 | 新增数据权限：`@DataScope` + `DataScopeType` + `DataScopeProvider` SPI，拦截器写入 `DataScopeContext`，由 ext-jdbc 追加查询条件 |

@@ -1,6 +1,5 @@
 package ext.library.security.authority;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,7 +15,7 @@ public interface SecurityAuthority {
 	 * @return List<String>
 	 */
 	default List<String> getPermissionCodeList(String loginId) {
-		return Collections.emptyList();
+		return List.of();
 	}
 
 	/**
@@ -25,7 +24,7 @@ public interface SecurityAuthority {
 	 * @return List<String>
 	 */
 	default List<String> getRoleCodeList(String loginId) {
-		return Collections.emptyList();
+		return List.of();
 	}
 
 }

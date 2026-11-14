@@ -560,7 +560,7 @@ public class SecurityService {
     public Boolean isLogin() {
         try {
             checkToken();
-        } catch (UnauthorizedException e) {
+        } catch (UnauthorizedException _) {
             return false;
         }
         return true;

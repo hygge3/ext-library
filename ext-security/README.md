@@ -68,8 +68,7 @@ ext:
       path:                            # cookie 路径
       secure:                          # 是否仅 HTTPS 发送
   cache:
-    cache-storage: L2                  # CAFFEINE/REDIS/POSTGRES/L2
-    l2-backend: REDIS                  # L2 模式下的分布式后端
+    cache-storage: L2                  # AUTO/CAFFEINE/REDIS/POSTGRES/L2，唯一的选型入口
 ```
 
 ## 包结构

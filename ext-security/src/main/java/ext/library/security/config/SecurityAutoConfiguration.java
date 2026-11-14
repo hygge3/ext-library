@@ -1,6 +1,7 @@
 package ext.library.security.config;
 
 import ext.library.cache.strategy.CacheStrategy;
+import ext.library.security.authority.DataScopeProvider;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.interceptor.SecurityInterceptor;
 import ext.library.security.properties.MfaProperties;
@@ -22,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -76,12 +78,29 @@ public class SecurityAutoConfiguration {
      * @return 拦截器配置
      */
     @Bean
+    @ConditionalOnMissingBean(SecurityInterceptor.class)
+    public SecurityInterceptor securityInterceptor(ObjectProvider<DataScopeProvider> dataScopeProvider) {
+        return new SecurityInterceptor(dataScopeProvider.getIfAvailable());
+    }
+
+    /**
+     * 注册权限拦截器
+     * <p>
+     * 之前没有任何地方注册它，按 README 写 {@code @RequiresPermissions} / {@code @RequiresRoles}
+     * 的接口实际不校验。
+     *
+     * @param securityInterceptor 权限拦截器
+     *
+     * @return 拦截器配置
+     */
+    @Bean
     @ConditionalOnWebApplication(type = SERVLET)
-    public WebMvcConfigurer securityInterceptorConfigurer() {
+    public WebMvcConfigurer securityInterceptorConfigurer(SecurityInterceptor securityInterceptor) {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/**");
+                // 排在签名拦截之前：未登录请求先被挡掉，不给它消耗 nonce 的机会
+                registry.addInterceptor(securityInterceptor).addPathPatterns("/**").order(0);
             }
         };
     }

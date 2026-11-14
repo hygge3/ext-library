@@ -1,6 +1,8 @@
 package ext.library.security.repository;
 
 import ext.library.cache.strategy.CacheStrategy;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
 import ext.library.security.domain.SecuritySession;
 import ext.library.security.domain.SecurityToken;
 import ext.library.security.enums.TokenState;
@@ -100,6 +102,23 @@ class SecurityCacheRepositoryTest {
         @Override
         public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
             return store.putIfAbsent(cacheName + ":" + key, value) == null;
+        }
+
+        @Override
+        public long increment(String cacheName, String key, long delta, Duration window) {
+            return ((Long) store.merge(cacheName + ":" + key, delta, (old, d) -> (Long) old + delta));
+        }
+
+        @Override
+        public TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity,
+                                            Duration refillPeriod) {
+            // 本测试只断言同实例内可见性，令牌桶行为不在范围内
+            return new TokenBucketResult(true, capacity - permits, 0);
+        }
+
+        @Override
+        public BackendType backendType() {
+            return BackendType.MEMORY;
         }
 
     }
