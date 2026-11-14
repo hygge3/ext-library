@@ -34,7 +34,7 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-captcha          | 验证码生成和验证                       |
 | ext-crypto           | 加密操作，加密/解密功能                |
 | ext-api-crypto       | 接口加解密，请求解密响应加密           |
-| ext-ratelimit        | 接口限流，注解式 Redis/PG/内存限流    |
+| ext-resilience       | 令牌桶限流与熔断降级，注解式、后端跟随 ext-cache |
 | ext-audit            | 操作审计，注解式操作留痕               |
 | ext-http             | HTTP 客户端增强                        |
 | ext-useragent        | User-Agent 解析                        |

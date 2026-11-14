@@ -41,7 +41,7 @@ graph LR
         mvc[ext-mvc]; rt[ext-realtime]
     end
     subgraph L5[ext-enhance]
-        captcha[ext-captcha]; idem[ext-idempotent]; apic[ext-api-crypto]; rl[ext-ratelimit]; audit[ext-audit]
+        captcha[ext-captcha]; idem[ext-idempotent]; apic[ext-api-crypto]; rl[ext-resilience]; audit[ext-audit]
     end
     core --> tool; json --> tool
     redis --> core; redis --> json
@@ -87,7 +87,7 @@ graph LR
 - `R` 与 `ServletUtil` 从 `ext-mvc` 迁入 `ext-servlet`，`ext-mvc` 的原副本删除；
 - 分页与选项模型 `PageQuery` / `PageResult` / `SelectData` 迁入；`ext-jdbc` 的同名副本删除，`selectPage` 直接用基座那一套，Web 层不再手工转换；
 - 异常 → `(HttpStatus, R)` 的信封组装收进 `ErrorEnvelope`、日志口径收进 `ErrorLog`，`ext-mvc` 的 `GlobalExceptionHandler` 与 `ext-security` 的 `SecurityExceptionHandler` 只声明"哪种异常归我管"与对外消息（顺带消掉了原 `@ResponseStatus` 与响应体状态码不一致的几处：`428` / `412` 统一为 `400`）；
-- `ServletUtil` 补 `getRequestOrNull()` / `getResponseOrNull()` 与 `writeJson()`；`ext-audit` / `ext-idempotent` / `ext-ratelimit` / `ext-lock` 里手写的 `instanceof ServletRequestAttributes` 样板一并删掉；
+- `ServletUtil` 补 `getRequestOrNull()` / `getResponseOrNull()` 与 `writeJson()`；`ext-audit` / `ext-idempotent` / `ext-resilience` / `ext-lock` 里手写的 `instanceof ServletRequestAttributes` 样板一并删掉；
 - 新增 `RepeatableRequestWrapper` + 可选过滤器（默认关闭），供需要多次读取请求体的模块使用；
 - `ext-security` 改为依赖 `ext-servlet`，`ext-realtime` 不再借道 `ext-mvc` 取 `spring-webmvc`。
 
@@ -103,13 +103,13 @@ graph LR
 
 ## 待执行的重构
 
-1. **待定**：`X-Request-Id` 透传与 MDC 字段（`ext-servlet` ⑤）是新能力，默认开关与字段名未定，实施前需先确认；当前 `ext-servlet` 未实现该能力。
+1. ~~`X-Request-Id` 透传与 MDC 字段~~ 已实施：`ext-common/ext-trace` 模块的 `TraceFilter`（入站），请求头与 MDC 键名经 `ext.trace.*` 配置；出站由 `ext-http` 与 `RestTemplate` 拦截器注入，定时任务与 WebSocket 消息由 `TraceContext` 绑定。
 
 ## 跨模块决策
 
 - **版本收敛**：Spring 全家桶经 `spring-boot-dependencies` 导入；自己带 BOM 的第三方（如 `software.amazon.awssdk:bom`）导它的 BOM；不在任何 BOM 的第三方（bouncycastle / zxing / springdoc / webauthn4j）逐个在 `ext-bom` 约束。这样消费方只导一个 BOM，模块之间不会出现版本漂移。唯一例外是 swagger：它的版本必须跟着 springdoc 走，BOM 不插手。
-- **重后端 `compileOnly` + 类路径探测**：目的是让消费方只引自己用得上的后端、不被意外拖入 Redis / PostgreSQL；切换后端靠"引入哪个依赖"，配置只选行为不选类（`AUTO` 优先 Redis）。该原则在 `ext-cache`、`ext-idempotent`、`ext-ratelimit`、`ext-realtime`、`ext-i18n`、`ext-oss` 上一体适用。
-- **接入方式**：横切能力用注解 + 切面（`@Cache`、`@RedisLock`、`@Idempotent`、`@RateLimit`、`@OperationLog`、`@RequestDecrypt`）；可选实现用 SPI + 自动探测（`CacheStrategy`、`RateLimitStore`、`LockStore`、`ObjectStorage`、`PubSub`、`AuditHandler`、`TranslationSource`）。
+- **重后端 `compileOnly` + 类路径探测**：目的是让消费方只引自己用得上的后端、不被意外拖入 Redis / PostgreSQL；切换后端靠"引入哪个依赖"，配置只选行为不选类（`AUTO` 优先 Redis）。该原则在 `ext-cache`、`ext-idempotent`、`ext-resilience`、`ext-realtime`、`ext-i18n`、`ext-oss` 上一体适用。
+- **接入方式**：横切能力用注解 + 切面（`@Cache`、`@RedisLock`、`@Idempotent`、`@RateLimit`、`@OperationLog`、`@RequestDecrypt`）；可选实现用 SPI + 自动探测（`CacheStrategy`、`LockStore`、`ObjectStorage`、`PubSub`、`AuditHandler`、`TranslationSource`），但**后端选型不搞 SPI 开关**：`store-type` 这类开关一律取消，由 `CacheStrategy#backendType()` 给出已解析后端。
 - **配置类型**：时长用 `Duration`（`30d`、`1h`、`3m`），语言用 `Locale`，不暴露裸毫秒数与字符串枚举常量。
 - **构建**：Gradle Groovy DSL，JDK 25 toolchain；编译带 `-parameters` 与 `-Xlint:deprecation,unchecked,rawtypes`；`compileJava` 显式依赖 `processResources`，否则配置元数据处理器读不到 `additional-spring-configuration-metadata.json`。
 

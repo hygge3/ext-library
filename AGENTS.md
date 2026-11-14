@@ -26,6 +26,7 @@ ext-library 是一个基于 Spring Boot 的扩展库，采用 Gradle 多模块�
 - 横切能力以**注解 + 切面**接入业务，业务代码不写调用样板。
 - 同一口径只实现一次：脱敏策略由 `ext-json` 定义，日志脱敏与接口返回复用同一套策略。
 - 可选实现统一用 **SPI + 自动探测**（存储、策略、处理器），配置只选行为，不选类。
+- **需要持久化的键值数据统一走 `ext-cache`**（会话、凭据、token、nonce、幂等键、配置快照等）。模块直接依赖 `CacheStrategy`，不直接注入 `RedisUtil` / `PostgresUtil`，也不自建 `*-storage` 选型开关——后端只有 `ext.cache.cache-storage` 一处选。缺 `CacheStrategy` Bean 时启动失败，不静默降级到内存。
 
 ## 技术栈
 
@@ -56,6 +57,7 @@ graph TD
     B --> B7["ext-useragent<br/>User-Agent 解析"]
     B --> B8["ext-qrcode<br/>二维码"]
     B --> B9["ext-logback<br/>日志脱敏"]
+    B --> B10["ext-trace<br/>链路追踪/上下文透传"]
     C --> C1["ext-redis<br/>Redis 支持"]
     C --> C1b["ext-postgres<br/>PostgreSQL 支持"]
     C --> C2["ext-cache<br/>缓存支持"]
@@ -65,14 +67,14 @@ graph TD
     C1 --> C1c["ext-lock<br/>分布式锁"]
     C --> C1f["ext-i18n<br/>国际化"]
     C --> C1g["ext-oss<br/>对象存储"]
+    C --> C1h["ext-metrics<br/>运行时指标与告警"]
     F --> F1["ext-accesslog<br/>结构化访问日志"]
     F --> F2["ext-mvc<br/>MVC 支持 (含 OpenAPI)"]
     F --> F3["ext-realtime<br/>SSE + WebSocket"]
-    F --> F4["ext-trace<br/>链路追踪/上下文透传"]
     G --> G1["ext-captcha<br/>验证码"]
     G --> G2["ext-idempotent<br/>幂等性"]
     G --> G3["ext-api-crypto<br/>API 加密"]
-    G --> G4["ext-ratelimit<br/>限流"]
+    G --> G4["ext-resilience<br/>限流与降级"]
     G --> G5["ext-audit<br/>操作审计"]
     click B "./ext-common/AGENTS.md" "查看 ext-common 模块文档"
     click C "./ext-infra/AGENTS.md" "查看 ext-infra 模块文档"
@@ -87,16 +89,16 @@ graph TD
 | 模块                                     | 类型     | 描述                                           |
 |------------------------------------------|----------|------------------------------------------------|
 | ext-bom                                  | 独立模块 | BOM 依赖管理，统一管理所有 ext 模块版本        |
-| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类��核心功能、JSON 处理、servlet 基座、HTTP 客户端、UA 解析、二维码、日志脱敏 |
-| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度、国际化、对象存储 |
+| [ext-common](./ext-common/AGENTS.md)     | 分层     | 通用基础层，包含工具类、核心功能、JSON 处理、servlet 基座、HTTP 客户端、UA 解析、二维码、日志脱敏、链路追踪 |
+| [ext-infra](./ext-infra/AGENTS.md)       | 分层     | 基础设施层，包含 Redis、PostgreSQL、缓存、邮件、锁、JDBC、任务调度、国际化、对象存储、指标与告警 |
 | [ext-security](./ext-security/AGENTS.md) | 独立模块 | 安全认证与授权框架（会话、权限、两步验证、通行密钥） |
 | [ext-crypto](./ext-crypto/AGENTS.md)     | 独立模块 | 加密算法工具库 (AES/RSA/SM2/SM3/SM4)           |
 | [ext-web](./ext-web/AGENTS.md)           | 分层     | Web 层，包含 MVC、访问日志、链路追踪、实时通信    |
-| [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流、审计  |
+| [ext-enhance](./ext-enhance/AGENTS.md)   | 分层     | 业务增强层，包含验证码、幂等性、API加密、限流与降级、审计  |
 
 ## ext-bom
 
-**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、springdoc、webauthn4j、twelvemonkeys），并把 28 个 ext 模块的版本一并约束。swagger 三件套（`swagger-core-jakarta` / `swagger-annotations-jakarta` / `swagger-models-jakarta`）**不由本 BOM 约束**，版本必须与 springdoc 传递的完全一致，否则同名注解类会出现两份。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
+**职责**：唯一的版本约束来源（`java-platform`）。导入 `spring-boot-dependencies` 覆盖 Spring 全家桶，导入 `software.amazon.awssdk:bom` 覆盖 [ext-oss](ext-infra/AGENTS.md#ext-oss) 的 S3 客户端，逐个约束不在任何 BOM 的第三方（bouncycastle、zxing、springdoc、webauthn4j、webp-imageio），并把 28 个 ext 模块的版本一并约束。swagger 三件套（`swagger-core-jakarta` / `swagger-annotations-jakarta` / `swagger-models-jakarta`）**不由本 BOM 约束**，版本必须与 springdoc 传递的完全一致，否则同名注解类会出现两份。消费方只需 `platform('ext.library:ext-bom:<version>')`，再按需引模块、不写版本号。
 
 **优先复用官方 BOM**：第三方自己带 BOM（如 `software.amazon.awssdk:bom`）就 `platform(...)` 导入，不要把它的几十个 artifact 拆成 constraint——逐个约束跟不上官方拆包节奏，还会诱使模块混引不同版本的 service client。
 
@@ -117,7 +119,7 @@ graph TD
 |                       ext-bom                             |  BOM 依赖管理
 +------------------------------------------------------------+
 |                       ext-enhance                         |  业务增强层
-|          (captcha, idempotent, api-crypto, ratelimit, audit)|
+|          (captcha, idempotent, api-crypto, resilience, audit)|
 +------------------------------------------------------------+
 |                       ext-web                             |  Web 层
 |              (accesslog, mvc, realtime, trace)            |
@@ -198,16 +200,15 @@ graph TD
 
 | 日期       | 变更内容                                                              |
 |------------|-----------------------------------------------------------------------|
-| 2026-01-19 | 初始化 AGENTS.md 文档                                                 |
-| 2026-10-10 | 构建方式从 Maven 切换为 Gradle (Groovy DSL)                           |
-| 2026-10-10 | 依赖版本统一收敛到 gradle.properties，第三方依赖移入 ext-bom          |
-| 2026-10-10 | AI 编程工具从 Claude Code 切换为 pi-agent，CLAUDE.md 更名为 AGENTS.md |
-| 2026-10-10 | 新增 ext-jdbc、ext-job、ext-i18n、ext-oss |
-| 2026-10-10 | 新增 ext-postgres、ext-lock、ext-ratelimit、ext-audit、ext-logback |
+| 2026-01-19 | 初始化 AGENTS.md 文档 |
+| 2026-10-10 | 构建方式从 Maven 切换为 Gradle (Groovy DSL)；依赖版本统一收敛到 gradle.properties，第三方依赖移入 ext-bom；AI 编程工具从 Claude Code 切换为 pi-agent，CLAUDE.md 更名为 AGENTS.md；新增 ext-jdbc、ext-job、ext-i18n、ext-oss；新增 ext-postgres、ext-lock、ext-ratelimit、ext-audit、ext-logback |
 | 2026-10-11 | 解散 ext-misc 层：ext-http / ext-qrcode / ext-useragent / ext-logback 归入 ext-common，ext-i18n / ext-oss 归入 ext-infra |
-| 2026-10-31 | 27 个 SPEC.md 正文并入各层 AGENTS.md 的「设计约束」节，SPEC 文档删除（AI 读 AGENTS.md 即可，不再两处维护） |
-| 2026-10-31 | `goal-and-requirements.md` 的目标 / 非目标 / 设计原则并入根 AGENTS.md，原文档删除 |
-| 2026-11-01 | ext-oss 移除 SFTP 后端（presign 无法实现，属接口违约），只留 local + S3；sshd 依赖与 BOM 约束删除 |
-| 2026-11-01 | ext-security 新增两步验证（TOTP）与通行密钥（WebAuthn，webauthn4j-core）；ext-bom 新增 webauthn4j 与 org.jetbrains:annotations 约束 |
-| 2026-11-03 | 依赖收敛：ext-mvc 改声明 `swagger-core-jakarta`（原 `swagger-annotations:3.0.0` 与 springdoc 传递的 `-jakarta:2.2.55` 同名类冲突，且 3.x 需 Jackson 3/EE11，springdoc 3.2.0 尚未跟进）；BOM 不再约束 swagger；删除用不到的 `org.jetbrains:annotations`；webauthn4j 升 0.32.0；ext-qrcode 排除 jcommander |
-| 2026-11-03 | ext-mvc 改用 `springdoc-openapi-starter-webmvc-api`：只生成 `/v3/api-docs`，不再拖 swagger-ui webjars；`-ui` 留给消费方自加（BOM 仍有约束） |
+| 2026-10-31 | 27 个 SPEC.md 正文并入各层 AGENTS.md 的「设计约束」节，SPEC 文档删除（AI 读 AGENTS.md 即可，不再两处维护）；`goal-and-requirements.md` 的目标 / 非目标 / 设计原则并入根 AGENTS.md，原文档删除 |
+| 2026-11-01 | ext-oss 移除 SFTP 后端（presign 无法实现，属接口违约），只留 local + S3；sshd 依赖与 BOM 约束删除；ext-security 新增两步验证（TOTP）与通行密钥（WebAuthn，webauthn4j-core）；ext-bom 新增 webauthn4j 与 org.jetbrains:annotations 约束 |
+| 2026-11-03 | 依赖收敛：ext-mvc 改声明 `swagger-core-jakarta`（原 `swagger-annotations:3.0.0` 与 springdoc 传递的 `-jakarta:2.2.55` 同名类冲突，且 3.x 需 Jackson 3/EE11，springdoc 3.2.0 尚未跟进）；BOM 不再约束 swagger；删除用不到的 `org.jetbrains:annotations`；webauthn4j 升 0.32.0；ext-qrcode 排除 jcommander；ext-mvc 改用 `springdoc-openapi-starter-webmvc-api`：只生成 `/v3/api-docs`，不再拖 swagger-ui webjars；`-ui` 留给消费方自加（BOM 仍有约束） |
+| 2026-11-11 | 新增设计原则：需要持久化的键值数据统一走 ext-cache（`CacheStrategy`），模块不直接注入 `RedisUtil` / `PostgresUtil`，不自建 `*-storage` 开关；ext-api-crypto 的 nonce 存储随之改为 ext-cache 实现，删除三个自建后端 |
+| 2026-11-12 | ext-ratelimit 改名 ext-resilience：限流改令牌桶（`CacheStrategy#tryAcquire`，多实例共用一个桶），新增熔断降级（`@Degrade` + 进程内 `CircuitBreaker`，不共享熔断态）、隔离线程池与超时（`IsolationTimeoutException`→504）、失败重试（`@Retry`，指数退避 + 抖动，强制幂等） |
+| 2026-11-13 | ext-cache 覆盖穿透/击穿/雪崩：`@Cache(cacheNull, nullTimeout)` 写 `key + ":null"` 负缓存且 `DELETE` 一并清理；`CacheAspect` 对同 `cacheName:key` 单飞合并并发回源（线程重入直通）；新增 `ext.cache.expire-jitter`（默认 0.1），各策略 `put` 经 `CacheStrategy#withJitter` 只缩短不延长 TTL；ext-trace 从 ext-web 移到 ext-common（出站透传、@Scheduled 传播与 traceparent 一并补齐）；新增 ext-infra/ext-metrics（自建指标采集、即时告警、Web 大屏），并新增 `ext-core` 的 `MetricsRecorder` SPI 供各模块埋点 |
+| 2026-11-14 | ext-oss 新增缩略图输出（默认 webp，长边 320，`ThumbnailEncoder` SPI 可注入自定义格式）与 `presignDownload`（带 `Content-Disposition` 文件名）；BOM 引入 `com.github.usefulness:webp-imageio`；ext-trace 从 ext-web 移入 ext-common，补齐全链路透传：`ext-tool` 新增 `TraceContext`（32 位 W3C hex traceId、出站头、`wrap`）；`HttpUtil` 与 `RestTemplate` 默认带追踪头；`@Scheduled` 任务由 `ThreadPoolTaskScheduler` 装饰器生成 traceId；WebSocket 消息处理绑定握手 traceId |
+| 2026-11-15 | `ImageUtil` 从 ext-tool 移到 ext-oss（`ext.library.oss.util`），图片能力集中到它：读写/缩放/格式探测/缩略图编码器注册表；`Thumbnails` 并入 `ImageUtil`，`ext.library.oss.thumbnail` 包删除；ext-qrcode 改用 ImageIO 自带读写 |
+| 2026-11-16 | ImageIO 薄封装抽到 `ext-common/ext-tool` 的 `ImageIOUtil`（读写 + 格式探测 + 守卫），ext-qrcode 直接用；`ImageUtil` 只留缩略图/缩放/质量控制/编码器注册表，其纯转发的 12 个读写与格式探测方法删除（约 70 行）；补 webp 透明度与缩略图 alpha 测试 |
