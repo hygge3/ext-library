@@ -101,7 +101,7 @@ class TranslationHandlerTest {
         try {
             TranslatorRegistry.getTranslators().clear();
             throw new AssertionError("只读视图不应可修改");
-        } catch (UnsupportedOperationException expected) {
+        } catch (UnsupportedOperationException _) {
             assertEquals(1, TranslatorRegistry.getTranslators().size());
         }
     }

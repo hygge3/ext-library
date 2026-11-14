@@ -5,7 +5,6 @@ import ext.library.tool.exception.ToolException;
 import ext.library.tool.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -102,7 +101,7 @@ public record TreeBuilder<T, K>(
      */
     public List<T> buildTree(List<T> items) {
         if (items.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         // 1. 构建数据索引
@@ -121,7 +120,7 @@ public record TreeBuilder<T, K>(
 
         // 3. 构建树结构
         nodeMap.forEach((nodeId, node) -> {
-            List<T> children = parentChildrenMap.getOrDefault(nodeId, Collections.emptyList())
+            List<T> children = parentChildrenMap.getOrDefault(nodeId, List.of())
                     .stream()
                     .sorted(comparator)
                     .toList();
@@ -132,7 +131,7 @@ public record TreeBuilder<T, K>(
         return items.stream()
                 .filter(item -> isRootNode(item, nodeMap))
                 .sorted(comparator)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -160,7 +159,7 @@ public record TreeBuilder<T, K>(
         Set<K> relatedIds = findRelatedIds(allItems, matchIds);
         List<T> relatedItems = allItems.stream()
                 .filter(item -> relatedIds.contains(idGetter.apply(item)))
-                .collect(Collectors.toList());
+                .toList();
 
         return buildTree(relatedItems);
     }

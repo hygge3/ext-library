@@ -1,3 +1,4 @@
 ext.library.core.config.AsyncConfiguration
+ext.library.core.config.ContextPropagationAutoConfiguration
 ext.library.core.config.ThreadPoolConfiguration
 ext.library.core.util.SpringUtil

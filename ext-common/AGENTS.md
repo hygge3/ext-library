@@ -24,6 +24,7 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 | ext-useragent | User-Agent 解析器 | ext-tool |
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
 | ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
+| ext-trace | 链路追踪（traceId 入站/出站透传、MDC、定时任务链路） | ext-tool, ext-core, ext-servlet, spring-web |
 
 ## 模块详情
 
@@ -67,6 +68,8 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 **职责**：全库共用的核心机制：SpEL 表达式求值（`ExtExpressionEvaluator`）、基于 Spring `BeanUtils` 的属性拷贝（`BeanUtil`）、AOP / AspectJ 支持、线程池与异步执行（`ThreadPoolConfiguration`、`AsyncConfiguration`，前缀 `ext.thread-pool`）、`SpringUtil` 静态容器访问、发布订阅 SPI `PubSub`（`publish` / `subscribe`，由 [ext-redis](../ext-infra/AGENTS.md#ext-redis) 与 [ext-postgres](../ext-infra/AGENTS.md#ext-postgres) 各实现一份）。
 
 **边界**：只依赖 `ext-tool`。不依赖 `ext-json`，不引入任何 web / servlet 组件——它被非 Web 应用使用，拖入 web 栈会改变消费方的启动形态。
+
+**上下文传播**：`ContextPropagationAutoConfiguration` 给容器内每个 `ThreadPoolTaskExecutor` 挂 `ContextTaskDecorator`（MDC + 数据权限进池线程），给每个 `ThreadPoolTaskScheduler` 挂 `TraceContext::wrap`（`@Scheduled` 每次执行生成独立 traceId）。
 
 ### ext-json
 
@@ -134,7 +137,7 @@ servlet 基座，把「接口返回什么形状、分页怎么传、错误怎么
 
 ###### ⑤ 请求标识
 
-`X-Request-Id` 的透传 / 生成与对应的 MDC 字段约定（供 `ext-logback` 的日志 pattern 使用）。**新能力：字段名、是否默认开启尚未确认**，实施前需先定——**当前未实现**，模块里尚无相关代码。
+已移出本模块：`X-Request-Id` 透传 / 生成与 MDC 字段由 [`ext-trace`](./ext-trace) 负责（`ext.trace.*` 配置），`ext-servlet` 只保留 `ServletUtil` 等无状态的请求工具。
 
 ##### 归属判定
 
@@ -170,6 +173,8 @@ HTTP 客户端模块，提供：
 **职责**：一个 `HttpUtil` 门面收敛出站 HTTP 调用：常用方法（GET / POST / PUT / DELETE 等）、请求与响应处理、同步与异步两种调用方式。`HttpProperties` 承载 `ext.http.*`：`timeout`（连接/读取超时，默认 `30s`）、`retry-count`（失败重试次数，默认 `3`，即首次之外最多再试 3 次），两者都可按单次调用覆盖。
 
 **边界**：只依赖 `ext-tool`，不引入额外 HTTP 客户端库也不做服务发现/负载均衡；重试用 `ext-tool` 的 `RetryUtils.doWithRetry`（重试次数与间隔取自 `HttpProperties`），不在这里长出一套重试框架。
+
+**追踪头**：`applyHeaders` 默认带上当前线程的 `X-Request-Id`（traceId 是 W3C 32 位 hex 时同时写 `traceparent`，见 `ext-tool` 的 `TraceContext`）；消费方显式设置的同名头优先。没有 traceId 的线程（定时任务、裸线程）现生成一个，不写 MDC。
 
 **约定**：重试只针对可重试的失败（连接超时 / `5xx` / `IOException`），`4xx` 与非幂等方法（非 GET/HEAD 的默认策略）不重试；超时全局默认 `30s`，业务侧按调用传入 `Duration` 覆盖，不要在每个调用点写魔法值。
 
@@ -231,9 +236,9 @@ String content = QrCode.read(inputStream);        // 识别
 
 - `LogMaskConverter` - Logback 转换器，用于 `%maskedMsg` 占位符
 - `LogMaskRule` - 单条脱敏规则（正则 + 遮蔽函数），支持只遮蔽指定捕获组
-- `LogMaskRules` - 内置规则集：手机号、身份证、邮箱、银行卡、IPv4、键值对凭据
+- `LogMaskRules` - 内置规则集：以 `DesensitizeStrategy` 为键，按策略取正则 + 遮蔽函数
 - `LogMaskRegistry` - 静态规则注册表，充当 converter 与 Spring 容器之间的桥
-- `LogMaskProperties` - 配置属性，开关每条规则
+- `LogMaskProperties` - 配置属性，用策略枚举列表选择启用哪几条
 
 **包结构**: `ext.library.logback.mask` / `ext.library.logback.config`
 
@@ -250,11 +255,32 @@ String content = QrCode.read(inputStream);        // 识别
 
 #### 设计约束
 
-**职责**：把脱敏口径搬到日志输出上：`%maskedMsg` 转换器 `LogMaskConverter`、单条规则 `LogMaskRule`（正则 + 遮蔽函数，可只遮蔽指定捕获组）、内置规则集 `LogMaskRules`（手机号、身份证、邮箱、银行卡、IPv4、键值对凭据）、静态注册表 `LogMaskRegistry`、开关每条规则的 `LogMaskProperties`（前缀 `ext.logback.mask`）。
+**职责**：把脱敏口径搬到日志输出上：`%maskedMsg` 转换器 `LogMaskConverter`、单条规则 `LogMaskRule`（正则 + 遮蔽函数，可只遮蔽指定捕获组）、规则集 `LogMaskRules`（`DesensitizeStrategy` → 正则）、静态注册表 `LogMaskRegistry`、选策略的 `LogMaskProperties`（前缀 `ext.logback.mask`）。
+
+**配置口径**：只有一处——`ext.logback.mask.strategies` 列出要启用的 `DesensitizeStrategy` 枚举名，默认 `BANK_CARD, ID_CARD, PHONE, EMAIL, IP, PASSWORD`（`PASSWORD` 在日志侧按 `password=xxx` 键值对形式匹配，只遮蔽值）。不在 `LogMaskRules` 表里的策略（`NONE` / `GENERIC` / `ADDRESS` / `CHINESE_NAME`）无法在自由文本中定位，配置后启动告警并跳过。不另设 `phone` / `email` 这类布尔开关。
 
 **遮蔽口径**：遮蔽函数直接复用 [ext-json](#ext-json) 的 `DesensitizeStrategy`，所以日志里的手机号和接口返回里的手机号是同一形态——不要在这里另写一套遮蔽逻辑。
 
 **关键约束**：converter 由 logback XML 实例化，拿不到 Spring 容器；规则必须在启动时由 `LogMaskAutoConfiguration` 写入 `LogMaskRegistry`。规则表为空时 converter 直接放行，不报错。
+
+### ext-trace
+
+链路追踪模块，提供：
+
+- **入站**：`TraceFilter` 从 `X-Request-Id` / `X-Trace-Id` / `traceparent` 提取或生成 traceId，写入 MDC 与响应头；上游值须匹配 `[A-Za-z0-9._-]{1,128}`，否则丢弃重生成
+- **出站**：`HttpUtil` 默认带追踪头（头名大小写不敏感）；容器内 `RestTemplate` Bean 自动挂 `TraceInterceptor`，`RestClient` / `@HttpExchange` 走 `RestClientCustomizer` 挂同一个拦截器
+- **定时任务**：`ext-core` 自动配置给 `ThreadPoolTaskScheduler` 挂 `TraceContext::wrap`，每次执行生成 traceId
+- **配置**：`TraceProperties`（前缀 `ext.trace`）
+
+**包结构**: `ext.library.trace`；生成 / MDC 读写 / 出站头的原语在 [`ext-tool`](#ext-tool) 的 `ext.library.tool.trace.TraceContext`（无 Servlet 依赖，`ext-http` 等下层模块直接用）。
+
+#### 设计约束
+
+**职责**：只做 traceId 的提取、生成、绑定与透传，不做采样、不做 span 树；要完整的分布式追踪接 Micrometer Tracing / OTel（本模块已 `compileOnly` 声明 `micrometer-tracing` / `context-propagation`）。
+
+**边界**：`TraceFilter` 依赖 `ext-servlet` 与 `jakarta.servlet-api`（`compileOnly`）；traceId 原语下沉在 `ext-tool`，因此出站侧不反向依赖本模块。`ext.trace.enabled=false` 同时关掉入站过滤器与出站注入（自动配置调 `TraceContext.setEnabled`），换成 OTel 时不会出现两套 `traceparent`。
+
+**注意**：MDC 跨线程传播不在这里——线程池只能挂一个 `TaskDecorator`，统一由 `ext-core` 的 `ContextPropagationAutoConfiguration` 处理；`shouldNotFilterAsyncDispatch()` 返回 `false`，否则 SSE / `DeferredResult` 的异步阶段丢 traceId。
 
 ## 依赖关系
 
@@ -268,6 +294,8 @@ ext-tool (基础工具)
     |         +---> ext-logback (+ logback-classic)
     |
     +---> ext-http
+    |         |
+    |         +---> ext-trace (+ ext-servlet, spring-web)
     |
     +---> ext-useragent
     |
@@ -285,11 +313,13 @@ ext-tool (基础工具)
 - `ext-useragent/src/main/java/ext/library/useragent/` - User-Agent 解析源码
 - `ext-qrcode/src/main/java/ext/library/qrcode/` - 二维码源码
 - `ext-logback/src/main/java/ext/library/logback/` - 日志脱敏源码
+- `ext-trace/src/main/java/ext/library/trace/` - 链路追踪源码
 
 ## 变更记录
 
 | 日期 | 变更内容 |
 |------|----------|
+| 2026-01-19 | 移除 ext-pom，BOM 模块已迁移至根目录 ext-bom；初始化 AGENTS.md 文档 |
 | 2026-10-11 | 收编原 ext-misc 层的 ext-http / ext-useragent / ext-qrcode / ext-logback，ext-misc 层解散 |
-| 2026-01-19 | 移除 ext-pom，BOM 模块已迁移至根目录 ext-bom |
-| 2026-01-19 | 初始化 AGENTS.md 文档 |
+| 2026-11-11 | ext-servlet 新增 `TraceFilter`（X-Request-Id 透传/生成 + MDC）；ext-core 新增 `datascope`（`DataScopeContext` / `DataScopeMeta`） |
+| 2026-11-14 | ext-trace 从 ext-web 移入本层：traceId 原语下沉 `ext-tool` 的 `TraceContext`（32 位 W3C hex、出站头、`wrap`），补出站透传（`HttpUtil` / `TraceInterceptor`）与定时任务链路（`ThreadPoolTaskScheduler` 装饰器） |

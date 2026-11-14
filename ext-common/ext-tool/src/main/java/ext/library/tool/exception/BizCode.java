@@ -108,6 +108,9 @@ public enum BizCode implements ResponseCode {
     /** 加解密异常 */
     CRYPTO_ERROR(5006, "加解密错误"),
 
+    /** 服务暂时不可用（熔断打开 / 调用超时） */
+    SERVICE_UNAVAILABLE(5007, "服务暂时不可用，请稍后再试"),
+
     // endregion
 
     // region 6xxx 外部依赖/工具类

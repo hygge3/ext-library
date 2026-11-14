@@ -1,5 +1,6 @@
 package ext.library.core.config;
 
+import ext.library.core.context.ContextTaskDecorator;
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
@@ -8,6 +9,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
+import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 
 import java.util.Arrays;
@@ -29,6 +31,11 @@ import java.util.concurrent.ScheduledExecutorService;
 public class AsyncConfiguration implements AsyncConfigurer {
 
     /**
+     * 把 MDC 与数据权限范围带进异步线程；不挂它的话 @Async 里查数据库会拿不到数据权限
+     */
+    private static final ContextTaskDecorator DECORATOR = new ContextTaskDecorator();
+
+    /**
      * 虚拟线程执行器缓存
      * <p>
      * {@link #getAsyncExecutor()} 由 Spring 每次调用都可能新建一个 {@link VirtualThreadTaskExecutor}，
@@ -48,7 +55,9 @@ public class AsyncConfiguration implements AsyncConfigurer {
 
     private synchronized Executor virtualThreadExecutor() {
         if (this.virtualThreadExecutor == null) {
-            this.virtualThreadExecutor = new VirtualThreadTaskExecutor("异步任务-");
+            TaskExecutorAdapter executor = new TaskExecutorAdapter(new VirtualThreadTaskExecutor("异步任务-"));
+            executor.setTaskDecorator(DECORATOR);
+            this.virtualThreadExecutor = executor;
         }
         return this.virtualThreadExecutor;
     }
@@ -63,8 +72,10 @@ public class AsyncConfiguration implements AsyncConfigurer {
      */
     private static Executor scheduledExecutor() {
         String[] names = SpringUtil.getBeanNamesForType(ScheduledExecutorService.class);
-        return names.length > 0 ? SpringUtil.getBean(names[0])
+        ScheduledExecutorService delegate = names.length > 0 ? SpringUtil.getBean(names[0])
                 : Executors.newSingleThreadScheduledExecutor();
+        // @Async 只用到 Executor 接口；Spring 拿不到 AsyncTaskExecutor 时会自己包一层 TaskExecutorAdapter
+        return command -> delegate.execute(DECORATOR.decorate(command));
     }
 
     /**

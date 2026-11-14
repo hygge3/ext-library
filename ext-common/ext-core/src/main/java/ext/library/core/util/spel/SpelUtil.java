@@ -10,7 +10,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,7 +92,7 @@ public final class SpelUtil {
     public static List<String> parseValueToStringList(StandardEvaluationContext context, String spelExpression) {
         Object value = expression(spelExpression).getValue(context, List.class);
         if (!(value instanceof List<?> list) || list.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
         return list.stream()
                 .filter(Objects::nonNull)

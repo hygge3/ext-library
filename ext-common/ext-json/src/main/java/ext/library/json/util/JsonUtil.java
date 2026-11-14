@@ -295,7 +295,7 @@ public final class JsonUtil {
                 // 只需读完，不取内容
             }
             return true;
-        } catch (Exception e) {
+        } catch (Exception _) {
             return false;
         }
     }

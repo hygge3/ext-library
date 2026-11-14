@@ -1,0 +1,16 @@
+description = '链路追踪与上下文透传'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    api project(':ext-common:ext-servlet')
+    api 'org.springframework:spring-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'io.micrometer:micrometer-tracing'
+    compileOnly 'io.micrometer:context-propagation'
+    compileOnly 'org.springframework.boot:spring-boot-restclient'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework.boot:spring-boot-restclient'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

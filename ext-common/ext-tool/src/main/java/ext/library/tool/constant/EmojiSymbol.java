@@ -38,6 +38,8 @@ public final class EmojiSymbol {
     // endregion
     public static final String IDEMPOTENT = "🔂";
     public static final String RATELIMIT = "🚦";
+    public static final String DEGRADE = "🔌";
+    public static final String RETRY = "🔄";
     public static final String AUDIT = "📋";
     public static final String DESENSITIZE = "🎭";
     public static final String TRANS = "🔁";
@@ -47,9 +49,9 @@ public final class EmojiSymbol {
     public static final String LOGBACK = "🧾";
     public static final String I18N = "🔤";
     public static final String OSS = "📦";
+    public static final String METRICS = "📊";
     // endregion
     public static final String QRCODE = "📱";
-
     private EmojiSymbol() {
         // 防止实例化
     }

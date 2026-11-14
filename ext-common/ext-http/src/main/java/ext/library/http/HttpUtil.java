@@ -3,6 +3,7 @@ package ext.library.http;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
+import ext.library.tool.trace.TraceContext;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.MimeTypeUtils;
 
@@ -24,6 +25,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
@@ -289,7 +291,8 @@ public final class HttpUtil {
         public Request(String url) {
             this.url = url;
             this.method = HttpMethod.GET;
-            this.headers = new HashMap<>();
+            // 大小写不敏感：调用方写 x-request-id 也要能被追踪头判断命中，否则同一次请求会出现两个 traceId
+            this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             this.queryParams = new HashMap<>();
             this.timeout = defaultTimeout;
             this.responseType = String.class;
@@ -804,6 +807,12 @@ public final class HttpUtil {
                 }
             }
             headers.forEach(builder::header);
+            // 显式设置的追踪头优先：默认带当前线程的 traceId，否则跨服务调用在这里断链
+            TraceContext.outboundHeaders(headers.get(TraceContext.HEADER_REQUEST_ID)).forEach((name, value) -> {
+                if (!headers.containsKey(name)) {
+                    builder.header(name, value);
+                }
+            });
         }
 
         private HttpRequest.BodyPublisher buildBodyPublisher() {
@@ -1124,7 +1133,7 @@ public final class HttpUtil {
             if (length != null) {
                 try {
                     return Long.parseLong(length);
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException _) {
                     return -1;
                 }
             }

@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +194,7 @@ public final class BeanUtil {
     @SuppressWarnings("unchecked")
     public static <S, T> List<T> convert(List<S> sourceList, Class<T> targetType) {
         if (ObjectUtil.isEmpty(sourceList)) {
-            return Collections.emptyList();
+            return List.of();
         }
         if (targetType.equals(sourceList.getFirst().getClass())) {
             return (List<T>) sourceList;

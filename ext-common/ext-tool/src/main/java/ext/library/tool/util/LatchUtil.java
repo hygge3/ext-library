@@ -84,7 +84,7 @@ public final class LatchUtil {
 
         try {
             return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             return false;
         }

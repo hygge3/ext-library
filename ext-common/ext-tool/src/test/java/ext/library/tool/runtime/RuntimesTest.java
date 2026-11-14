@@ -50,7 +50,7 @@ class RuntimesTest {
         // 等待一小段时间后再次获取，应该增加
         try {
             Thread.sleep(10);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         }
 

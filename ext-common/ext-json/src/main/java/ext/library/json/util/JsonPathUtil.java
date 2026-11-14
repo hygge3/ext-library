@@ -123,7 +123,7 @@ public final class JsonPathUtil {
         try {
             context.read(pathOf(path));
             return true;
-        } catch (PathNotFoundException e) {
+        } catch (PathNotFoundException _) {
             return false;
         }
     }
@@ -154,7 +154,7 @@ public final class JsonPathUtil {
         try {
             T value = context.read(pathOf(path));
             return value != null ? value : defaultValue;
-        } catch (PathNotFoundException e) {
+        } catch (PathNotFoundException _) {
             return defaultValue;
         }
     }

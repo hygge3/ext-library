@@ -4,7 +4,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeLocator;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import java.util.Collections;
+import java.util.List;
 
 /**
  * SpEL 上下文加固
@@ -46,7 +46,7 @@ final class SpelLock {
      */
     static <C extends StandardEvaluationContext> C lock(C context) {
         context.setTypeLocator(NO_CLASS_LOADING);
-        context.setConstructorResolvers(Collections.emptyList());
+        context.setConstructorResolvers(List.of());
         return context;
     }
 

@@ -12,6 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * ServletUtil 工具类测试
@@ -74,7 +75,8 @@ class ServletUtilTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         ServletUtil.writeJson(response, R.failed(600, "业务失败"));
         assertEquals(200, response.getStatus());
-        assertEquals("{\"status\":200,\"code\":600,\"msg\":\"业务失败\"}", response.getContentAsString());
+        // timestamp 是生成时刻，不参与逐字比较
+        assertTrue(response.getContentAsString().startsWith("{\"status\":200,\"code\":600,\"msg\":\"业务失败\""));
     }
 
     @Test

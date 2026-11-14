@@ -18,7 +18,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
-import ext.library.tool.util.ImageUtil;
+import ext.library.tool.util.ImageIOUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
@@ -171,7 +171,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(String qrCodeFile) {
-        return read(ImageUtil.read(qrCodeFile));
+        return read(ImageIOUtil.read(qrCodeFile));
     }
 
     /**
@@ -182,7 +182,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(File qrCodeFile) {
-        return read(ImageUtil.read(qrCodeFile));
+        return read(ImageIOUtil.read(qrCodeFile));
     }
 
     /**
@@ -193,7 +193,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(URL qrCodeUrl) {
-        return read(ImageUtil.read(qrCodeUrl));
+        return read(ImageIOUtil.read(qrCodeUrl));
     }
 
     /**
@@ -204,7 +204,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(InputStream inputStream) {
-        return read(ImageUtil.read(inputStream));
+        return read(ImageIOUtil.read(inputStream));
     }
 
     /**
@@ -227,7 +227,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(String qrCodeFile, Charset charset) {
-        return read(ImageUtil.read(qrCodeFile), charset);
+        return read(ImageIOUtil.read(qrCodeFile), charset);
     }
 
     /**
@@ -239,7 +239,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(File qrCodeFile, Charset charset) {
-        return read(ImageUtil.read(qrCodeFile), charset);
+        return read(ImageIOUtil.read(qrCodeFile), charset);
     }
 
     /**
@@ -251,7 +251,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(URL qrCodeUrl, Charset charset) {
-        return read(ImageUtil.read(qrCodeUrl), charset);
+        return read(ImageIOUtil.read(qrCodeUrl), charset);
     }
 
     /**
@@ -263,7 +263,7 @@ public class QrCode {
      * @return 二维码内容
      */
     public static String read(InputStream inputStream, Charset charset) {
-        return read(ImageUtil.read(inputStream), charset);
+        return read(ImageIOUtil.read(inputStream), charset);
     }
 
     /**
@@ -309,7 +309,7 @@ public class QrCode {
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(String qrCodeFile) {
-        return readRawBytes(ImageUtil.read(qrCodeFile));
+        return readRawBytes(ImageIOUtil.read(qrCodeFile));
     }
 
     /**
@@ -320,7 +320,7 @@ public class QrCode {
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(File qrCodeFile) {
-        return readRawBytes(ImageUtil.read(qrCodeFile));
+        return readRawBytes(ImageIOUtil.read(qrCodeFile));
     }
 
     /**
@@ -331,7 +331,7 @@ public class QrCode {
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(URL qrCodeUrl) {
-        return readRawBytes(ImageUtil.read(qrCodeUrl));
+        return readRawBytes(ImageIOUtil.read(qrCodeUrl));
     }
 
     /**
@@ -342,7 +342,7 @@ public class QrCode {
      * @return 原始字节数组
      */
     public static byte[] readRawBytes(InputStream inputStream) {
-        return readRawBytes(ImageUtil.read(inputStream));
+        return readRawBytes(ImageIOUtil.read(inputStream));
     }
 
     /**
@@ -374,7 +374,7 @@ public class QrCode {
         try {
             String normalized = hexString.startsWith("#") ? hexString : "#" + hexString;
             return new Color(Long.decode(normalized).intValue());
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return defaultColor;
         }
     }
@@ -541,7 +541,7 @@ public class QrCode {
      * @return this
      */
     public QrCode logo(File logoFile) {
-        return logo(ImageUtil.read(logoFile));
+        return logo(ImageIOUtil.read(logoFile));
     }
 
     /**
@@ -552,7 +552,7 @@ public class QrCode {
      * @return this
      */
     public QrCode logo(URL logoUrl) {
-        return logo(ImageUtil.read(logoUrl));
+        return logo(ImageIOUtil.read(logoUrl));
     }
 
     // ==================== 输出方法 ====================
@@ -565,7 +565,7 @@ public class QrCode {
      * @return this
      */
     public QrCode logo(String logoPath) {
-        return logo(ImageUtil.read(logoPath));
+        return logo(ImageIOUtil.read(logoPath));
     }
 
     /**
@@ -576,7 +576,7 @@ public class QrCode {
      * @return this
      */
     public QrCode logo(InputStream logoStream) {
-        return logo(ImageUtil.read(logoStream));
+        return logo(ImageIOUtil.read(logoStream));
     }
 
     /**
@@ -586,7 +586,7 @@ public class QrCode {
      */
     public void write(OutputStream output) {
         BufferedImage image = this.toImage();
-        ImageUtil.write(image, this.imageFormat, output);
+        ImageIOUtil.write(image, this.imageFormat, output);
     }
 
     /**
@@ -613,7 +613,7 @@ public class QrCode {
             parentDir.mkdirs();
         }
         BufferedImage image = this.toImage();
-        ImageUtil.write(image, this.imageFormat, file);
+        ImageIOUtil.write(image, this.imageFormat, file);
         return file;
     }
 
@@ -634,10 +634,11 @@ public class QrCode {
      */
     public byte[] toBytes() {
         BufferedImage image = this.toImage();
-        return ImageUtil.writeAsBytes(image, this.imageFormat);
+        return ImageIOUtil.writeAsBytes(image, this.imageFormat);
     }
 
     // ==================== 内部方法 ====================
+
 
     /**
      * 输出为输入流
@@ -646,7 +647,7 @@ public class QrCode {
      */
     public ByteArrayInputStream toStream() {
         BufferedImage image = this.toImage();
-        return ImageUtil.writeAsStream(image, this.imageFormat);
+        return new ByteArrayInputStream(ImageIOUtil.writeAsBytes(image, this.imageFormat));
     }
 
     /**

@@ -34,7 +34,7 @@ public final class NetUtil {
             if (StringUtil.isBlank(hostname)) {
                 hostname = address.toString();
             }
-        } catch (UnknownHostException ignore) {
+        } catch (UnknownHostException _) {
             hostname = localHost;
         }
         return hostname;
@@ -54,7 +54,7 @@ public final class NetUtil {
             if (StringUtil.isBlank(hostAddress)) {
                 hostAddress = address.toString();
             }
-        } catch (UnknownHostException ignore) {
+        } catch (UnknownHostException _) {
             hostAddress = localHost;
         }
         return hostAddress;
@@ -152,7 +152,7 @@ public final class NetUtil {
     public static boolean tryPort(int port) {
         try (ServerSocket ignore = new ServerSocket(port)) {
             return true;
-        } catch (Exception e) {
+        } catch (Exception _) {
             return false;
         }
     }

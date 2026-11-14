@@ -1,6 +1,5 @@
 package ext.library.servlet.response;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,7 +24,7 @@ public record PageResult<T>(long page, long size, Long total, Long pages, List<T
      * @return 空分页结果
      */
     public static <T> PageResult<T> empty(PageQuery query) {
-        return new PageResult<>(query.getPage(), query.getSize(), 0L, 0L, Collections.emptyList());
+        return new PageResult<>(query.getPage(), query.getSize(), 0L, 0L, List.of());
     }
 
 }

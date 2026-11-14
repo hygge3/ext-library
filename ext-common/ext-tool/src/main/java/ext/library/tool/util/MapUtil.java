@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -257,7 +256,7 @@ public final class MapUtil {
      */
     public static <K, T> Map<K, List<T>> groupBy(List<T> list, Function<T, K> keyClassifier) {
         if (ObjectUtil.isEmpty(list)) {
-            return Collections.emptyMap();
+            return Map.of();
         }
         return list.stream().collect(Collectors.groupingBy(keyClassifier));
     }

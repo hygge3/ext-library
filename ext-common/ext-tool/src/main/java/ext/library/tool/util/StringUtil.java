@@ -687,7 +687,7 @@ public final class StringUtil {
      * 检查集合中是否有任意一个非空字符串
      *
      * <pre>
-     * StringUtil.isAnyNotBlank(Collections.emptyList()) = false
+     * StringUtil.isAnyNotBlank(List.of()) = false
      * StringUtil.isAnyNotBlank(Arrays.asList(null, "", " ")) = false
      * StringUtil.isAnyNotBlank(Arrays.asList("", "test", " ")) = true
      * </pre>

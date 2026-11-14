@@ -101,7 +101,7 @@ public final class Version {
             int n1 = parseVersionNumber(s1);
             int n2 = parseVersionNumber(s2);
             return Integer.compare(n1, n2);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             // 回退到字符串比较
             return s1.compareTo(s2);
         }

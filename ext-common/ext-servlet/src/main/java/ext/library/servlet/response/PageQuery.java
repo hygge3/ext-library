@@ -44,7 +44,7 @@ public class PageQuery {
     }
 
     public void setSize(long size) {
-        this.size = Math.min(Math.max(size, 1), MAX_SIZE);
+        this.size = Math.clamp(size, 1, MAX_SIZE);
     }
 
     public long getTotal() {
@@ -64,7 +64,7 @@ public class PageQuery {
         // 页码离谱时避免真实溢出：溢出说明这条查询没有意义，放到一个肯定越过后全部数据的位置
         try {
             return Math.multiplyExact(page - 1, size);
-        } catch (ArithmeticException e) {
+        } catch (ArithmeticException _) {
             return Long.MAX_VALUE;
         }
     }

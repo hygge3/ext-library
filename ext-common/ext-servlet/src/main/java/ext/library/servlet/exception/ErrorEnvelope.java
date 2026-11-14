@@ -6,6 +6,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 /**
  * 错误信封
  * <p>
@@ -16,11 +18,16 @@ import org.springframework.http.ResponseEntity;
  * 业务码（如 {@code 6xx}）不是合法的 HTTP 状态码，所以 {@link #status()} 允许为 {@code null}：
  * 为空表示"HTTP 状态保持 200，错误信息只在响应体里"。
  *
- * @param status HTTP 状态，{@code null} 表示不改动 HTTP 状态
- * @param body   响应体
+ * @param status  HTTP 状态，{@code null} 表示不改动 HTTP 状态
+ * @param body    响应体
+ * @param headers 额外响应头（如 {@code Retry-After}）
  * @since 4.1.0
  */
-public record ErrorEnvelope(@Nullable HttpStatus status, R<Void> body) {
+public record ErrorEnvelope(@Nullable HttpStatus status, R<Void> body, Map<String, String> headers) {
+
+    public ErrorEnvelope(@Nullable HttpStatus status, R<Void> body) {
+        this(status, body, Map.of());
+    }
 
     /**
      * 按 HTTP 状态生成信封（消息取状态码的 reason phrase）
@@ -62,6 +69,20 @@ public record ErrorEnvelope(@Nullable HttpStatus status, R<Void> body) {
     }
 
     /**
+     * 按 HTTP 状态、业务码与额外响应头生成信封
+     *
+     * @param status  HTTP 状态
+     * @param code    业务码
+     * @param message 对外消息
+     * @param headers 额外响应头
+     *
+     * @return 错误信封
+     */
+    public static ErrorEnvelope of(HttpStatus status, int code, String message, Map<String, String> headers) {
+        return new ErrorEnvelope(status, R.failed(code, message), headers);
+    }
+
+    /**
      * 按业务码生成信封，HTTP 状态保持 200
      *
      * @param code    业务码
@@ -90,9 +111,11 @@ public record ErrorEnvelope(@Nullable HttpStatus status, R<Void> body) {
      * @return 响应实体，{@code status} 为空时状态为 200
      */
     public ResponseEntity<R<Void>> toResponseEntity() {
-        return status == null
-                ? ResponseEntity.ok(body)
-                : ResponseEntity.status(status).body(body);
+        ResponseEntity.BodyBuilder builder = status == null
+                ? ResponseEntity.ok()
+                : ResponseEntity.status(status);
+        headers.forEach(builder::header);
+        return builder.body(body);
     }
 
     /**

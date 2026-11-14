@@ -86,7 +86,7 @@ public final class Threads {
                 t = ce;
             } catch (ExecutionException ee) {
                 t = ee.getCause();
-            } catch (InterruptedException ie) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
         }

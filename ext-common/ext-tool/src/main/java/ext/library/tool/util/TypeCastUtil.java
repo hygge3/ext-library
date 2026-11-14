@@ -750,7 +750,7 @@ public final class TypeCastUtil {
         try {
             R result = (R) cast(obj, defaultValue.getClass());
             return result != null ? result : defaultValue;
-        } catch (Exception e) {
+        } catch (Exception _) {
             return defaultValue;
         }
     }
@@ -766,7 +766,7 @@ public final class TypeCastUtil {
         try {
             T result = converter.apply(obj);
             return result != null ? result : defaultValue;
-        } catch (Exception e) {
+        } catch (Exception _) {
             return defaultValue;
         }
     }

@@ -174,7 +174,7 @@ public final class ClassUtil {
     private static @Nullable Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
         try {
             return clazz.getMethod(methodName, paramTypes);
-        } catch (NoSuchMethodException ex) {
+        } catch (NoSuchMethodException _) {
             return null;
         }
     }

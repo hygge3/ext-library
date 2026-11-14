@@ -53,13 +53,13 @@ public final class IOUtil {
         if (closeable instanceof Flushable flushable) {
             try {
                 flushable.flush();
-            } catch (IOException ignored) {
+            } catch (IOException _) {
                 // ignore
             }
         }
         try {
             closeable.close();
-        } catch (IOException ignored) {
+        } catch (IOException _) {
             // ignore
         }
     }

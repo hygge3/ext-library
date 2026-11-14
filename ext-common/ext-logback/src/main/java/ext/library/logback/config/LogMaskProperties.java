@@ -1,11 +1,16 @@
 package ext.library.logback.config;
 
+import ext.library.desensitize.DesensitizeStrategy;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 日志脱敏配置属性
  * <p>
- * 各开关只控制对应规则是否启用，全部关闭可达到「等同未脱敏」的效果。
+ * 用 {@link DesensitizeStrategy} 枚举选择要启用的规则，与 JSON 脱敏同一套口径；
+ * 配置为空列表等价于不脱敏。
  *
  * @see ext.library.logback.mask.LogMaskConverter
  */
@@ -14,65 +19,26 @@ public class LogMaskProperties {
 
     public static final String PREFIX = "ext.logback.mask";
 
-    /** 是否脱敏手机号 */
-    private boolean phone = true;
-    /** 是否脱敏身份证号 */
-    private boolean idCard = true;
-    /** 是否脱敏邮箱 */
-    private boolean email = true;
-    /** 是否脱敏银行卡号 */
-    private boolean bankCard = true;
-    /** 是否脱敏 IPv4 地址 */
-    private boolean ip = true;
-    /** 是否脱敏 {@code password=xxx} 这类键值对形式的凭据 */
-    private boolean credential = true;
+    /**
+     * 启用的脱敏策略，按声明顺序依次执行
+     * <p>
+     * 默认：银行卡号、身份证号、手机号、邮箱、IPv4、键值对凭据。
+     * {@code PASSWORD} 在日志侧按 {@code password=xxx} 键值对形式匹配。
+     */
+    private List<DesensitizeStrategy> strategies = new ArrayList<>(List.of(
+            DesensitizeStrategy.BANK_CARD,
+            DesensitizeStrategy.ID_CARD,
+            DesensitizeStrategy.PHONE,
+            DesensitizeStrategy.EMAIL,
+            DesensitizeStrategy.IP,
+            DesensitizeStrategy.PASSWORD));
 
-    public boolean isPhone() {
-        return phone;
+    public List<DesensitizeStrategy> getStrategies() {
+        return strategies;
     }
 
-    public void setPhone(boolean phone) {
-        this.phone = phone;
-    }
-
-    public boolean isIdCard() {
-        return idCard;
-    }
-
-    public void setIdCard(boolean idCard) {
-        this.idCard = idCard;
-    }
-
-    public boolean isEmail() {
-        return email;
-    }
-
-    public void setEmail(boolean email) {
-        this.email = email;
-    }
-
-    public boolean isBankCard() {
-        return bankCard;
-    }
-
-    public void setBankCard(boolean bankCard) {
-        this.bankCard = bankCard;
-    }
-
-    public boolean isIp() {
-        return ip;
-    }
-
-    public void setIp(boolean ip) {
-        this.ip = ip;
-    }
-
-    public boolean isCredential() {
-        return credential;
-    }
-
-    public void setCredential(boolean credential) {
-        this.credential = credential;
+    public void setStrategies(List<DesensitizeStrategy> strategies) {
+        this.strategies = strategies;
     }
 
 }
