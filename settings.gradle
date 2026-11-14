@@ -19,6 +19,7 @@ include 'ext-common:ext-http'
 include 'ext-common:ext-useragent'
 include 'ext-common:ext-qrcode'
 include 'ext-common:ext-logback'
+include 'ext-common:ext-trace'
 
 // ==================== ext-infra ====================
 include 'ext-infra:ext-redis'
@@ -30,6 +31,7 @@ include 'ext-infra:ext-jdbc'
 include 'ext-infra:ext-job'
 include 'ext-infra:ext-i18n'
 include 'ext-infra:ext-oss'
+include 'ext-infra:ext-metrics'
 
 // ==================== ext-security ====================
 include 'ext-security'
@@ -41,11 +43,10 @@ include 'ext-crypto'
 include 'ext-web:ext-accesslog'
 include 'ext-web:ext-mvc'
 include 'ext-web:ext-realtime'
-include 'ext-web:ext-trace'
 
 // ==================== ext-enhance ====================
 include 'ext-enhance:ext-captcha'
 include 'ext-enhance:ext-idempotent'
 include 'ext-enhance:ext-api-crypto'
-include 'ext-enhance:ext-ratelimit'
+include 'ext-enhance:ext-resilience'
 include 'ext-enhance:ext-audit'
