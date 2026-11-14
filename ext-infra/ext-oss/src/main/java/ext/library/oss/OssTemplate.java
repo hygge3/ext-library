@@ -1,6 +1,7 @@
 package ext.library.oss;
 
 import ext.library.oss.config.OssProperties;
+import ext.library.oss.util.ImageUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 
@@ -277,6 +278,67 @@ public class OssTemplate {
      */
     public String presignPut(String key, Duration expiry) {
         return storage.presignPut(key, expiry);
+    }
+
+    /**
+     * 生成带文件名的下载直链（浏览器另存为时用这个名字）
+     *
+     * @param key      对象键
+     * @param filename 下载文件名
+     *
+     * @return 直链
+     */
+    public String presignDownload(String key, String filename) {
+        return storage.presignDownload(key, properties.getPresignExpiry(), filename);
+    }
+
+    /**
+     * 生成带文件名、指定有效期的下载直链
+     *
+     * @param key      对象键
+     * @param expiry   有效期
+     * @param filename 下载文件名
+     *
+     * @return 直链
+     */
+    public String presignDownload(String key, Duration expiry, String filename) {
+        return storage.presignDownload(key, expiry, filename);
+    }
+
+    /**
+     * 生成缩略图，格式、质量、尺寸均取配置
+     *
+     * @param key 对象键
+     *
+     * @return 缩略图字节（默认 webp）
+     */
+    public byte[] thumbnail(String key) {
+        return thumbnail(key, properties.getThumbnailMaxEdge(), properties.getThumbnailFormat());
+    }
+
+    /**
+     * 生成缩略图，格式与质量取配置
+     *
+     * @param key     对象键
+     * @param maxEdge 长边上限（像素），只缩不放
+     *
+     * @return 缩略图字节
+     */
+    public byte[] thumbnail(String key, int maxEdge) {
+        return thumbnail(key, maxEdge, properties.getThumbnailFormat());
+    }
+
+    /**
+     * 生成缩略图
+     *
+     * @param key     对象键
+     * @param maxEdge 长边上限（像素），只缩不放
+     * @param format  输出格式，需在 {@link ImageUtil#encoders()} 内
+     *
+     * @return 缩略图字节
+     */
+    public byte[] thumbnail(String key, int maxEdge, String format) {
+        return ImageUtil.thumbnail(getBytes(key), maxEdge, format, properties.getThumbnailQuality());
     }
 
     /**

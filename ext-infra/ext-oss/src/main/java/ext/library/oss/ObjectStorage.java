@@ -159,4 +159,20 @@ public interface ObjectStorage {
      */
     String presignPut(String key, Duration expiry);
 
+    /**
+     * 生成带下载文件名的直链
+     * <p>
+     * 实现把 {@code filename} 变成响应的 {@code Content-Disposition}，浏览器点击即按此名保存。
+     * 不支持响应头覆盖的实现（如本地文件系统）忽略文件名，等同于 {@link #presign(String, Duration)}。
+     *
+     * @param key      对象键
+     * @param expiry   有效期
+     * @param filename 下载时展示的文件名
+     *
+     * @return 可直接访问的 URL
+     */
+    default String presignDownload(String key, Duration expiry, String filename) {
+        return presign(key, expiry);
+    }
+
 }

@@ -3,6 +3,9 @@ description = '对象存储，支持本地文件系统与 S3 协议'
 dependencies {
     api project(':ext-common:ext-core')
 
+    // 缩略图默认输出 webp；JDK ImageIO 无 webp 编码器，这个包带各平台原生库
+    implementation 'com.github.usefulness:webp-imageio'
+
     // 厂商 SDK 一律 compileOnly：消费方只引自己用得上的后端，没有 SDK 时其他模式仍能启动
     // AWS SDK for Java v2（S3 客户端 + 预签名），版本由 ext-bom 导入的 awssdk bom 收敛
     compileOnly 'software.amazon.awssdk:s3'

@@ -4,9 +4,13 @@ import ext.library.oss.LocalObjectStorage;
 import ext.library.oss.ObjectStorage;
 import ext.library.oss.OssTemplate;
 import ext.library.oss.S3ObjectStorage;
+import ext.library.oss.util.ImageUtil;
+import ext.library.oss.util.ThumbnailEncoder;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ExtException;
 import ext.library.tool.runtime.Logs;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,6 +38,18 @@ import java.net.URI;
 @ConditionalOnProperty(prefix = OssProperties.PREFIX, name = "enabled", havingValue = "true",
         matchIfMissing = true)
 public class OssAutoConfiguration {
+
+    /**
+     * 注册业务方注入的缩略图编码器，同格式覆盖内置实现
+     *
+     * @param encoders 容器里的编码器
+     *
+     * @return 初始化回调
+     */
+    @Bean
+    public SmartInitializingSingleton thumbnailEncoderRegistrar(ObjectProvider<ThumbnailEncoder> encoders) {
+        return () -> encoders.orderedStream().forEach(ImageUtil::registerEncoder);
+    }
 
     /**
      * 对象存储门面

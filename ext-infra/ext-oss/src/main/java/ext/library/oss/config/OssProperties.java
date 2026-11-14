@@ -91,6 +91,21 @@ public class OssProperties {
      */
     private boolean chunkedEncoding = true;
 
+    /**
+     * 缩略图长边上限（像素），只缩不放
+     */
+    private int thumbnailMaxEdge = 320;
+
+    /**
+     * 缩略图输出格式，需在 ImageIO 可写格式内（内置 webp，依赖 webp-imageio）
+     */
+    private String thumbnailFormat = "webp";
+
+    /**
+     * 缩略图压缩质量，仅对有损格式生效
+     */
+    private float thumbnailQuality = 0.8f;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -201,6 +216,30 @@ public class OssProperties {
 
     public void setChunkedEncoding(boolean chunkedEncoding) {
         this.chunkedEncoding = chunkedEncoding;
+    }
+
+    public int getThumbnailMaxEdge() {
+        return thumbnailMaxEdge;
+    }
+
+    public void setThumbnailMaxEdge(int thumbnailMaxEdge) {
+        this.thumbnailMaxEdge = thumbnailMaxEdge;
+    }
+
+    public String getThumbnailFormat() {
+        return thumbnailFormat;
+    }
+
+    public void setThumbnailFormat(String thumbnailFormat) {
+        this.thumbnailFormat = thumbnailFormat;
+    }
+
+    public float getThumbnailQuality() {
+        return thumbnailQuality;
+    }
+
+    public void setThumbnailQuality(float thumbnailQuality) {
+        this.thumbnailQuality = thumbnailQuality;
     }
 
 }

@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
@@ -29,6 +30,8 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -217,7 +220,7 @@ public class S3ObjectStorage implements ObjectStorage {
         try {
             client.abortMultipartUpload(AbortMultipartUploadRequest.builder()
                     .bucket(bucket).key(key).uploadId(uploadId).build());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException _) {
             // 放弃失败不影响业务结果，留日志由 SDK 自己打
         }
     }
@@ -358,6 +361,42 @@ public class S3ObjectStorage implements ObjectStorage {
         } catch (RuntimeException e) {
             throw new ExtException(EmojiSymbol.OSS, e, "生成预签名上传链接失败：{}", key);
         }
+    }
+
+    @Override
+    public String presignDownload(String key, Duration expiry, String filename) {
+        if (filename == null || filename.isBlank()) {
+            return presign(key, expiry);
+        }
+        try {
+            return presigner.presignGetObject(GetObjectPresignRequest.builder()
+                            .signatureDuration(expiry)
+                            .getObjectRequest(GetObjectRequest.builder()
+                                    .bucket(bucket)
+                                    .key(key)
+                                    .responseContentDisposition(contentDisposition(filename))
+                                    .build())
+                            .build())
+                    .url().toString();
+        } catch (RuntimeException e) {
+            throw new ExtException(EmojiSymbol.OSS, e, "生成预签名下载链接失败：{}", key);
+        }
+    }
+
+    /**
+     * 按 RFC 6266 / 5987 拼 Content-Disposition：纯 ASCII 直接引号，含中文等字符时走 {@code filename*}
+     *
+     * @param filename 文件名
+     *
+     * @return 响应头值
+     */
+    private static String contentDisposition(String filename) {
+        String safe = filename.replace("\"", "");
+        boolean ascii = safe.chars().allMatch(c -> c >= 0x20 && c < 0x7f);
+        if (ascii) {
+            return "attachment; filename=\"" + safe + "\"";
+        }
+        return "attachment; filename*=UTF-8''" + URLEncoder.encode(safe, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
 }
