@@ -3,6 +3,7 @@ package ext.library.websocket.handler;
 import ext.library.security.domain.SecuritySession;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import ext.library.tool.trace.TraceContext;
 import ext.library.websocket.manager.WebSocketConnectionManager;
 import ext.library.websocket.manager.WebSocketHeartbeatManager;
 import ext.library.websocket.properties.WebSocketProperties;
@@ -15,6 +16,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -58,11 +60,16 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
-        String sessionKey = loginUser.getLoginId();
-        // 记录活动时间
-        heartbeatManager.recordActivity(session.getId());
-        Logs.debug(EmojiSymbol.WEBSOCKET, "[消息] userId: {}, message: {}", sessionKey, message.getPayload());
+        Map<String, String> traceSnapshot = bindTrace(session);
+        try {
+            SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
+            String sessionKey = loginUser.getLoginId();
+            // 记录活动时间
+            heartbeatManager.recordActivity(session.getId());
+            Logs.debug(EmojiSymbol.WEBSOCKET, "[消息] userId: {}, message: {}", sessionKey, message.getPayload());
+        } finally {
+            TraceContext.restore(traceSnapshot);
+        }
     }
 
     /**
@@ -70,11 +77,25 @@ public class ExtWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
-        if (loginUser != null) {
-            heartbeatManager.recordActivity(session.getId());
+        Map<String, String> traceSnapshot = bindTrace(session);
+        try {
+            SecuritySession loginUser = (SecuritySession) session.getAttributes().get(loginUserKey);
+            if (loginUser != null) {
+                heartbeatManager.recordActivity(session.getId());
+            }
+            super.handleBinaryMessage(session, message);
+        } finally {
+            TraceContext.restore(traceSnapshot);
         }
-        super.handleBinaryMessage(session, message);
+    }
+
+    /**
+     * 消息处理不在 Servlet 线程上，MDC 里没有 traceId：用握手时存下的那个，
+     * 让处理它的日志与出站请求跟连接同一条链路
+     */
+    private static Map<String, String> bindTrace(WebSocketSession session) {
+        Object traceId = session.getAttributes().get(TraceContext.TRACE_ID_MDC_KEY);
+        return TraceContext.bind(traceId instanceof String value && !value.isBlank() ? value : TraceContext.generate());
     }
 
     /**

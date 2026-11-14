@@ -64,7 +64,7 @@ public class SseHeartbeatManager {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                 scheduler.shutdownNow();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
@@ -114,7 +114,7 @@ public class SseHeartbeatManager {
                 // 尝试完成 emitter
                 try {
                     emitter.completeWithError(e);
-                } catch (Exception ignored) {
+                } catch (Exception _) {
                     // 忽略
                 }
             }

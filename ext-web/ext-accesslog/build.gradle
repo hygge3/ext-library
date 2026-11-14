@@ -5,6 +5,8 @@ dependencies {
     api project(':ext-common:ext-json')
     api project(':ext-common:ext-servlet')
     api 'org.springframework:spring-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

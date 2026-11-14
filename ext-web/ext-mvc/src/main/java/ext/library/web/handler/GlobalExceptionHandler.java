@@ -1,7 +1,9 @@
 package ext.library.web.handler;
 
+import ext.library.core.metrics.MetricsRecorder;
 import ext.library.servlet.exception.ErrorEnvelope;
 import ext.library.servlet.exception.ErrorLog;
+import ext.library.servlet.exception.HttpAware;
 import ext.library.servlet.response.R;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.BizCode;
@@ -9,6 +11,8 @@ import ext.library.tool.exception.BizException;
 import ext.library.tool.util.StreamUtil;
 import ext.library.tool.util.StringUtil;
 import org.springframework.core.annotation.Order;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -46,6 +50,18 @@ import java.util.Set;
 @Order(1)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private MetricsRecorder metrics;
+
+    /**
+     * 指标幂可选：未引入 ext-metrics 时保持为 null
+     *
+     * @param provider 指标记录器
+     */
+    @Autowired
+    void setMetrics(ObjectProvider<MetricsRecorder> provider) {
+        this.metrics = provider.getIfAvailable();
+    }
 
     /**
      * 处理 BindingResult
@@ -90,6 +106,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     public ResponseEntity<R<Void>> bizException(BizException e, HttpServletRequest request) {
         ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage());
+        if (metrics != null) {
+            metrics.businessError(String.valueOf(e.getCode()));
+        }
+        // 限流 / 熔断这类异常自带 HTTP 语义，按它声明的状态、业务码与响应头返回
+        if (e instanceof HttpAware aware) {
+            return ErrorEnvelope.of(aware.status(), aware.bizCode().getCode(), e.getMessage(), aware.headers())
+                    .toResponseEntity();
+        }
         return ErrorEnvelope.ofCode(e.getCode(), e.getMessage()).toResponseEntity();
     }
 

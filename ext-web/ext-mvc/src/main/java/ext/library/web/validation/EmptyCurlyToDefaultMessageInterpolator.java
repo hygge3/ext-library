@@ -37,7 +37,7 @@ public class EmptyCurlyToDefaultMessageInterpolator extends ResourceBundleMessag
             Method messageMethod;
             try {
                 messageMethod = annotationType.getDeclaredMethod("message");
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException _) {
                 return super.interpolate(message, context, locale);
             }
 

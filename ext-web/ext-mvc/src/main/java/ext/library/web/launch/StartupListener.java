@@ -17,10 +17,6 @@ import java.time.LocalDateTime;
 @AutoConfiguration
 public class StartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
-    private static boolean hasOpenApi() {
-        return ClassUtils.isPresent("io.swagger.v3.oas.models.OpenAPI", null);
-    }
-
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
@@ -53,7 +49,7 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
                  💻\t操作系统\t:\t%s (%s)
                 ============================================================
                 """.formatted(appName, DateUtil.format(event.getTimeTaken()), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch);
-        boolean hasOpenApi = hasOpenApi();
+        boolean hasOpenApi = ClassUtils.isPresent("io.swagger.v3.oas.models.OpenAPI", null);
         if (hasOpenApi) {
             // 本模块只产 OpenAPI 描述（JSON）
             String apiDocsPath = environment.getProperty("springdoc.api-docs.path", "/v3/api-docs");

@@ -20,7 +20,6 @@ import org.springframework.web.method.HandlerMethod;
 import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -127,7 +126,7 @@ public class ExtOpenAPIService extends OpenAPIService {
             return;
         }
         if (securityRequirements.length == 0) {
-            operation.setSecurity(Collections.emptyList());
+            operation.setSecurity(List.of());
         } else {
             securityParser.buildSecurityRequirement(securityRequirements, operation);
         }

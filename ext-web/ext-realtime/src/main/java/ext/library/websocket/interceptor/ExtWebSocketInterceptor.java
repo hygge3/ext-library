@@ -4,6 +4,7 @@ import ext.library.security.exception.UnauthorizedException;
 import ext.library.security.util.SecurityUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import ext.library.tool.trace.TraceContext;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -37,6 +38,8 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
             // 检查是否登录 是否有 token
             SecurityUtil.checkToken();
             attributes.put(loginUserKey, SecurityUtil.getCurrentSecuritySession());
+            // 握手是 HTTP 请求，TraceFilter 已把 traceId 写进 MDC；消息处理线程拿不到它，存进会话属性带走
+            attributes.put(TraceContext.TRACE_ID_MDC_KEY, TraceContext.currentOrGenerate());
             return true;
         } catch (UnauthorizedException e) {
             Logs.error(EmojiSymbol.WEBSOCKET, e, "WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
