@@ -190,6 +190,5 @@ String sha3 = DigestUtil.hash("SHA3-256", "data");
 
 | 日期 | 变更内容 |
 |------|----------|
-| 2026-01-20 | 重构：删除 DESUtil，AESUtil 改用 AES-GCM 256 位，简化 PasswordEncoder，新增 SM3Util |
-| 2026-01-20 | 重构 API：统一方法命名、修复一致性问题、完善文档 |
 | 2026-01-19 | 初始化 AGENTS.md 文档 |
+| 2026-01-20 | 重构：删除 DESUtil，AESUtil 改用 AES-GCM 256 位，简化 PasswordEncoder，新增 SM3Util；重构 API：统一方法命名、修复一致性问题、完善文档 |

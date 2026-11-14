@@ -4,6 +4,10 @@ package ext.library.crypto;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.exception.ToolException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
@@ -52,7 +56,7 @@ public final class DigestUtil {
             MessageDigest md = MessageDigest.getInstance(algorithm);
             byte[] hash = md.digest(input.getBytes());
             return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException _) {
             throw new ToolException(EmojiSymbol.CRYPTO, "不支持的算法：{}" + algorithm);
         }
     }
@@ -64,8 +68,29 @@ public final class DigestUtil {
         try {
             MessageDigest.getInstance(algorithm);
             return true;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException _) {
             return false;
+        }
+    }
+
+    /**
+     * HMAC 计算
+     * <p>
+     * 密钥与输入均按 UTF-8 编码，输出为小写十六进制。
+     *
+     * @param algorithm 算法名，如 {@code HmacSHA256}
+     * @param key       密钥
+     * @param input     输入
+     *
+     * @return 十六进制 HMAC
+     */
+    public static String hmac(String algorithm, String key, String input) {
+        try {
+            Mac mac = Mac.getInstance(algorithm);
+            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), algorithm));
+            return HexFormat.of().formatHex(mac.doFinal(input.getBytes(StandardCharsets.UTF_8)));
+        } catch (GeneralSecurityException e) {
+            throw new ToolException(EmojiSymbol.CRYPTO, "HMAC 计算失败：" + e.getMessage());
         }
     }
 }
