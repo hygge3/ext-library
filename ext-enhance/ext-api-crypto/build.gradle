@@ -1,9 +1,15 @@
-description = 'API 请求解密响应加密'
+description = 'API 请求解密/响应加密/接口签名' 
 
 dependencies {
     api project(':ext-common:ext-tool')
     api project(':ext-common:ext-json')
     api project(':ext-common:ext-servlet')
     api project(':ext-crypto')
+    api project(':ext-infra:ext-cache')
     api 'org.springframework:spring-webmvc'
+    // 签名拦截器声明了 HttpServletRequest/Response，编译期需要；运行时由消费方容器提供
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    // 随机数存储走 ext-cache，其 Caffeine 后端是 compileOnly，测试里要显式引入
+    testImplementation 'com.github.ben-manes.caffeine:caffeine'
 }

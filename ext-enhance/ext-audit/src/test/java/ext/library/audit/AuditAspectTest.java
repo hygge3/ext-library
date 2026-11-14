@@ -60,7 +60,7 @@ class AuditAspectTest {
         when(joinPoint.getArgs()).thenReturn(args);
         try {
             when(joinPoint.proceed()).thenReturn(result);
-        } catch (Throwable ignored) {
+        } catch (Throwable _) {
             // mock 的 proceed 不会抛
         }
         return joinPoint;

@@ -50,6 +50,11 @@ public class ApiCryptoProperties {
      */
     private String salt;
 
+    /**
+     * 接口签名配置
+     */
+    private final Sign sign = new Sign();
+
     public Algorithm getAlgorithm() {
         return algorithm;
     }
@@ -90,6 +95,10 @@ public class ApiCryptoProperties {
         this.salt = salt;
     }
 
+    public Sign getSign() {
+        return sign;
+    }
+
     /**
      * 获取用于加密的密钥
      * <p>
@@ -110,5 +119,50 @@ public class ApiCryptoProperties {
      */
     public String getDecryptKey() {
         return privateKey != null && !privateKey.isBlank() ? privateKey : secretKey;
+    }
+
+    /**
+     * 接口签名配置
+     */
+    public static class Sign {
+
+        /**
+         * 是否开启接口签名校验
+         */
+        private boolean enabled = true;
+
+        /**
+         * 签名密钥，使用 {@code @ApiSign} 时必须配置
+         */
+        private String secret;
+
+        /**
+         * 时间戳允许的最大偏差（秒）
+         */
+        private long maxSkewSeconds = 300;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public long getMaxSkewSeconds() {
+            return maxSkewSeconds;
+        }
+
+        public void setMaxSkewSeconds(long maxSkewSeconds) {
+            this.maxSkewSeconds = maxSkewSeconds;
+        }
     }
 }

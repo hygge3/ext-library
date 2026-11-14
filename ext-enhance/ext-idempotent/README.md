@@ -34,6 +34,7 @@ implementation("ext.library:ext-idempotent")
 ## 功能特性
 
 - 基于注解的幂等性控制
+- 防重复提交：`@RepeatSubmit` 按「用户 + 接口 + 参数指纹」自动生成键，业务方不写表达式
 - 支持 SpEL 表达式
 - 存储后端跟随 ext-cache（Caffeine / Redis / PostgreSQL），不再自带 KeyStore
 - 可自定义幂等 Key 生成器
@@ -54,11 +55,33 @@ implementation("ext.library:ext-idempotent")
 | duration | 10 | 幂等控制时长 |
 | timeUnit | SECONDS | 时间单位 |
 | message | 重复请求，请稍后重试 | 重复请求提示信息 |
-| removeKeyWhenFinished | false | 业务完成后是否清除 Key |
-| removeKeyWhenError | false | 异常时是否清除 Key |
+| removeKeyWhenFinished | false | 业务完成后是否清除 Key。业务异常时一律清除，不可配置 |
 | cacheName | idempotent | 幂等键写入的缓存名，可用于隔离不同业务 |
 
 ## 使用示例
+
+### 防重复提交
+
+连点、网关重投直接用 `@RepeatSubmit`，不用写表达式：
+
+```java
+@PostMapping("/order")
+@RepeatSubmit
+public R<Order> createOrder(@RequestBody OrderDTO dto) {
+    return R.ok(orderService.create(dto));
+}
+```
+
+| 属性 | 默认值 | 说明 |
+|------|-------|------|
+| prefix | repeat | 键前缀 |
+| duration | 3 | 控制时长 |
+| timeUnit | SECONDS | 时间单位 |
+| message | 请勿重复提交 | 重复提交提示信息 |
+| cacheName | repeat-submit | 键写入的缓存名 |
+| uniqueExpression | - | 额外区分维度（SpEL），参数指纹已含全部入参，一般不用填 |
+
+键 = `prefix:hash(用户):方法:URI:hash(参数指纹)`。用户取自 `request.getUserPrincipal()`，无则退到 session id、再退到 `anon`；用户与参数只存 SHA-256 摘要，缓存里不留明文。业务异常时键同样释放，可直接重试。
 
 ### 基本使用
 
@@ -93,7 +116,7 @@ public R<Void> pay(@RequestParam Long userId, @RequestBody PaymentDTO dto) {
 
 ```java
 @Component
-public class IPKeyGenerator extends DefaultIdempotentKeyGenerator {
+public class IPKeyGenerator extends DefaultKeyGenerator {
     @Override
     public String generate(JoinPoint joinPoint, Idempotent annotation) {
         String clientIP = ServletUtil.getIpAddr();
@@ -104,7 +127,7 @@ public class IPKeyGenerator extends DefaultIdempotentKeyGenerator {
 @Configuration
 public class IdempotentConfig {
     @Bean
-    public IdempotentKeyGenerator keyGenerator() {
+    public KeyGenerator keyGenerator() {
         return new IPKeyGenerator();
     }
 }

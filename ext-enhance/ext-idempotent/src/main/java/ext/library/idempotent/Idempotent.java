@@ -90,16 +90,11 @@ public @interface Idempotent {
 
     /**
      * 是否在业务完成后立刻清除幂等 key
+     * <p>
+     * 业务异常时一律释放 key，不受本属性控制：失败即允许重试，否则用户在整个时间窗内都会被判为重复提交。
      *
      * @return true: 立刻清除 false: 不处理
      */
     boolean removeKeyWhenFinished() default false;
-
-    /**
-     * 是否在业务执行异常时立刻清除幂等 key
-     *
-     * @return true: 立刻清除 false: 不处理
-     */
-    boolean removeKeyWhenError() default false;
 
 }

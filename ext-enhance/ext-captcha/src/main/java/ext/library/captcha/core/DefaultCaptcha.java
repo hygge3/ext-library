@@ -110,7 +110,7 @@ public class DefaultCaptcha implements Captcha {
     private static Font loadFont(ClassPathResource resource) {
         try {
             return Font.createFont(Font.TRUETYPE_FONT, resource.getInputStream());
-        } catch (FontFormatException | IOException e) {
+        } catch (FontFormatException | IOException _) {
             throw new ExtException(EmojiSymbol.CAPTCHA, "加载字体失败");
         }
     }
@@ -145,7 +145,7 @@ public class DefaultCaptcha implements Captcha {
         try (OutputStream os = supplier.get()) {
             ImageIO.write(image, imageFormat, os);
             return captcha;
-        } catch (IOException e) {
+        } catch (IOException _) {
             throw new ExtException(EmojiSymbol.CAPTCHA, "生成验证码失败");
         } finally {
             graphics.dispose();

@@ -2,6 +2,8 @@ package ext.library.idempotent;
 
 import ext.library.core.util.spel.SpelUtil;
 import ext.library.servlet.util.ServletUtil;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.exception.ExtException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -45,6 +47,11 @@ public class DefaultKeyGenerator implements KeyGenerator {
 
         // 解析出唯一标识并拼接完整 key
         String uniqueStr = SpelUtil.parseValueToString(spelContext, uniqueExpression);
+        if (uniqueStr == null || uniqueStr.isBlank()) {
+            // 求值为空时 key 会退化成同一个常量，整个接口被锁死一个 duration，
+            // 而对外表现只是“重复请求”，极难排查，所以直接报配置错误
+            throw new ExtException(EmojiSymbol.IDEMPOTENT, "幂等表达式求值为空：" + uniqueExpression);
+        }
         return idempotent.prefix() + ":" + uniqueStr;
     }
 

@@ -1,0 +1,11 @@
+description = '限流与降级'
+
+dependencies {
+    api project(':ext-common:ext-core')
+    // 限流计数落在这里；降级（熔断）是进程内状态机，不依赖缓存
+    api project(':ext-infra:ext-cache')
+    compileOnly project(':ext-common:ext-servlet')
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation project(':ext-common:ext-servlet')
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+}

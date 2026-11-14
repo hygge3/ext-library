@@ -61,7 +61,7 @@ public interface AuditOperatorResolver {
                     return null;
                 }
                 return (String) session.getClass().getMethod("getLoginId").invoke(session);
-            } catch (ReflectiveOperationException | RuntimeException e) {
+            } catch (ReflectiveOperationException | RuntimeException _) {
                 // 未引入 ext-security 或未登录，静默降级
                 return null;
             }
