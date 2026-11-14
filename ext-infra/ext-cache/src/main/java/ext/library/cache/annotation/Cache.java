@@ -70,4 +70,24 @@ public @interface Cache {
      */
     CacheType type() default CacheType.FULL;
 
+    /**
+     * 结果为空时是否缓存（防穿透）
+     * <p>
+     * 只应该开在「查不到是常态」的方法上（按不存在的 ID 查详情、按手机号查用户等）：
+     * 不缓存空值的话，每个不存在的 ID 都会打穿缓存直接回源，而且大多是恶意扫描。
+     * 开了之后确实查到数据仍会刷新缓存，不会因为负缓存阻住新写入的数据。
+     *
+     * @return 是否缓存空值，默认 {@code false}
+     */
+    boolean cacheNull() default false;
+
+    /**
+     * 空值的缓存时长，单位与 {@link #timeUnit()} 一致
+     * <p>
+     * 必须比正常值短得多：负缓存期间真实数据可能已经被写入，这段时间内只能靠它自己过期。
+     *
+     * @return 空值缓存时长，默认 30
+     */
+    long nullTimeout() default 30;
+
 }

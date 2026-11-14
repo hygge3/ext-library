@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,12 +47,14 @@ class JdbcDaoInsertTest {
 
     private JdbcClient jdbcClient;
 
+    private JdbcClient.StatementSpec statementSpec;
+
     private JdbcDao<Demo> jdbcDao;
 
     @BeforeEach
     void setUp() {
         jdbcClient = mock(JdbcClient.class);
-        JdbcClient.StatementSpec statementSpec = mock(JdbcClient.StatementSpec.class, RETURNS_SELF);
+        statementSpec = mock(JdbcClient.StatementSpec.class, RETURNS_SELF);
         when(jdbcClient.sql(anyString())).thenReturn(statementSpec);
         when(statementSpec.params(anyList())).thenReturn(statementSpec);
         when(statementSpec.update()).thenReturn(1);
@@ -82,6 +86,22 @@ class JdbcDaoInsertTest {
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(jdbcClient).sql(sql.capture());
         assertThat(sql.getValue()).isEqualTo("INSERT INTO demo (id, name) VALUES (?, ?)");
+    }
+
+    @Test
+    @DisplayName("占位符参数顺序与列顺序一致")
+    @SuppressWarnings("unchecked")
+    void paramsFollowColumnOrder() {
+        Demo demo = new Demo();
+        demo.setId(7L);
+        demo.setName("a");
+
+        jdbcDao.insert(demo);
+
+        // 列顺序与参数顺序各自拼装，错位不会报错，只会悄悄写错列
+        ArgumentCaptor<List<Object>> params = ArgumentCaptor.forClass(List.class);
+        verify(statementSpec).params(params.capture());
+        assertThat(params.getValue()).containsExactly(7L, "a");
     }
 
 }

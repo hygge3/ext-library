@@ -3,7 +3,7 @@ package ext.library.cache.enums;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,7 +59,7 @@ class CacheTypeTest {
     @Test
     @DisplayName("测试枚举在集合中使用")
     void testEnumInCollection() {
-        var list = Arrays.asList(CacheType.values());
+        var list = List.of(CacheType.values());
 
         assertEquals(3, list.size(), "列表应包含 3 个元素");
     }

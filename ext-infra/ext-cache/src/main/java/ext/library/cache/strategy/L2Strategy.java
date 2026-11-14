@@ -1,8 +1,7 @@
 package ext.library.cache.strategy;
 
-import ext.library.cache.enums.L2Backend;
-import ext.library.cache.properties.CacheProperties;
-import ext.library.core.util.SpringUtil;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.util.ClassUtils;
@@ -16,12 +15,9 @@ import java.time.Duration;
  * 结合 Caffeine 本地缓存和分布式缓存（Redis 或 PostgreSQL），实现多级缓存架构。
  * 读取时先查询本地缓存，未命中则查询分布式缓存并回填本地缓存。
  * <p>
- * 分布式缓存后端通过 {@code ext.cache.l2-backend} 配置项指定：
- * <ul>
- *     <li>{@link L2Backend#AUTO} - 自动检测，优先 Redis，其次 PostgreSQL（默认）</li>
- *     <li>{@link L2Backend#REDIS} - 使用 Redis</li>
- *     <li>{@link L2Backend#POSTGRES} - 使用 PostgreSQL</li>
- * </ul>
+ * 分布式缓存后端按类路径自动选择，优先 Redis，其次 PostgreSQL：L2 是「本地 + 分布式」
+ * 组合策略，再给一个 {@code l2-backend} 选型键会让两条分布式分支变成两个配置入口，
+ * 而 {@code ext.cache.storage} 已经是唯一的选型处。
  *
  * @since 2025.08.29
  */
@@ -30,7 +26,6 @@ public class L2Strategy implements CacheStrategy {
     private final CacheStrategy caffeineStrategy = new CaffeineStrategy();
 
     private volatile CacheStrategy distributedStrategy;
-    private volatile L2Backend backendType;
 
     /**
      * 获取分布式缓存策略（延迟初始化）
@@ -39,9 +34,8 @@ public class L2Strategy implements CacheStrategy {
         if (distributedStrategy == null) {
             synchronized (this) {
                 if (distributedStrategy == null) {
-                    CacheProperties properties = SpringUtil.getBean(CacheProperties.class);
-                    distributedStrategy = createDistributedStrategy(properties.getL2Backend());
-                    Logs.info(EmojiSymbol.CACHE, "L2 缓存后端: {}", backendType);
+                    distributedStrategy = createDistributedStrategy();
+                    Logs.info(EmojiSymbol.CACHE, "L2 缓存后端: {}", distributedStrategy.backendType());
                 }
             }
         }
@@ -54,35 +48,19 @@ public class L2Strategy implements CacheStrategy {
     }
 
     /**
-     * 根据后端类型创建分布式缓存策略
-     * <p>
-     * {@link L2Backend#AUTO} 时通过类路径检测自动选择，优先级：Redis > PostgreSQL。
+     * 按类路径创建分布式缓存策略，优先级：Redis > PostgreSQL。
      */
-    private CacheStrategy createDistributedStrategy(L2Backend configured) {
-        return switch (configured) {
-            case AUTO -> {
-                ClassLoader cl = getClass().getClassLoader();
-                if (ClassUtils.isPresent("ext.library.redis.util.RedisUtil", cl)) {
-                    backendType = L2Backend.REDIS;
-                    yield new RedisStrategy();
-                }
-                if (ClassUtils.isPresent("ext.library.postgres.util.PostgresUtil", cl)) {
-                    backendType = L2Backend.POSTGRES;
-                    yield new PostgresStrategy();
-                }
-                throw new IllegalStateException(
-                        "L2 后端自动检测失败：类路径中未找到 ext-redis 或 ext-postgres 依赖，" +
-                        "请引入相应模块或将 ext.cache.cache-storage 改为 CAFFEINE");
-            }
-            case REDIS -> {
-                backendType = L2Backend.REDIS;
-                yield new RedisStrategy();
-            }
-            case POSTGRES -> {
-                backendType = L2Backend.POSTGRES;
-                yield new PostgresStrategy();
-            }
-        };
+    private CacheStrategy createDistributedStrategy() {
+        ClassLoader cl = getClass().getClassLoader();
+        if (ClassUtils.isPresent("ext.library.redis.util.RedisUtil", cl)) {
+            return new RedisStrategy();
+        }
+        if (ClassUtils.isPresent("ext.library.postgres.util.PostgresUtil", cl)) {
+            return new PostgresStrategy();
+        }
+        throw new IllegalStateException(
+                "L2 后端自动检测失败：类路径中未找到 ext-redis 或 ext-postgres 依赖，" +
+                "请引入相应模块或将 ext.cache.cache-storage 改为 CAFFEINE");
     }
 
     @Override
@@ -98,7 +76,7 @@ public class L2Strategy implements CacheStrategy {
         CacheStrategy distributed = getDistributedStrategy();
         T distributedCache = distributed.get(cacheName, key, type);
         if (distributedCache != null) {
-            Logs.debug(EmojiSymbol.CACHE, "从 {} 获取数据", backendType);
+            Logs.debug(EmojiSymbol.CACHE, "从 {} 获取数据", distributed.backendType());
             // 回填本地缓存时沿用分布式层的剩余有效期，不能用默认值：那会让本地副本比分布式层活得久，
             // 分布式层过期后本实例还在供应旧值
             Duration remaining = distributed.remainingTtl(cacheName, key);
@@ -136,6 +114,29 @@ public class L2Strategy implements CacheStrategy {
             caffeineStrategy.put(cacheName, key, value, expireTime);
         }
         return created;
+    }
+
+    /**
+     * 计数只落分布式层
+     * <p>
+     * 本地层也累加会双计，且各实例的本地计数互不可见，分布式下等于每台机器各自限流。
+     */
+    @Override
+    public long increment(String cacheName, String key, long delta, Duration window) {
+        return getDistributedStrategy().increment(cacheName, key, delta, window);
+    }
+
+    /**
+     * 令牌桶只在分布式层：本地层的桶各实例互不可见，等于每台机器各限一份。
+     */
+    @Override
+    public TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity, Duration refillPeriod) {
+        return getDistributedStrategy().tryAcquire(cacheName, key, permits, capacity, refillPeriod);
+    }
+
+    @Override
+    public BackendType backendType() {
+        return getDistributedStrategy().backendType();
     }
 
     @Override

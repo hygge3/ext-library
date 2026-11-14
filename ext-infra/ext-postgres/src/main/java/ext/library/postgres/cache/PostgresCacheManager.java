@@ -1,5 +1,6 @@
 package ext.library.postgres.cache;
 
+import ext.library.core.token.TokenBucketResult;
 import ext.library.json.util.JsonUtil;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.tool.constant.EmojiSymbol;
@@ -22,11 +23,13 @@ public class PostgresCacheManager {
     private final JdbcClient jdbcClient;
     private final PostgresProperties properties;
     private final String tableName;
+    private final String bucketTableName;
 
     public PostgresCacheManager(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
         this.tableName = properties.getCache().getTableName();
+        this.bucketTableName = properties.getBucket().getTableName();
     }
 
     /**
@@ -163,6 +166,81 @@ public class PostgresCacheManager {
     }
 
     /**
+     * 计数器累加（固定窗口）
+     * <p>
+     * 窗口从第一次累加开始算，后续累加只加计数、不动 {@code expires_at}；过期后下一次累加重新开窗。
+     * 每次都续期等于把窗口无限往后推，持续有流量时计数永不归零。
+     *
+     * @param key    缓存 key
+     * @param delta  步长
+     * @param window 窗口大小
+     *
+     * @return 累加后的计数
+     */
+    public long increment(String key, long delta, Duration window) {
+        String interval = window.toSeconds() + " seconds";
+        Long count = jdbcClient.sql("""
+                        INSERT INTO %s (key, value, expires_at)
+                        VALUES (?, to_jsonb(?::bigint), NOW() + ?::interval)
+                        ON CONFLICT (key) DO UPDATE SET
+                            value = CASE WHEN %s.expires_at <= NOW() THEN to_jsonb(?::bigint)
+                                         ELSE to_jsonb((%s.value #>> '{}')::bigint + ?::bigint) END,
+                            expires_at = CASE WHEN %s.expires_at <= NOW() THEN NOW() + ?::interval
+                                              ELSE %s.expires_at END
+                        RETURNING (value #>> '{}')::bigint
+                        """.formatted(tableName, tableName, tableName, tableName, tableName))
+                .param(key).param(delta).param(interval)
+                .param(delta).param(delta)
+                .param(interval)
+                .query(Long.class)
+                .single();
+        return count == null ? 0L : count;
+    }
+
+    /**
+     * 令牌桶取令牌（GCRA 等价实现）
+     * <p>
+     * 两条语句各自原子，不需要事务：先幂等建行（等于满桶），再把「理论到达时间」往前推一格，
+     * 超突发容忍就影响 0 行。保留旧 tat 只在前推成功时发生，所以不会被拒绝的请求拖后。
+     *
+     * @param key          桶 key
+     * @param permits      本次需要的令牌数
+     * @param capacity     桶容量（允许的瞬时突发量）
+     * @param refillPeriod 从空桶补满所需时长
+     *
+     * @return 取令牌结果：是否成、剩余令牌、被拒时的等待时间
+     */
+    public TokenBucketResult tryAcquireToken(String key, long permits, long capacity, Duration refillPeriod) {
+        // 微秒：毫秒精度会把 >1000/s 的配额截断成 1ms/个，实际速率被悄悄压到 1000/s
+        long interval = Math.max(1, refillPeriod.toNanos() / 1_000 / capacity);
+        // 一条语句完成「建桶 / 条件扣减」：放行时返回扣减后的领先微秒数，被拒时没有返回行
+        Long aheadMicros = jdbcClient.sql("""
+                        INSERT INTO %1$s (key, tat) VALUES (?, NOW())
+                        ON CONFLICT (key) DO UPDATE
+                            SET tat = GREATEST(%1$s.tat, NOW()) + (? * ?::float8) * INTERVAL '1 microsecond'
+                            WHERE GREATEST(%1$s.tat, NOW()) - NOW() <= ? * ?::float8 * INTERVAL '1 microsecond'
+                        RETURNING (EXTRACT(EPOCH FROM (tat - NOW())) * 1000000)::bigint
+                        """.formatted(bucketTableName))
+                .params(key, interval, permits, interval, capacity - permits)
+                .query(Long.class)
+                .optional()
+                .orElse(null);
+        if (aheadMicros != null) {
+            return TokenBucketResult.of(true, Math.max(0, aheadMicros) * 1_000L, interval * 1_000L, permits, capacity);
+        }
+        // 被拒：读出当前 tat 算要等多久，放行路径就不多跑这一条
+        long currentMicros = jdbcClient.sql("""
+                        SELECT GREATEST(0, EXTRACT(EPOCH FROM (GREATEST(tat, NOW()) - NOW())) * 1000000)::bigint
+                        FROM %s WHERE key = ?
+                        """.formatted(bucketTableName))
+                .param(key)
+                .query(Long.class)
+                .optional()
+                .orElse(0L);
+        return TokenBucketResult.of(false, currentMicros * 1_000L, interval * 1_000L, permits, capacity);
+    }
+
+    /**
      * 删除缓存
      *
      * @param key 缓存 key
@@ -229,6 +307,11 @@ public class PostgresCacheManager {
         int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE expires_at < NOW()").update();
         if (deleted > 0) {
             Logs.debug(EmojiSymbol.POSTGRES, "清理过期缓存：{} 条", deleted);
+        }
+        // 桶不落 expires_at：tat 落后一小时说明这一小时没人用过，删掉等下次重建
+        int buckets = jdbcClient.sql("DELETE FROM " + bucketTableName + " WHERE tat < NOW() - INTERVAL '1 hour'").update();
+        if (buckets > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理空闲令牌桶：{} 条", buckets);
         }
     }
 

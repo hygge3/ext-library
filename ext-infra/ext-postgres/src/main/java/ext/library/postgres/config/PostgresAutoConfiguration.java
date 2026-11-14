@@ -8,7 +8,6 @@ import ext.library.postgres.properties.DataSourceConfig;
 import ext.library.postgres.properties.PostgresProperties;
 import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.postgres.queue.PostgresQueue;
-import ext.library.postgres.ratelimit.PostgresRateLimiter;
 import ext.library.postgres.schema.PostgresSchemaInitializer;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
@@ -73,13 +72,6 @@ public class PostgresAutoConfiguration {
     public PostgresQueue postgresQueue(JdbcClient postgresJdbcClient, PostgresProperties properties) {
         Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 队列");
         return new PostgresQueue(postgresJdbcClient, properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PostgresRateLimiter postgresRateLimiter(JdbcClient postgresJdbcClient, PostgresProperties properties) {
-        Logs.info(EmojiSymbol.POSTGRES, "载入模块：PostgreSQL 限流");
-        return new PostgresRateLimiter(postgresJdbcClient, properties);
     }
 
     /**

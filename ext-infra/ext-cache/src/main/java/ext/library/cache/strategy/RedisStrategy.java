@@ -1,6 +1,8 @@
 package ext.library.cache.strategy;
 
 import ext.library.cache.properties.CacheProperties;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.redis.util.RedisUtil;
@@ -24,7 +26,7 @@ public class RedisStrategy implements CacheStrategy {
 
     @Override
     public <T> T put(String cacheName, String key, T value, Duration expireTime) {
-        RedisUtil.set(genKey(cacheName, key), JsonUtil.toJson(value), expireTime);
+        RedisUtil.set(genKey(cacheName, key), JsonUtil.toJson(value), withJitter(expireTime));
         return value;
     }
 
@@ -36,6 +38,21 @@ public class RedisStrategy implements CacheStrategy {
     @Override
     public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
         return RedisUtil.setNxEx(genKey(cacheName, key), JsonUtil.toJson(value), expireTime);
+    }
+
+    @Override
+    public long increment(String cacheName, String key, long delta, Duration window) {
+        return RedisUtil.incrByAndExpire(genKey(cacheName, key), delta, window.toSeconds());
+    }
+
+    @Override
+    public TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity, Duration refillPeriod) {
+        return RedisUtil.tryAcquireToken(genKey(cacheName, key), permits, capacity, refillPeriod);
+    }
+
+    @Override
+    public BackendType backendType() {
+        return BackendType.REDIS;
     }
 
     @Override

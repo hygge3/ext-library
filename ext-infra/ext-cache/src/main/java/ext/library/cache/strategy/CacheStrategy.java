@@ -1,12 +1,15 @@
 package ext.library.cache.strategy;
 
 import ext.library.cache.properties.CacheProperties;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
 import ext.library.core.util.SpringUtil;
 import ext.library.tool.util.StringUtil;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 缓存策略
@@ -125,6 +128,49 @@ public interface CacheStrategy {
     boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime);
 
     /**
+     * 计数器累加（后端原子操作，固定窗口）
+     * <p>
+     * 窗口从第一次累加开始算，后续累加不续期。每次都续期等于把窗口无限往后推，
+     * 持续有流量时计数永不归零，累计超过阈值后就永久限流。
+     *
+     * @param cacheName 缓存名称
+     * @param key       缓存 key
+     * @param delta     步长
+     * @param window    窗口大小
+     *
+     * @return 累加后的计数
+     */
+    long increment(String cacheName, String key, long delta, Duration window);
+
+    /**
+     * 令牌桶取令牌（后端原子操作）
+     * <p>
+     * 桶容量 = 允许的瞬时突发量，速率 = {@code capacity / refillPeriod}，即把空桶补满要一个
+     * {@code refillPeriod}。例：{@code capacity=10, refillPeriod=1s} 表示平均 10 rps、允许瞬时打满 10 个。
+     * <p>
+     * 实现用 GCRA 等价表达（只存一个「理论到达时间」），必须后端原子完成，不能用 get + put 拼。
+     *
+     * @param cacheName    缓存名称
+     * @param key          缓存 key
+     * @param permits      本次需要的令牌数，必须 {@code >= 1} 且 {@code <= capacity}
+     * @param capacity     桶容量
+     * @param refillPeriod 从空桶补满所需时长
+     *
+     * @return 结果：是否取到、还能取几个、被拒时要等多久
+     */
+     TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity, Duration refillPeriod);
+
+    /**
+     * 实际使用的存储后端
+     * <p>
+     * 分布式锁、限流都靠这个值决定用哪套实现，配置选型只在 {@code ext.cache.storage} 一处，
+     * 避免三处各配一次后端、部署时配漂。
+     *
+     * @return {@link BackendType }
+     */
+    BackendType backendType();
+
+    /**
      * 生成 key
      *
      * @param key key
@@ -142,5 +188,41 @@ public interface CacheStrategy {
      */
     default Duration getDefaultExpireTime() {
         return SpringUtil.getBean(CacheProperties.class).getExpireTime();
+    }
+
+    /**
+     * 给过期时间加上随机抖动（防雪崩）
+     * <p>
+     * 只缩短不延长，结果落在 {@code [ttl × (1 - jitter), ttl]}。抖动比例取
+     * {@code ext.cache.expire-jitter}，{@code 0} 表示不抖。零或负的 TTL 原样返回。
+     * <p>
+     * L2 不自己抖：两级各自由底层策略抖一次，本地副本与分布式层的 TTL 最大偏差为 jitter 的两倍；
+     * 回填路径已按 {@link #remainingTtl} 对齐，写入路径存在这段偏差。
+     *
+     * @param expireTime 原始过期时间
+     *
+     * @return 抖动后的过期时间
+     */
+    default Duration withJitter(Duration expireTime) {
+        if (expireTime == null || expireTime.isZero() || expireTime.isNegative()) {
+            return expireTime;
+        }
+        double jitter = Math.clamp(expireJitter(), 0, 1);
+        if (jitter <= 0) {
+            return expireTime;
+        }
+        double factor = 1 - jitter * ThreadLocalRandom.current().nextDouble();
+        return Duration.ofNanos(Math.max(1, (long) (expireTime.toNanos() * factor)));
+    }
+
+    /**
+     * 读抖动比例，不在 Spring 容器里（单测直接 new 策略）时不抖
+     */
+    private double expireJitter() {
+        try {
+            return SpringUtil.getBean(CacheProperties.class).getExpireJitter();
+        } catch (RuntimeException _) {
+            return 0;
+        }
     }
 }

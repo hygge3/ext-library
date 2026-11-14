@@ -10,8 +10,8 @@ import java.time.Duration;
  * 以保证 bean 名为 {@code postgresProperties}，供 {@code #{@postgresProperties.xxx}} 形式的
  * {@code @Scheduled} SpEL 表达式引用。
  * <p>
- * 缓存 / 队列 / 限流三种能力各有自己的开关与表名（{@code ext.postgres.cache.*}、
- * {@code ext.postgres.queue.*}、{@code ext.postgres.ratelimit.*}），互不影响；
+ * 缓存 / 队列 / 令牌桶三种能力各有自己的开关与表名（{@code ext.postgres.cache.*}、
+ * {@code ext.postgres.queue.*}、{@code ext.postgres.bucket.*}），互不影响；
  * 发布订阅不需要表。
  *
  * @since 4.0.0
@@ -36,13 +36,9 @@ public class PostgresProperties {
     private QueueConfig queue = new QueueConfig();
 
     /**
-     * 限流能力配置
-     * <p>
-     * 字段名刻意写成 {@code ratelimit}（一个词）以匹配配置前缀 {@code ext.postgres.ratelimit}——
-     * Spring 的松散绑定不会把 {@code ratelimit} 拆成 {@code rate-limit}，写成 {@code rateLimit}
-     * 反而绑不上。
+     * 令牌桶能力配置
      */
-    private RateLimitConfig ratelimit = new RateLimitConfig();
+    private BucketConfig bucket = new BucketConfig();
 
     /**
      * 缓存能力配置（UNLOGGED 表）
@@ -150,29 +146,19 @@ public class PostgresProperties {
     }
 
     /**
-     * 限流能力配置（计数表 + 固定窗口）
+     * 令牌桶能力配置（限流用，每行存一个 GCRA 理论到达时间）
      */
-    public static class RateLimitConfig {
+    public static class BucketConfig {
 
         /**
-         * 是否自动初始化限流表结构，关掉则完全不建表（由调用方自行用迁移工具建表）
+         * 是否自动初始化令牌桶表结构，关掉则完全不建表（由调用方自行用迁移工具建表）
          */
         private boolean autoInitSchema = true;
 
         /**
-         * 限流表名
+         * 令牌桶表名
          */
-        private String tableName = "pg_rate_limits";
-
-        /**
-         * 限流窗口大小
-         */
-        private Duration window = Duration.ofMinutes(1);
-
-        /**
-         * 默认限流阈值
-         */
-        private int defaultLimit = 100;
+        private String tableName = "pg_token_bucket";
 
         public boolean isAutoInitSchema() {
             return autoInitSchema;
@@ -188,22 +174,6 @@ public class PostgresProperties {
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
-        }
-
-        public Duration getWindow() {
-            return window;
-        }
-
-        public void setWindow(Duration window) {
-            this.window = window;
-        }
-
-        public int getDefaultLimit() {
-            return defaultLimit;
-        }
-
-        public void setDefaultLimit(int defaultLimit) {
-            this.defaultLimit = defaultLimit;
         }
 
     }
@@ -234,12 +204,12 @@ public class PostgresProperties {
         this.queue = queue;
     }
 
-    public RateLimitConfig getRatelimit() {
-        return ratelimit;
+    public BucketConfig getBucket() {
+        return bucket;
     }
 
-    public void setRatelimit(RateLimitConfig ratelimit) {
-        this.ratelimit = ratelimit;
+    public void setBucket(BucketConfig bucket) {
+        this.bucket = bucket;
     }
 
     // endregion

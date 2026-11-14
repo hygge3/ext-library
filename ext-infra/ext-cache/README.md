@@ -47,8 +47,9 @@ implementation("ext.library:ext-cache")
 |-------|-------|------|
 | `ext.cache.key-prefix` | `ext:cache` | 缓存 key 前缀 |
 | `ext.cache.expire-time` | `86400s` | 默认缓存过期时间 |
-| `ext.cache.cache-storage` | `L2` | 缓存存储方式 |
-| `ext.cache.l2-backend` | `REDIS` | 二级缓存后端类型 |
+| `ext.cache.cache-storage` | `AUTO` | 缓存存储方式，唯一的选型入口 |
+| `ext.cache.expire-jitter` | `0.1` | 过期抖动比例，写入的 TTL 在 `[ttl × (1-jitter), ttl]` 内随机，`0` 关闭 |
+| `ext.cache.load-timeout` | `3s` | 单飞时等待同 key 首次加载的上限，超时后自行回源 |
 | `ext.cache.caffeine.maximum-size` | `10000` | Caffeine 最大缓存条目数 |
 | `ext.cache.caffeine.refresh-on-access` | `true` | 访问后是否刷新过期时间 |
 
@@ -56,19 +57,16 @@ implementation("ext.library:ext-cache")
 
 | 类型 | 说明 | 依赖模块 |
 |------|------|---------|
+| `AUTO` | 优先级 Redis > PostgreSQL > 本地内存：有 ext-redis 用 Redis，其次 ext-postgres，都没引用 Caffeine（默认） | - |
 | `REDIS` | Redis 分布式缓存 | ext-redis |
 | `POSTGRES` | PostgreSQL 分布式缓存 | ext-postgres |
 | `CAFFEINE` | Caffeine 本地内存缓存 | - |
 | `L2` | 二级缓存（Caffeine + 分布式缓存） | ext-redis 或 ext-postgres |
 
-## 二级缓存后端
+## 二级缓存的分布式后端
 
-当 `cache-storage` 设置为 `L2` 时，可通过 `l2-backend` 配置指定分布式缓存后端：
-
-| 类型 | 说明 | 依赖模块 |
-|------|------|---------|
-| `REDIS` | 使用 Redis 作为二级缓存（默认） | ext-redis |
-| `POSTGRES` | 使用 PostgreSQL 作为二级缓存 | ext-postgres |
+`L2` 的第二级后端不单独配置：按类路径自动选择，有 ext-redis 用 Redis，否则用 ext-postgres。
+两个都在时 Redis 优先。只有一个选型键——`ext.cache.cache-storage`。
 
 ## @Cache 注解
 
@@ -81,6 +79,18 @@ implementation("ext.library:ext-cache")
 | `timeout` | long | `120` | 超时时间 |
 | `timeUnit` | TimeUnit | `SECONDS` | 时间单位 |
 | `type` | CacheType | `FULL` | 缓存类型 |
+| `cacheNull` | boolean | `false` | 空结果是否写负缓存 |
+| `nullTimeout` | long | `30` | 负缓存时长，单位同 `timeUnit` |
+
+## 穿透 / 击穿 / 雪崩
+
+| 问题 | 机制 | 怎么开 |
+|------|------|--------|
+| 穿透 | 空结果写短 TTL 负缓存，存在 `key + ":null"` 独立键上 | `@Cache(cacheNull = true, nullTimeout = 30)` |
+| 击穿 | 同 `cacheName:key` 的并发回源合并为一次（进程内） | `FULL` 默认生效，无需配置 |
+| 雪崩 | 写入 TTL 前随机抖动 | `ext.cache.expire-jitter`，默认 `0.1` |
+
+负缓存只适合「查不到是常态」的方法，而且负缓存期间真实数据写进来也读不到，只能等 `nullTimeout` 过期；`CacheType.DELETE` 会连 `key + ":null"` 一起删。
 
 ### CacheType 类型
 
@@ -92,7 +102,9 @@ implementation("ext.library:ext-cache")
 
 ## 使用示例
 
-### 配置二级缓存（Redis 后端）
+### 配置二级缓存
+
+二级后端按依赖自动选择，不写 `l2-backend`：引入 ext-redis 就用 Redis，只引 ext-postgres 就用 PostgreSQL。
 
 ```yaml
 ext:
@@ -100,21 +112,6 @@ ext:
     key-prefix: myapp:cache
     expire-time: 1h
     cache-storage: L2
-    l2-backend: REDIS  # 默认值
-    caffeine:
-      maximum-size: 5000
-      refresh-on-access: true
-```
-
-### 配置二级缓存（PostgreSQL 后端）
-
-```yaml
-ext:
-  cache:
-    key-prefix: myapp:cache
-    expire-time: 1h
-    cache-storage: L2
-    l2-backend: POSTGRES  # 使用 PostgreSQL
     caffeine:
       maximum-size: 5000
       refresh-on-access: true

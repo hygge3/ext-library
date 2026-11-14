@@ -1,6 +1,8 @@
 package ext.library.cache.strategy;
 
 import ext.library.cache.properties.CacheProperties;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.postgres.util.PostgresUtil;
@@ -25,7 +27,7 @@ public class PostgresStrategy implements CacheStrategy {
 
     @Override
     public <T> T put(String cacheName, String key, T value, Duration expireTime) {
-        PostgresUtil.cacheSet(genKey(cacheName, key), value, expireTime);
+        PostgresUtil.cacheSet(genKey(cacheName, key), value, withJitter(expireTime));
         return value;
     }
 
@@ -37,6 +39,21 @@ public class PostgresStrategy implements CacheStrategy {
     @Override
     public boolean putIfAbsent(String cacheName, String key, Object value, Duration expireTime) {
         return PostgresUtil.cacheSetNxEx(genKey(cacheName, key), JsonUtil.toJson(value), expireTime);
+    }
+
+    @Override
+    public long increment(String cacheName, String key, long delta, Duration window) {
+        return PostgresUtil.cacheIncrement(genKey(cacheName, key), delta, window);
+    }
+
+    @Override
+    public TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity, Duration refillPeriod) {
+        return PostgresUtil.tryAcquireToken(genKey(cacheName, key), permits, capacity, refillPeriod);
+    }
+
+    @Override
+    public BackendType backendType() {
+        return BackendType.POSTGRES;
     }
 
     @Override

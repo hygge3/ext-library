@@ -66,7 +66,7 @@ public class ResourceBundleTranslationSource implements TranslationSource {
         ResourceBundle bundle;
         try {
             bundle = ResourceBundle.getBundle(baseName, locale);
-        } catch (MissingResourceException e) {
+        } catch (MissingResourceException _) {
             return Map.of();
         }
         Map<String, String> messages = new HashMap<>(bundle.keySet().size());

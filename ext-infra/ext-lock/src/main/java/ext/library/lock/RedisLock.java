@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  * 在方法上标注此注解，即可对该方法加上一把分布式锁，方法执行完毕后自动释放
  * （正常返回与抛异常都会释放）。同一时刻只允许一个线程进入被标注的方法。
  * <p>
- * 名字里的 Redis 是历史契约：实际后端由 {@code ext.lock.store-type} 决定，
+ * 名字里的 Redis 是历史契约：实际后端由 {@code ext.cache.storage} 解析结果（{@code CacheStrategy#backendType()}）决定，
  * 可以是 Redis，也可以是 PostgreSQL 咨询锁。
  * <p>
  * 使用示例：

@@ -1,5 +1,6 @@
 package ext.library.redis.util;
 
+import ext.library.core.token.TokenBucketResult;
 import ext.library.core.util.SpringUtil;
 import ext.library.json.util.JsonUtil;
 import ext.library.tool.constant.EmojiSymbol;
@@ -151,7 +152,7 @@ public final class RedisUtil {
      * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
      */
     public static long unlink(String... keys) {
-        return del(Arrays.asList(keys));
+        return del(List.of(keys));
     }
 
     public static long unlink(Collection<String> keys) {
@@ -180,7 +181,7 @@ public final class RedisUtil {
      * @return 如果删除了一个或多个 key，则为大于 0 的整数，如果指定的 key 都不存在，则为 0
      */
     public static long del(String... keys) {
-        return del(Arrays.asList(keys));
+        return del(List.of(keys));
     }
 
     public static long del(Collection<String> keys) {
@@ -211,7 +212,7 @@ public final class RedisUtil {
      * @see <a href="http://redis.io/commands/exists">Exists Command</a>
      */
     public static long exists(String... keys) {
-        return exists(Arrays.asList(keys));
+        return exists(List.of(keys));
     }
 
     public static long exists(Collection<String> keys) {
@@ -554,6 +555,48 @@ public final class RedisUtil {
     }
 
     /**
+     * 令牌桶取令牌（GCRA 等价实现）
+     * <p>
+     * 只存一个「理论到达时间 tat」，读-算-写必须在 Lua 里一次完成；
+     * 空闲一个补满周期后 key 自动消失，等价于满桶，不会卡住后续请求。
+     *
+     * @param key          桶 key
+     * @param permits      本次需要的令牌数
+     * @param capacity     桶容量（允许的瞬时突发量）
+     * @param refillPeriod 从空桶补满所需时长
+     *
+     * @return 结果：是否取到、还能取几个、被拒时要等多久
+     */
+    public static TokenBucketResult tryAcquireToken(String key, long permits, long capacity, Duration refillPeriod) {
+        // 微秒：毫秒精度会把 >1000/s 的配额截断成 1ms/个，实际速率被悄悄压到 1000/s
+        long interval = Math.max(1, refillPeriod.toNanos() / 1_000 / capacity);
+        // 用 TIME 的秒+微秒拼微秒；Lua 只回传一个数：放行时是「领先微秒数」，拒绝时是 -(领先微秒数)-1
+        // language=Redis
+        DefaultRedisScript<Long> tryAcquireLua = new DefaultRedisScript<>(
+                "local t = redis.call('TIME') " +
+                        "local now = tonumber(t[1]) * 1000000 + tonumber(t[2]) " +
+                        "local interval = tonumber(ARGV[1]) " +
+                        "local permits = tonumber(ARGV[2]) " +
+                        "local capacity = tonumber(ARGV[3]) " +
+                        "local tat = tonumber(redis.call('GET', KEYS[1])) " +
+                        "if tat == nil or tat < now then tat = now end " +
+                        "local ahead = tat - now " +
+                        "if ahead > interval * (capacity - permits) then return -ahead - 1 end " +
+                        "local next = tat + interval * permits " +
+                        "redis.call('SET', KEYS[1], next, 'PX', math.max(1, math.ceil(interval * capacity / 1000))) " +
+                        "return next - now",
+                Long.class);
+        Long raw = getRedisTemplate().execute(tryAcquireLua, Collections.singletonList(key),
+                String.valueOf(interval), String.valueOf(permits), String.valueOf(capacity));
+        if (raw == null) {
+            return new TokenBucketResult(false, 0, interval);
+        }
+        boolean allowed = raw >= 0;
+        long aheadMicros = allowed ? raw : -raw - 1;
+        return TokenBucketResult.of(allowed, aheadMicros * 1_000L, interval * 1_000L, permits, capacity);
+    }
+
+    /**
      * @see #incrBy(String, long)
      */
     public static double incrByFloat(String key, double delta) {
@@ -577,7 +620,7 @@ public final class RedisUtil {
      * @see #mGet(Collection)
      */
     public static List<String> mGet(String... keys) {
-        return mGet(Arrays.asList(keys));
+        return mGet(List.of(keys));
     }
 
     /**
@@ -610,7 +653,7 @@ public final class RedisUtil {
      * @see #mGetToMap(Collection)
      */
     public static Map<String, String> mGetToMap(String... keys) {
-        return mGetToMap(Arrays.asList(keys));
+        return mGetToMap(List.of(keys));
     }
 
     /**
@@ -935,7 +978,7 @@ public final class RedisUtil {
      * @see <a href="https://redis.io/commands/hkeys/">HKeys Command</a>
      */
     public static List<String> hMGet(String key, String... fields) {
-        return hashOps().multiGet(key, Arrays.asList(fields));
+        return hashOps().multiGet(key, List.of(fields));
     }
 
     /**
@@ -1962,3 +2005,4 @@ public final class RedisUtil {
     // endregion
 
 }
+

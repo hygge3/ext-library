@@ -1,7 +1,6 @@
 package ext.library.cache.properties;
 
 import ext.library.cache.enums.CacheStorage;
-import ext.library.cache.enums.L2Backend;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -34,9 +33,17 @@ public class CacheProperties {
     private CacheStorage cacheStorage = CacheStorage.AUTO;
 
     /**
-     * 二级缓存后端类型，默认为自动检测。当 cacheStorage 为 L2 或 AUTO 时生效。AUTO 优先 Redis，其次 PostgreSQL
+     * 过期时间抖动比例：{@code 0} 关闭，{@code 0.1} 表示在 {@code [expire × 0.9, expire]} 内随机
+     * <p>
+     * 同一时刻首次访问的一批 key，TTL 完全相同就会在同一秒集体过期，回源流量瞬间砸到数据库。
+     * 只缩短不延长：抖动后仍不超过调用方给的上限。
      */
-    private L2Backend l2Backend = L2Backend.AUTO;
+    private double expireJitter = 0.1;
+
+    /**
+     * 单飞时等待同 key 首次加载的上限，超时后自行回源
+     */
+    private Duration loadTimeout = Duration.ofSeconds(3);
 
     /**
      * Caffeine 缓存配置
@@ -63,16 +70,34 @@ public class CacheProperties {
         return cacheStorage;
     }
 
+    public double getExpireJitter() {
+        return expireJitter;
+    }
+
+    public void setExpireJitter(double expireJitter) {
+        this.expireJitter = expireJitter;
+    }
+
+    /**
+     * 单飞等待上限
+     *
+     * @return 超时时长
+     */
+    public Duration getLoadTimeout() {
+        return loadTimeout;
+    }
+
+    /**
+     * 设置单飞等待上限
+     *
+     * @param loadTimeout 超时时长
+     */
+    public void setLoadTimeout(Duration loadTimeout) {
+        this.loadTimeout = loadTimeout;
+    }
+
     public void setCacheStorage(CacheStorage cacheStorage) {
         this.cacheStorage = cacheStorage;
-    }
-
-    public L2Backend getL2Backend() {
-        return l2Backend;
-    }
-
-    public void setL2Backend(L2Backend l2Backend) {
-        this.l2Backend = l2Backend;
     }
 
     public CaffeineConfig getCaffeine() {

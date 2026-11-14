@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
  * PostgreSQL 表结构初始化器
  * <p>
  * 在应用启动时为「开着 {@code auto-init-schema}」的能力建表：缓存（{@code ext.postgres.cache.*}）、
- * 队列（{@code ext.postgres.queue.*}）、限流（{@code ext.postgres.ratelimit.*}）。发布订阅无需建表。
+ * 队列（{@code ext.postgres.queue.*}）、令牌桶（{@code ext.postgres.bucket.*}）。发布订阅无需建表。
  * <p>
  * 关掉某个能力就完全不给它建表——调用方自己用迁移工具（Flyway / Liquibase）建表即可，
  * 下游模块（如 ext-job）也不会替它补表。三个都关时连库都不会碰。
@@ -38,12 +38,12 @@ public class PostgresSchemaInitializer implements InitializingBean {
     public void initSchema() {
         PostgresProperties.CacheConfig cache = properties.getCache();
         PostgresProperties.QueueConfig queue = properties.getQueue();
-        PostgresProperties.RateLimitConfig ratelimit = properties.getRatelimit();
+        PostgresProperties.BucketConfig bucket = properties.getBucket();
 
         boolean cacheEnabled = cache.isAutoInitSchema();
         boolean queueEnabled = queue.isAutoInitSchema();
-        boolean rateLimitEnabled = ratelimit.isAutoInitSchema();
-        if (!cacheEnabled && !queueEnabled && !rateLimitEnabled) {
+        boolean bucketEnabled = bucket.isAutoInitSchema();
+        if (!cacheEnabled && !queueEnabled && !bucketEnabled) {
             Logs.info(EmojiSymbol.POSTGRES, "所有能力的 auto-init-schema 均已关闭，跳过表结构初始化（表需由调用方自行创建）");
             return;
         }
@@ -54,10 +54,27 @@ public class PostgresSchemaInitializer implements InitializingBean {
         if (queueEnabled) {
             createQueueTable(queue.getTableName());
         }
-        if (rateLimitEnabled) {
-            createRateLimitTable(ratelimit.getTableName());
+        if (bucketEnabled) {
+            createBucketTable(bucket.getTableName());
         }
         Logs.info(EmojiSymbol.POSTGRES, "PostgreSQL 表结构初始化完成");
+    }
+
+    /**
+     * 创建令牌桶表
+     * <p>
+     * 不加过期时间列：桶的 TTL 不是行级关注点，过期行留着也无害（tat 落后于 NOW() 等于满桶）。
+     */
+    private void createBucketTable(String tableName) {
+        jdbcClient.sql("""
+                        CREATE UNLOGGED TABLE IF NOT EXISTS %s (
+                            key TEXT PRIMARY KEY,
+                            tat TIMESTAMPTZ NOT NULL
+                        )
+                        """.formatted(tableName))
+                .update();
+
+        Logs.debug(EmojiSymbol.POSTGRES, "令牌桶表 {} 初始化完成", tableName);
     }
 
     /**
@@ -144,28 +161,6 @@ public class PostgresSchemaInitializer implements InitializingBean {
                 .update();
 
         Logs.debug(EmojiSymbol.POSTGRES, "队列表 {} 初始化完成", tableName);
-    }
-
-    /**
-     * 创建限流表
-     */
-    private void createRateLimitTable(String tableName) {
-        // 创建表
-        jdbcClient.sql("""
-                        CREATE TABLE IF NOT EXISTS %s (
-                            key TEXT PRIMARY KEY,
-                            request_count INT DEFAULT 0,
-                            window_start TIMESTAMPTZ DEFAULT NOW()
-                        )
-                        """.formatted(tableName))
-                .update();
-
-        // 创建窗口过期索引
-        jdbcClient.sql("CREATE INDEX IF NOT EXISTS idx_%s_window ON %s(window_start)"
-                        .formatted(tableName, tableName))
-                .update();
-
-        Logs.debug(EmojiSymbol.POSTGRES, "限流表 {} 初始化完成", tableName);
     }
 
 }

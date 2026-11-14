@@ -1,12 +1,11 @@
 package ext.library.postgres.util;
 
+import ext.library.core.token.TokenBucketResult;
 import ext.library.core.util.SpringUtil;
 import ext.library.postgres.cache.PostgresCacheManager;
 import ext.library.postgres.pubsub.PostgresPubSub;
 import ext.library.postgres.queue.Job;
 import ext.library.postgres.queue.PostgresQueue;
-import ext.library.postgres.ratelimit.PostgresRateLimiter;
-import ext.library.postgres.ratelimit.RateLimitResult;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -71,6 +70,33 @@ public final class PostgresUtil {
      */
     public static void cacheSet(String key, Object value, Duration ttl) {
         getCacheManager().set(key, value, ttl);
+    }
+
+    /**
+     * 计数器累加（固定窗口）
+     *
+     * @param key    缓存键
+     * @param delta  步长
+     * @param window 窗口大小
+     *
+     * @return 累加后的计数
+     */
+    public static long cacheIncrement(String key, long delta, Duration window) {
+        return getCacheManager().increment(key, delta, window);
+    }
+
+    /**
+     * 令牌桶取令牌（GCRA 等价实现）
+     *
+     * @param key          桶 key
+     * @param permits      本次需要的令牌数
+     * @param capacity     桶容量（允许的瞬时突发量）
+     * @param refillPeriod 从空桶补满所需时长
+     *
+     * @return 取令牌结果：是否成、剩余令牌、被拒时的等待时间
+     */
+    public static TokenBucketResult tryAcquireToken(String key, long permits, long capacity, Duration refillPeriod) {
+        return getCacheManager().tryAcquireToken(key, permits, capacity, refillPeriod);
     }
 
     /**
@@ -357,67 +383,6 @@ public final class PostgresUtil {
         return getPubSub().isSubscribed(channel);
     }
 
-    // ==================== 限流操作 ====================
-
-    /**
-     * 检查并递增（使用默认配置）
-     *
-     * @param key 限流键
-     *
-     * @return 限流结果
-     */
-    public static RateLimitResult rateLimit(String key) {
-        return getRateLimiter().checkAndIncrement(key);
-    }
-
-    /**
-     * 检查并递增
-     *
-     * @param key    限流键
-     * @param limit  限制阈值
-     * @param window 时间窗口
-     *
-     * @return 限流结果
-     */
-    public static RateLimitResult rateLimit(String key, int limit, Duration window) {
-        return getRateLimiter().checkAndIncrement(key, limit, window);
-    }
-
-    /**
-     * 仅检查是否允许（不递增）
-     *
-     * @param key 限流键
-     *
-     * @return 是否允许
-     */
-    public static boolean isRateLimitAllowed(String key) {
-        return getRateLimiter().isAllowed(key);
-    }
-
-    /**
-     * 仅检查是否允许（不递增）
-     *
-     * @param key    限流键
-     * @param limit  限制阈值
-     * @param window 时间窗口
-     *
-     * @return 是否允许
-     */
-    public static boolean isRateLimitAllowed(String key, int limit, Duration window) {
-        return getRateLimiter().isAllowed(key, limit, window);
-    }
-
-    /**
-     * 重置限流计数
-     *
-     * @param key 限流键
-     *
-     * @return 是否重置成功
-     */
-    public static boolean resetRateLimit(String key) {
-        return getRateLimiter().reset(key);
-    }
-
     // ==================== Bean 获取 ====================
 
     /**
@@ -441,10 +406,4 @@ public final class PostgresUtil {
         return SpringUtil.getBean(PostgresPubSub.class);
     }
 
-    /**
-     * 获取限流器 Bean
-     */
-    public static PostgresRateLimiter getRateLimiter() {
-        return SpringUtil.getBean(PostgresRateLimiter.class);
-    }
 }

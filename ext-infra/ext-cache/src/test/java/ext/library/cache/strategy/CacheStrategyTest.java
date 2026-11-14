@@ -1,7 +1,12 @@
 package ext.library.cache.strategy;
 
+import ext.library.cache.properties.CacheProperties;
+import ext.library.core.backend.BackendType;
+import ext.library.core.token.TokenBucketResult;
+import ext.library.core.util.SpringUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -46,6 +51,22 @@ class CacheStrategyTest {
             return true;
         }
 
+        @Override
+        public long increment(String cacheName, String key, long delta, Duration window) {
+            return delta;
+        }
+
+        @Override
+        public TokenBucketResult tryAcquire(String cacheName, String key, long permits, long capacity,
+                                            Duration refillPeriod) {
+            return new TokenBucketResult(true, capacity - permits, 0);
+        }
+
+        @Override
+        public BackendType backendType() {
+            return BackendType.MEMORY;
+        }
+
     };
 
     @Test
@@ -72,6 +93,32 @@ class CacheStrategyTest {
     @DisplayName("值为 null 返回 null")
     void nullValue() {
         assertThat((Object) strategy.narrow(null, String.class)).isNull();
+    }
+
+    @Test
+    @DisplayName("抖动只缩短不延长，且不超上限")
+    void jitterShrinksOnly() {
+        CacheProperties properties = new CacheProperties();
+        properties.setExpireJitter(0.5);
+        GenericApplicationContext context = new GenericApplicationContext();
+        context.registerBean(CacheProperties.class, () -> properties);
+        context.refresh();
+        SpringUtil.setContext(context);
+        try {
+            Duration ttl = Duration.ofSeconds(100);
+            for (int i = 0; i < 200; i++) {
+                assertThat(strategy.withJitter(ttl)).isBetween(Duration.ofSeconds(50), ttl);
+            }
+
+            assertThat(strategy.withJitter(null)).isNull();
+            assertThat(strategy.withJitter(Duration.ZERO)).isZero();
+
+            properties.setExpireJitter(0);
+            assertThat(strategy.withJitter(ttl)).isEqualTo(ttl);
+        } finally {
+            SpringUtil.clearContext();
+            context.close();
+        }
     }
 
 }

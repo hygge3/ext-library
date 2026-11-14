@@ -82,7 +82,7 @@ public class PostgresLockStore implements LockStore {
                 // 抢到了：这条连接必须一直握着，锁才在
                 held.put(lockKey, new Holding(connection));
                 return true;
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
                 closeQuietly(connection);
                 Logs.warn(EmojiSymbol.LOCK, "等待分布式锁时被中断，lockKey: {}", lockKey);

@@ -131,7 +131,7 @@ public class PostgresPubSub implements PubSub, DisposableBean {
                 }
             }
             Logs.info(EmojiSymbol.POSTGRES, "取消订阅：{}", channel);
-        } catch (SQLException e) {
+        } catch (SQLException _) {
             Logs.warn(EmojiSymbol.POSTGRES, "取消订阅失败：{}", channel);
         }
     }
@@ -224,14 +224,14 @@ public class PostgresPubSub implements PubSub, DisposableBean {
             if (listenerConnection != null) {
                 listenerConnection.close();
             }
-        } catch (SQLException ignored) {
+        } catch (SQLException _) {
         }
         listenerConnection = null;
 
         // 等待一段时间后重试
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         }
     }
@@ -270,7 +270,7 @@ public class PostgresPubSub implements PubSub, DisposableBean {
             if (!listenerExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                 listenerExecutor.shutdownNow();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             listenerExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
@@ -278,7 +278,7 @@ public class PostgresPubSub implements PubSub, DisposableBean {
             if (listenerConnection != null && !listenerConnection.isClosed()) {
                 listenerConnection.close();
             }
-        } catch (SQLException ignored) {
+        } catch (SQLException _) {
         }
         Logs.info(EmojiSymbol.POSTGRES, "发布订阅管理器已关闭");
     }

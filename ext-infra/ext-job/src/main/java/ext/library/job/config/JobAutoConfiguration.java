@@ -3,6 +3,7 @@ package ext.library.job.config;
 import ext.library.job.JobDispatcher;
 import ext.library.job.JobExecutor;
 import ext.library.job.JobHandler;
+import ext.library.lock.store.LockStore;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
@@ -11,7 +12,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -59,6 +62,25 @@ public class JobAutoConfiguration {
     @ConditionalOnMissingBean
     public JobExecutor jobExecutor(PostgresQueue queue, JobDispatcher dispatcher, JobProperties properties) {
         return new JobExecutor(queue, dispatcher.handlers(), properties.getBatchSize());
+    }
+
+    /**
+     * 定时任务注册器
+     * <p>
+     * 把标注了 {@code @CronJob} 的处理器按 cron 表达式挂到调度器上，到点投递进队列。
+     *
+     * @param applicationContext 容器
+     * @param dispatcher         投递器
+     * @param taskScheduler      调度器
+     * @param lockStore          分布式锁
+     *
+     * @return 注册器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public CronJobScheduler cronJobScheduler(ApplicationContext applicationContext, JobDispatcher dispatcher,
+                                             TaskScheduler taskScheduler, LockStore lockStore) {
+        return new CronJobScheduler(applicationContext, dispatcher, taskScheduler, lockStore);
     }
 
     /**

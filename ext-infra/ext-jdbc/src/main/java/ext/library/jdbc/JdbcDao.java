@@ -1,5 +1,7 @@
 package ext.library.jdbc;
 
+import ext.library.core.datascope.DataScopeContext;
+import ext.library.core.datascope.DataScopeMeta;
 import ext.library.core.util.BeanUtil;
 import ext.library.servlet.response.PageQuery;
 import ext.library.servlet.response.PageResult;
@@ -65,8 +67,11 @@ public class JdbcDao<T> {
      * @return 实体，不存在时为空
      */
     public Optional<T> selectById(Object id) {
-        String sql = "SELECT * FROM " + metaData.tableName() + " WHERE " + metaData.idColumn() + " = ?";
-        return jdbcClient.sql(sql).param(id).query(rowMapper).optional();
+        // 数据权限必须盖住单条读取，否则拿到 ID 就能跨部门读
+        List<Object> params = new ArrayList<>();
+        String where = applyDataScope(metaData.idColumn() + " = ?", List.of(id), params);
+        String sql = "SELECT * FROM " + metaData.tableName() + whereFragment(where);
+        return jdbcClient.sql(sql).params(params).query(rowMapper).optional();
     }
 
     /**
@@ -77,12 +82,13 @@ public class JdbcDao<T> {
      * @return 实体列表
      */
     public List<T> selectList(QueryWrapper<T> wrapper) {
-        List<Object> params = new ArrayList<>(wrapper.whereParameters());
+        List<Object> params = new ArrayList<>();
+        String where = applyDataScope(wrapper.whereClause(), wrapper.whereParameters(), params);
         params.addAll(wrapper.havingParameters());
         params.addAll(wrapper.limitParameters());
 
         String sql = "SELECT * FROM " + metaData.tableName()
-                + whereFragment(wrapper.whereClause())
+                + whereFragment(where)
                 + wrapper.groupByHavingClause()
                 + wrapper.orderByClause()
                 + wrapper.limitClause()
@@ -98,11 +104,12 @@ public class JdbcDao<T> {
      * @return 总数，无记录时返回 0
      */
     public long selectCount(QueryWrapper<T> wrapper) {
-        List<Object> params = new ArrayList<>(wrapper.whereParameters());
+        List<Object> params = new ArrayList<>();
+        String where = applyDataScope(wrapper.whereClause(), wrapper.whereParameters(), params);
         params.addAll(wrapper.havingParameters());
 
         String sql = "SELECT COUNT(*) FROM " + metaData.tableName()
-                + whereFragment(wrapper.whereClause())
+                + whereFragment(where)
                 + wrapper.groupByHavingClause();
         return jdbcClient.sql(sql).params(params).query(Long.class).optional().orElse(0L);
     }
@@ -196,16 +203,15 @@ public class JdbcDao<T> {
         }
 
         String[] settable = settableProperties();
+        List<Object> params = new ArrayList<>(readValues(values, settable));
+        where = where.isEmpty()
+                ? applyDataScope(metaData.idColumn() + " = ?", List.of(id), params)
+                : applyDataScope(where, wrapper.whereParameters(), params);
+
         String sql = "UPDATE " + metaData.tableName()
                 + " SET " + assignments(settable)
-                + whereFragment(where.isEmpty() ? metaData.idColumn() + " = ?" : where);
+                + whereFragment(where);
 
-        List<Object> params = new ArrayList<>(readValues(values, settable));
-        if (where.isEmpty()) {
-            params.add(id);
-        } else {
-            params.addAll(wrapper.whereParameters());
-        }
         Logs.debug(EmojiSymbol.JDBC, "按条件更新实体：table={}", metaData.tableName());
         return jdbcClient.sql(sql).params(params).update();
     }
@@ -218,9 +224,12 @@ public class JdbcDao<T> {
      * @return 影响行数
      */
     public int deleteById(Object id) {
-        String sql = "DELETE FROM " + metaData.tableName() + " WHERE " + metaData.idColumn() + " = ?";
+        // 同 selectById：只靠主键过滤等于没有数据权限
+        List<Object> params = new ArrayList<>();
+        String where = applyDataScope(metaData.idColumn() + " = ?", List.of(id), params);
+        String sql = "DELETE FROM " + metaData.tableName() + whereFragment(where);
         Logs.debug(EmojiSymbol.JDBC, "按主键删除：table={}, id={}", metaData.tableName(), id);
-        return jdbcClient.sql(sql).param(id).update();
+        return jdbcClient.sql(sql).params(params).update();
     }
 
     /**
@@ -231,13 +240,14 @@ public class JdbcDao<T> {
      * @return 影响行数
      */
     public int delete(QueryWrapper<T> wrapper) {
-        String where = wrapper.whereClause();
+        List<Object> params = new ArrayList<>();
+        String where = applyDataScope(wrapper.whereClause(), wrapper.whereParameters(), params);
         if (where.isEmpty()) {
             throw new ExtException(EmojiSymbol.JDBC, "拒绝执行全表删除：条件为空");
         }
         String sql = "DELETE FROM " + metaData.tableName() + whereFragment(where);
         Logs.debug(EmojiSymbol.JDBC, "按条件删除：table={}", metaData.tableName());
-        return jdbcClient.sql(sql).params(wrapper.whereParameters()).update();
+        return jdbcClient.sql(sql).params(params).update();
     }
 
     // endregion
@@ -270,6 +280,28 @@ public class JdbcDao<T> {
      */
     private static String whereFragment(String where) {
         return where.isEmpty() ? "" : " WHERE " + where;
+    }
+
+    /**
+     * 拼接数据权限范围条件
+     * <p>
+     * 数据权限由 {@code ext-security} 的拦截器写入 {@link DataScopeContext}，
+     * 此处把它追加到查询条件上；未设置时不做任何改变。
+     *
+     * @param where      已有条件片段
+     * @param whereParams 已有条件的绑定参数
+         * @param params     出参，按 SQL 中 {@code ?} 的顺序追加绑定值
+     *
+     * @return 追加数据权限后的条件片段
+     */
+    private static String applyDataScope(String where, List<Object> whereParams, List<Object> params) {
+        params.addAll(whereParams);
+        DataScopeMeta scope = DataScopeContext.get();
+        if (scope == null) {
+            return where;
+        }
+        params.addAll(scope.values());
+        return where.isEmpty() ? scope.condition() : where + " AND " + scope.condition();
     }
 
     private static String placeholders(int count) {

@@ -97,7 +97,7 @@ public class JdbcDaoFactory {
                 return field.getName();
             }
         }
-        if (Arrays.asList(properties).contains("id")) {
+        if (List.of(properties).contains("id")) {
             return "id";
         }
         throw new ExtException(EmojiSymbol.JDBC, "实体类未找到主键：请标注 @Id 或提供 id 字段：{}", entityClass.getName());

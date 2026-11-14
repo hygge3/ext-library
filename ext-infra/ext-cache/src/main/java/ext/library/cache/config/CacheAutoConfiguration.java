@@ -31,13 +31,14 @@ public class CacheAutoConfiguration {
      * 缓存切面
      *
      * @param cacheStrategy 缓存策略
+     * @param properties    缓存配置
      *
      * @return 缓存切面实例
      */
     @Bean
-    public CacheAspect cacheAspect(CacheStrategy cacheStrategy) {
+    public CacheAspect cacheAspect(CacheStrategy cacheStrategy, CacheProperties properties) {
         Logs.info(EmojiSymbol.CACHE, "载入模块：缓存（Strategy: {}）", cacheStrategy.getClass().getSimpleName());
-        return new CacheAspect(cacheStrategy);
+        return new CacheAspect(cacheStrategy, properties);
     }
 
     // ──────────── 显式配置 ────────────
@@ -98,8 +99,7 @@ public class CacheAutoConfiguration {
     /**
      * 显式配置：二级缓存（Caffeine + 分布式缓存）
      * <p>
-     * 当 {@code ext.cache.cache-storage=L2} 时生效。
-     * 分布式后端通过 {@code ext.cache.l2-backend} 配置（默认 AUTO 自动检测）。
+     * 当 {@code ext.cache.cache-storage=L2} 时生效。分布式后端按类路径自动选择（Redis 优先）。
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix = CacheProperties.PREFIX, name = "cache-storage", havingValue = "L2")
@@ -119,10 +119,11 @@ public class CacheAutoConfiguration {
      * 自动检测缓存策略
      * <p>
      * 当 {@code ext.cache.cache-storage} 未配置或显式设置为 {@code AUTO} 时生效，
-     * 根据类路径中可用的依赖自动选择：
+    * 根据类路径中可用的依赖自动选择，优先级 Redis > PostgreSQL > 本地内存：
      * <ul>
-     *     <li>存在 ext-redis 或 ext-postgres → {@link L2Strategy}（Caffeine + 分布式缓存）</li>
-     *     <li>仅有 Caffeine → {@link CaffeineStrategy}</li>
+     *     <li>存在 ext-redis → {@link L2Strategy}（Caffeine + Redis）</li>
+     *     <li>无 ext-redis、存在 ext-postgres → {@link L2Strategy}（Caffeine + PostgreSQL）</li>
+     *     <li>都没引 → {@link CaffeineStrategy}</li>
      * </ul>
      */
     @Configuration(proxyBeanMethods = false)
@@ -141,7 +142,6 @@ public class CacheAutoConfiguration {
             boolean hasRedis = ClassUtils.isPresent("ext.library.redis.util.RedisUtil", cl);
             boolean hasPostgres = ClassUtils.isPresent("ext.library.postgres.util.PostgresUtil", cl);
             if (hasRedis || hasPostgres) {
-                // L2Strategy 内部通过 l2-backend 配置（默认 AUTO）进一步决定分布式后端
                 return new L2Strategy();
             }
             return new CaffeineStrategy();

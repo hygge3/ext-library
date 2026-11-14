@@ -88,7 +88,7 @@ public final class DistributedLock implements Lock, AutoCloseable {
             if (!tryLock(defaultTryLockTimeout)) {
                 throw new ExtException(EmojiSymbol.LOCK, "尝试加锁超时，key:{}", lockKey);
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             throw new ExtException(EmojiSymbol.LOCK, "获取锁失败，请先解锁，lockKey:{}, lockValue:{}", lockKey, lockValue);
         }
     }

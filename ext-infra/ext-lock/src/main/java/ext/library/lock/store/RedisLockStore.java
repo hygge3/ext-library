@@ -43,7 +43,7 @@ public class RedisLockStore implements LockStore {
             acquired = waitTime == null || waitTime.isZero() || waitTime.isNegative()
                     ? lock.tryLock()
                     : lock.tryLock(waitTime);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             Logs.warn(EmojiSymbol.LOCK, "等待分布式锁时被中断，lockKey: {}", lockKey);
             return false;

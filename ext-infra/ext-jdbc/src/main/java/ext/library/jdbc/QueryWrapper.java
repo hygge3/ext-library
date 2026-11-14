@@ -112,6 +112,7 @@ public class QueryWrapper<T> {
      */
     public QueryWrapper<T> and(String condition, Object... args) {
         conditions.add(conditions.isEmpty() ? condition : "AND " + condition);
+        // 参数可能为 null（绑 SQL NULL），Arrays.asList 允许空元素，勿换 List.of
         conditionParams.addAll(Arrays.asList(args));
         return this;
     }
@@ -474,7 +475,7 @@ public class QueryWrapper<T> {
      */
     public List<Object> limitParameters() {
         if (limit == null && offset == null) {
-            return Collections.emptyList();
+            return List.of();
         }
         List<Object> params = new ArrayList<>(2);
         if (limit != null) {
