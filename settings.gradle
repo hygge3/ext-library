@@ -49,3 +49,5 @@ include 'ext-enhance:ext-api-crypto'
 include 'ext-enhance:ext-resilience'
 include 'ext-enhance:ext-audit'
 
+// ==================== 示例应用（不发布） ====================
+include 'example'

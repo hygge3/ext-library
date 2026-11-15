@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{login.title})}"></head>
+<body class="centered">
+<main class="card auth-card">
+    <h1 th:text="#{app.name}">轻笔记</h1>
+    <p class="muted" th:text="#{app.tagline}"></p>
+
+    <div class="tabs">
+        <button class="tab on" data-tab="code" th:text="#{login.tabCode}">验证码登录</button>
+        <button class="tab" data-tab="password" th:text="#{login.tabPassword}">密码登录</button>
+    </div>
+
+    <form id="login-form" onsubmit="login(event)">
+        <label>
+            <span th:text="#{login.email}">邮箱</span>
+            <input name="email" type="email" required autocomplete="username" value="admin@example.com">
+        </label>
+
+        <div class="row code-row" data-pane="code">
+            <label class="grow">
+                <span th:text="#{login.code}">验证码</span>
+                <input name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+            </label>
+            <button type="button" class="ghost" onclick="sendCode(this)" th:text="#{login.sendCode}">获取验证码</button>
+        </div>
+
+        <!-- 发邮件验证码前必须先过图形验证码；答案存 ext-cache，点图换一张 -->
+        <div class="row" data-pane="code">
+            <label class="grow">
+                <span th:text="#{login.captcha}">图形验证码</span>
+                <input name="captchaCode" maxlength="8" th:placeholder="#{login.captchaPlaceholder}">
+            </label>
+            <img id="captcha-img" class="captcha" alt="captcha" onclick="loadCaptcha()">
+        </div>
+        <input type="hidden" name="captchaUuid" id="captcha-uuid">
+
+        <label data-pane="password" hidden>
+            <span th:text="#{login.password}">密码</span>
+            <input name="password" type="password" autocomplete="current-password">
+        </label>
+
+        <button class="primary" type="submit" th:text="#{login.submit}">登录</button>
+        <p class="msg" id="msg"></p>
+    </form>
+
+    <a th:href="@{/register}" th:text="#{login.toRegister}">去注册</a>
+</main>
+<script th:replace="~{fragments/layout :: script}"></script>
+<script th:inline="javascript">
+    loginMode = 'code';
+    loadCaptcha();
+</script>
+</body>
+</html>

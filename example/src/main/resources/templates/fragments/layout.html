@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · ' + #{app.name}">ext-library example</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<!-- 登录后的公共头部：导航 + 当前账号 + 语言切换 + 退出 -->
+<header th:fragment="header(active)" class="topbar">
+    <a class="brand" th:href="@{/notes}">
+        <span class="logo">✎</span>
+        <span th:text="#{app.name}">Tiny Notes</span>
+    </a>
+    <nav>
+        <a th:href="@{/notes}" th:classappend="${active == 'notes'} ? 'on'"><span th:text="#{nav.notes}">Notes</span></a>
+        <a th:href="@{/profile}" th:classappend="${active == 'profile'} ? 'on'"><span th:text="#{nav.profile}">Me</span></a>
+        <a th:href="@{/admin}" th:classappend="${active == 'admin'} ? 'on'"
+           th:if="${user != null and user.role == 'ADMIN'}"><span th:text="#{nav.admin}">Admin</span></a>
+    </nav>
+    <div class="topbar-right">
+        <a class="lang" th:href="@{''(lang='en_US')}" th:if="${#locale.language == 'zh'}">EN</a>
+        <a class="lang" th:href="@{''(lang='zh_CN')}" th:if="${#locale.language != 'zh'}">中文</a>
+        <span class="who" th:text="${user != null} ? ${user.nickname} : ''"></span>
+        <button class="link" onclick="logout()" th:text="#{nav.logout}">Sign out</button>
+    </div>
+    <div class="sse-strip" id="sse-strip"></div>
+</header>
+
+<div th:fragment="foot" class="foot">
+    <span th:text="#{app.tagline}">built on ext-library</span>
+    <span class="trace" id="trace-line"></span>
+</div>
+
+<script th:fragment="script" th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ext-library-example
+
+  datasource:
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:ext_example}
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:postgres}
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+  thymeleaf:
+    cache: false
+
+ext:
+  postgres:
+    schema: middle
+
+  # 缓存后端：L2 = Redis 本地缓存 + Redis 远程，需要两个中间件都在线
+  cache:
+    cache-storage: L2
+    key-prefix: ext:example
+
+  job:
+    enabled: true
+
+  # 两套实时通道默认关，这里显式打开
+  sse:
+    enabled: true
+    path: /sse
+    heartbeat:
+      enabled: true
+  websocket:
+    enabled: true
+    path: /websocket
+
+  # @ApiSign 校验签名需要读请求体
+  servlet:
+    repeatable-request:
+      enabled: true
+
+
+  api-crypto:
+    algorithm: AES
+    secret-key: ${API_CRYPTO_SECRET:ext-example-apicrypto-secret-32byte}
+    salt: ${API_CRYPTO_SALT:ext-example-salt}
+    sign:
+      enabled: true
+      secret: ${API_CRYPTO_SIGN_SECRET:ext-example-sign-secret}
+
+  i18n:
+    default-locale: zh_CN
+
+  oss:
+    type: ${OSS_TYPE:LOCAL}
+    path: ./data/oss
+    bucket: ${OSS_BUCKET:ext-example}
+    endpoint: ${OSS_ENDPOINT:}
+    access-key: ${OSS_ACCESS_KEY:}
+    secret-key: ${OSS_SECRET_KEY:}
+
+  metrics:
+    dashboard:
+      path: /metrics
+      token: ${METRICS_TOKEN:}
+
+  security:
+    token-name: Authorization
+    token-prefix: 'Bearer '
+
+  accesslog:
+    include-user-agent: false
+
+# 业务侧配置
+app:
+  # banner 的 Version：bootRun 把 gradle.properties 的 version 作为系统属性传进来
+  version: ${APP_VERSION:dev}
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  # 第一个用这个邮箱登录的账号自动成为 ADMIN
+  admin-email: ${ADMIN_EMAIL:admin@example.com}
+
+logging:
+  level:
+    ext.library: INFO
+    # 启动噪声：框架自述、被替代的默认实现、无需在生产打开的提示
+    org.springframework.data.repository.config: WARN
+    org.springframework.boot.web.embedded.tomcat: WARN
+    org.springframework.boot.web.context: WARN
+    org.springframework.web.servlet.DispatcherServlet: WARN
+    org.apache.catalina: WARN
+    com.zaxxer.hikari: WARN
+    org.springdoc.core.events: ERROR
+  pattern:
+    # YAML 里 % 开头不是合法标量，必须加引号
+    # 非请求线程（启动、定时任务）没有 traceId，%replace 把空 [] 抹掉，不留空括号
+    console: '%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%replace([%X{traceId}]){''\[\]'',''''}){faint} %clr(%logger{36}){cyan} - %msg%n%ex'
+
+# xbatis 的 ASCII banner 与启动信息无关，关掉
+xbatis:
+  banner: false

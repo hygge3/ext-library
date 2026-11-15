@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(${note.title})}"></head>
+<body th:attr="data-note-id=${note.id},data-view-once=true"><header th:replace="~{fragments/layout :: header('notes')}"></header>
+
+<main class="wrap">
+    <section class="panel">
+        <form onsubmit="saveNote(event, /*[[${note.id}]]*/ '')">
+            <input name="title" class="title-input" required maxlength="120" th:value="${note.title}">
+            <textarea name="content" rows="12" th:text="${note.content}"></textarea>
+            <input name="tags" th:value="${note.tags}" th:placeholder="#{notes.tags}">
+            <div class="row">
+                <button class="primary" type="submit" th:text="#{note.save}">保存</button>
+                <button class="ghost danger" type="button" onclick="deleteNote()" th:text="#{note.delete}">删除</button>
+                <span class="pill" th:text="#{notes.views(${views})}">0</span>
+            </div>
+            <p class="msg" id="msg"></p>
+        </form>
+
+        <p class="muted small">
+            <span th:text="#{note.traceId}"></span>:
+            <code th:text="${note.traceId}">trace</code>
+        </p>
+
+        <h3 th:text="#{note.attachments}">附件</h3>
+        <form class="row" onsubmit="uploadAttachment(event)">
+            <input type="file" name="file" class="grow" required>
+            <button class="ghost" type="submit" th:text="#{note.upload}">上传</button>
+        </form>
+        <ul class="plain attachments">
+            <li th:each="a : ${attachments}">
+                <a th:href="@{'/api/attachments/' + ${a.id}}" th:text="${a.fileName}">文件</a>
+                <span class="muted" th:text="${a.size} + ' B'"></span>
+                <!-- 图片附件走 ext-oss 的缩略图（webp） -->
+                <img class="thumb" th:if="${a.contentType != null and a.contentType.startsWith('image/')}"
+                     th:src="@{'/api/attachments/' + ${a.id} + '/thumbnail'}" alt="thumb">
+                <button class="link danger" type="button" th:data-id="${a.id}"
+                        onclick="removeAttachment(this.dataset.id)" th:text="#{note.removeAttachment}">删除</button>
+            </li>
+        </ul>
+
+        <h3 th:text="#{note.share}">分享</h3>
+        <form class="row" onsubmit="createShare(event)">
+            <label class="inline">
+                <span th:text="#{note.shareDays}"></span>
+                <input name="days" type="number" min="1" max="365" value="7" class="days">
+            </label>
+            <label class="inline">
+                <input type="checkbox" name="mail" value="true">
+                <span th:text="#{note.shareMail}"></span>
+            </label>
+            <button class="ghost" type="submit" th:text="#{note.share}">生成分享链接</button>
+        </form>
+        <div class="share-box" id="share-box" hidden>
+            <p><span th:text="#{note.shareResult}"></span>:
+                <a id="share-url" target="_blank" rel="noopener"></a>
+            </p>
+            <img id="share-qr" class="qr" alt="qr">
+            <button class="ghost" type="button" onclick="callOpenApi()" th:text="#{note.openApi}">调开放接口</button>
+            <pre class="log" id="open-api-log"></pre>
+        </div>
+        <ul class="plain" th:if="${!shares.isEmpty()}">
+            <li th:each="s : ${shares}">
+                <a th:href="@{'/share/' + ${s.token}}" th:text="@{'/share/' + ${s.token}}" target="_blank"></a>
+                <span class="muted" th:text="${#temporals.format(s.expiresAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </li>
+        </ul>
+    </section>
+
+    <aside class="panel side">
+        <h3>ext-library</h3>
+        <ul class="plain small muted">
+            <li>读取走 ext-cache，改完精确失效</li>
+            <li>保存串行：ext-lock 分布式锁</li>
+            <li>删除记 ext-audit 审计</li>
+            <li>附件落 ext-oss，元数据走 PostgreSQL</li>
+            <li>分享 token 是 ext-crypto 的 AES 密文</li>
+            <li>二维码由 ext-qrcode 生成</li>
+        </ul>
+        <p class="log" id="realtime-log"></p>
+    </aside>
+</main>
+
+<footer th:replace="~{fragments/layout :: foot}"></footer>
+<script th:replace="~{fragments/layout :: script}"></script>
+</body>
+</html>

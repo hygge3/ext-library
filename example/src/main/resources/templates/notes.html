@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{notes.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('notes')}"></header>
+
+<main class="wrap">
+    <section class="panel">
+        <h2 th:text="#{notes.title}">我的笔记</h2>
+
+        <form class="row" onsubmit="searchNotes(event)">
+            <input name="keyword" class="grow" th:placeholder="#{notes.search}">
+            <button class="ghost" type="submit" th:text="#{notes.search}">搜索</button>
+        </form>
+
+        <form class="row new-note" onsubmit="createNote(event)">
+            <input name="title" class="grow" required maxlength="120" th:placeholder="#{note.title}">
+            <input name="tags" class="tags-input" th:placeholder="#{notes.tags}">
+            <!-- 重复点只落一条：ext-idempotent -->
+            <button class="primary" type="submit" th:text="#{notes.new}">新建笔记</button>
+        </form>
+
+        <p class="msg" id="msg"></p>
+
+        <ul class="note-list" id="note-list">
+            <li th:each="n : ${page.records}">
+                <a th:href="@{'/notes/' + ${n.id}}">
+                    <strong th:text="${n.title}">标题</strong>
+                    <span class="muted" th:text="${n.tags}">标签</span>
+                </a>
+                <span class="muted" th:text="${#temporals.format(n.updatedAt, 'MM-dd HH:mm')}">时间</span>
+            </li>
+            <li th:if="${page.records.isEmpty()}" class="empty" th:text="#{notes.empty}"></li>
+        </ul>
+        <p class="muted" th:if="${page.total != null and page.total > page.size}">
+            <span th:text="${page.page} + ' / ' + ${page.pages}"></span>
+        </p>
+    </section>
+
+    <aside class="panel side">
+        <h3 th:text="#{notes.recent}">最近浏览</h3>
+        <ul class="plain">
+            <li th:each="r : ${recent}">
+                <a th:href="@{'/notes/' + ${r.id}}" th:text="${r.title}"></a>
+                <span class="pill" th:text="#{notes.views(${r.views})}">0</span>
+            </li>
+            <li th:if="${recent.isEmpty()}" class="muted">—</li>
+        </ul>
+        <h3 th:text="#{note.realtime}">实时通道</h3>
+        <button class="ghost block" onclick="pushRealtime('sse')">SSE</button>
+        <button class="ghost block" onclick="pushRealtime('ws')">WebSocket</button>
+        <p class="log" id="realtime-log"></p>
+    </aside>
+</main>
+
+<footer th:replace="~{fragments/layout :: foot}"></footer>
+<script th:replace="~{fragments/layout :: script}"></script>
+<script th:inline="javascript">
+    connectSse();
+</script>
+</body>
+</html>

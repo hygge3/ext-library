@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{error.title})}"></head>
+<body class="centered">
+<main class="card auth-card">
+    <h1 th:text="${status}">404</h1>
+    <p class="muted" th:text="#{error.hint}">页面不存在或已失效</p>
+    <p class="muted" th:text="${path}"></p>
+    <p><a class="btn" th:href="@{/notes}" th:text="#{error.back}">回到笔记</a></p>
+</main>
+</body>
+</html>

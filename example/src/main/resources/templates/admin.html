@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{admin.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+
+<main class="wrap">
+    <section class="panel">
+        <h2 th:text="#{admin.title}">后台</h2>
+
+        <h3 th:text="#{admin.metrics}">运行指标</h3>
+        <p>
+            <a th:href="@{/metrics}" target="_blank" th:text="#{admin.metricsLink}">指标大屏</a> ·
+            <a th:href="@{/v3/api-docs}" target="_blank">OpenAPI</a>
+        </p>
+
+        <h3 th:text="#{admin.jobs}">任务队列</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th th:text="#{admin.queue}">队列</th>
+                <th th:text="#{admin.pending}">待处理</th>
+                <th th:text="#{admin.processing}">处理中</th>
+                <th th:text="#{admin.completed}">已完成</th>
+                <th th:text="#{admin.failed}">失败</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="q : ${queues}">
+                <td th:text="${q.name}"></td>
+                <td th:text="${q.pending}"></td>
+                <td th:text="${q.processing}"></td>
+                <td th:text="${q.completed}"></td>
+                <td th:text="${q.failed}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3 th:text="#{admin.notesByOwner}">笔记数量排行</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th th:text="#{admin.owner}">账号</th>
+                <th th:text="#{admin.count}">笔记数</th>
+                <th th:text="#{admin.lastActive}">最后活跃</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${ownerStats}">
+                <td th:text="${s.owner_email}"></td>
+                <td th:text="${s.notes}"></td>
+                <td th:text="${s.last_active}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h3 th:text="#{admin.audits}">操作审计</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th th:text="#{profile.time}">时间</th>
+                <th th:text="#{admin.operator}">操作人</th>
+                <th th:text="#{admin.module}">模块</th>
+                <th th:text="#{admin.type}">类型</th>
+                <th th:text="#{admin.description}">描述</th>
+                <th th:text="#{admin.duration}">耗时</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${audits}">
+                <td th:text="${a.created_at}"></td>
+                <td th:text="${a.operator}"></td>
+                <td th:text="${a.module}"></td>
+                <td th:text="${a.type}"></td>
+                <td th:text="${a.description}"></td>
+                <td th:text="${a.duration_ms}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3 th:text="#{admin.logins}">最近登录</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th th:text="#{profile.time}">时间</th>
+                <th th:text="#{register.email}">邮箱</th>
+                <th th:text="#{profile.ip}">IP</th>
+                <th th:text="#{profile.device}">设备</th>
+                <th th:text="#{profile.result}">结果</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${logs}">
+                <td th:text="${#temporals.format(l.createdAt, 'MM-dd HH:mm:ss')}"></td>
+                <td th:text="${l.email}"></td>
+                <td th:text="${l.ip}"></td>
+                <td th:text="${l.device}"></td>
+                <td th:text="${l.success} ? #{profile.success} : #{profile.fail}"
+                    th:classappend="${l.success} ? 'ok' : 'bad'"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: foot}"></footer>
+<script th:replace="~{fragments/layout :: script}"></script>
+</body>
+</html>

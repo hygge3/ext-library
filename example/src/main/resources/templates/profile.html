@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{profile.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('profile')}"></header>
+
+<main class="wrap">
+    <section class="panel">
+        <h2 th:text="#{profile.title}">我的</h2>
+        <table class="kv">
+            <tr>
+                <th th:text="#{register.email}">邮箱</th>
+                <td th:text="${user.email}"></td>
+            </tr>
+            <tr>
+                <th th:text="#{register.nickname}">昵称</th>
+                <td th:text="${user.nickname}"></td>
+            </tr>
+            <tr>
+                <th>role</th>
+                <td th:text="${user.role}"></td>
+            </tr>
+        </table>
+
+        <h3 th:text="#{profile.session}">当前会话</h3>
+        <!-- ext-security 的会话：token、登录时间、最后活跃、设备 -->
+        <table class="kv" th:if="${session != null}">
+            <tr th:each="attr : ${session.attributes}">
+                <th th:text="${attr.key}"></th>
+                <td th:text="${attr.value}"></td>
+            </tr>
+            <tr>
+                <th>loginId</th>
+                <td th:text="${session.loginId}"></td>
+            </tr>
+        </table>
+
+        <h3 th:text="#{profile.lang}">界面语言</h3>
+        <p>
+            <a th:href="@{''(lang='zh_CN')}">中文</a> ·
+            <a th:href="@{''(lang='en_US')}">English</a>
+        </p>
+    </section>
+
+    <section class="panel">
+        <h3 th:text="#{profile.logins}">登录记录</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th th:text="#{profile.time}">时间</th>
+                <th th:text="#{profile.ip}">IP</th>
+                <th th:text="#{profile.device}">设备</th>
+                <th th:text="#{profile.result}">结果</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${logins}">
+                <td th:text="${#temporals.format(l.createdAt, 'MM-dd HH:mm:ss')}"></td>
+                <td th:text="${l.ip}"></td>
+                <td th:text="${l.browser} + ' / ' + ${l.os}"></td>
+                <td th:text="${l.success} ? #{profile.success} : #{profile.fail}"
+                    th:classappend="${l.success} ? 'ok' : 'bad'"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3 th:text="#{profile.recent}">最近浏览</h3>
+        <ul class="plain">
+            <li th:each="r : ${recent}">
+                <a th:href="@{'/notes/' + ${r.id}}" th:text="${r.title}"></a>
+                <span class="pill" th:text="#{notes.views(${r.views})}"></span>
+            </li>
+        </ul>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: foot}"></footer>
+<script th:replace="~{fragments/layout :: script}"></script>
+</body>
+</html>

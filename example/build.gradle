@@ -1,0 +1,63 @@
+description = '示例应用「轻笔记」：引入全部模块，每个模块都在业务里真实用到'
+
+apply plugin: 'application'
+
+application {
+    mainClass = 'ext.library.example.ExampleApplication'
+}
+
+dependencies {
+    // ext-common
+    implementation project(':ext-common:ext-tool')
+    implementation project(':ext-common:ext-core')
+    implementation project(':ext-common:ext-json')
+    implementation project(':ext-common:ext-servlet')
+    implementation project(':ext-common:ext-http')
+    implementation project(':ext-common:ext-useragent')
+    implementation project(':ext-common:ext-qrcode')
+    implementation project(':ext-common:ext-trace')
+
+    // ext-infra
+    implementation project(':ext-infra:ext-redis')
+    implementation project(':ext-infra:ext-postgres')
+    implementation project(':ext-infra:ext-cache')
+    implementation project(':ext-infra:ext-mail')
+    implementation project(':ext-infra:ext-lock')
+    implementation project(':ext-infra:ext-job')
+    implementation project(':ext-infra:ext-i18n')
+    implementation project(':ext-infra:ext-oss')
+    implementation project(':ext-infra:ext-metrics')
+
+    // 安全 / 加密
+    implementation project(':ext-security')
+    implementation project(':ext-crypto')
+
+    // ext-web
+    implementation project(':ext-web:ext-accesslog')
+    implementation project(':ext-web:ext-mvc')
+    implementation project(':ext-web:ext-realtime')
+
+    // ext-enhance
+    implementation project(':ext-enhance:ext-captcha')
+    implementation project(':ext-enhance:ext-idempotent')
+    implementation project(':ext-enhance:ext-api-crypto')
+    implementation project(':ext-enhance:ext-resilience')
+    implementation project(':ext-enhance:ext-audit')
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // ext-cache 的内存后端是 compileOnly，示例显式引入
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation "cn.xbatis:xbatis-spring-boot-starter:${xbatisVersion}"
+}
+
+dependencies {
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+}
+
+// banner 的 Version 取 gradle.properties 的 version
+run {
+    systemProperty 'APP_VERSION', project.version
+}

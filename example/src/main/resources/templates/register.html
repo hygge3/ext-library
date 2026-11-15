@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{register.title})}"></head>
+<body class="centered">
+<main class="card auth-card">
+    <h1 th:text="#{register.title}">注册</h1>
+    <p class="muted" th:text="#{app.tagline}"></p>
+
+    <form id="register-form" onsubmit="register(event)">
+        <label>
+            <span th:text="#{register.email}">邮箱</span>
+            <input name="email" type="email" required autocomplete="username">
+        </label>
+        <label>
+            <span th:text="#{register.nickname}">昵称</span>
+            <input name="nickname" required maxlength="32">
+        </label>
+        <label>
+            <span th:text="#{register.password}">密码</span>
+            <input name="password" type="password" autocomplete="new-password">
+        </label>
+        <div class="row">
+            <label class="grow">
+                <span th:text="#{register.captcha}">图形验证码</span>
+                <input name="captchaCode" required maxlength="8" th:placeholder="#{register.captchaPlaceholder}">
+            </label>
+            <!-- 图形验证码来自 ext-captcha，答案存在 ext-cache -->
+            <img id="captcha-img" class="captcha" alt="captcha" onclick="loadCaptcha()">
+        </div>
+        <input type="hidden" name="captchaUuid" id="captcha-uuid">
+        <button class="primary" type="submit" th:text="#{register.submit}">注册</button>
+        <p class="msg" id="msg"></p>
+    </form>
+
+    <a th:href="@{/login}" th:text="#{register.toLogin}">去登录</a>
+</main>
+<script th:replace="~{fragments/layout :: script}"></script>
+<script th:inline="javascript">
+    loadCaptcha();
+</script>
+</body>
+</html>

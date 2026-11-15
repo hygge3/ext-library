@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head th:replace="~{fragments/layout :: head(#{share.title})}"></head>
+<body class="centered">
+<main class="card">
+    <h1 th:text="#{share.title}">分享的笔记</h1>
+
+    <p class="error" th:if="${error != null}" th:text="${error != null} ? ${error} : #{share.invalid}"></p>
+
+    <article th:if="${note != null}">
+        <h2 th:text="${note.title}">标题</h2>
+        <p class="muted small">
+            <span th:text="#{share.expiresAt}"></span>:
+            <span th:text="${#temporals.format(expiresAt, 'yyyy-MM-dd HH:mm')}"></span>
+            <span class="pill" th:text="#{notes.views(${views})}"></span>
+        </p>
+        <pre class="content" th:text="${note.content}"></pre>
+        <p class="muted small" th:if="${note.tags != null and !note.tags.isEmpty()}">
+            <span th:text="#{notes.tags}"></span>: <span th:text="${note.tags}"></span>
+        </p>
+    </article>
+
+    <p><a th:href="@{/login}" th:text="#{app.name}"></a></p>
+</main>
+</body>
+</html>
