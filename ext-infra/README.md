@@ -14,7 +14,6 @@
 | [ext-cache](ext-cache/README.md) | 多级缓存支持 | ext-redis, caffeine |
 | [ext-postgres](AGENTS.md#ext-postgres) | PostgreSQL 集成，缓存/队列/发布订阅/限流 | ext-core, ext-json, postgresql |
 | [ext-lock](AGENTS.md#ext-lock) | 分布式锁，注解式加锁（Redis / PostgreSQL 咨询锁） | ext-core；可选 ext-redis、ext-postgres |
-| [ext-jdbc](AGENTS.md#ext-jdbc) | JdbcClient 增强，注解驱动的轻量 DAO | ext-core, spring-boot-starter-jdbc |
 | [ext-job](AGENTS.md#ext-job) | 任务调度，基于 PostgreSQL 队列 | ext-postgres |
 | [ext-mail](ext-mail/README.md) | 邮件发送服务 | spring-boot-starter-mail |
 | [ext-i18n](AGENTS.md#ext-i18n) | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |

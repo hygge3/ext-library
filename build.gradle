@@ -62,8 +62,9 @@ subprojects {
             annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
         }
 
+        // 示例应用是可执行的 demo，不进 Maven 仓库
         afterEvaluate {
-            publishing {
+            if (project.name != 'example') publishing {
                 publications {
                     library(MavenPublication) {
                         from components.java

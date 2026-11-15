@@ -42,7 +42,6 @@ public class ThreadPoolConfiguration {
         executor.setAwaitTerminationSeconds(threadPoolProperties.getAwaitTerminationSeconds());
         // 不要手动 initialize()：@Bean 容器会在 afterPropertiesSet() 里再调一次，
         // 第二次会直接 new ThreadPoolExecutor 覆盖字段，第一次创建的实例被丢弃且从未 shutdown。
-        Logs.info(EmojiSymbol.CORE, "载入模块：Spring 线程池");
         return executor;
     }
 
@@ -62,7 +61,6 @@ public class ThreadPoolConfiguration {
         executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         // 调度任务不允许静默丢弃
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
-        Logs.info(EmojiSymbol.CORE, "载入模块：Spring 调度线程池");
         return executor;
     }
 

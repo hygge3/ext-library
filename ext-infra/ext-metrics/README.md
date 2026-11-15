@@ -10,7 +10,7 @@ implementation 'ext.library:ext-infra-ext-metrics'
 
 唯一动作就是加这一行依赖。零配置、零注解、零初始化代码，启动后：
 
-- 日志里出现 `载入模块：运行时指标与告警` 与 `指标大屏：/metrics`；
+- 日志里出现 `指标大屏：/metrics`；
 - 访问 `http://<host>:<port>/metrics` 看大屏，`/metrics/snapshot` 拿 JSON；
 - 错误率或 P99 超阈值时，日志里出现 `[指标]` 开头的 WARN。
 

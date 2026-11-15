@@ -1,1 +1,2 @@
 ext.library.oss.config.OssAutoConfiguration
+ext.library.oss.config.S3ObjectStorageConfiguration

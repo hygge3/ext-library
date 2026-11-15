@@ -17,7 +17,6 @@ ext-infra 负责与外部基础设施的集成，为上层业务模块提供数�
 | ext-postgres | PostgreSQL 功能模块（缓存、队列、发布订阅、限流） | ext-core, ext-json, postgresql |
 | ext-cache | 多级缓存抽象 (Caffeine + Redis/PostgreSQL) | ext-redis(可选), ext-postgres(可选), caffeine |
 | ext-mail | 邮件发送服务封装 | spring-boot-starter-mail |
-| ext-jdbc | 基于 JdbcClient 的通用 DAO 与链式条件构造 | ext-core, spring-boot-starter-jdbc |
 | ext-job | 基于 PostgreSQL 队列的声明式任务投递与执行 | ext-postgres |
 | ext-i18n | 国际化，资源文件与数据库双源翻译 | ext-core, ext-json, spring-boot-starter-jdbc(可选) |
 | ext-oss | 对象存储，支持本地文件系统与 S3 协议 | ext-core；可选 AWS SDK v2（s3 + apache-client） |
@@ -94,7 +93,7 @@ PostgreSQL 功能模块，使用 PostgreSQL 原生特性实现：
 - **发布订阅**：`LISTEN/NOTIFY`——`PostgresPubSub`（实现 [ext-core](../ext-common/AGENTS.md#ext-core) 的 `PubSub` SPI）。
 - **限流**：令牌桶表，GCRA 等价实现——单行存「理论到达时间」，`UPDATE … WHERE bucket_key = ? AND tat <= ?` 条件更新，`RETURNING` 判断是否放行（供 [ext-cache](#ext-cache) 的 `tryAcquire`）。
 
-**建表与配置**：每种能力有自己的开关与表名，互不影响——`ext.postgres.cache.*`（`auto-init-schema`、`table-name`）、`ext.postgres.queue.*`（`auto-init-schema`、`table-name`）、`ext.postgres.bucket.*`（`auto-init-schema`、`table-name`），`auto-init-schema` 默认均为 `true`。`PostgresSchemaInitializer` 只为开着的那些能力建表（`CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS`，幂等），全关时不连库、不建表；`pubsub` 不需要表。表名可改（用于与已有表/前缀共存），DDL 语句统一引用配置的表名，不写死 `pg_*`。其余参数同样归到各自能力下：`cache.default-expire-time` / `cache.cleanup-interval`、`queue.max-attempts`。
+**建表与配置**：每种能力有自己的开关与表名，互不影响——`ext.postgres.cache.*`（`auto-init-schema`、`table-name`）、`ext.postgres.queue.*`（`auto-init-schema`、`table-name`）、`ext.postgres.bucket.*`（`auto-init-schema`、`table-name`），`auto-init-schema` 默认均为 `true`。`PostgresSchemaInitializer` 只为开着的那些能力建表（`CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS`，幂等），全关时不连库、不建表；`pubsub` 不需要表。表名可改（用于与已有表/前缀共存），DDL 语句统一引用配置的表名，不写死 `pg_*`。`ext.postgres.schema` 指定三种能力共用的 schema（留空沿用连接的 `search_path`），带 schema 时 DDL 与运行时 SQL 一律走 `PostgresProperties#qualify(表名)`，各能力的 `table-name` 仍写裸表名；该值只接受普通标识符（`[A-Za-z_][A-Za-z0-9_]*`），因为它会被直接拼进 SQL。配了 schema 时初始化器会先 `CREATE SCHEMA IF NOT EXISTS`（需要建 schema 的权限，没有就自己先建好）。数据库本身不单独配置，由 `ext.postgres.datasource.url`（或应用主数据源）决定。其余参数同样归到各自能力下：`cache.default-expire-time` / `cache.cleanup-interval`、`queue.max-attempts`。
 
 **边界**：依赖 `ext-core`、`ext-json`、`postgresql` 驱动、`starter-jdbc`；不依赖 `ext-redis`，与 [ext-cache](#ext-cache) 之间只有「cache 单向可选引用 postgres」的关系，不成环。队列能力被 [ext-job](#ext-job) 直接复用，不在别处另造调度原语。
 
@@ -194,80 +193,15 @@ ext:
 
 **边界**：只依赖 `ext-tool` 与 `starter-mail`；账号与服务器配置完全沿用 Spring 前缀 `spring.mail`，除重试参数外不新增配置项，也不管理发送队列或模板。
 
-### ext-jdbc
-
-JdbcClient 增强模块，在 Spring `JdbcClient` 之上补一层注解驱动的轻量 DAO，不引入 ORM：
-
-- **注解**: `@Table`（表名）、`@Id`（主键字段）
-- **DAO 工厂**: `JdbcDaoFactory#of(Class)` 按实体类型产出 `JdbcDao<T>`
-- **元数据**: `EntityMetaData` 在首次使用时反射解析表名、主键与列名
-- **行映射**: `EntityRowMapper` 按列名（驼峰↔下划线）映射实体字段
-- **链式条件**: `QueryWrapper<T>` 提供 eq/ne/lt/le/gt/ge/in/notIn/between/isNull/like/groupBy/having/orderBy/limit/last
-- **分页**: `PageQuery`（页码/页大小）与 `PageResult<T>`（记录、总条数、总页数）
-- **防护**: 无条件 `update`/`delete` 直接拒绝执行，必须带 `QueryWrapper` 或主键
-- **数据权限**: `selectList` / `selectCount` 自动追加 `DataScopeContext` 里的 `field IN (...)` 条件
-
-**包结构**: `ext.library.jdbc`
-
-所有值均以 `?` 占位符绑定，不会拼接进 SQL 文本。
-
-**核心类**:
-- `JdbcDao` - 通用 DAO（`selectById`/`selectList`/`selectCount`/`selectPage`/`insert`/`update`/`deleteById`/`delete`）
-- `JdbcDaoFactory` - DAO 工厂
-- `QueryWrapper` - 链式条件构造
-- `EntityMetaData` / `EntityRowMapper` - 元数据解析与行映射
-- `PageQuery` / `PageResult` - 分页入参与结果
-- `JdbcAutoConfiguration` - 自动装配 `JdbcDaoFactory`
-
-**使用示例**:
-```java
-@Table("sys_user")
-public class User {
-    @Id
-    private Long id;
-    private String name;
-}
-
-JdbcDao<User> userDao = jdbcDaoFactory.of(User.class);
-Optional<User> user = userDao.selectById(1L);
-
-PageQuery page = new PageQuery();
-page.setPage(1);
-page.setSize(20);
-PageResult<User> result = userDao.selectPage(page,
-        QueryWrapper.<User>of().like("name", "张").orderByAsc("id"));
-
-// 防护：无条件全表操作会被拒绝
-userDao.delete(QueryWrapper.of());   // 抛 ExtException
-
-// 数据权限：Controller 标注 @DataScope 后，本次请求内的 selectList/selectCount
-// 自动追加 dept_id IN (...)，DAO 侧无感
-```
-
-#### 设计约束
-
-**职责**：在 Spring `JdbcClient` 之上补一层注解驱动的轻量 DAO，**不引入 ORM**：`@Table` / `@Id` 标注实体，`JdbcDaoFactory#of(Class)` 产出 `JdbcDao<T>`，`EntityMetaData` + `EntityRowMapper` 反射解析表名、主键与列名（驼峰↔下划线），`QueryWrapper<T>` 链式条件（eq/ne/lt/le/gt/ge/in/notIn/between/isNull/like/groupBy/having/orderBy/limit/last），`PageQuery` / `PageResult<T>` 分页——**这两个类型属于 [ext-servlet](../ext-common/AGENTS.md#ext-servlet) 而非本模块**，`selectPage` 直接用基座那一套，全库只有一份定义。
-
-**决策（名字转换与反查）**：列名↔属性名的互转全部复用 `ext-tool` 的 `StringUtil.underlineToCamelCase` / `camelToUnderline`，`EntityMetaData` 只做委托，不再自己写一遍字符循环——下划线风格全库只有一处定义，改风格只改一处。反查（拿到数据库返回的列名找 setter）不靠每次反射：`EntityRowMapper` 构造时用 JavaBeans 内省（`Introspector`）一次性建好「小写属性名 → setter + 属性类型」的不可变 `Map`，回填时只做一次查表加类型转换。
-
-**不变量**：
-
-- 所有值以 `?` 占位符绑定，绝不拼接进 SQL 文本。
-- 无条件的 `update` / `delete` 直接拒绝执行（抛 `ExtException`）——必须带 `QueryWrapper` 或主键。这是防误删全表的硬约束，不要为了"方便"放开。
-
-**边界**：`starter-jdbc` 为 `compileOnly`（由消费方的数据源提供）；不管理事务、不做 DDL 迁移。
-
-**数据权限**：`selectList` / `selectCount` 在拼 where 前调 `applyDataScope`，把 [ext-security](../ext-security/AGENTS.md#数据权限) 拦截器写进 `ext-core` 的 `DataScopeContext` 的范围值追加成 `field IN (?,?,...)`，绑定值按 SQL 中 `?` 顺序插在已有条件之后。上下文为空时 SQL 与原来完全一致（无额外开销的判断）；`ALL` 直接跳过。位置固定为**总条数与列表都生效**，不允许只过滤列表导致分页总数对不上。
-
 ### ext-job
 
 任务调度模块，直接复用 ext-postgres 的 `PostgresQueue`，不引入独立调度框架：
 
-- **处理器**: `JobHandler<T>` 声明负载类型、队列名与处理逻辑，`handle` 抛异常即视为本次尝试失败
+- **处理器**: `JobHandler<T>` 声明负载类型、队列名与处理逻辑，`handle` 抛异常即视为本次尝试失败；一个队列只能有一个处理器，重名在 `JobDispatcher` 构造时直接抛异常（否则后注册者会顶掉前者、负载被静默吞掉）
 - **投递器**: `JobDispatcher` 按队列投递任务，支持延迟投递、重试次数上限与队列统计
 - **执行器**: `JobExecutor` 每轮按队列出队处理，由 `@Scheduled` 轮询触发
 - **定时任务**: `@CronJob` 标注在 `JobHandler` 实现类或 `@Bean` 工厂方法上，`CronJobScheduler` 按 cron 表达式到点投递；只负责触发投递，执行仍走轮询执行器
-- **运维接口**: `countPending`/`stats`/`cleanup`/`resetStuck`/`queues`，用于积压观测与卡死任务回收
+- **运维接口**: `countPending`/`stats`/`cleanup`/`cleanupFailed`/`resetStuck`/`queues`，用于积压观测、死信清理与卡死任务回收
 
 **包结构**: `ext.library.job`
 
@@ -331,7 +265,9 @@ ext:
 
 **决策**：队列直接用 PostgreSQL 的 `FOR UPDATE SKIP LOCKED`，因此不需要额外的消息中间件——这也是本库"用 PG 替代 Redis"路线的一部分。
 
-**边界与装配**：未注册任何 `JobHandler` 时只装配投递器与执行器，不启动轮询；配置前缀 `ext.job`（`enabled`、`batch-size`、`poll-interval-millis`、`stuck-timeout`、`completed-retention`、`recover-on-startup`、`cleanup-on-startup`）。
+**调度器**：`@EnableScheduling` 声明在本模块的自动配置上，Spring Boot 的 `TaskSchedulingAutoConfiguration` 判断时机在其后、拿不到调度注解处理器，因此 `TaskScheduler` 由本模块自建（`@ConditionalOnMissingBean`，2 线程，前缀 `ext-job-`），消费方自备调度器时退让；轮询间隔读 `${ext.job.poll-interval-millis:500}`，不引用 `JobProperties` Bean（`@EnableConfigurationProperties` 注册的 Bean 名不是 `jobProperties`）。
+
+**边界与装配**：未注册任何 `JobHandler` 时只装配投递器与执行器，不启动轮询；配置前缀 `ext.job`（`enabled`、`batch-size`、`poll-interval-millis`、`stuck-timeout`、`completed-retention`、`failed-retention`、`cleanup-interval-millis`、`recover-on-startup`、`cleanup-on-startup`）。运行期由 `@Scheduled(cleanup-interval-millis)` 周期清理：COMPLETED 按 `completed_at`、FAILED（重试耗尽的死信）按 `created_at` 各自套保留时长，不清理就会无限堆积。
 
 **建表**：队列表由 [ext-postgres](#ext-postgres) 的 `ext.postgres.queue.auto-init-schema` 决定是否自动创建（默认 `true`，表名 `ext.postgres.queue.table-name`，默认 `pg_jobs`）。关掉它就真的不建表——`ext-job` 自己不做任何 DDL，也不会在启动时偷偷把表补上；这时消费方必须先用迁移工具建好同名表（列结构见 [ext-postgres](#ext-postgres)），否则 `ext-job` 不可用。
 
@@ -343,7 +279,8 @@ ext:
 - **来源 SPI**: `TranslationSource` 接口（`load(Locale)` / `name()` / `order()`），`order()` 越小越先查询
 - **资源文件源**: `ResourceBundleTranslationSource` 读 classpath 下的 `ResourceBundle`
 - **数据库源**: `JdbcTranslationSource` 读翻译表，查询走语言降级链 `zh-CN` → `zh` → `ROOT`，按降级顺序合并
-- **缓存**: 按语言缓存翻译表，`ext.i18n.cache-ttl` 到期重载，便于翻译变更后自动��效
+- **缓存**: 按语言缓存翻译表，`ext.i18n.cache-ttl` 到期重载，便于翻译变更后自动生效
+- **Spring 消息源**: `I18nMessageSource` 实现 Spring 的 `MessageSource`，容器里没有 `messageSource` bean 时自动注册为它。模板的 `#{...}`、Bean Validation 消息因此能用同一套翻译（含数据库覆盖）；指定语言缺键回落 `default-locale`，都没有时返回键本身，而不是 `??code_locale??`。消费方配了 `spring.messages.basename` 时以消费方为准
 
 **包结构**: `ext.library.i18n`
 
@@ -353,6 +290,7 @@ ext:
 - `I18nMessageManager` - 翻译管理器
 - `TranslationSource` - 翻译来源 SPI
 - `ResourceBundleTranslationSource` / `JdbcTranslationSource` - 两个翻译源
+- `I18nMessageSource` - Spring `MessageSource` 适配（模板与校验消息用）
 - `I18nProperties` / `I18nAutoConfiguration` - 配置属性与自动配置
 
 **使用示例**:
@@ -508,7 +446,6 @@ ext-common (ext-core, ext-json, ext-servlet)
     |         |
     |         +---> ext-job
     |
-    +---> ext-jdbc (独立)
     |
     +---> ext-cache
               |
@@ -540,7 +477,6 @@ ext-core + ext-json (+ spring-jdbc、HikariCP 按需 compileOnly)
 - `ext-postgres/src/main/java/ext/library/postgres/` - PostgreSQL 相关源码
 - `ext-cache/src/main/java/ext/library/cache/` - 缓存相关源码
 - `ext-mail/src/main/java/ext/library/mail/` - 邮件相关源码
-- `ext-jdbc/src/main/java/ext/library/jdbc/` - JdbcClient DAO 相关源码
 - `ext-job/src/main/java/ext/library/job/` - 任务调度源码
 - `ext-i18n/src/main/java/ext/library/i18n/` - 国际化源码
 - `ext-oss/src/main/java/ext/library/oss/` - 对象存储源码

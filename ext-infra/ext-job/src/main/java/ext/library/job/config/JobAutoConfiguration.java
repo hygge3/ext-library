@@ -7,15 +7,17 @@ import ext.library.lock.store.LockStore;
 import ext.library.postgres.queue.PostgresQueue;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
@@ -34,6 +36,27 @@ import java.util.List;
 @ConditionalOnProperty(prefix = JobProperties.PREFIX, name = "enabled", havingValue = "true",
         matchIfMissing = true)
 public class JobAutoConfiguration {
+
+    /** 定时任务只做「投递进队列」，2 个线程足够，压力在执行器那边。 */
+    private static final int SCHEDULER_POOL_SIZE = 2;
+
+    /**
+     * 调度器
+     * <p>
+     * 自己建而不是等 Spring Boot 的 {@code TaskSchedulingAutoConfiguration}：它只在容器里已存在调度注解处理器时才建
+     * {@code TaskScheduler}，而 {@code @EnableScheduling} 声明在自动配置上，处理时机在其后判断，拿到的是「没有」。
+     * 消费方已注册自己的 {@code TaskScheduler} 时本方法退让。
+     *
+     * @return 调度器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskScheduler extTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(SCHEDULER_POOL_SIZE);
+        scheduler.setThreadNamePrefix("ext-job-");
+        return scheduler;
+    }
 
     /**
      * 任务投递器
@@ -101,8 +124,12 @@ public class JobAutoConfiguration {
 
     /**
      * 轮询任务
+     * <p>
+     * 启动恢复放到 {@link ApplicationReadyEvent}：它要读写队列表，而建表在
+     * {@code PostgresSchemaInitializer} 的 {@code InitializingBean} 里，两者谁先谁后取决于 Bean 注册顺序
+     * （自动配置按类名排序，job 在 postgres 之前），在 {@code afterPropertiesSet} 里查表会撞上「关系不存在」。
      */
-    public static class JobPollingTask implements InitializingBean {
+    public static class JobPollingTask implements ApplicationListener<ApplicationReadyEvent> {
 
         private final JobProperties properties;
 
@@ -117,7 +144,7 @@ public class JobAutoConfiguration {
         }
 
         @Override
-        public void afterPropertiesSet() {
+        public void onApplicationEvent(ApplicationReadyEvent event) {
             if (dispatcher.isEmpty()) {
                 Logs.info(EmojiSymbol.JOB, "未注册任务处理器，跳过启动恢复");
                 return;
@@ -125,13 +152,32 @@ public class JobAutoConfiguration {
             if (!properties.isRecoverOnStartup()) {
                 return;
             }
+            if (properties.isCleanupOnStartup()) {
+                cleanup();
+            }
             for (String queue : dispatcher.queues()) {
-                if (properties.isCleanupOnStartup()) {
-                    dispatcher.cleanup(queue, properties.getCompletedRetention());
-                }
                 dispatcher.resetStuck(queue, properties.getStuckTimeout());
             }
             Logs.info(EmojiSymbol.JOB, "任务启动恢复完成：queues={}", dispatcher.queues());
+        }
+
+        /**
+         * 清理过期的已完成任务与死信
+         * <p>
+         * 不清理就会无限堆积：COMPLETED 按完成时间算，FAILED 按创建时间算。
+         */
+        @Scheduled(fixedDelayString = "${ext.job.cleanup-interval-millis:3600000}")
+        public void cleanup() {
+            if (dispatcher.isEmpty()) {
+                return;
+            }
+            for (String queue : dispatcher.queues()) {
+                int completed = dispatcher.cleanup(queue, properties.getCompletedRetention());
+                int failed = dispatcher.cleanupFailed(queue, properties.getFailedRetention());
+                if (completed + failed > 0) {
+                    Logs.info(EmojiSymbol.JOB, "清理任务：queue={}, completed={}, failed={}", queue, completed, failed);
+                }
+            }
         }
 
         /**
@@ -139,7 +185,7 @@ public class JobAutoConfiguration {
          * <p>
          * 整轮异常必须就地吞掉，否则 Spring 调度器会取消后续所有执行。
          */
-        @Scheduled(fixedDelayString = "#{@jobProperties.pollIntervalMillis}")
+        @Scheduled(fixedDelayString = "${ext.job.poll-interval-millis:500}")
         public void poll() {
             if (dispatcher.isEmpty()) {
                 return;

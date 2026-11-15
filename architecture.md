@@ -22,16 +22,16 @@ ext-common  →  ext-infra  →  { ext-security, ext-crypto }  →  ext-web  →
 
 - `ext-bom` 不在层内：它是约束层，所有叶子通过 `api platform(project(':ext-bom'))` 继承版本。
 - 同层可互相依赖（如 `ext-security` → `ext-crypto`）；跨层只允许上层依赖下层。
-- **没有不分层的「杂项层」**：每个模块都落在上面五层之一，依赖方向检查因此没有例外。不需要业务语义的独立工具（`ext-http` / `ext-qrcode` / `ext-useragent` / `ext-logback` 与 servlet 基座 `ext-servlet`）在 `ext-common`；带 Spring 装配或后端集成的 `ext-i18n` / `ext-oss` 在 `ext-infra`。「暂时不知道放哪」不构成新建层的理由——放错层的代价只是新开一条可解释的依赖边。
+- **没有不分层的「杂项层」**：每个模块都落在上面五层之一，依赖方向检查因此没有例外。不需要业务语义的独立工具（`ext-http` / `ext-qrcode` / `ext-useragent` 与 servlet 基座 `ext-servlet`）在 `ext-common`；带 Spring 装配或后端集成的 `ext-i18n` / `ext-oss` 在 `ext-infra`。「暂时不知道放哪」不构成新建层的理由——放错层的代价只是新开一条可解释的依赖边。
 
 ```mermaid
 graph LR
     subgraph L1[ext-common]
         tool[ext-tool]; core[ext-core]; json[ext-json]; servlet[ext-servlet]
-        http[ext-http]; qrcode[ext-qrcode]; ua[ext-useragent]; lb[ext-logback]
+        http[ext-http]; qrcode[ext-qrcode]; ua[ext-useragent]
     end
     subgraph L2[ext-infra]
-        redis[ext-redis]; cache[ext-cache]; mail[ext-mail]; pg[ext-postgres]; lock[ext-lock]; jdbc[ext-jdbc]; job[ext-job]
+        redis[ext-redis]; cache[ext-cache]; mail[ext-mail]; pg[ext-postgres]; lock[ext-lock]; job[ext-job]
         i18n[ext-i18n]; oss[ext-oss]
     end
     subgraph L3[安全/加密层]
@@ -67,7 +67,7 @@ graph LR
     audit --> core; audit --> json; audit --> servlet
 ```
 
-工具类模块只压在最底层：`ext-http` / `ext-qrcode` / `ext-useragent` 依赖 `ext-tool`，`ext-logback` 依赖 `ext-json`，`ext-servlet` 依赖 `ext-tool` + `ext-json` + `spring-web`（`jakarta.servlet-api` 为 `compileOnly`）；`ext-i18n` 依赖 `ext-core` + `ext-json`，`ext-oss` 依赖 `ext-core`。`ext-realtime` 与 `ext-enhance` 的数个模块对 Redis / PostgreSQL 只有 `compileOnly` 可选边（图中未画）。逐模块的可选边以各模块 spec 与其 `depends-on` 为准。
+工具类模块只压在最底层：`ext-http` / `ext-qrcode` / `ext-useragent` 依赖 `ext-tool`，`ext-servlet` 依赖 `ext-tool` + `ext-json` + `spring-web`（`jakarta.servlet-api` 为 `compileOnly`）；`ext-i18n` 依赖 `ext-core` + `ext-json`，`ext-oss` 依赖 `ext-core`。`ext-realtime` 与 `ext-enhance` 的数个模块对 Redis / PostgreSQL 只有 `compileOnly` 可选边（图中未画）。逐模块的可选边以各模块 spec 与其 `depends-on` 为准。
 
 ## 不变量
 
@@ -85,7 +85,7 @@ graph LR
 `ext-security` 曾经以 `api` 依赖 `ext-web:ext-mvc`（Web 层），只为拿 `R` 与 `ServletUtil` 两个类——唯一一条越层边。基座 `ext-common/ext-servlet` 建成后这条边已消除：
 
 - `R` 与 `ServletUtil` 从 `ext-mvc` 迁入 `ext-servlet`，`ext-mvc` 的原副本删除；
-- 分页与选项模型 `PageQuery` / `PageResult` / `SelectData` 迁入；`ext-jdbc` 的同名副本删除，`selectPage` 直接用基座那一套，Web 层不再手工转换；
+- 分页与选项模型 `PageQuery` / `PageResult` / `SelectData` 迁入，全库只有一份定义，Web 层不再手工转换；
 - 异常 → `(HttpStatus, R)` 的信封组装收进 `ErrorEnvelope`、日志口径收进 `ErrorLog`，`ext-mvc` 的 `GlobalExceptionHandler` 与 `ext-security` 的 `SecurityExceptionHandler` 只声明"哪种异常归我管"与对外消息（顺带消掉了原 `@ResponseStatus` 与响应体状态码不一致的几处：`428` / `412` 统一为 `400`）；
 - `ServletUtil` 补 `getRequestOrNull()` / `getResponseOrNull()` 与 `writeJson()`；`ext-audit` / `ext-idempotent` / `ext-resilience` / `ext-lock` 里手写的 `instanceof ServletRequestAttributes` 样板一并删掉；
 - 新增 `RepeatableRequestWrapper` + 可选过滤器（默认关闭），供需要多次读取请求体的模块使用；
@@ -97,7 +97,7 @@ graph LR
 
 `ext-misc` 曾是「暂时不知道放哪」的收容层，与「每个模块都落在五层之一」的约定相冲。六个模块已按依赖性质归位，层目录删除：
 
-- `ext-http` / `ext-qrcode` / `ext-useragent` / `ext-logback` → `ext-common`（只依赖 `ext-tool` 或 `ext-json` 的独立工具）；
+- `ext-http` / `ext-qrcode` / `ext-useragent` → `ext-common`（只依赖 `ext-tool` 的独立工具）；
 - `ext-i18n` / `ext-oss` → `ext-infra`（带 Spring 装配与后端集成）；
 - `settings.gradle` 的 include 列表、`ext-bom` 的 constraints 分组、`ext-security` 对 `ext-useragent` 的依赖同步改到新路径；各层 AGENTS.md / README 与根索引一并更新。
 
@@ -116,5 +116,5 @@ graph LR
 ## 测试与验证（已知限制）
 
 - **无 CI**：构建与测试只在本地 `./gradlew` 执行，提交前没有自动门禁。
-- **多数模块无自动化测试**：`ext-enhance` 全部 5 个模块、`ext-realtime`、`ext-infra` 的 postgres / job / jdbc / mail / lock / i18n / oss、`ext-logback` 的 `test` 目录为空或不存在；有测试的集中在 `ext-tool`、`ext-core`、`ext-json`、`ext-servlet`、`ext-cache`、`ext-redis`、`ext-crypto`、`ext-security`、`ext-http`、`ext-qrcode`、`ext-useragent`、`ext-mvc`，合计 300 余个用例。
+- **多数模块无自动化测试**：`ext-enhance` 全部 5 个模块、`ext-realtime`、`ext-infra` 的 postgres / job / jdbc / mail / lock / i18n / oss 的 `test` 目录为空或不存在；有测试的集中在 `ext-tool`、`ext-core`、`ext-json`、`ext-servlet`、`ext-cache`、`ext-redis`、`ext-crypto`、`ext-security`、`ext-http`、`ext-qrcode`、`ext-useragent`、`ext-mvc`，合计 300 余个用例。
 - 因此新增或改动行为必须自带测试，不能指望既有测试兜底。

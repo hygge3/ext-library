@@ -54,7 +54,6 @@
 | ext-http      | HTTP 客户端                                  |
 | ext-useragent | User-Agent 解析                              |
 | ext-qrcode    | 二维码生成与识别                             |
-| ext-logback   | 日志脱敏                                     |
 
 ### ext-infra 层
 
@@ -65,7 +64,6 @@
 | ext-mail     | 邮件发送服务                                     |
 | ext-postgres | PostgreSQL 集成（缓存 / 队列 / 发布订阅 / 限流） |
 | ext-lock     | 分布式锁                                         |
-| ext-jdbc     | JdbcClient 增强                                  |
 | ext-job      | 任务调度                                         |
 | ext-i18n     | 国际化                                           |
 | ext-oss      | 对象存储（本地 / S3）                            |

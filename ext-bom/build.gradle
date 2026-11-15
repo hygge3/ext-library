@@ -46,7 +46,6 @@ dependencies {
         api project(':ext-common:ext-http')
         api project(':ext-common:ext-useragent')
         api project(':ext-common:ext-qrcode')
-        api project(':ext-common:ext-logback')
         api project(':ext-common:ext-trace')
     }
 }
@@ -59,7 +58,6 @@ dependencies {
         api project(':ext-infra:ext-mail')
         api project(':ext-infra:ext-postgres')
         api project(':ext-infra:ext-lock')
-        api project(':ext-infra:ext-jdbc')
         api project(':ext-infra:ext-metrics')
         api project(':ext-infra:ext-job')
         api project(':ext-infra:ext-i18n')

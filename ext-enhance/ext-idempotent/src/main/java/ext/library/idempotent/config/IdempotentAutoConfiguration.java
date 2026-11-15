@@ -7,9 +7,9 @@ import ext.library.idempotent.IdempotentAspect;
 import ext.library.idempotent.KeyGenerator;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -43,13 +43,12 @@ public class IdempotentAutoConfiguration {
      *
      * @param cacheStrategy 缓存策略
      * @param keyGenerator  Key 生成器
-     *
      * @return 幂等切面实例
      */
     @Bean
     public IdempotentAspect idempotentAspect(CacheStrategy cacheStrategy, KeyGenerator keyGenerator,
                                              ObjectProvider<MetricsRecorder> metrics) {
-        Logs.info(EmojiSymbol.IDEMPOTENT, "载入模块：幂等（存储: {}）", cacheStrategy.getClass().getSimpleName());
+        Logs.info(EmojiSymbol.IDEMPOTENT, "载入模块：幂等（存储策略: {}）", cacheStrategy.getClass().getSimpleName());
         return new IdempotentAspect(cacheStrategy, keyGenerator, metrics.getIfAvailable());
     }
 

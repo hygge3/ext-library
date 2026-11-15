@@ -16,7 +16,6 @@
 | [ext-http](ext-http/README.md) | HTTP 客户端封装 | ext-tool |
 | [ext-useragent](ext-useragent/README.md) | User-Agent 解析器 | ext-tool |
 | [ext-qrcode](ext-qrcode/README.md) | 二维码生成与识别 | ext-tool, zxing |
-| ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
 
 ## 依赖关系
 
@@ -71,7 +70,7 @@ ext-tool (基础工具)
 
 ### 引入独立工具模块
 
-`ext-http` / `ext-useragent` / `ext-qrcode` / `ext-logback` 互不依赖，按需单独引入：
+`ext-http` / `ext-useragent` / `ext-qrcode` 互不依赖，按需单独引入：
 
 ```xml
 <dependency>

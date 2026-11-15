@@ -32,12 +32,11 @@ public class CacheAutoConfiguration {
      *
      * @param cacheStrategy 缓存策略
      * @param properties    缓存配置
-     *
      * @return 缓存切面实例
      */
     @Bean
     public CacheAspect cacheAspect(CacheStrategy cacheStrategy, CacheProperties properties) {
-        Logs.info(EmojiSymbol.CACHE, "载入模块：缓存（Strategy: {}）", cacheStrategy.getClass().getSimpleName());
+        Logs.info(EmojiSymbol.CACHE, "载入模块：缓存（存储策略: {}）", cacheStrategy.getClass().getSimpleName());
         return new CacheAspect(cacheStrategy, properties);
     }
 
@@ -119,7 +118,7 @@ public class CacheAutoConfiguration {
      * 自动检测缓存策略
      * <p>
      * 当 {@code ext.cache.cache-storage} 未配置或显式设置为 {@code AUTO} 时生效，
-    * 根据类路径中可用的依赖自动选择，优先级 Redis > PostgreSQL > 本地内存：
+     * 根据类路径中可用的依赖自动选择，优先级 Redis > PostgreSQL > 本地内存：
      * <ul>
      *     <li>存在 ext-redis → {@link L2Strategy}（Caffeine + Redis）</li>
      *     <li>无 ext-redis、存在 ext-postgres → {@link L2Strategy}（Caffeine + PostgreSQL）</li>

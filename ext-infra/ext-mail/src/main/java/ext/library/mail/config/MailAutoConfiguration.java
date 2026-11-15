@@ -19,10 +19,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 @AutoConfiguration(after = MailSenderAutoConfiguration.class)
 public class MailAutoConfiguration {
 
+    /**
+     * Bean 名不能叫 mailSender：Spring Boot 自己的 MailSenderAutoConfiguration 已占用该名字，
+     * 同名会导致覆盖被禁时启动失败
+     */
     @Bean
     @ConditionalOnMissingBean(MailSender.class)
     @ConditionalOnProperty(prefix = "spring.mail", name = "host")
-    public MailSender mailSender(JavaMailSender javaMailSender, ApplicationEventPublisher eventPublisher) {
+    public MailSender extMailSender(JavaMailSender javaMailSender, ApplicationEventPublisher eventPublisher) {
         Logs.info(EmojiSymbol.MAIL, "载入模块：邮件");
         return new MailSenderImpl(javaMailSender, eventPublisher);
     }

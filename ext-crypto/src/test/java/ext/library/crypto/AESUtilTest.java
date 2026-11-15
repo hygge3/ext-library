@@ -37,6 +37,17 @@ class AESUtilTest {
     }
 
     @Test
+    void plainTextPasswordAndSaltWork() {
+        // 口令和盐值是普通单词（非 Hex）也必须能用，否则首个加密请求就会抛 Non-hex character
+        String password = "ext-example-share-sercet-32bytes";
+        String salt = "ext-example-salt";
+
+        String encrypted = AESUtil.encrypt(password, salt, "Hello World!");
+
+        assertEquals("Hello World!", AESUtil.decrypt(password, salt, encrypted));
+    }
+
+    @Test
     void generatePasswordProducesValidLength() {
         String password = AESUtil.generatePassword();
         // 32 字节 Base64 URL 编码约 43 字符

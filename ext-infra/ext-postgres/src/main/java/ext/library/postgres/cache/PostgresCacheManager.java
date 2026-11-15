@@ -28,8 +28,8 @@ public class PostgresCacheManager {
     public PostgresCacheManager(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
-        this.tableName = properties.getCache().getTableName();
-        this.bucketTableName = properties.getBucket().getTableName();
+        this.tableName = properties.qualify(properties.getCache().getTableName());
+        this.bucketTableName = properties.qualify(properties.getBucket().getTableName());
     }
 
     /**

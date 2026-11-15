@@ -56,7 +56,9 @@ public class TranslationAutoConfiguration {
             }
         }
         TranslatorRegistry.registerAll(translatorMap);
-        Logs.info(EmojiSymbol.TRANS, "载入模块：翻译，已注册 {} 个翻译器", translatorMap.size());
+        if (!translatorMap.isEmpty()) {
+            Logs.info(EmojiSymbol.TRANS, "载入翻译器：{} 个 {}", translatorMap.size(), translatorMap.keySet());
+        }
     }
 
     /**

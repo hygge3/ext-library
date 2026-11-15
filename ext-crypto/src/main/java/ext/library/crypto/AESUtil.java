@@ -5,6 +5,9 @@ import org.springframework.security.crypto.encrypt.BytesEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
@@ -48,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>注意事项：
  * <ul>
  *   <li>密码和盐值必须妥善保管，两者都需要用于解密</li>
- *   <li>盐值为 16 字节（128 位）Hex 编码字符串</li>
+ *   <li>密码和盐值可以是任意字符串：内部先 SHA-256 散列成 hex，再交给 Spring Security 做 PBKDF2</li>
  *   <li>AES-GCM 提供认证加密，可检测密文篡改</li>
  *   <li>PBKDF2 迭代次数较高，实例创建较慢，应复用而非每次调用重建</li>
  * </ul>
@@ -95,8 +98,8 @@ public final class AESUtil {
     /**
      * 使用 AES-GCM 256 位加密字符串
      *
-     * @param password 加密密码
-     * @param salt     盐值（Hex 编码，至少 8 字节）
+     * @param password 加密密码，任意字符串
+     * @param salt     盐值，任意字符串
      * @param plainText 待加密的明文
      * @return Base64 URL 安全编码的密文
      */
@@ -137,7 +140,34 @@ public final class AESUtil {
             encryptors.clear();
         }
         return encryptors.computeIfAbsent(password + '\u0000' + salt,
-                key -> AesGcmBytesEncryptor.withPassword(password, salt).build());
+                key -> AesGcmBytesEncryptor.withPassword(hexDigest(password), hexSalt(salt)).build());
+    }
+
+    /**
+     * 任意口令散列成 32 字节（AES-256）Hex 密钥
+     *
+     * <p>{@code withPassword} 只收 Hex，直接转发调用方口令会在启动后第一个加密请求抛
+     * 「Detected a Non-hex character」（口令是普通单词时必然发生），所以这里统一散列成 Hex</p>
+     *
+     * @param text 口令
+     *
+     * @return 64 个十六进制字符
+     */
+    private static String hexDigest(String text) {
+        return HexFormat.of().formatHex(sha256(text));
+    }
+
+    /** 任意盐值散列成 16 字节 Hex 盐值 */
+    private static String hexSalt(String salt) {
+        return HexFormat.of().formatHex(Arrays.copyOf(sha256(salt), 16));
+    }
+
+    private static byte[] sha256(String text) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(text.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 不可用", e);
+        }
     }
 
     /**

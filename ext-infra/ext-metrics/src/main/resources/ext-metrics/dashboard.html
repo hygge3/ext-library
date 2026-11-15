@@ -203,7 +203,8 @@
 
 <script>
   var REFRESH_SECONDS = {{refreshSeconds}};
-  var SNAPSHOT_URL = '{{snapshotUrl}}';
+  // 相对当前页面算，挂裁路径改了也不用动；location.search 把 ?token= 带上，否则快照请求被 403
+  var SNAPSHOT_URL = location.pathname.replace(/\/+$/, '') + '{{snapshotSuffix}}' + location.search;
   var ERROR_RATE_THRESHOLD = {{errorRateThreshold}};
   var P99_THRESHOLD = {{p99ThresholdMillis}};
 

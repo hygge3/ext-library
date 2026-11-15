@@ -105,7 +105,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     public ResponseEntity<R<Void>> bizException(BizException e, HttpServletRequest request) {
-        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage());
+        // 交给 Logs 分类：纯业务拒绝降 WARN 不打堆栈，包着真实故障（连不上邮件/数据库）才留 ERROR 与堆栈
+        ErrorLog.error(EmojiSymbol.WEB, request, e.getMessage(), e);
         if (metrics != null) {
             metrics.businessError(String.valueOf(e.getCode()));
         }

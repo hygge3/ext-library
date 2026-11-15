@@ -5,21 +5,19 @@ import ext.library.servlet.util.ServletUtil;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.util.StringUtil;
-import org.jspecify.annotations.NonNull;
-import org.slf4j.MDC;
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,21 +30,18 @@ public class AccessLogFilter extends OncePerRequestFilter {
             "authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"
     );
 
-    /**
-     * 查询串里需要掩码的参数名
-     * <p>
-     * 请求头有白名单，URL 没有：{@code ?access_token=...} 会跟着访问日志一起落盘。
-     */
-    private static final Set<String> SENSITIVE_PARAMS = Set.of(
-            "token", "access_token", "refresh_token", "id_token", "password", "pwd",
-            "secret", "sign", "signature", "id_card", "idcard", "phone", "mobile"
-    );
-
     private final AccessLogProperties properties;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public AccessLogFilter(AccessLogProperties properties) {
         this.properties = properties;
+    }
+
+    private static String abbreviate(String value, int max) {
+        if (value == null || value.length() <= max) {
+            return value;
+        }
+        return value.substring(0, max) + "...";
     }
 
     @Override
@@ -100,26 +95,21 @@ public class AccessLogFilter extends OncePerRequestFilter {
     private void logAccess(HttpServletRequest request, HttpServletResponse response, long duration) {
         String method = request.getMethod();
         String uri = request.getRequestURI();
-        String query = properties.isIncludeQueryString() ? maskQuery(request.getQueryString()) : null;
+        String query = properties.isIncludeQueryString() ? request.getQueryString() : null;
         String path = StringUtil.isNotBlank(query) ? uri + "?" + query : uri;
         int status = response.getStatus();
-        String traceId = firstNonBlank(MDC.get(properties.getTraceIdMdcKey()),
-                MDC.get(properties.getRequestIdMdcKey()));
 
         StringBuilder msg = new StringBuilder(256);
         msg.append("HTTP ").append(method).append(' ').append(path)
-                .append(" | status=").append(status)
-                .append(" | duration=").append(duration).append("ms");
-        if (StringUtil.isNotBlank(traceId)) {
-            msg.append(" | traceId=").append(traceId);
-        }
+                .append(" | ").append(status)
+                .append(" | ").append(duration).append("ms");
         if (properties.isIncludeClientIp()) {
-            msg.append(" | ip=").append(ServletUtil.getIpAddr(request));
+            msg.append(" | ").append(ServletUtil.getIpAddr(request));
         }
         if (properties.isIncludeUserAgent()) {
             String ua = request.getHeader(HttpHeaders.USER_AGENT);
             if (StringUtil.isNotBlank(ua)) {
-                msg.append(" | ua=").append(abbreviate(ua, 160));
+                msg.append(" | ").append(abbreviate(ua, 160));
             }
         }
         if (properties.isIncludeHeaders()) {
@@ -158,37 +148,5 @@ public class AccessLogFilter extends OncePerRequestFilter {
             }
         }
         return map;
-    }
-
-    private static String abbreviate(String value, int max) {
-        if (value == null || value.length() <= max) {
-            return value;
-        }
-        return value.substring(0, max) + "...";
-    }
-
-    static String maskQuery(String query) {
-        if (StringUtil.isBlank(query)) {
-            return query;
-        }
-        StringBuilder masked = new StringBuilder(query.length());
-        for (String pair : query.split("&")) {
-            if (!masked.isEmpty()) {
-                masked.append('&');
-            }
-            int eq = pair.indexOf('=');
-            if (eq > 0 && SENSITIVE_PARAMS.contains(pair.substring(0, eq).toLowerCase(Locale.ROOT))) {
-                masked.append(pair, 0, eq + 1).append("***");
-            } else {
-                masked.append(pair);
-            }
-        }
-        return masked.toString();
-    }
-
-    private static String firstNonBlank(String a, String b) {
-        if (StringUtil.isNotBlank(a)) return a;
-        if (StringUtil.isNotBlank(b)) return b;
-        return null;
     }
 }

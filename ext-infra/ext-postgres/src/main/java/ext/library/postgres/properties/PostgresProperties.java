@@ -1,6 +1,7 @@
 package ext.library.postgres.properties;
 
 import java.time.Duration;
+import java.util.regex.Pattern;
 
 /**
  * PostgreSQL 模块配置属性
@@ -20,10 +21,17 @@ public class PostgresProperties {
 
     public static final String PREFIX = "ext.postgres";
 
+    private static final Pattern SCHEMA_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+
     /**
      * 数据源配置（可选，不配置则使用应用主数据源）
      */
     private DataSourceConfig datasource;
+
+    /**
+     * 三种能力建表 / 查询所用的 schema，留空则沿用连接上的 {@code search_path}
+     */
+    private String schema = "";
 
     /**
      * 缓存能力配置
@@ -178,7 +186,39 @@ public class PostgresProperties {
 
     }
 
+    /**
+     * 给表名拼上 schema 前缀
+     * <p>
+     * 预建表建在非默认 schema 下时，把 {@link #setSchema(String)} 填成该 schema 即可，各能力的
+     * {@code table-name} 仍写裸表名。
+     *
+     * @param tableName 裸表名
+     *
+     * @return 带 schema 前缀的表名
+     */
+    public String qualify(String tableName) {
+        return schema == null || schema.isBlank() ? tableName : schema + "." + tableName;
+    }
+
     // region Getters and Setters
+
+    /**
+     * 设置 schema
+     * <p>
+     * 只接受普通标识符：表名会被直接拼进 SQL，不允许引号、分号、点号等能改变语句结构的东西。
+     *
+     * @param schema schema 名，空串表示沿用 {@code search_path}
+     */
+    public void setSchema(String schema) {
+        if (schema != null && !schema.isBlank() && !SCHEMA_PATTERN.matcher(schema).matches()) {
+            throw new IllegalArgumentException("ext.postgres.schema 只接受普通标识符：" + schema);
+        }
+        this.schema = schema;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
 
     public DataSourceConfig getDatasource() {
         return datasource;

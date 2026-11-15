@@ -9,11 +9,11 @@ import ext.library.resilience.ratelimit.RateLimitKeyGenerator;
 import ext.library.resilience.retry.RetryAspect;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -43,16 +43,15 @@ public class ResilienceAutoConfiguration {
      * @param cacheStrategy 缓存策略，令牌桶落在这里
      * @param keyGenerator  Key 生成器
      * @param properties    配置，取自告警阈值
-     *
      * @return 限流切面实例
      */
     @Bean
     @ConditionalOnBean(CacheStrategy.class)
     public RateLimitAspect rateLimitAspect(CacheStrategy cacheStrategy, RateLimitKeyGenerator keyGenerator,
                                            ResilienceProperties properties, ObjectProvider<MetricsRecorder> metrics) {
-        Logs.info(EmojiSymbol.RATELIMIT, "载入模块：限流（令牌桶，后端: {}）", cacheStrategy.backendType());
+        Logs.info(EmojiSymbol.RATELIMIT, "载入模块：限流（后端: {}）", cacheStrategy.backendType());
         return new RateLimitAspect(cacheStrategy, keyGenerator, properties.getRateLimit().getWarnThreshold(),
-                                   metrics.getIfAvailable());
+                metrics.getIfAvailable());
     }
 
     /**
@@ -70,12 +69,11 @@ public class ResilienceAutoConfiguration {
      * 降级切面
      *
      * @param registry 熔断器注册表
-     *
      * @return 降级切面实例
      */
     @Bean
     public DegradeAspect degradeAspect(DegradeRegistry registry) {
-        Logs.info(EmojiSymbol.DEGRADE, "载入模块：降级（熔断，进程内）");
+        Logs.info(EmojiSymbol.DEGRADE, "载入模块：降级");
         return new DegradeAspect(registry);
     }
 
@@ -87,7 +85,7 @@ public class ResilienceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public RetryAspect retryAspect() {
-        Logs.info(EmojiSymbol.RETRY, "载入模块：重试（指数退避 + 抖动）");
+        Logs.info(EmojiSymbol.RETRY, "载入模块：重试");
         return new RetryAspect();
     }
 

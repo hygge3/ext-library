@@ -192,3 +192,4 @@ String sha3 = DigestUtil.hash("SHA3-256", "data");
 |------|----------|
 | 2026-01-19 | 初始化 AGENTS.md 文档 |
 | 2026-01-20 | 重构：删除 DESUtil，AESUtil 改用 AES-GCM 256 位，简化 PasswordEncoder，新增 SM3Util；重构 API：统一方法命名、修复一致性问题、完善文档 |
+| 2026-11-18 | AESUtil 口令/盐值不再要求 Hex：getEncryptor 先用 SHA-256 散列成 32 字节密钥与 16 字节盐（`hexDigest`/`hexSalt`）再交给 `AesGcmBytesEncryptor.withPassword`。原来的直连会让普通单词口令在首个加密请求抛 `Detected a Non-hex character at 1 or 2 position`，`generatePassword()` 返回的 Base64 同样不可用 |

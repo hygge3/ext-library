@@ -1,19 +1,23 @@
 package ext.library.i18n.config;
 
 import ext.library.i18n.I18nMessageManager;
+import ext.library.i18n.I18nMessageSource;
 import ext.library.i18n.TranslationSource;
 import ext.library.i18n.store.JdbcTranslationSource;
 import ext.library.i18n.store.ResourceBundleTranslationSource;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.List;
@@ -28,6 +32,7 @@ import java.util.List;
  * @since 4.1.0
  */
 @AutoConfiguration
+@AutoConfigureAfter(name = "org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration")
 @EnableConfigurationProperties(I18nProperties.class)
 @ConditionalOnProperty(prefix = I18nProperties.PREFIX, name = "enabled", havingValue = "true",
         matchIfMissing = true)
@@ -61,6 +66,23 @@ public class I18nAutoConfiguration {
         Logs.info(EmojiSymbol.I18N, "载入模块：国际化，default={}, sources={}", properties.getDefaultLocale(),
                 sources.size());
         return new I18nMessageManager(sources, properties.getDefaultLocale(), properties.getCacheTtl());
+    }
+
+    /**
+     * Spring 消息源适配
+     * <p>
+     * 模板的 {@code #{...}}、校验消息都查 Spring 的 {@code MessageSource}，没有这个 bean 时它们
+     * 拿不到本模块的翻译（页面上会显示 {@code ??login.title_zh_CN??}）。消费方自己配了
+     * {@code spring.messages.basename} 时以消费方的为准。
+     *
+     * @param manager 翻译管理器
+     *
+     * @return 消息源
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME)
+    public MessageSource messageSource(I18nMessageManager manager) {
+        return new I18nMessageSource(manager);
     }
 
     /**

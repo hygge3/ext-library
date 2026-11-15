@@ -48,6 +48,18 @@ public class JobProperties {
     private Duration completedRetention = Duration.ofDays(7);
 
     /**
+     * 失败任务（重试耗尽）的保留时长
+     */
+    private Duration failedRetention = Duration.ofDays(30);
+
+    /**
+     * 周期性清理间隔（毫秒）
+     * <p>
+     * 可完成任务与死信都会无限堆积，运行期必须定期删；声明为原始数值的理由同 {@code pollIntervalMillis}。
+     */
+    private long cleanupIntervalMillis = 3_600_000L;
+
+    /**
      * 是否启用启动恢复
      * <p>
      * 重置 {@code PROCESSING} 残留并清理已完成任务，多实例同时部署时应只在一个实例开启。
@@ -97,6 +109,22 @@ public class JobProperties {
 
     public void setCompletedRetention(Duration completedRetention) {
         this.completedRetention = completedRetention;
+    }
+
+    public Duration getFailedRetention() {
+        return failedRetention;
+    }
+
+    public void setFailedRetention(Duration failedRetention) {
+        this.failedRetention = failedRetention;
+    }
+
+    public long getCleanupIntervalMillis() {
+        return cleanupIntervalMillis;
+    }
+
+    public void setCleanupIntervalMillis(long cleanupIntervalMillis) {
+        this.cleanupIntervalMillis = cleanupIntervalMillis;
     }
 
     public boolean isRecoverOnStartup() {

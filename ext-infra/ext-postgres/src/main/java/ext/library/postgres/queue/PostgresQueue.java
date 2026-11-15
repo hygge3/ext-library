@@ -34,7 +34,7 @@ public class PostgresQueue {
     public PostgresQueue(JdbcClient jdbcClient, PostgresProperties properties) {
         this.jdbcClient = jdbcClient;
         this.properties = properties;
-        this.tableName = properties.getQueue().getTableName();
+        this.tableName = properties.qualify(properties.getQueue().getTableName());
     }
 
     /**
@@ -259,6 +259,24 @@ public class PostgresQueue {
         int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE queue = ? AND status = 'COMPLETED' AND completed_at < NOW() - ?::interval").param(queue).param(olderThan.toSeconds() + " seconds").update();
         if (deleted > 0) {
             Logs.debug(EmojiSymbol.POSTGRES, "清理已完成任务：queue={}, count={}", queue, deleted);
+        }
+        return deleted;
+    }
+
+    /**
+     * 清理失败（重试耗尽）的任务
+     * <p>
+     * {@code FAILED} 行没有 {@code completed_at}，用 {@code created_at} 算年龄。
+     *
+     * @param queue     队列名称
+     * @param olderThan 清理多久之前创建的任务
+     *
+     * @return 清理的任务数量
+     */
+    public int cleanupFailed(String queue, Duration olderThan) {
+        int deleted = jdbcClient.sql("DELETE FROM " + tableName + " WHERE queue = ? AND status = 'FAILED' AND created_at < NOW() - ?::interval").param(queue).param(olderThan.toSeconds() + " seconds").update();
+        if (deleted > 0) {
+            Logs.debug(EmojiSymbol.POSTGRES, "清理失败任务：queue={}, count={}", queue, deleted);
         }
         return deleted;
     }

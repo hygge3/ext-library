@@ -4,6 +4,7 @@ import ext.library.accesslog.filter.AccessLogFilter;
 import ext.library.accesslog.properties.AccessLogProperties;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
+import jakarta.servlet.Filter;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -14,8 +15,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-
-import jakarta.servlet.Filter;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
@@ -37,7 +36,7 @@ public class AccessLogAutoConfiguration {
         // traceFilter 在 +5，accesslog 稍后以便拿到 traceId
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 20);
         bean.setName("accessLogFilter");
-        Logs.info(EmojiSymbol.WEB, "载入模块：结构化访问日志");
+        Logs.info(EmojiSymbol.WEB, "载入模块：访问日志");
         return bean;
     }
 }

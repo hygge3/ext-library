@@ -5,6 +5,7 @@ import ext.library.tool.exception.BizCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,6 +66,8 @@ class ErrorEnvelopeTest {
         assertEquals(HttpStatus.UNAUTHORIZED.value(), entity.getStatusCode().value());
         assertEquals(BizCode.UNAUTHORIZED.getCode(), entity.getBody().getCode());
         assertEquals(HttpStatus.UNAUTHORIZED.value(), entity.getBody().getStatus());
+        // 固定 JSON：与调用方的 Accept 无关，否则 text/html 请求会让异常处理器自己抛协商失败
+        assertEquals(MediaType.APPLICATION_JSON, entity.getHeaders().getContentType());
     }
 
 }

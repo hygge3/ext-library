@@ -40,9 +40,7 @@ ext-library 是一个精心设计的扩展框架，以简洁直观的设计集�
 | ext-useragent        | User-Agent 解析                        |
 | ext-idempotent       | 幂等处理，防止重复请求                 |
 | ext-mail             | 邮件发送支持                           |
-| ext-jdbc             | JdbcClient 增强，注解驱动的轻量 DAO    |
 | ext-job              | 任务调度，基于 PostgreSQL 队列         |
-| ext-logback          | 日志脱敏，Logback 脱敏转换器           |
 | ext-mvc              | Web 增强，MVC 工具、验证与 OpenAPI     |
 | ext-qrcode           | 二维码生成和识别                       |
 | ext-realtime         | 实时通信，SSE 推送与 WebSocket         |

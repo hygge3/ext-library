@@ -4,7 +4,7 @@ package ext.library.metrics;
  * 指标埋点入口
  * <p>
  * 其它模块只依赖这个接口：{@code ext-resilience} 记限流拒绝、{@code ext-idempotent} 记幂等命中、
- * {@code ext-jdbc} 记慢 SQL、{@code ext-mvc} 记错误码分布。没有实现 Bean 时各模块按 {@code ObjectProvider}
+ * {@code ext-mvc} 记错误码分布。没有实现 Bean 时各模块按 {@code ObjectProvider}
  * 静默跳过，不因为没引监控就启动失败。
  */
 public interface MetricsRecorder {

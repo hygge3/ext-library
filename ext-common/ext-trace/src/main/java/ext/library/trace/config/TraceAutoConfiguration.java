@@ -1,11 +1,10 @@
 package ext.library.trace.config;
 
-import ext.library.tool.constant.EmojiSymbol;
-import ext.library.tool.runtime.Logs;
 import ext.library.tool.trace.TraceContext;
 import ext.library.trace.filter.TraceFilter;
 import ext.library.trace.properties.TraceProperties;
 import ext.library.trace.support.TraceInterceptor;
+import jakarta.servlet.Filter;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -15,15 +14,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.restclient.RestClientCustomizer;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-
-import jakarta.servlet.Filter;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
@@ -42,20 +39,6 @@ public class TraceAutoConfiguration {
      */
     public TraceAutoConfiguration(TraceProperties properties) {
         TraceContext.setEnabled(properties.isEnabled());
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = TraceProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnWebApplication(type = SERVLET)
-    @ConditionalOnClass(Filter.class)
-    @ConditionalOnMissingBean(name = "traceFilterRegistration")
-    public FilterRegistrationBean<@NonNull TraceFilter> traceFilterRegistration(TraceProperties properties) {
-        FilterRegistrationBean<@NonNull TraceFilter> bean = new FilterRegistrationBean<>(new TraceFilter(properties));
-        bean.addUrlPatterns("/*");
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 5);
-        bean.setName("traceFilter");
-        Logs.info(EmojiSymbol.CORE, "载入模块：链路追踪（traceId MDC + 响应头）");
-        return bean;
     }
 
     /**
@@ -82,6 +65,19 @@ public class TraceAutoConfiguration {
                 return bean;
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = TraceProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnWebApplication(type = SERVLET)
+    @ConditionalOnClass(Filter.class)
+    @ConditionalOnMissingBean(name = "traceFilterRegistration")
+    public FilterRegistrationBean<@NonNull TraceFilter> traceFilterRegistration(TraceProperties properties) {
+        FilterRegistrationBean<@NonNull TraceFilter> bean = new FilterRegistrationBean<>(new TraceFilter(properties));
+        bean.addUrlPatterns("/*");
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 5);
+        bean.setName("traceFilter");
+        return bean;
     }
 
     /**

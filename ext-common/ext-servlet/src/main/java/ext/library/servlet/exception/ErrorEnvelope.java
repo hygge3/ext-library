@@ -4,6 +4,7 @@ import ext.library.servlet.response.R;
 import ext.library.tool.exception.ResponseCode;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -111,9 +112,11 @@ public record ErrorEnvelope(@Nullable HttpStatus status, R<Void> body, Map<Strin
      * @return 响应实体，{@code status} 为空时状态为 200
      */
     public ResponseEntity<R<Void>> toResponseEntity() {
+        // 固定 JSON：浏览器的 Accept: text/html 下若让框架协商，会抛 HttpMediaTypeNotAcceptableException，
+        // 异常处理器自己失败后异常逃到容器，Tomcat 就打一整段堆栈
         ResponseEntity.BodyBuilder builder = status == null
-                ? ResponseEntity.ok()
-                : ResponseEntity.status(status);
+                ? ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
+                : ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON);
         headers.forEach(builder::header);
         return builder.body(body);
     }

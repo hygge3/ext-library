@@ -37,12 +37,10 @@ public class ApiCryptoAutoConfiguration {
      * 注册请求解密处理器
      *
      * @param properties API 加解密配置属性
-     *
      * @return 请求解密处理器
      */
     @Bean
     public RequestDecryptHandler requestDecryptHandler(ApiCryptoProperties properties) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：请求解密");
         return new RequestDecryptHandler(properties);
     }
 
@@ -50,12 +48,10 @@ public class ApiCryptoAutoConfiguration {
      * 注册响应加密处理器
      *
      * @param properties API 加解密配置属性
-     *
      * @return 响应加密处理器
      */
     @Bean
     public ResponseEncryptHandler responseEncryptHandler(ApiCryptoProperties properties) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：响应加密");
         return new ResponseEncryptHandler(properties);
     }
 
@@ -67,13 +63,12 @@ public class ApiCryptoAutoConfiguration {
      * 后端由 {@code ext.cache.cache-storage} 决定，本模块不再自建选型配置。
      *
      * @param cacheStrategy 缓存策略（ext-cache 提供）
-     *
      * @return 随机数存储
      */
     @Bean
     @ConditionalOnMissingBean
     public NonceStore nonceStore(CacheStrategy cacheStrategy) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：防重放存储（{}）", cacheStrategy.getClass().getSimpleName());
+        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：防重放存储（存储策略: {}）", cacheStrategy.getClass().getSimpleName());
         return new CacheNonceStore(cacheStrategy);
     }
 
@@ -82,14 +77,12 @@ public class ApiCryptoAutoConfiguration {
      *
      * @param nonceStore 随机数存储
      * @param properties 配置属性
-     *
      * @return 拦截器配置
      */
     @Bean
     @ConditionalOnProperty(prefix = ApiCryptoProperties.PREFIX + ".sign", name = "enabled",
             havingValue = "true", matchIfMissing = true)
     public WebMvcConfigurer apiSignConfigurer(NonceStore nonceStore, ApiCryptoProperties properties) {
-        Logs.info(EmojiSymbol.API_CRYPTO, "载入模块：接口签名");
         ApiSignHandler handler = new ApiSignHandler(nonceStore, properties);
         return new WebMvcConfigurer() {
             @Override

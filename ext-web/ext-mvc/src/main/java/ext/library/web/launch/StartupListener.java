@@ -17,6 +17,20 @@ import java.time.LocalDateTime;
 @AutoConfiguration
 public class StartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
+    /**
+     * 去掉末尾斜杠：context-path 配成 "/" 时拼出来的地址会变成 {@code http://host:port//v3/api-docs}
+     */
+    static String trimTrailingSlash(String path) {
+        return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+    }
+
+    /**
+     * 补上前导斜杠
+     */
+    static String leadWithSlash(String path) {
+        return path.startsWith("/") ? path : "/" + path;
+    }
+
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
@@ -27,7 +41,7 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
             return;
         }
         String serverPort = environment.getProperty("server.port", "8080");
-        String contextPath = environment.getProperty("server.servlet.context-path", "/");
+        String contextPath = trimTrailingSlash(environment.getProperty("server.servlet.context-path", ""));
         String ip = NetUtil.getHostIp();
         String hostName = NetUtil.getHostName();
         String osName = System.getProperty("os.name");
@@ -39,7 +53,7 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
         String url = "%s://%s:%s%s".formatted(scheme, ip, serverPort, contextPath);
         String content = """
                 ============================================================
-                         ✅ %s 启动完成！耗时:%s
+                         ✅ 启动完成！耗时:%s
                 ============================================================
                  🎉\t启动时间\t:\t%s
                  📌\t应用名称\t:\t%s
@@ -48,11 +62,11 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
                  📍\t本机 IP\t:\t%s
                  💻\t操作系统\t:\t%s (%s)
                 ============================================================
-                """.formatted(appName, DateUtil.format(event.getTimeTaken()), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch);
+                """.formatted(DateUtil.format(event.getTimeTaken()), DateUtil.format(startTime), appName, url, hostName, ip, osName, osArch);
         boolean hasOpenApi = ClassUtils.isPresent("io.swagger.v3.oas.models.OpenAPI", null);
         if (hasOpenApi) {
             // 本模块只产 OpenAPI 描述（JSON）
-            String apiDocsPath = environment.getProperty("springdoc.api-docs.path", "/v3/api-docs");
+            String apiDocsPath = leadWithSlash(environment.getProperty("springdoc.api-docs.path", "/v3/api-docs"));
             content = content.concat("""
                     📘 OpenAPI 描述（JSON）\t:\t%s%s
                     """.formatted(url, apiDocsPath));

@@ -37,10 +37,4 @@ public class AccessLogProperties {
     private List<String> excludePatterns = new ArrayList<>(List.of(
             "/actuator", "/favicon.ico", "/error", "/swagger", "/v3/api-docs", "/webjars"
     ));
-
-    /** MDC 中的追踪 ID 键名，须与 ext.trace.trace-id-mdc-key 一致 */
-    private String traceIdMdcKey = "traceId";
-
-    /** MDC 中的请求 ID 键名，须与 ext.trace.request-id-mdc-key 一致 */
-    private String requestIdMdcKey = "requestId";
 }

@@ -3,6 +3,8 @@ package ext.library.metrics.web;
 import ext.library.json.util.JsonUtil;
 import ext.library.metrics.core.MetricsRegistry;
 import ext.library.metrics.properties.MetricsProperties;
+import ext.library.tool.constant.EmojiSymbol;
+import ext.library.tool.runtime.Logs;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,7 +60,12 @@ public class DashboardServlet extends HttpServlet {
     @Override
     protected void doGet(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response) throws IOException {
         if (!allowed(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "指标接口需要 access token");
+            // 两种拒绝原因差很多（没带令牌 / 不在本机或经过代理），日志里分开写，别让人猜
+            String reason = token.isBlank()
+                    ? "只允许本机直连，当前 remoteAddr: " + request.getRemoteAddr() + "，转发头: " + forwardedBy(request)
+                    : "令牌缺失或不匹配（?token= 或 X-Metrics-Token）";
+            Logs.warn(EmojiSymbol.METRICS, "指标大屏拒绝访问，{}", reason);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, reason);
             return;
         }
         String path = request.getPathInfo();
@@ -84,6 +91,11 @@ public class DashboardServlet extends HttpServlet {
         return LOOPBACK.contains(request.getRemoteAddr())
                 && request.getHeader("X-Forwarded-For") == null
                 && request.getHeader("Forwarded") == null;
+    }
+
+    private static String forwardedBy(HttpServletRequest request) {
+        String forwarded = request.getHeader("Forwarded");
+        return forwarded != null ? forwarded : String.valueOf(request.getHeader("X-Forwarded-For"));
     }
 
     /**
@@ -117,7 +129,7 @@ public class DashboardServlet extends HttpServlet {
             }
             String html = new String(stream.readAllBytes(), StandardCharsets.UTF_8)
                     .replace("{{refreshSeconds}}", String.valueOf(refreshSeconds))
-                    .replace("{{snapshotUrl}}", SNAPSHOT_SUFFIX)
+                    .replace("{{snapshotSuffix}}", SNAPSHOT_SUFFIX)
                     .replace("{{errorRateThreshold}}", String.valueOf(errorRateThreshold))
                     .replace("{{p99ThresholdMillis}}", String.valueOf(p99ThresholdMillis));
             return html.getBytes(StandardCharsets.UTF_8);

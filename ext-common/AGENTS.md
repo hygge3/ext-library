@@ -23,7 +23,6 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 | ext-http | HTTP 客户端封装 | ext-tool |
 | ext-useragent | User-Agent 解析器 | ext-tool |
 | ext-qrcode | 二维码生成工具 | ext-tool, zxing |
-| ext-logback | 日志脱敏，Logback 脱敏转换器 | ext-json, logback-classic |
 | ext-trace | 链路追踪（traceId 入站/出站透传、MDC、定时任务链路） | ext-tool, ext-core, ext-servlet, spring-web |
 
 ## 模块详情
@@ -49,6 +48,8 @@ ext-common 是整个项目的基础层，所有其他模块都直接或间接依
 **边界**：不依赖任何其他 ext 模块；除根构建统一施加的 `slf4j-api` 与 `spring-boot-starter` 外不引入第三方依赖——需要第三方库的工具应落到别的模块，而不是这里。
 
 **约定**：包 `ext.library.tool`，无自动配置、无 Spring 容器依赖，可被非 Spring 代码使用。
+
+**日志**：统一走 `Logs`（模块前缀 + 占位符）。`Logs.error(module, throwable, ...)` 遇到 `BizException` 及其子类（未登录、无权限、参数不合法、限流等主动抛出的已知异常）降为 WARN，只记类型与消息、不打堆栈；其他异常保留 ERROR 与完整堆栈。堆栈只留给需要排查的意外故障。
 
 **归属**：本模块**不是** Spring / Spring Boot 工具类的家——`SpringUtil`（静态取 Bean）、`BeanUtil`（属性拷贝）、`ExtExpressionEvaluator`（SpEL）都在 [ext-core](#ext-core)，因为它们需要 Spring 容器上下文，而本模块要保持「非 Spring 代码可用」。同理，`@Xss` 这类 Web 校验器在 [ext-mvc](../ext-web/AGENTS.md#ext-mvc)，纯字符串转义（`StringUtil.escapeHtml`）留在本模块，不需要单独开一个 HTML 模块。
 
@@ -95,7 +96,7 @@ JSON 处理模块，提供：
 
 **包结构**：翻译与脱敏是同一层的两个兄弟子包，都直接挂在 `ext.library` 下——`ext.library.trans.*` 与 `ext.library.desensitize.*`，不嵌进 JSON 相关包（它们是「数据口径」，JSON 只是生效时机），也不合并成一个大包（两者使用场景独立）。
 
-**决策**：脱敏策略是全库唯一口径。`ext-logback` 的日志脱敏直接复用 `DesensitizeStrategy`，所以同一个手机号在日志里和接口返回里被遮蔽成同一形态。新增规则改这里，不要在调用方另写遮蔽逻辑。
+**决策**：脱敏策略是全库唯一口径。新增规则改这里，不要在调用方另写遮蔽逻辑。
 
 ### ext-servlet
 
@@ -119,7 +120,7 @@ servlet 基座，把「接口返回什么形状、分页怎么传、错误怎么
 ###### ① 弱模型
 
 - **统一响应体 `R<T>`**（`code` / `msg` / `data`，状态码取自 `ext-tool` 的 `ResponseCode`）——从 `ext-mvc` 抽出。
-- **分页与选项模型** `PageQuery`（`page` / `size` / `total`）、`PageResult<T>`（`records` / `total` / `pages` + `empty(query)`）、`SelectData`（下拉选项）——从 `ext-mvc` 抽出。`ext-jdbc` 里那份同名副本随之删除：它的类注释已经写明"由于 infra 不能反向依赖 web，此处独立定义一份"——基座建成后这个理由不存在了，分页类型只保留一份，Web 层不再需要手工转换。
+- **分页与选项模型** `PageQuery`（`page` / `size` / `total`）、`PageResult<T>`（`records` / `total` / `pages` + `empty(query)`）、`SelectData`（下拉选项）——从 `ext-mvc` 抽出，全库只此一份，Web 层不再需要手工转换。
 
 ###### ② servlet 工具 `ServletUtil`
 
@@ -230,39 +231,6 @@ String content = QrCode.read(inputStream);        // 识别
 
 **边界**：只依赖 `ext-tool` 与 `javase` 版 ZXing；不提供条码以外的格式、不做图片处理管线。
 
-### ext-logback
-
-日志脱敏模块，把 ext-json 的脱敏口径搬到日志输出上：
-
-- `LogMaskConverter` - Logback 转换器，用于 `%maskedMsg` 占位符
-- `LogMaskRule` - 单条脱敏规则（正则 + 遮蔽函数），支持只遮蔽指定捕获组
-- `LogMaskRules` - 内置规则集：以 `DesensitizeStrategy` 为键，按策略取正则 + 遮蔽函数
-- `LogMaskRegistry` - 静态规则注册表，充当 converter 与 Spring 容器之间的桥
-- `LogMaskProperties` - 配置属性，用策略枚举列表选择启用哪几条
-
-**包结构**: `ext.library.logback.mask` / `ext.library.logback.config`
-
-**配置前缀**: `ext.logback.mask`
-
-遮蔽函数直接复用 `DesensitizeStrategy`，所以日志里的手机号和接口返回里的手机号遮蔽成同一形态。
-
-**使用示例**（logback.xml）:
-```xml
-<conversionRule conversionWord="maskedMsg" converterClass="ext.library.logback.mask.LogMaskConverter"/>
-```
-
-> converter 由 logback XML 实例化，拿不到 Spring 容器，所以规则由 `LogMaskAutoConfiguration` 启动时写入 `LogMaskRegistry`。规则表为空时 converter 直接放行。
-
-#### 设计约束
-
-**职责**：把脱敏口径搬到日志输出上：`%maskedMsg` 转换器 `LogMaskConverter`、单条规则 `LogMaskRule`（正则 + 遮蔽函数，可只遮蔽指定捕获组）、规则集 `LogMaskRules`（`DesensitizeStrategy` → 正则）、静态注册表 `LogMaskRegistry`、选策略的 `LogMaskProperties`（前缀 `ext.logback.mask`）。
-
-**配置口径**：只有一处——`ext.logback.mask.strategies` 列出要启用的 `DesensitizeStrategy` 枚举名，默认 `BANK_CARD, ID_CARD, PHONE, EMAIL, IP, PASSWORD`（`PASSWORD` 在日志侧按 `password=xxx` 键值对形式匹配，只遮蔽值）。不在 `LogMaskRules` 表里的策略（`NONE` / `GENERIC` / `ADDRESS` / `CHINESE_NAME`）无法在自由文本中定位，配置后启动告警并跳过。不另设 `phone` / `email` 这类布尔开关。
-
-**遮蔽口径**：遮蔽函数直接复用 [ext-json](#ext-json) 的 `DesensitizeStrategy`，所以日志里的手机号和接口返回里的手机号是同一形态——不要在这里另写一套遮蔽逻辑。
-
-**关键约束**：converter 由 logback XML 实例化，拿不到 Spring 容器；规则必须在启动时由 `LogMaskAutoConfiguration` 写入 `LogMaskRegistry`。规则表为空时 converter 直接放行，不报错。
-
 ### ext-trace
 
 链路追踪模块，提供：
@@ -290,8 +258,6 @@ ext-tool (基础工具)
     +---> ext-core (核心功能)
     |
     +---> ext-json (JSON处理)
-    |         |
-    |         +---> ext-logback (+ logback-classic)
     |
     +---> ext-http
     |         |
@@ -312,7 +278,6 @@ ext-tool (基础工具)
 - `ext-http/src/main/java/ext/library/http/` - HTTP 客户端源码
 - `ext-useragent/src/main/java/ext/library/useragent/` - User-Agent 解析源码
 - `ext-qrcode/src/main/java/ext/library/qrcode/` - 二维码源码
-- `ext-logback/src/main/java/ext/library/logback/` - 日志脱敏源码
 - `ext-trace/src/main/java/ext/library/trace/` - 链路追踪源码
 
 ## 变更记录
@@ -323,3 +288,5 @@ ext-tool (基础工具)
 | 2026-10-11 | 收编原 ext-misc 层的 ext-http / ext-useragent / ext-qrcode / ext-logback，ext-misc 层解散 |
 | 2026-11-11 | ext-servlet 新增 `TraceFilter`（X-Request-Id 透传/生成 + MDC）；ext-core 新增 `datascope`（`DataScopeContext` / `DataScopeMeta`） |
 | 2026-11-14 | ext-trace 从 ext-web 移入本层：traceId 原语下沉 `ext-tool` 的 `TraceContext`（32 位 W3C hex、出站头、`wrap`），补出站透传（`HttpUtil` / `TraceInterceptor`）与定时任务链路（`ThreadPoolTaskScheduler` 装饰器） |
+| 2026-11-17 | 删除 `ext-core` 的 `datascope` 包（`DataScopeContext` / `DataScopeMeta`）：唯一消费方 ext-jdbc 已移除，线程上下文不再做数据权限传递 |
+| 2026-11-18 | 删除 ext-logback（`LogMaskConverter` / `%maskedMsg`）：脱敏只覆盖消息正文，堆栈与 MDC 本就不脱敏，排障价值有限；IP 规则还把 UA 版本号当 IPv4 打星。`DesensitizeStrategy` 仍归 ext-json，接口返回脱敏不变 |

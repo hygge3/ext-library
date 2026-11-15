@@ -39,10 +39,24 @@ public class JobDispatcher {
         for (JobHandler<?> handler : handlers) {
             String name = handlerQueueName(handler);
             if (this.handlers.put(name, handler) != null) {
-                Logs.warn(EmojiSymbol.JOB, "同一队列注册了多个处理器，后者生效：queue={}", name);
+                // 同一队列两个处理器会静默吞掉一方的负载，直接拒绝启动
+                throw new IllegalStateException("同一队列注册了多个处理器：queue=" + name
+                        + "，处理器=" + handler.payloadType().getName());
             }
         }
-        Logs.info(EmojiSymbol.JOB, "载入任务处理器：count={}", this.handlers.size());
+        Logs.info(EmojiSymbol.JOB, "载入任务处理器：{}", this.handlers.keySet());
+    }
+
+    /**
+     * 取队列名
+     */
+    private static String handlerQueueName(JobHandler<?> handler) {
+        String queueName = handler.queue();
+        if (queueName == null || queueName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "任务处理器队列名不能为空：" + handler.payloadType().getName());
+        }
+        return queueName;
     }
 
     /**
@@ -50,7 +64,6 @@ public class JobDispatcher {
      *
      * @param payload 负载
      * @param <T>     负载类型泛型
-     *
      * @return 任务 ID
      */
     public <T> long dispatch(T payload) {
@@ -63,7 +76,6 @@ public class JobDispatcher {
      * @param queueName 队列名
      * @param payload   负载
      * @param <T>       负载类型泛型
-     *
      * @return 任务 ID
      */
     public <T> long dispatch(String queueName, T payload) {
@@ -78,7 +90,6 @@ public class JobDispatcher {
      * @param payload   负载
      * @param delay     延迟时间
      * @param <T>       负载类型泛型
-     *
      * @return 任务 ID
      */
     public <T> long dispatch(String queueName, T payload, Duration delay) {
@@ -92,7 +103,6 @@ public class JobDispatcher {
      * @param payload 负载
      * @param delay   延迟时间
      * @param <T>     负载类型泛型
-     *
      * @return 任务 ID
      */
     public <T> long dispatch(T payload, Duration delay) {
@@ -106,7 +116,6 @@ public class JobDispatcher {
      * @param payload     负载
      * @param maxAttempts 最大尝试次数
      * @param <T>         负载类型泛型
-     *
      * @return 任务 ID
      */
     public <T> long dispatch(String queueName, T payload, int maxAttempts) {
@@ -118,7 +127,6 @@ public class JobDispatcher {
      * 查询待处理任务数
      *
      * @param queueName 队列名
-     *
      * @return 待处理任务数
      */
     public long countPending(String queueName) {
@@ -129,7 +137,6 @@ public class JobDispatcher {
      * 查询队列统计
      *
      * @param queueName 队列名
-     *
      * @return 各状态任务数 [pending, processing, completed, failed]
      */
     public long[] stats(String queueName) {
@@ -141,11 +148,22 @@ public class JobDispatcher {
      *
      * @param queueName 队列名
      * @param olderThan 保留时长
-     *
      * @return 清理条数
      */
     public int cleanup(String queueName, Duration olderThan) {
         return queue.cleanupCompleted(queueName, olderThan);
+    }
+
+    /**
+     * 清理失败（重试耗尽）的任务
+     *
+     * @param queueName 队列名
+     * @param olderThan 保留时长
+     *
+     * @return 清理条数
+     */
+    public int cleanupFailed(String queueName, Duration olderThan) {
+        return queue.cleanupFailed(queueName, olderThan);
     }
 
     /**
@@ -155,7 +173,6 @@ public class JobDispatcher {
      *
      * @param queueName 队列名
      * @param timeout   超时判定时长
-     *
      * @return 重置条数
      */
     public int resetStuck(String queueName, Duration timeout) {
@@ -200,18 +217,6 @@ public class JobDispatcher {
         if (!handlers.containsKey(queueName)) {
             throw new IllegalArgumentException("队列未注册任务处理器：" + queueName);
         }
-    }
-
-    /**
-     * 取队列名
-     */
-    private static String handlerQueueName(JobHandler<?> handler) {
-        String queueName = handler.queue();
-        if (queueName == null || queueName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "任务处理器队列名不能为空：" + handler.payloadType().getName());
-        }
-        return queueName;
     }
 
 }

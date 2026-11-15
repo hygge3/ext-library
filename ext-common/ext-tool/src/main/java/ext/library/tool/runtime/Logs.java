@@ -1,5 +1,6 @@
 package ext.library.tool.runtime;
 
+import ext.library.tool.exception.BizException;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void debug(String module, String message) {
-        getLogger().debug("[{}] {}", module, message);
+        getLogger().debug("{}|{}", module, message);
     }
 
     /**
@@ -56,7 +57,7 @@ public final class Logs {
      */
     public static void debug(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().debug("[{}] {}", allArgs, message);
+        getLogger().debug("{}|" + message, allArgs);
     }
 
     /**
@@ -69,7 +70,7 @@ public final class Logs {
      */
     public static void debug(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().debug("[{}] {}", allArgs, message);
+        getLogger().debug("{}|" + message, allArgs);
     }
 
     /**
@@ -104,7 +105,7 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void info(String module, String message) {
-        getLogger().info("[{}] {}", module, message);
+        getLogger().info("{}|{}", module, message);
     }
 
     /**
@@ -116,7 +117,7 @@ public final class Logs {
      */
     public static void info(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().info("[{}] {}", allArgs, message);
+        getLogger().info("{}|" + message, allArgs);
     }
 
     /**
@@ -129,7 +130,7 @@ public final class Logs {
      */
     public static void info(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().info("[{}] {}", allArgs, message);
+        getLogger().info("{}|" + message, allArgs);
     }
 
     /**
@@ -164,7 +165,7 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void warn(String module, String message) {
-        getLogger().warn("[{}] {}", module, message);
+        getLogger().warn("{}|{}", module, message);
     }
 
     /**
@@ -176,7 +177,7 @@ public final class Logs {
      */
     public static void warn(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().warn("[{}] {}", allArgs, message);
+        getLogger().warn("{}|" + message, allArgs);
     }
 
     /**
@@ -189,7 +190,7 @@ public final class Logs {
      */
     public static void warn(String module, Throwable throwable, String message, Object... args) {
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().warn("[{}] {}", allArgs, message);
+        getLogger().warn("{}|" + message, allArgs);
     }
 
     /**
@@ -224,7 +225,7 @@ public final class Logs {
      * @param message 日志内容
      */
     public static void error(String module, String message) {
-        getLogger().error("[{}] {}", module, message);
+        getLogger().error("{}|{}", module, message);
     }
 
     /**
@@ -236,7 +237,7 @@ public final class Logs {
      */
     public static void error(String module, String message, Object... args) {
         Object[] allArgs = prependModule(module, args);
-        getLogger().error("[{}] {}", allArgs, message);
+        getLogger().error("{}|" + message, allArgs);
     }
 
     /**
@@ -248,8 +249,14 @@ public final class Logs {
      * @param args      格式化参数
      */
     public static void error(String module, Throwable throwable, String message, Object... args) {
+        // 已知异常（业务/认证/权限等主动抛出的）不打堆栈，堆栈只留给需要排查的意外故障
+        if (isKnownException(throwable)) {
+            Object[] allArgs = prependModuleAppendMessage(module, throwable, args);
+            getLogger().warn("{}|" + message + "|{}", allArgs);
+            return;
+        }
         Object[] allArgs = prependModuleAppendThrowable(module, throwable, args);
-        getLogger().error("[{}] {}", allArgs, message);
+        getLogger().error("{}|" + message, allArgs);
     }
 
     /**
@@ -269,6 +276,11 @@ public final class Logs {
      * @param args      格式化参数
      */
     public static void error(Throwable throwable, String message, Object... args) {
+        if (isKnownException(throwable)) {
+            Object[] allArgs = appendMessage(throwable, args);
+            getLogger().warn(message + "|{}", allArgs);
+            return;
+        }
         Object[] allArgs = appendThrowable(throwable, args);
         getLogger().error(message, allArgs);
     }
@@ -292,6 +304,41 @@ public final class Logs {
     /**
      * 将 module 添加到参数数组开头
      */
+    /**
+     * 是否是纯业务拒绝（堆栈没有信息量）
+     * <p>
+     * {@link BizException} 及其子类（未登录、无权限、参数不合法、限流等）由业务主动抛出，
+     * 是预期结果而非服务端故障。但整条 cause 链必须都是业务异常——一旦包着
+     * {@code ConnectException}、{@code SQLException} 这类真实故障，堆栈才是排查的入口，要留着。
+     */
+    private static boolean isKnownException(Throwable throwable) {
+        if (!(throwable instanceof BizException)) {
+            return false;
+        }
+        Throwable current = throwable.getCause();
+        for (int depth = 0; current != null && depth < 10; depth++) {
+            if (!(current instanceof BizException)) {
+                return false;
+            }
+            current = current.getCause() == current ? null : current.getCause();
+        }
+        return true;
+    }
+
+    /**
+     * 将 throwable 的类型与消息（不是堆栈）作为最后一个占位符参数
+     */
+    private static Object[] prependModuleAppendMessage(String module, Throwable throwable, Object[] args) {
+        return prependModule(module, appendMessage(throwable, args));
+    }
+
+    private static Object[] appendMessage(Throwable throwable, Object[] args) {
+        Object[] allArgs = new Object[args.length + 1];
+        System.arraycopy(args, 0, allArgs, 0, args.length);
+        allArgs[args.length] = throwable.toString();
+        return allArgs;
+    }
+
     private static Object[] prependModule(String module, Object[] args) {
         Object[] allArgs = new Object[args.length + 1];
         allArgs[0] = module;

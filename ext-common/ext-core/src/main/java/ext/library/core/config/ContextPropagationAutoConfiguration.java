@@ -4,14 +4,18 @@ import ext.library.core.context.ContextTaskDecorator;
 import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.trace.TraceContext;
+import java.lang.reflect.Field;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
@@ -38,25 +42,55 @@ public class ContextPropagationAutoConfiguration {
      * <p>
      * {@link ThreadPoolTaskExecutor} 没有读取 taskDecorator 的 getter，无法判断消费方是否已配置，
      * 因此这里会直接覆盖并打一条 WARN —— 静默覆盖会让对方的上下文传播莫名失效。
+     * <p>
+     * 装饰器用 {@link ObjectProvider} 延迟取：直接声明成方法参数会让本类与装饰器在
+     * {@code contextTaskDecoratorPostProcessor} 创建时就提前实例化，错过后续的 BeanPostProcessor
+     * （Spring 会打 "not eligible for getting processed by all BeanPostProcessors"）。
      *
-     * @param decorator 上下文装饰器
+     * @param decoratorProvider 上下文装饰器（延迟解析）
      *
      * @return 后处理器
      */
     @Bean
-    public static BeanPostProcessor contextTaskDecoratorPostProcessor(ContextTaskDecorator decorator) {
+    public static BeanPostProcessor contextTaskDecoratorPostProcessor(
+            ObjectProvider<ContextTaskDecorator> decoratorProvider) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName)
                     throws BeansException {
                 if (bean instanceof ThreadPoolTaskExecutor executor) {
+                    ContextTaskDecorator decorator = decoratorProvider.getObject();
+                    TaskDecorator existing = currentDecorator(executor);
                     executor.setTaskDecorator(decorator);
-                    Logs.warn(EmojiSymbol.CORE,
-                            "已为线程池 {} 设置上下文传播装饰器，原有的 TaskDecorator 会被覆盖", beanName);
+                    // 只在自己真的覆盖了别人的装饰器时才吵；没有 getter，只能反射读私有字段
+                    if (existing != null && existing != decorator) {
+                        Logs.warn(EmojiSymbol.CORE,
+                                "已为线程池 {} 设置上下文传播装饰器，原有的 TaskDecorator 会被覆盖", beanName);
+                    }
                 }
                 return bean;
             }
         };
+    }
+
+    /**
+     * 读线程池当前的 TaskDecorator
+     * <p>
+     * {@link ThreadPoolTaskExecutor} 没有 getter，只能反射读私有字段；读不到（字段改名或不可访问）就当没有，
+     * 最坏结果是少打一条覆盖警告。
+     *
+     * @param executor 线程池
+     *
+     * @return 现有装饰器，没有则 {@code null}
+     */
+    private static @Nullable TaskDecorator currentDecorator(ThreadPoolTaskExecutor executor) {
+        try {
+            Field field = ThreadPoolTaskExecutor.class.getDeclaredField("taskDecorator");
+            field.setAccessible(true);
+            return (TaskDecorator) field.get(executor);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
     }
 
     /**
@@ -76,7 +110,6 @@ public class ContextPropagationAutoConfiguration {
                     throws BeansException {
                 if (bean instanceof ThreadPoolTaskScheduler scheduler) {
                     scheduler.setTaskDecorator(TraceContext::wrap);
-                    Logs.info(EmojiSymbol.CORE, "已为调度器 {} 设置追踪装饰器，定时任务各自生成 traceId", beanName);
                 }
                 return bean;
             }

@@ -6,6 +6,7 @@ import ext.library.tool.constant.EmojiSymbol;
 import ext.library.tool.runtime.Logs;
 import ext.library.tool.trace.TraceContext;
 import org.jspecify.annotations.Nullable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -42,7 +43,11 @@ public class ExtWebSocketInterceptor implements HandshakeInterceptor {
             attributes.put(TraceContext.TRACE_ID_MDC_KEY, TraceContext.currentOrGenerate());
             return true;
         } catch (UnauthorizedException e) {
-            Logs.error(EmojiSymbol.WEBSOCKET, e, "WebSocket 认证失败'{}',无法访问系统资源", e.getMessage());
+            // 未登录的握手是预期内的拒绝，不是服务端故障：记 WARN，不打异常堆栈
+            // 状态码显式置为 401：不置时握手被拒仍是 200，客户端分不清“没登录”和“连不上”
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            Logs.warn(EmojiSymbol.WEBSOCKET, "WebSocket 握手被拒，无法访问系统资源：uri={}, reason={}",
+                    request.getURI().getPath(), e.getMessage());
             return false;
         }
     }

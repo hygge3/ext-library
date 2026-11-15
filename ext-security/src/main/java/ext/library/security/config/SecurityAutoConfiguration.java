@@ -1,7 +1,6 @@
 package ext.library.security.config;
 
 import ext.library.cache.strategy.CacheStrategy;
-import ext.library.security.authority.DataScopeProvider;
 import ext.library.security.authority.SecurityAuthority;
 import ext.library.security.interceptor.SecurityInterceptor;
 import ext.library.security.properties.MfaProperties;
@@ -79,8 +78,8 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(SecurityInterceptor.class)
-    public SecurityInterceptor securityInterceptor(ObjectProvider<DataScopeProvider> dataScopeProvider) {
-        return new SecurityInterceptor(dataScopeProvider.getIfAvailable());
+    public SecurityInterceptor securityInterceptor() {
+        return new SecurityInterceptor();
     }
 
     /**
